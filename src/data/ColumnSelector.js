@@ -20,7 +20,7 @@ export default class ColumnSelector extends Component {
 
         this.onSelect = props.onSelect;
         this.displayColumns = props.displayColumns;
-        console.log('DCs', this.displayColumns);
+        // console.log('DCs', this.displayColumns);
     }
 
     componentDidMount() {
@@ -30,7 +30,7 @@ export default class ColumnSelector extends Component {
         const selected = options.filter(opt => opt.selected).map(opt => opt.key);
         this.setState({ options, selected });
 
-        console.log('STATE', selected);
+        // console.log('STATE', selected);
     }
 
     toggleColumns = (event, allSelections) => {
