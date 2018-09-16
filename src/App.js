@@ -8,7 +8,6 @@ import {
 import { Render } from 'graph-app-kit/components/Render';
 import JMXDisplay from './jmx/JMXDisplay';
 import Neo4jConfiguration from './configuration/Neo4jConfiguration';
-import ActiveQueries from './performance/ActiveQueries';
 import PerformancePane from './performance/PerformancePane';
 import DBSize from './performance/DBSize';
 import PermissionsPane from './configuration/PermissionsPane';
@@ -44,20 +43,16 @@ class Halin extends Component {
   render() {
     const panes = [
       {
-        menuItem: 'Permissions',
-        render: () => this.paneWrapper(<PermissionsPane/>),
-      },
-      {
         menuItem: 'Performance',
         render: () => this.paneWrapper(<PerformancePane/>),
       },
       {
-        menuItem: 'Database',
-        render: () => this.paneWrapper(<DBSize/>),
+        menuItem: 'Permissions',
+        render: () => this.paneWrapper(<PermissionsPane/>),
       },
       {
-        menuItem: 'Active Queries',
-        render: () => this.paneWrapper(<ActiveQueries />),
+        menuItem: 'Database',
+        render: () => this.paneWrapper(<DBSize/>),
       },
       {
         menuItem: 'Configuration',
