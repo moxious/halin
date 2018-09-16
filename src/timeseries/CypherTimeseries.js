@@ -27,7 +27,7 @@ class CypherTimeseries extends Component {
     state = {
         query: null,
         data: null,
-        events: new Ring(200),
+        events: null,
         time: new Date(),
         lastDataArrived: new Date(),
         disabled: {},
@@ -109,7 +109,15 @@ class CypherTimeseries extends Component {
             disabled[idx] = disabledFlag;
         });
 
-        this.setState({ disabled });
+        // Ring buffer captures all of the data that gets displayed. 
+        // Can't keep everything, but we need a ring big enough to get as many samples
+        // as the time window is wide.  I'm arbitrarily adding 25% just so we don't miss
+        // data.
+
+        this.setState({ 
+            disabled,
+            events: new Ring(Math.floor((this.timeWindowWidth / this.rate) * 1.25)),
+        });
         this.stream = new Stream();
 
         this.sampleData();
@@ -227,6 +235,7 @@ class CypherTimeseries extends Component {
     };
 
     render() {
+        if (!this.state.events) { return 'Loading...'; }
         const style = styler(this.displayColumns.map((col, idx) => ({
             key: col.accessor, 
             color: this.chooseColor(idx),
