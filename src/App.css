@@ -8,6 +8,13 @@
   padding-right: 15px;
 }
 
+.PaneWrapper {
+  padding-top: 15px;
+  border-left: 1px solid #d4d4d5;
+  border-right: 1px solid #d4d4d5;
+  border-bottom: 1px solid #d4d4d5;
+}
+
 .App-logo {
   animation: App-logo-spin infinite 20s linear;
   height: 80px;

@@ -36,31 +36,35 @@ class Halin extends Component {
   reRunManually = () => {
     this.setState(state => ({ cTag: state.cTag + 1 }));
   };
+
+  paneWrapper = obj =>
+    <div className='PaneWrapper'>{obj}</div>;
+
   render() {
     const panes = [
       {
         menuItem: 'Permissions',
-        render: () => <PermissionsPane/>,
+        render: () => this.paneWrapper(<PermissionsPane/>),
       },
       {
         menuItem: 'System Performance',
-        render: () => <PerformancePane/>,
+        render: () => this.paneWrapper(<PerformancePane/>),
       },
       {
         menuItem: 'Database Size',
-        render: () => <DBSize/>,
+        render: () => this.paneWrapper(<DBSize/>),
       },
       {
         menuItem: 'Active Queries',
-        render: () => <ActiveQueries />,
+        render: () => this.paneWrapper(<ActiveQueries />),
       },
       {
         menuItem: 'Configuration',
-        render: () => <Neo4jConfiguration />,
+        render: () => this.paneWrapper(<Neo4jConfiguration />),
       },
       {
         menuItem: 'JMX / Diagnostics',
-        render: () => <Cypher query="CALL dbms.queryJmx('*:*')" render={renderJMX} interval={3000} />,
+        render: () => this.paneWrapper(<Cypher query="CALL dbms.queryJmx('*:*')" render={renderJMX} interval={3000} />),
       },
     ]
 
