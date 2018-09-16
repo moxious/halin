@@ -5,6 +5,7 @@ import { Button, Confirm } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import status from '../../status/index';
 import './Neo4jUsers.css';
+import AssignRoleModal from '../roles/AssignRoleModal';
 // import Neo4jRoles from '../roles/Neo4jRoles';
 import styles from '../../styles';
 
@@ -33,7 +34,7 @@ class Neo4jUsers extends Component {
             accessor: 'roles',
             Cell: ({ row }) => row.roles.map((role, idx) => (
                 <div className='role' key={idx}>
-                    { role }
+                    { role }{ idx < row.roles.length -1 ? ',' : '' }
                     {/* Working on it. */}
                     {/* <Button compact style={styles.tinyButton}
                         disabled={!Neo4jRoles.canDelete(role)} 
@@ -45,13 +46,13 @@ class Neo4jUsers extends Component {
             Header: 'Flags', 
             accessor: 'flags',
         },
-        {
-            Header: 'Assign Role',
-            Cell: ({ row }) => 
-                <Button compact positive style={styles.tinyButton}
-                    onClick={e => this.openAssign(row)}
-                    type='submit'>+</Button>
-        }
+        // {
+        //     Header: 'Assign Role',
+        //     Cell: ({ row }) => 
+        //         <Button compact positive style={styles.tinyButton}
+        //             onClick={e => this.openAssign(row)}
+        //             type='submit'>+</Button>
+        // }
     ];
 
     state = {
@@ -66,15 +67,22 @@ class Neo4jUsers extends Component {
         this.driver = props.driver || context.driver;
     }
 
+    refresh(val = (this.state.refresh + 1)) {
+        // These are passed by state to child components, updating it, 
+        // because child component data table is watching, has the effect to
+        // force refresh its data.
+        this.setState({
+            refresh: val,
+            childRefresh: val,
+        });
+    }
+
     componentWillReceiveProps(props) {
         // If I receive a refresh signal, copy to child
         // which does data polling.  Man I wish there were a better way.
         const refresh = this.state.refresh;
         if (refresh !== props.refresh) {
-            this.setState({
-                refresh: props.refresh,
-                childRefresh: props.refresh,
-            });
+            this.refresh(props.refresh);
         }
     }
 
@@ -114,6 +122,14 @@ class Neo4jUsers extends Component {
         });
     };
 
+    confirmRoleAssignment = (component, message) => {
+        this.refresh();
+        this.setState({
+            assignOpen: false,
+            message,
+        });
+    }
+
     closeAssign = () => {
         this.setState({ assignOpen: false });
     };
@@ -146,15 +162,27 @@ class Neo4jUsers extends Component {
             <div className="Neo4jUsers">
                 <h3>Users</h3>
                 
+                <Button basic color='green' onClick={e => this.openAssign()}>
+                    Assign Role to User
+                </Button>
+                <Button basic color='green' onClick={e => this.refresh()}>
+                    Refresh
+                </Button>
+
                 { message }
 
-                <Confirm open={this.state.assignOpen} 
+                <AssignRoleModal open={this.state.assignOpen}
+                    onCancel={this.closeAssign}
+                    onConfirm={this.confirmRoleAssignment}/>
+
+                {/* <Confirm open={this.state.assignOpen} 
                     content='Not yet implemented.  Getting there!'
                     onCancel={this.closeAssign} 
-                    onConfirm={this.closeAssign}/>
+                    onConfirm={this.closeAssign}/> */}
 
                 <Confirm 
                     header='Delete User'
+                    content='Are you sure? This action cannot be undone!'
                     open={this.state.confirmOpen} 
                     onCancel={this.close} 
                     onConfirm={this.confirm}/>
