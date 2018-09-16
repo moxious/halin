@@ -8,12 +8,48 @@ import './CypherDataTable.css';
 
 const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
 
+const toNumber = val => {
+    if(_.isNil(val)) { return 'n/a'; }
+    const num = parseInt(val, 10);
+    return num.toLocaleString();
+};
+
+const convertMsToTime = (millis) => {
+    if (_.isNil(millis)) { return 'n/a'; }
+
+    let delim = " ";
+    let hours = Math.floor(millis / (1000 * 60 * 60) % 60);
+    let minutes = Math.floor(millis / (1000 * 60) % 60);
+    let seconds = Math.floor(millis / 1000 % 60);
+    const hoursStr = hours < 10 ? '0' + hours : hours;
+    const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+    const secondsStr = seconds < 10 ? '0' + seconds : seconds;
+
+    let str = secondsStr + 's';
+    if (minutes > 0) { str = minutesStr + delim + str; }
+    if (hours > 0) { str = hoursStr + delim + str; }
+
+    return str;
+};
+
 class CypherDataTable extends Component {
     state = {
         items: null,
         refresh: null,
         displayColumns: null,
     };
+
+    static jsonField(item) {
+        return <div className='_jsonField'>{JSON.stringify(item.value)}</div>;
+    }
+
+    static numField(item) {
+        <div className='_numberField'>{toNumber(item.value)}</div>;
+    }
+
+    static timeField(item) {
+        <div className='_timeField'>{convertMsToTime(item.value)}</div>;
+    }
 
     constructor(props, context) {
         super(props, context);

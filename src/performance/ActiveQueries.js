@@ -6,38 +6,9 @@ import _ from 'lodash';
 import CypherDataTable from '../data/CypherDataTable';
 import 'react-table/react-table.css';
 
-const convertMsToTime = (millis) => {
-    if (_.isNil(millis)) { return 'n/a'; }
-
-    let delim = " ";
-    let hours = Math.floor(millis / (1000 * 60 * 60) % 60);
-    let minutes = Math.floor(millis / (1000 * 60) % 60);
-    let seconds = Math.floor(millis / 1000 % 60);
-    const hoursStr = hours < 10 ? '0' + hours : hours;
-    const minutesStr = minutes < 10 ? '0' + minutes : minutes;
-    const secondsStr = seconds < 10 ? '0' + seconds : seconds;
-
-    let str = secondsStr + 's';
-    if (minutes > 0) { str = minutesStr + delim + str; }
-    if (hours > 0) { str = hoursStr + delim + str; }
-
-    return str;
-};
-
-const toNumber = val => {
-    if(_.isNil(val)) { return 'n/a'; }
-    const num = parseInt(val, 10);
-    return num.toLocaleString();
-};
-
-const jsonField = item =>
-    <div className='ActiveQueries_jsonField'>{JSON.stringify(item.value)}</div>;
-
-const numField = item =>
-    <div className='ActiveQueries_numberField'>{toNumber(item.value)}</div>;
-
-const timeField = item => 
-    <div className='ActiveQueries_timeField'>{convertMsToTime(item.value)}</div>;
+const jsonField = CypherDataTable.jsonField;
+const numField = CypherDataTable.numField;
+const timeField = CypherDataTable.timeField;
 
 class ActiveQueries extends Component {
     query = 'call dbms.listQueries()';
