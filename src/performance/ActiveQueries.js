@@ -51,7 +51,7 @@ class ActiveQueries extends Component {
             { Header: 'Parameters', accessor: 'parameters', show: false, Cell: jsonField },
             { Header: 'planner', accessor: 'planner', show: false },
             { Header: 'Runtime', accessor: 'runtime', show: false },
-            { Header: 'Indexes', accessor: 'indexes', show: false },
+            { Header: 'Indexes', accessor: 'indexes', show: false, Cell: jsonField },
             { Header: 'Start Time', accessor: 'startTime', show: false },
             { Header: 'Protocol', accessor: 'protocol', show: false },
             { Header: 'Client Addr', accessor: 'clientAddress', show: false },
