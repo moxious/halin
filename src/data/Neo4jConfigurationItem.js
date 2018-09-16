@@ -1,4 +1,4 @@
-import TreeItem from '../data/TreeItem';
+import TreeItem from './TreeItem';
 
 export default class Neo4jConfigurationItem extends TreeItem {
     constructor(name, description, value) {

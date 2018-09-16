@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Neo4jConfigurationItem from './Neo4jConfigurationItem';
+import Neo4jConfigurationItem from '../data/Neo4jConfigurationItem';
 import TreeItem from '../data/TreeItem';
 import * as PropTypes from "prop-types";
 import _ from 'lodash';
