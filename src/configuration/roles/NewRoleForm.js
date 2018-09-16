@@ -103,7 +103,7 @@ class NewRoleForm extends Component {
                             </Grid.Column>
                         </Grid.Row>
                         <Grid.Row columns={1}>
-                            <Grid.Column>
+                            <Grid.Column textAlign='left'>
                                 <Button 
                                         style={this.inputStyle}
                                         disabled={this.state.pending || !this.formValid()} 
