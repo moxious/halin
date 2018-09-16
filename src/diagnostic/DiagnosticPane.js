@@ -3,7 +3,9 @@ import "semantic-ui-css/semantic.min.css";
 import { Grid } from 'semantic-ui-react';
 import Overview from './Overview';
 import JMXDisplay from '../jmx/JMXDisplay';
-import { Cypher } from "graph-app-kit/components/Cypher";
+import { Cypher } from 'graph-app-kit/components/Cypher';
+import Functions from './Functions';
+import Procedures from './Procedures';
 
 const renderJMX = ({ pending, error, result }) => {
     return pending ? (
@@ -19,12 +21,21 @@ class DiagnosticPane extends Component {
     render() {
         return (
             <div className="DiagnosticPane">
-                <h3>Diagnostics</h3>
                 <Grid divided='vertically'>
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <Overview/>
                         </Grid.Column>
+                    </Grid.Row>
+
+                    <Grid.Row columns={2}>
+                        <Grid.Column>
+                            <Functions/>
+                        </Grid.Column>
+
+                        <Grid.Column>
+                            <Procedures/>
+                        </Grid.Column>    
                     </Grid.Row>
 
                     <Grid.Row columns={1}>
