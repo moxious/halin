@@ -27,6 +27,8 @@ class MemoryMonitor extends Component {
     displayColumns = [
         { Header: 'Total Memory', accessor: 'totalMem' },
         { Header: 'Heap Used', accessor: 'heapUsed' },
+        { Header: 'Heap Committed', accessor: 'heapCommitted' },
+        { Header: 'Nonheap Used', accessor: 'nonHeapUsed' },
     ];
 
     render() {
@@ -34,7 +36,9 @@ class MemoryMonitor extends Component {
             <div className="MemoryMonitor">
                 <CypherTimeseries 
                     query={this.query} 
+                    width={400}
                     rate={1000}
+                    startingEnabled={[this.displayColumns[1]]}
                     displayColumns={this.displayColumns}
                 />
             </div>

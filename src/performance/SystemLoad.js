@@ -22,7 +22,8 @@ class SystemLoad extends Component {
         return (
             <div className="SystemLoad">
                 <CypherTimeseries 
-                    query={this.query} 
+                    query={this.query}
+                    width={400}
                     rate={1000}
                     displayColumns={this.displayColumns}
                 />

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import "semantic-ui-css/semantic.min.css";
-import { Grid } from 'semantic-ui-react';
+import 'semantic-ui-css/semantic.min.css';
+import { Grid, Popup } from 'semantic-ui-react';
 import * as PropTypes from "prop-types";
 import {
     TimeSeries,
@@ -10,8 +10,8 @@ import {
     Stream,
 } from "pondjs";
 
-import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from "react-timeseries-charts";
-import Ring from "ringjs";
+import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
+import Ring from 'ringjs';
 
 // import ReactTable from 'react-table';
 // import 'react-table/react-table.css';
@@ -32,6 +32,8 @@ class CypherTimeseries extends Component {
         data: null,
         events: new Ring(200),
         time: new Date(),
+        lastDataArrived: new Date(),
+        disabled: {},
     };
 
     constructor(props, context) {
@@ -52,6 +54,11 @@ class CypherTimeseries extends Component {
         this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 5;  // 5 min
         this.displayColumns = props.displayColumns;
         this.palette = props.palette || DEFAULT_PALETTE;
+        this.showGrid = _.isNil(props.showGrid) ? false : props.showGrid;
+        this.showGridPosition = _.isNil(props.showGridPosition) ? 'over' : props.showGridPosition;
+
+        // By default, enable only those specified, otherwise all are on by default.
+        this.startingEnabled = props.startingEnabled || props.displayColumns;
 
         this.dateStyle = {
             fontSize: 12,
@@ -88,10 +95,24 @@ class CypherTimeseries extends Component {
         return Math.max(computedMax, this.maxObservedValue);
     };
     
-
     componentDidMount() {
         this.mounted = true;
 
+        const disabled = {};
+
+        this.displayColumns.forEach((col, idx) => {
+            let disabledFlag;
+
+            if (this.startingEnabled.filter(i => i.accessor === col.accessor).length > 0) {
+                disabledFlag = false;
+            } else {
+                disabledFlag = true;
+            }
+
+            disabled[idx] = disabledFlag;
+        });
+
+        this.setState({ disabled });
         this.stream = new Stream();
 
         this.sampleData();
@@ -138,6 +159,7 @@ class CypherTimeseries extends Component {
                     const newEvents = this.state.events;
                     newEvents.push(event);
                     this.setState({
+                        lastDataArrived: new Date(),
                         data: [data],
                         time: t,
                         event: newEvents
@@ -178,14 +200,37 @@ class CypherTimeseries extends Component {
             return this.palette[0];
         }
 
+        if (this.state.disabled[idx]) {
+            return 'transparent';
+        }
+
         return this.palette[idx % this.palette.length];
     }
+
+    legendClick = data => {
+        console.log('Legend clicked',data);
+
+        // Find index and toggle its disabled state.
+        let foundIdx;
+
+        this.displayColumns.forEach((item, idx) => {            
+            if (item.accessor === data) {
+                foundIdx = idx;
+            }
+        });
+        
+        const toggle = idx =>
+            this.state.disabled[idx] = !this.state.disabled[idx];
+
+        toggle(foundIdx);
+        console.log('disabled',this.state.disabled);
+    };
 
     render() {
         const style = styler(this.displayColumns.map((col, idx) => ({
             key: col.accessor, 
             color: this.chooseColor(idx),
-            width: 2
+            width: 3,
         })));
 
         const dataSeries = new TimeSeries({
@@ -195,7 +240,7 @@ class CypherTimeseries extends Component {
 
         const timeRange = new TimeRange(
             new Date(this.state.time.getTime() - (this.timeWindowWidth)),
-            new Date(this.state.time.getTime() + (1 * 1000))
+            new Date(this.state.time.getTime() + (30 * 1000))
         );
 
         return this.state.data ? (
@@ -209,10 +254,11 @@ class CypherTimeseries extends Component {
                     columns={this.displayColumns} /> */}
 
                 <Grid divided='vertically'>
-                    <Grid.Row columns={2}>
+                    <Grid.Row columns={1}>
                         <Grid.Column>
                             <Legend type="swatch"
                                 style={style}
+                                onSelectionChange={this.legendClick}
                                 categories={this.displayColumns.map((col, idx) => ({
                                     key: col.accessor,
                                     label: col.Header || col.accessor,
@@ -220,16 +266,21 @@ class CypherTimeseries extends Component {
                                 }))}
                             />
                         </Grid.Column>
-                        <Grid.Column>
+                        {/* <Grid.Column>
                             <span style={this.dateStyle}>{`${this.state.time}`}</span>
-                        </Grid.Column>
+                        </Grid.Column> */}
                     </Grid.Row>
-                    <ChartContainer width={this.width} timeRange={timeRange}>
+                    <ChartContainer 
+                        showGrid={this.showGrid}
+                        showGridPosition={this.showGridPosition}
+                        width={this.width} 
+                        timeRange={timeRange}>
                         <ChartRow height="150">
                             <YAxis id="y" 
                                 min={this.getChartMin()} 
                                 max={this.getChartMax()} 
                                 width="70" 
+                                showGrid={true}
                                 type="linear"/>
                             <Charts>
                                 {
