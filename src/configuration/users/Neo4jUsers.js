@@ -46,13 +46,6 @@ class Neo4jUsers extends Component {
             Header: 'Flags', 
             accessor: 'flags',
         },
-        // {
-        //     Header: 'Assign Role',
-        //     Cell: ({ row }) => 
-        //         <Button compact positive style={styles.tinyButton}
-        //             onClick={e => this.openAssign(row)}
-        //             type='submit'>+</Button>
-        // }
     ];
 
     state = {
@@ -163,7 +156,7 @@ class Neo4jUsers extends Component {
                 <h3>Users</h3>
                 
                 <Button basic color='green' onClick={e => this.openAssign()}>
-                    Assign Role to User
+                    Manage User Roles
                 </Button>
                 <Button basic color='green' onClick={e => this.refresh()}>
                     Refresh
@@ -188,6 +181,7 @@ class Neo4jUsers extends Component {
                     onConfirm={this.confirm}/>
 
                 <CypherDataTable
+                    showPagination={true}
                     query={this.query}
                     refresh={this.state.childRefresh}
                     displayColumns={this.displayColumns}

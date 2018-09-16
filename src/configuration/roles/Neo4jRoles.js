@@ -136,6 +136,7 @@ class Neo4jRoles extends Component {
 
                 <CypherDataTable   
                     query={this.query}
+                    showPagination={true}
                     refresh={this.state.childRefresh}
                     displayColumns={this.displayColumns} 
                 />
