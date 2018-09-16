@@ -1,12 +1,10 @@
-import React, { Component } from "react";
-import { Cypher } from "graph-app-kit/components/Cypher";
+import React, { Component } from 'react';
 import {
   GraphAppBase,
   ConnectModal,
   CONNECTED
 } from 'graph-app-kit/components/GraphAppBase';
 import { Render } from 'graph-app-kit/components/Render';
-import JMXDisplay from './jmx/JMXDisplay';
 import Neo4jConfiguration from './configuration/Neo4jConfiguration';
 import PerformancePane from './performance/PerformancePane';
 import DBSize from './performance/DBSize';
@@ -17,17 +15,7 @@ import DiagnosticPane from './diagnostic/DiagnosticPane';
 import './App.css';
 import 'semantic-ui-css/semantic.min.css';
 
-const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
-
-const renderJMX = ({ pending, error, result }) => {
-  return pending ? (
-    <div style={{ height: "60px" }}>pending</div>
-  ) : error ? (
-    <div style={{ height: "60px" }}>{error.message}</div>
-  ) : result ? (
-    <JMXDisplay data={result} />
-  ) : null;
-};
+const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 class Halin extends Component {
   state = {
