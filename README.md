@@ -8,6 +8,10 @@ This app assumes that it runs where the Neo4j Desktop API is available.
 
 This app works on local db:s with no auth, or on remote connections (with or without auth).
 
+## Screenshot
+
+![Halin Screenshot](img/halin.png "Halin Screenshot")
+
 ## Commands
  
 ```
