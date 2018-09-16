@@ -3,6 +3,8 @@ import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import * as PropTypes from "prop-types";
 import _ from 'lodash';
+import ColumnSelector from './ColumnSelector';
+import './CypherDataTable.css';
 
 const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
 
@@ -10,18 +12,30 @@ class CypherDataTable extends Component {
     state = {
         items: null,
         refresh: null,
+        displayColumns: null,
     };
 
     constructor(props, context) {
         super(props, context);
+
+        if (!props.query) {
+            throw new Error('must provide query');
+        } else if(!props.displayColumns) {
+            throw new Error('must provide displayColumns');
+        }
 
         this.driver = props.driver || context.driver;
         this.rate = props.rate || 5000;
         this.query = props.query;
         this.params = props.params || {};
 
+        this.allowColumnSelect = _.isNil(props.allowColumnSelect) ? false : props.allowColumnSelect;
+
+        // Immutable original display columns.  In the state, we will modify columns
+        // as needed, but parent's won't be modified.
+        this.originalDisplayColumns = props.displayColumns;
+        
         // Properties for the data table.
-        this.displayColumns = props.displayColumns;
         this.showPagination = (props.showPagination ? 
                 () => props.showPagination :
                 () => this.state.items.length >= 7);
@@ -40,17 +54,12 @@ class CypherDataTable extends Component {
 
         const signals = ['onPageChange', 'onPageSizeChange', 'onSortedChange', 'onFilteredChange',
             'onResizedChange', 'onExpandedChange'];
-        signals.forEach(assignCallback);   
-
-        if (!this.query) {
-            throw new Error('must provide query');
-        } else if(!this.displayColumns) {
-            throw new Error('must provide displayColumns');
-        }
+        signals.forEach(assignCallback);
     }
 
     componentDidMount() {
         this.mounted = true;
+        this.setState({ displayColumns: _.cloneDeep(this.originalDisplayColumns)});
         this.sampleData();
     }
 
@@ -86,7 +95,7 @@ class CypherDataTable extends Component {
 
                     // Loop through all columns with accessors to populate their 
                     // data
-                    this.displayColumns.filter(col => col.accessor).forEach(col => {
+                    this.state.displayColumns.filter(col => col.accessor).forEach(col => {
                         const val = row.get(col.accessor);
                         item[col.accessor] = neo4j.isInt(val) ? neo4j.integer.toNumber(val) : val;
                     });
@@ -109,9 +118,33 @@ class CypherDataTable extends Component {
             .finally(() => session.close());
     }
 
+    updateColumns = (cols) => {
+        console.log('Showing', cols);
+
+        const newColumns = _.cloneDeep(this.state.displayColumns);
+        newColumns.forEach(thisCol => {
+            if (cols.indexOf(thisCol.accessor) > -1) {
+                thisCol.show = true;
+            } else {
+                thisCol.show = false;
+            }
+        });
+
+        console.log('New display columns', newColumns);
+        return this.setState({ displayColumns: newColumns });
+    };
+
     render() {
         return this.state.items ? (
             <div className='CypherDataTable'>
+                { 
+                    this.allowColumnSelect ? 
+                    <ColumnSelector 
+                        onSelect={this.updateColumns}
+                        displayColumns={this.state.displayColumns} /> : 
+                    '' 
+                }
+
                 <ReactTable 
                     data={this.state.items}
                     sortable={this.sortable}
@@ -119,7 +152,7 @@ class CypherDataTable extends Component {
                     defaultPageSize={this.defaultPageSize()}
                     pageSizeOptions={this.pageSizeOptions}
                     showPagination={this.showPagination()}
-                    columns={this.displayColumns}
+                    columns={this.state.displayColumns}
                     onPageChange={this.onPageChange}
                     onPageSizeChange={this.onPageSizeChange}
                     onSortedChange={this.onSortedChange}
