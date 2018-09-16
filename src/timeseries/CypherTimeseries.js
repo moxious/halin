@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import 'semantic-ui-css/semantic.min.css';
-import { Grid, Popup } from 'semantic-ui-react';
+import { Grid } from 'semantic-ui-react';
 import * as PropTypes from "prop-types";
 import {
     TimeSeries,
@@ -12,9 +12,6 @@ import {
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import Ring from 'ringjs';
-
-// import ReactTable from 'react-table';
-// import 'react-table/react-table.css';
 
 const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
 
@@ -219,11 +216,14 @@ class CypherTimeseries extends Component {
             }
         });
         
-        const toggle = idx =>
-            this.state.disabled[idx] = !this.state.disabled[idx];
+        const toggle = idx => {
+            const disabledNew = _.cloneDeep(this.state.disabled);
+            disabledNew[idx] = !this.state.disabled[idx];
+            this.setState({ disabled: disabledNew });
+        };
 
         toggle(foundIdx);
-        console.log('disabled',this.state.disabled);
+        // console.log('disabled',this.state.disabled);
     };
 
     render() {
