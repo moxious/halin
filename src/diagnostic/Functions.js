@@ -9,19 +9,24 @@ class Functions extends Component {
             {
                 Header: 'Name',
                 accessor: 'name',
+                style: { whiteSpace: 'unset' }
             },
             {
                 Header: 'Signature',
                 accessor: 'signature',
+                style: { whiteSpace: 'unset' }
             },
             {
                 Header: 'Description',
                 accessor: 'description',
+                style: { whiteSpace: 'unset' }
             },
             {
                 Header: 'Roles',
                 accessor: 'roles',
                 Cell: CypherDataTable.jsonField,
+                style: { whiteSpace: 'unset' },
+                show: false,
             },
         ],
     };
@@ -35,7 +40,7 @@ class Functions extends Component {
         return (
             <div className='Functions'>
                 <h3>Installed Functions</h3>
-                
+
                 <CypherDataTable
                     showPagination={true}
                     query={this.state.query}

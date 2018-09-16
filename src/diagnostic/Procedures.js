@@ -9,19 +9,24 @@ class Procedures extends Component {
             {
                 Header: 'Name',
                 accessor: 'name',
+                style: { whiteSpace: 'unset' }
             },
             {
                 Header: 'Signature',
                 accessor: 'signature',
+                style: { whiteSpace: 'unset' }
             },
             {
                 Header: 'Description',
                 accessor: 'description',
+                style: { whiteSpace: 'unset' }
             },
             {
                 Header: 'Roles',
                 accessor: 'roles',
                 Cell: CypherDataTable.jsonField,
+                style: { whiteSpace: 'unset' },
+                show: false,
             },
         ],
     };
@@ -35,7 +40,7 @@ class Procedures extends Component {
         return (
             <div className='Procedures'>
                 <h3>Installed Procedures</h3>
-                
+
                 <CypherDataTable
                     showPagination={true}
                     query={this.state.query}
