@@ -56,7 +56,7 @@ class Neo4jConfiguration extends Component {
     componentDidMount() {
         const session = this.driver.session();
 
-        console.log('Fetching config data');
+        // console.log('Fetching config data');
         return session.run(this.query, {})
             .then(results => {
                 const items = results.records.map(row => {
