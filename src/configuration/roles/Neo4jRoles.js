@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../data/CypherDataTable';
 import { Button, Confirm } from 'semantic-ui-react';
-import * as PropTypes from "prop-types";
+import * as PropTypes from 'prop-types';
 import status from '../../status/index';
 import './Neo4jRoles.css';
 import styles from '../../styles';
@@ -18,12 +18,13 @@ class Neo4jRoles extends Component {
 
     displayColumns = [
         {
-            Header: 'Delete Role',
+            Header: 'Delete',
             id: 'delete',
             minWidth: 70,
             maxWidth: 100,
             Cell: ({ row }) => (
-                <Button compact color='red' style={styles.tinyButton}
+                <Button compact color='red' 
+                    style={styles.tinyButton}
                     // Don't let people delete neo4j or admins for now.
                     disabled={!Neo4jRoles.canDelete(row.role)}
                     onClick={e => this.open(row)/*this.deleteUser(e, row)*/}

@@ -13,7 +13,7 @@ class Neo4jUsers extends Component {
     query = 'call dbms.security.listUsers()';
     displayColumns = [
         {
-            Header: 'Delete User',
+            Header: 'Delete',
             id: 'delete',
             minWidth: 70,
             maxWidth: 100,
