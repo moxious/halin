@@ -126,6 +126,7 @@ class ActiveQueries extends Component {
                     data={this.state.queries}
                     sortable={true}
                     filterable={true}
+                    defaultPageSize={10}
                     columns={this.state.columns}
                 />
             </div>
