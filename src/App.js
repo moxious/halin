@@ -8,8 +8,7 @@ import {
 import { Render } from "graph-app-kit/components/Render";
 import "./App.css";
 import "semantic-ui-css/semantic.min.css";
-import jmx from './data/jmx';
-import JMXComponent from './JMXComponent';
+import JMXComponent from './jmx/JMXComponent';
 import Neo4jConfiguration from './configuration/Neo4jConfiguration';
 import ActiveQueries from './performance/ActiveQueries';
 import PerformancePane from './performance/PerformancePane';
@@ -25,7 +24,7 @@ const renderJMX = ({ pending, error, result }) => {
   ) : error ? (
     <div style={{ height: "60px" }}>{error.message}</div>
   ) : result ? (
-    <JMXComponent tree={jmx.jmx(result)} />
+    <JMXComponent data={result} />
   ) : null;
 };
 

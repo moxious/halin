@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import "semantic-ui-css/semantic.min.css";
-
+import jmx from '../data/jmx';
 // This only needs to be done once; probably during your application's bootstrapping process.
 import 'react-sortable-tree/style.css';
 
@@ -8,11 +8,15 @@ import 'react-sortable-tree/style.css';
 import SortableTree from 'react-sortable-tree';
 
 class JMXComponent extends Component {
-    constructor(props) {
-        super(props);
+    constructor(props, context) {
+        super(props, context);
+
+        const data = props.data;
+        const tree = jmx.jmx(data);
+
         // console.log('JMX',props);
         this.state = {
-            treeData: props.tree.children
+            treeData: tree.children
         };
     }
 
