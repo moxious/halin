@@ -128,7 +128,10 @@ class Overview extends Component {
                                             {(_.get(this.state.user, 'roles') || ['(none)']).join(', ')}
                                             {
                                                 _.get(this.state.user, 'flags') ? (
-                                                    ' and flags: ' + this.state.user.flags.join(', ')
+                                                    ' and flags: ' + (
+                                                        this.state.user.flags.length > 0 ? 
+                                                        this.state.user.flags.join(', ') :
+                                                        '(none)')
                                                 ) : ''
                                             }
                                         </li>
