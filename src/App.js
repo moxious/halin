@@ -67,7 +67,6 @@ class Halin extends Component {
     return (
       <div className="App" key="app">
         <header className="App-header">
-          <span className="App-title">Halin Neo4j Monitoring</span>
           <Image className="App-logo" src='img/halingraph.gif' size='tiny'/>
         </header>
 
