@@ -31,10 +31,9 @@ class JMXDisplay extends Component {
     render() {
         return (
             <div style={{ align: 'center', height: 800 }}>
-                <h2>Raw JMX Data</h2>
+                <h2>JMX Data</h2>
 
-                <p>This is just a POC.  Some of this is messy and not labeled right, but all of the data is
-                    there.  Will reorganize later.</p>
+                <p>This is just a POC.  Stay tuned for evolution.</p>
 
                 <SortableTree
                     treeData={this.state.treeData}

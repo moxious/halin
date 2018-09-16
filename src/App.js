@@ -12,6 +12,7 @@ import PerformancePane from './performance/PerformancePane';
 import DBSize from './performance/DBSize';
 import PermissionsPane from './configuration/PermissionsPane';
 import { Tab, Image } from 'semantic-ui-react'
+import DiagnosticPane from './diagnostic/DiagnosticPane';
 
 import './App.css';
 import 'semantic-ui-css/semantic.min.css';
@@ -59,8 +60,10 @@ class Halin extends Component {
         render: () => this.paneWrapper(<Neo4jConfiguration />),
       },
       {
-        menuItem: 'JMX / Diagnostics',
-        render: () => this.paneWrapper(<Cypher query="CALL dbms.queryJmx('*:*')" render={renderJMX} interval={3000} />),
+        menuItem: 'Diagnostics',
+        render: () => this.paneWrapper(
+          <DiagnosticPane/>
+        ),
       },
     ]
 
