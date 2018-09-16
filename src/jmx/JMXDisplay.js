@@ -7,7 +7,7 @@ import 'react-sortable-tree/style.css';
 // You can import the default tree with dnd context
 import SortableTree from 'react-sortable-tree';
 
-class JMXComponent extends Component {
+class JMXDisplay extends Component {
     constructor(props, context) {
         super(props, context);
 
@@ -46,4 +46,4 @@ class JMXComponent extends Component {
     }
 }
 
-export default JMXComponent;
+export default JMXDisplay;
