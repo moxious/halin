@@ -31,7 +31,15 @@ class Neo4jRoles extends Component {
             ),
         },
         { Header: 'Role', accessor: 'role' },
-        { Header: 'Users', accessor: 'users' },
+        { 
+            Header: 'Users', 
+            accessor: 'users',
+            Cell: ({ row }) => row.users.map((user, idx) => (
+                <div className='user' key={idx}>
+                    {user}{ idx < row.users.length -1 ? ',' : '' }
+                </div>
+            )),
+        },
     ];
 
     state = {
@@ -49,11 +57,15 @@ class Neo4jRoles extends Component {
         // which does data polling.  Man I wish there were a better way.
         const refresh = this.state.refresh;
         if (refresh !== props.refresh) {
-            this.setState({
-                refresh: props.refresh,
-                childRefresh: props.refresh,
-            });
+            this.refresh(props.refresh);
         }
+    }
+
+    refresh(val = (this.state.refresh + 1)) {
+        this.setState({
+            refresh: val,
+            childRefresh: val,
+        });
     }
 
     deleteRole(row) {
@@ -108,9 +120,18 @@ class Neo4jRoles extends Component {
             <div className="Neo4jRoles">
                 <h3>Roles</h3>
 
+                <Button basic color='green' onClick={e => this.refresh()}>
+                    Refresh
+                </Button>
+
                 {message}
 
-                <Confirm open={this.state.confirmOpen} onCancel={this.close} onConfirm={this.confirm}/>
+                <Confirm 
+                    header='Delete Role'
+                    content='Are you sure? This action cannot be undone.  If you delete this role, all users currently assigned to this role will lose it.'
+                    open={this.state.confirmOpen} 
+                    onCancel={this.close} 
+                    onConfirm={this.confirm}/>
 
                 <CypherDataTable   
                     query={this.query}
