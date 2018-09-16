@@ -16,15 +16,19 @@
 }
 
 .App-logo {
-  animation: App-logo-spin infinite 20s linear;
-  height: 80px;
+  /* animation: App-logo-spin infinite 20s linear; */
+  /* height: 80px; */
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .App-header {
-  background-color: #222;
-  height: 50px;
+  padding-top: 5px;
+  /* background-color: #222; */
+  /* height: 70px; */
   /* padding: 20px; */
-  color: white;
+  /* color: white; */
 }
 
 .App-title {

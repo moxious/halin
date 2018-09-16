@@ -4,17 +4,18 @@ import {
   GraphAppBase,
   ConnectModal,
   CONNECTED
-} from "graph-app-kit/components/GraphAppBase";
-import { Render } from "graph-app-kit/components/Render";
-import "./App.css";
-import "semantic-ui-css/semantic.min.css";
+} from 'graph-app-kit/components/GraphAppBase';
+import { Render } from 'graph-app-kit/components/Render';
 import JMXDisplay from './jmx/JMXDisplay';
 import Neo4jConfiguration from './configuration/Neo4jConfiguration';
 import ActiveQueries from './performance/ActiveQueries';
 import PerformancePane from './performance/PerformancePane';
 import DBSize from './performance/DBSize';
 import PermissionsPane from './configuration/PermissionsPane';
-import { Tab } from 'semantic-ui-react'
+import { Tab, Image } from 'semantic-ui-react'
+
+import './App.css';
+import 'semantic-ui-css/semantic.min.css';
 
 const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
 
@@ -47,11 +48,11 @@ class Halin extends Component {
         render: () => this.paneWrapper(<PermissionsPane/>),
       },
       {
-        menuItem: 'System Performance',
+        menuItem: 'Performance',
         render: () => this.paneWrapper(<PerformancePane/>),
       },
       {
-        menuItem: 'Database Size',
+        menuItem: 'Database',
         render: () => this.paneWrapper(<DBSize/>),
       },
       {
@@ -71,7 +72,8 @@ class Halin extends Component {
     return (
       <div className="App" key="app">
         <header className="App-header">
-          <h1 className="App-title">Halin Neo4j Monitoring</h1>
+          <span className="App-title">Halin Neo4j Monitoring</span>
+          <Image className="App-logo" src='img/halingraph.gif' size='tiny'/>
         </header>
 
         <Render if={this.props.connected}>
