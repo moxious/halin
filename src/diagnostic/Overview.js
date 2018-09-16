@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
 import { Message } from 'semantic-ui-react';
+import { Image, Grid } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css';
 import _ from 'lodash';
 
@@ -110,20 +111,34 @@ class Overview extends Component {
             (this.state.name && this.state.mode) ? (
                 <div className='Overview'>
                     <Message>
-                        <Message.Header>Neo4j {this.state.edition} version(s) {this.state.versions.join(', ')}</Message.Header>
-                        <ul>
-                            <li>Database is running in mode {this.state.mode} on {this.state.address}</li>
-                            <li>Halin is running under user&nbsp;
-                                {(_.get(this.state.user, 'username') || 'loading...')} 
-                                &nbsp;with roles&nbsp;
-                                {(_.get(this.state.user, 'roles') || ['(none)']).join(', ')}
-                                {
-                                    _.get(this.state.user, 'flags') ? (
-                                        ' and flags: ' + this.state.user.flags.join(', ')
-                                    ) : ''
-                                }
-                            </li>
-                        </ul>
+                        <Message.Header>
+                                        Neo4j {this.state.edition} version(s) {this.state.versions.join(', ')}            
+                        </Message.Header>
+                        <Grid>
+                            <Grid.Row columns={3}>
+                                <Grid.Column>
+                                    <Image style={{display:'block', marginLeft:0, marginRight: 'auto'}} size='tiny' src='img/neo4j_logo_globe.png' />
+                                </Grid.Column>
+                                <Grid.Column textAlign='left'>
+                                    <ul>
+                                        <li>Database is running in mode {this.state.mode} on {this.state.address}</li>
+                                        <li>Halin is running under user&nbsp;
+                                            {(_.get(this.state.user, 'username') || 'loading...')} 
+                                            &nbsp;with roles&nbsp;
+                                            {(_.get(this.state.user, 'roles') || ['(none)']).join(', ')}
+                                            {
+                                                _.get(this.state.user, 'flags') ? (
+                                                    ' and flags: ' + this.state.user.flags.join(', ')
+                                                ) : ''
+                                            }
+                                        </li>
+                                    </ul>                                    
+                                </Grid.Column>
+                                <Grid.Column>
+                                    <Image style={{display:'block', marginLeft:'auto', marginRight: 0}} size='tiny' src='img/neo4j_logo_globe.png' />
+                                </Grid.Column>
+                            </Grid.Row>
+                        </Grid>
                     </Message>
                 </div>
             ) : 'Loading...'
