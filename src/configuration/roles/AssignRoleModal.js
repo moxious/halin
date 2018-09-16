@@ -3,6 +3,7 @@ import * as PropTypes from 'prop-types';
 import { Button, Modal, Dropdown, Grid } from 'semantic-ui-react';
 import status from '../../status/index';
 import _ from 'lodash';
+import Promise from 'bluebird';
 
 class AssignRoleModal extends Component {
     state = {
@@ -36,7 +37,7 @@ class AssignRoleModal extends Component {
         return this.cypher('CALL dbms.security.listUsers()')
             .then(results => results.records)
             .then(records => {
-
+                console.log('Got users ', records);
                 // Convert to dropdown option format.
                 const users = records.map(rec => ({
                     key: rec.get('username'),
@@ -70,25 +71,59 @@ class AssignRoleModal extends Component {
         return this.state.onCancel(this);
     };
 
-    ok = () => {
-        console.log('OK would trigger assignment of ', this.state.activeUser, 'to', this.state.activeRole);
+    removeRole(username, role) {
+        const params = { username, role };
+        return this.cypher('call dbms.security.removeRoleFromUser({role}, {username})', params);
+    }
 
-        const q = 'CALL dbms.security.addRoleToUser({roleName}, {username})';
-        const params = {
-            username: this.state.activeUser.username,
-            roleName: this.state.activeRole.role,
-        };
+    addRole(username, role) {
+        const params = { username, role };
+        return this.cypher('call dbms.security.addRoleToUser({role}, {username})', params);
+    }
+
+    ok = () => {
+        const username = this.state.activeUser.username;
+        const oldRoles = new Set(this.state.activeUser.roles);
+        const newRoles = new Set(this.state.activeUser.newRoles);
+        const rolesToDelete = new Set(
+            [...oldRoles].filter(x => !newRoles.has(x))
+        );
+        const rolesToAdd = new Set(
+            [...newRoles].filter(x => !oldRoles.has(x))
+        );
+        // The roles they already have, which user wants to preserve (set intersection)
+        const rolesPreserved = new Set(
+            [...oldRoles].filter(x => newRoles.has(x))
+        );
+
+        console.log('Role modification: adding', 
+            rolesToAdd, 
+            'removing', rolesToDelete, 
+            'preserving', rolesPreserved);
+
+        const allRolePromises = 
+            [...rolesToAdd].map(role => this.addRole(username, role))
+                .concat([...rolesToDelete].map(role => this.removeRole(username, role)));
 
         // If cypher fails we will show err message in modal.
-        return this.cypher(q, params)
+        // TODO -- not wrapped in a TX.  It's possible for adding some roles to fail, others
+        // to succeed.
+        return Promise.all(allRolePromises)
             .then(() => {
                 // Returns nothing on success.
                 this.setState({ open: false });
 
+                const added = [...rolesToAdd].join(', ');
+                const removed = [...rolesToDelete].join(', ');
+
+                const addedStr = added ? 'Added: ' + added : '';
+                const removedStr = removed ? 'Removed: ' + removed : '';
+
                 // Fire callback to parent.
                 const result = _.merge(
-                    status.message('Success', `Assigned ${params.username} to role ${params.roleName}`), 
-                    params);
+                    status.message('Success', 
+                        `Assigned roles to ${username}. ${addedStr} ${removedStr}`), 
+                    this.state.activeUser);
                 
                 return this.state.onConfirm(this, result);
             });
@@ -101,6 +136,13 @@ class AssignRoleModal extends Component {
 
     componentWillReceiveProps(props) {
         if (!_.isNil(props.open)) {
+            if (props.open) {
+                // Load fresh data each time the dialog opens so that users
+                // don't get stale stuff
+                this.loadUsers();
+                this.loadRoles();
+            }
+
             this.setState({ open: props.open });
         }
     }
@@ -108,23 +150,29 @@ class AssignRoleModal extends Component {
     chooseUser = (event, allSelections) => {
         const username = allSelections.value;
 
-        this.setState({
-            activeUser: this.state.users.filter(u => u.username === username)[0],
-        });
+        // Create a copy of the user and associate their
+        // current roles with 'newRoles'.  This will control
+        // what's in the role selection box, and what work has to be done
+        // on confirm.
+        const foundUser = _.cloneDeep(this.state.users.filter(u => u.username === username)[0]);
+        const newRoles = _.cloneDeep(foundUser.roles);
+        foundUser.newRoles = newRoles;
+
+        this.setState({ activeUser: foundUser });
         
         console.log('selected user ', allSelections.value);
     };
 
-    formValid = () => this.state.activeUser && this.state.activeRole;
+    formValid = () => this.state.activeUser;
 
     chooseRole = (event, allSelections) => {
-        const role = allSelections.value;
+        const newRoleSet = allSelections.value;
 
-        this.setState({
-            activeRole: this.state.roles.filter(r => r.role === role)[0],
-        });
+        const activeUser = _.cloneDeep(this.state.activeUser);
+        activeUser.newRoles = newRoleSet;
 
-        console.log('selected role ', allSelections.value);
+        this.setState({ activeUser });
+        // console.log('selected role ', newRoleSet);
     };
 
     render() {
@@ -133,7 +181,7 @@ class AssignRoleModal extends Component {
         return (
             <Modal className='AssignRoleModal'
                 open={this.state.open}>
-                <Modal.Header>Assign Users Roles</Modal.Header>
+                <Modal.Header>Manage User Roles</Modal.Header>
                 <Modal.Content>
                     
                     { message }
@@ -141,7 +189,7 @@ class AssignRoleModal extends Component {
                     <Grid>
                         <Grid.Row columns={2}>
                             <Grid.Column>
-                                <h4>Select User</h4>
+                                <h4>Step 1: Select User</h4>
 
                                 {
                                     (this.state.users && this.state.users.length > 0) ?
@@ -154,12 +202,14 @@ class AssignRoleModal extends Component {
                             </Grid.Column>
 
                             <Grid.Column>
-                                <h4>Select Role</h4>
+                                <h4>Step 2: Assign Roles</h4>
 
                                 {
                                     (this.state.roles && this.state.roles.length > 0) ? 
-                                    <Dropdown 
-                                        placeholder='Select role' fluid selection 
+                                    <Dropdown fluid multiple selection
+                                        placeholder='Choose Roles'
+                                        disabled={!this.state.activeUser}
+                                        value={_.get(this.state.activeUser, 'newRoles') || []}
                                         onChange={this.chooseRole}
                                         options={this.state.roles}/> :
                                     'Loading roles...'
