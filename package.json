@@ -1,6 +1,6 @@
 {
-  "name": "cra-graph-app-components",
-  "version": "0.1.0",
+  "name": "halin",
+  "version": "0.0.1",
   "private": true,
   "dependencies": {
     "bluebird": "^3.5.2",
