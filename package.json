@@ -1,0 +1,27 @@
+{
+  "name": "cra-graph-app-components",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "bluebird": "^3.5.2",
+    "graph-app-kit": "^0.7.0",
+    "lodash": "^4.17.11",
+    "moment": "^2.22.2",
+    "neo4j-driver": "^1.6.3",
+    "pondjs": "^0.8.9",
+    "prop-types": "^15.6.0",
+    "react": "^16.0.0",
+    "react-dom": "^16.0.0",
+    "react-scripts": "1.0.16",
+    "react-sortable-tree": "^2.2.0",
+    "react-table": "^6.8.6",
+    "react-timeseries-charts": "^0.15.3",
+    "ringjs": "^0.0.1"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}
