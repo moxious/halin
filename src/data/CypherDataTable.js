@@ -82,7 +82,7 @@ class CypherDataTable extends Component {
         const num = toFloat(item.value);
         const pct = num * 100;
         const chopped = Math.round(pct * 100)/100;  // 2 decimal places
-        console.log('RATIO ',item.value,'->',pct,'->',chopped);
+        // console.log('RATIO ',item.value,'->',pct,'->',chopped);
         return <div className='_pctField'>{chopped} %</div>;
     }
 
