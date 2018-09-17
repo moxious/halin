@@ -9,7 +9,7 @@ import './CypherDataTable.css';
 const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
 
 const toNumber = val => {
-    if(_.isNil(val)) { return 'n/a'; }
+    if (_.isNil(val)) { return 'n/a'; }
     const num = parseInt(val, 10);
     return num.toLocaleString();
 };
@@ -56,7 +56,7 @@ class CypherDataTable extends Component {
 
         if (!props.query) {
             throw new Error('must provide query');
-        } else if(!props.displayColumns) {
+        } else if (!props.displayColumns) {
             throw new Error('must provide displayColumns');
         }
 
@@ -70,14 +70,14 @@ class CypherDataTable extends Component {
         // Immutable original display columns.  In the state, we will modify columns
         // as needed, but parent's won't be modified.
         this.originalDisplayColumns = props.displayColumns;
-        
+
         // Properties for the data table.
-        this.showPagination = (props.showPagination ? 
-                () => props.showPagination :
-                () => this.state.items.length >= 7);
-        this.defaultPageSize = (props.defaultPageSize ? 
-                () => props.defaultPageSize : 
-                () => Math.min(this.state.items.length, 10));
+        this.showPagination = (props.showPagination ?
+            () => props.showPagination :
+            () => this.state.items.length >= 7);
+        this.defaultPageSize = (props.defaultPageSize ?
+            () => props.defaultPageSize :
+            () => Math.min(this.state.items.length, 10));
 
         this.sortable = _.isNil(props.sortable) ? true : props.sortable;
         this.filterable = _.isNil(props.filterable) ? true : props.filterable;
@@ -95,7 +95,7 @@ class CypherDataTable extends Component {
 
     componentDidMount() {
         this.mounted = true;
-        this.setState({ displayColumns: _.cloneDeep(this.originalDisplayColumns)});
+        this.setState({ displayColumns: _.cloneDeep(this.originalDisplayColumns) });
         this.sampleData();
     }
 
@@ -173,15 +173,21 @@ class CypherDataTable extends Component {
     render() {
         return this.state.items ? (
             <div className='CypherDataTable'>
-                { 
-                    this.allowColumnSelect ? 
-                    <ColumnSelector 
-                        onSelect={this.updateColumns}
-                        displayColumns={this.state.displayColumns} /> : 
-                    '' 
+                {
+                    this.allowColumnSelect ?
+                        <ColumnSelector
+                            onSelect={this.updateColumns}
+                            displayColumns={this.state.displayColumns} /> :
+                        ''
                 }
 
-                <ReactTable 
+                <ReactTable
+                    // By default, filter only catches data if the value STARTS WITH
+                    // the entered string.  This makes it less picky.
+                    defaultFilterMethod={(filter, row, column) => {
+                        const id = filter.pivotId || filter.id
+                        return row[id] !== undefined ? String(row[id]).indexOf(filter.value) > -1 : true
+                    }}
                     data={this.state.items}
                     sortable={this.sortable}
                     filterable={this.filterable}
