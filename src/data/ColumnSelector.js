@@ -59,7 +59,7 @@ export default class ColumnSelector extends Component {
     render() {
         return ((!_.isNil(this.state.options) && !_.isNil(this.state.selected)) ? 
             <div className='ColumnSelector'>
-                <Dropdown fluid multiple selection
+                <Dropdown fluid multiple selection className='icon' icon='columns' search
                     placeholder='Select Columns'
                     value={this.state.selected}
                     options={this.state.options}
