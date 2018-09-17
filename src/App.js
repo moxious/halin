@@ -14,6 +14,7 @@ import DiagnosticPane from './diagnostic/DiagnosticPane';
 
 import './App.css';
 import 'semantic-ui-css/semantic.min.css';
+import HalinContext from './data/HalinContext';
 
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
@@ -29,19 +30,27 @@ class Halin extends Component {
   paneWrapper = obj =>
     <div className='PaneWrapper'>{obj}</div>;
 
+  componentDidMount() {
+    try {
+      window.halinContext = new HalinContext();
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
   render() {
     const panes = [
       {
         menuItem: 'Performance',
-        render: () => this.paneWrapper(<PerformancePane/>),
+        render: () => this.paneWrapper(<PerformancePane />),
       },
       {
         menuItem: 'User Management',
-        render: () => this.paneWrapper(<PermissionsPane/>),
+        render: () => this.paneWrapper(<PermissionsPane />),
       },
       {
         menuItem: 'Database',
-        render: () => this.paneWrapper(<DBSize/>),
+        render: () => this.paneWrapper(<DBSize />),
       },
       {
         menuItem: 'Configuration',
@@ -50,7 +59,7 @@ class Halin extends Component {
       {
         menuItem: 'Diagnostics',
         render: () => this.paneWrapper(
-          <DiagnosticPane/>
+          <DiagnosticPane />
         ),
       },
     ]
@@ -58,7 +67,7 @@ class Halin extends Component {
     return (
       <div className="App" key="app">
         <header className="App-header">
-          <Image className="App-logo" src='img/halingraph.gif' size='tiny'/>
+          <Image className="App-logo" src='img/halingraph.gif' size='tiny' />
         </header>
 
         <Render if={this.props.connected}>
