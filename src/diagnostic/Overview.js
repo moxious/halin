@@ -110,6 +110,8 @@ class Overview extends Component {
     }
 
     renderTopology() {
+        if (!this.state.topology) { return ''; }
+
         return (
             <ul>
                 {
