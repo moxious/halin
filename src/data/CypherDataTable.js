@@ -44,11 +44,11 @@ class CypherDataTable extends Component {
     }
 
     static numField(item) {
-        <div className='_numberField'>{toNumber(item.value)}</div>;
+        return <div className='_numberField'>{toNumber(item.value)}</div>;
     }
 
     static timeField(item) {
-        <div className='_timeField'>{convertMsToTime(item.value)}</div>;
+        return <div className='_timeField'>{convertMsToTime(item.value)}</div>;
     }
 
     constructor(props, context) {

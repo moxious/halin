@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import "semantic-ui-css/semantic.min.css";
 import * as PropTypes from "prop-types";
-import _ from 'lodash';
 
 import CypherDataTable from '../data/CypherDataTable';
 import 'react-table/react-table.css';
