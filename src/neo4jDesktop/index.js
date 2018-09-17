@@ -17,12 +17,8 @@ const getActiveProjects = context =>
         getActiveGraphs(proj).length > 0);
 
 /**
- * Get the first active set found in the context.
- * Note that in Neo4j Desktop technically more than one thing can be active at a time.
- * So we have to filter through the datastructure to find the first one active, and hope the
- * user isn't doing something funky like running multiple DBs on different ports, which would
- * ... suck.  Because AFAIK Neo4j Desktop doesn't give us a way to say which DB this app
- * is attached to, (would be better)
+ * Get the first active set found in the context.  This makes a hard assumption only
+ * one graph can be running at a time.
  * 
  * @param context a Neo4jDesktopApi Context
  * @returns an object with keys project and graph for what's active.
