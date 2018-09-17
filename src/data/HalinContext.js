@@ -1,4 +1,5 @@
 import nd from '../neo4jDesktop/index';
+import ClusterNode from '../data/ClusterNode';
 import _ from 'lodash';
 
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
@@ -24,6 +25,28 @@ export default class HalinContext {
         return driver;
     }
 
+    checkForCluster() {
+        const session = this.base.driver.session();
+
+        return session.run('CALL dbms.cluster.overview()', {})
+            .then(results => {
+                this.clusterNodes = results.records.map(rec => new ClusterNode(rec))
+
+                this.clusterNodes.forEach(node => {
+                    console.log(node.getAddress());
+                });
+            })
+            .catch(err => {
+                const str = `${err}`;
+                if (str.indexOf('no procedure') > -1) {
+                    // Not a cluster, this isn't an error.
+                } else {
+                    throw err;
+                }
+            })
+            .finally(() => session.close());
+    }
+
     initialize() {
         try {
             return nd.getFirstActive()
@@ -33,12 +56,12 @@ export default class HalinContext {
 
                     this.base = _.cloneDeep(active.graph.connection.configuration.protocols.bolt);
 
-                    console.log('base',this.base);
                     // Create a default driver to have around.
                     const uri = `bolt://${this.base.host}:${this.base.port}`;
-                    this.driverFor(uri);
+                    this.base.driver = this.driverFor(uri);
 
                     console.log('HalinContext created', this);
+                    // return this.checkForCluster();
                 })
                 .catch(err => {
                     console.error('Error initializing Halin Context', err);
