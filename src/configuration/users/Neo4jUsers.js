@@ -6,7 +6,6 @@ import 'semantic-ui-css/semantic.min.css';
 import status from '../../status/index';
 import './Neo4jUsers.css';
 import AssignRoleModal from '../roles/AssignRoleModal';
-// import Neo4jRoles from '../roles/Neo4jRoles';
 import styles from '../../styles';
 
 class Neo4jUsers extends Component {
@@ -18,11 +17,11 @@ class Neo4jUsers extends Component {
             minWidth: 70,
             maxWidth: 100,
             Cell: ({ row }) => (
-                <Button compact color='red' style={styles.tinyButton}
+                <Button compact negative
                     // Don't let people delete neo4j or admins for now.
                     disabled={row.username === 'neo4j' || row.roles.indexOf('admin') > -1}
                     onClick={e => this.open(row)}
-                    type='submit'>X</Button>
+                    type='submit' icon="cancel"/>
             ),
         },
         {
@@ -35,10 +34,6 @@ class Neo4jUsers extends Component {
             Cell: ({ row }) => row.roles.map((role, idx) => (
                 <div className='role' key={idx}>
                     {role}{idx < row.roles.length - 1 ? ',' : ''}
-                    {/* Working on it. */}
-                    {/* <Button compact style={styles.tinyButton}
-                        disabled={!Neo4jRoles.canDelete(role)} 
-                        color='red'>X</Button> */}
                 </div>
             )),
         },
@@ -161,13 +156,11 @@ class Neo4jUsers extends Component {
                             {message || 'Browse, filter, and delete users'}
                         </Grid.Column>
                         <Grid.Column>
-                            <Button basic color='green' onClick={e => this.openAssign()}>
-                                Manage Roles
+                            <Button basic onClick={e => this.openAssign()}>
+                                <i className="icon user"></i> Manage Roles
                             </Button>
-
-                            <Button basic color='green' onClick={e => this.refresh()}>
-                                Refresh
-                            </Button>
+                            
+                            <Button basic onClick={e => this.refresh()} icon="refresh"/>
                         </Grid.Column>
                     </Grid.Row>
 

@@ -23,12 +23,11 @@ class Neo4jRoles extends Component {
             minWidth: 70,
             maxWidth: 100,
             Cell: ({ row }) => (
-                <Button compact color='red'
-                    style={styles.tinyButton}
+                <Button compact negative
                     // Don't let people delete neo4j or admins for now.
                     disabled={!Neo4jRoles.canDelete(row.role)}
                     onClick={e => this.open(row)/*this.deleteUser(e, row)*/}
-                    type='submit'>X</Button>
+                    type='submit' icon="cancel"/>
             ),
         },
         { Header: 'Role', accessor: 'role' },
@@ -127,9 +126,7 @@ class Neo4jRoles extends Component {
                             {message || 'Browse, filter, and delete roles below'}
                         </Grid.Column>
                         <Grid.Column>
-                            <Button basic color='green' onClick={e => this.refresh()}>
-                                Refresh
-                            </Button>
+                            <Button basic onClick={e => this.refresh()} icon="refresh"/>
                         </Grid.Column>
                     </Grid.Row>
 

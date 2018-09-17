@@ -104,11 +104,13 @@ class NewRoleForm extends Component {
                         </Grid.Row>
                         <Grid.Row columns={1}>
                             <Grid.Column textAlign='left'>
-                                <Button 
+                                <Button positive
                                         style={this.inputStyle}
                                         disabled={this.state.pending || !this.formValid()} 
                                         onClick={data => this.submit(data)} 
-                                        type='submit'>Create</Button>
+                                        type='submit'>
+                                    <i className="icon add"/> Create
+                                </Button>
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>
