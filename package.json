@@ -16,7 +16,8 @@
     "react-sortable-tree": "^2.2.0",
     "react-table": "^6.8.6",
     "react-timeseries-charts": "^0.15.3",
-    "ringjs": "^0.0.1"
+    "ringjs": "^0.0.1",
+    "uri-parser": "^1.0.1"
   },
   "scripts": {
     "start": "react-scripts start",

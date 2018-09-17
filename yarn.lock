@@ -7013,6 +7013,10 @@ uri-js@^4.2.1:
   dependencies:
     punycode "^2.1.0"
 
+uri-parser@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/uri-parser/-/uri-parser-1.0.1.tgz#3307ebb50f279c11198ad09214bdaf24e29735b2"
+
 urijs@^1.16.1:
   version "1.19.0"
   resolved "https://registry.yarnpkg.com/urijs/-/urijs-1.19.0.tgz#d8aa284d0e7469703a6988ad045c4cbfdf08ada0"
