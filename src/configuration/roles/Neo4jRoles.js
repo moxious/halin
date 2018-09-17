@@ -4,7 +4,6 @@ import { Grid, Button, Confirm } from 'semantic-ui-react';
 import * as PropTypes from 'prop-types';
 import status from '../../status/index';
 import './Neo4jRoles.css';
-import styles from '../../styles';
 
 class Neo4jRoles extends Component {
     query = 'call dbms.security.listRoles()';

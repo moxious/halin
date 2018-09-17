@@ -6,7 +6,6 @@ import 'semantic-ui-css/semantic.min.css';
 import status from '../../status/index';
 import './Neo4jUsers.css';
 import AssignRoleModal from '../roles/AssignRoleModal';
-import styles from '../../styles';
 
 class Neo4jUsers extends Component {
     query = 'call dbms.security.listUsers()';
