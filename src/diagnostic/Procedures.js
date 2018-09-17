@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
 import CypherDataTable from '../data/CypherDataTable';
+import './Procedures.css';
 
 class Procedures extends Component {
     state = {

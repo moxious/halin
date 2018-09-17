@@ -6,6 +6,7 @@ import JMXDisplay from '../jmx/JMXDisplay';
 import { Cypher } from 'graph-app-kit/components/Cypher';
 import Functions from './Functions';
 import Procedures from './Procedures';
+import './DiagnosticPane.css';
 
 const renderJMX = ({ pending, error, result }) => {
     return pending ? (

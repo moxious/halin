@@ -4,6 +4,7 @@ import { Message } from 'semantic-ui-react';
 import { Image, Grid } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css';
 import _ from 'lodash';
+import './Overview.css';
 
 class Overview extends Component {
     state = {
