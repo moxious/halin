@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../data/CypherDataTable';
-import { Button, Confirm } from 'semantic-ui-react';
+import { Grid, Button, Confirm } from 'semantic-ui-react';
 import * as PropTypes from 'prop-types';
 import status from '../../status/index';
 import './Neo4jRoles.css';
@@ -23,7 +23,7 @@ class Neo4jRoles extends Component {
             minWidth: 70,
             maxWidth: 100,
             Cell: ({ row }) => (
-                <Button compact color='red' 
+                <Button compact color='red'
                     style={styles.tinyButton}
                     // Don't let people delete neo4j or admins for now.
                     disabled={!Neo4jRoles.canDelete(row.role)}
@@ -32,12 +32,12 @@ class Neo4jRoles extends Component {
             ),
         },
         { Header: 'Role', accessor: 'role' },
-        { 
-            Header: 'Users', 
+        {
+            Header: 'Users',
             accessor: 'users',
             Cell: ({ row }) => row.users.map((user, idx) => (
                 <div className='user' key={idx}>
-                    {user}{ idx < row.users.length -1 ? ',' : '' }
+                    {user}{idx < row.users.length - 1 ? ',' : ''}
                 </div>
             )),
         },
@@ -92,7 +92,7 @@ class Neo4jRoles extends Component {
     }
 
     open = (row) => {
-        this.setState({ 
+        this.setState({
             confirmOpen: true,
             activeRole: row,
         });
@@ -100,7 +100,7 @@ class Neo4jRoles extends Component {
 
     confirm = () => {
         const roleToDelete = this.state.activeRole;
-        this.setState({ 
+        this.setState({
             confirmOpen: false,
             activeRole: null,
             message: null,
@@ -121,25 +121,36 @@ class Neo4jRoles extends Component {
             <div className="Neo4jRoles">
                 <h3>Roles</h3>
 
-                <Button basic color='green' onClick={e => this.refresh()}>
-                    Refresh
-                </Button>
+                <Grid>
+                    <Grid.Row columns={2}>
+                        <Grid.Column>
+                            {message || 'Browse, filter, and delete roles below'}
+                        </Grid.Column>
+                        <Grid.Column>
+                            <Button basic color='green' onClick={e => this.refresh()}>
+                                Refresh
+                            </Button>
+                        </Grid.Column>
+                    </Grid.Row>
 
-                {message}
+                    <Confirm
+                        header='Delete Role'
+                        content='Are you sure? This action cannot be undone.  If you delete this role, all users currently assigned to this role will lose it.'
+                        open={this.state.confirmOpen}
+                        onCancel={this.close}
+                        onConfirm={this.confirm} />
 
-                <Confirm 
-                    header='Delete Role'
-                    content='Are you sure? This action cannot be undone.  If you delete this role, all users currently assigned to this role will lose it.'
-                    open={this.state.confirmOpen} 
-                    onCancel={this.close} 
-                    onConfirm={this.confirm}/>
-
-                <CypherDataTable   
-                    query={this.query}
-                    showPagination={true}
-                    refresh={this.state.childRefresh}
-                    displayColumns={this.displayColumns} 
-                />
+                    <Grid.Row columns={1}>
+                        <Grid.Column>
+                            <CypherDataTable
+                                query={this.query}
+                                showPagination={true}
+                                refresh={this.state.childRefresh}
+                                displayColumns={this.displayColumns}
+                            />
+                        </Grid.Column>
+                    </Grid.Row>
+                </Grid>
             </div>
         );
     }

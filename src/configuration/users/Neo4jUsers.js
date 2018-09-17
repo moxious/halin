@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../data/CypherDataTable';
 import * as PropTypes from 'prop-types';
-import { Button, Confirm } from 'semantic-ui-react';
+import { Button, Confirm, Grid } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import status from '../../status/index';
 import './Neo4jUsers.css';
@@ -25,16 +25,16 @@ class Neo4jUsers extends Component {
                     type='submit'>X</Button>
             ),
         },
-        { 
-            Header: 'Username', 
+        {
+            Header: 'Username',
             accessor: 'username',
         },
-        { 
-            Header: 'Roles', 
+        {
+            Header: 'Roles',
             accessor: 'roles',
             Cell: ({ row }) => row.roles.map((role, idx) => (
                 <div className='role' key={idx}>
-                    { role }{ idx < row.roles.length -1 ? ',' : '' }
+                    {role}{idx < row.roles.length - 1 ? ',' : ''}
                     {/* Working on it. */}
                     {/* <Button compact style={styles.tinyButton}
                         disabled={!Neo4jRoles.canDelete(role)} 
@@ -42,8 +42,8 @@ class Neo4jUsers extends Component {
                 </div>
             )),
         },
-        { 
-            Header: 'Flags', 
+        {
+            Header: 'Flags',
             accessor: 'flags',
         },
     ];
@@ -128,7 +128,7 @@ class Neo4jUsers extends Component {
     };
 
     open = (row) => {
-        this.setState({ 
+        this.setState({
             confirmOpen: true,
             activeUser: row,
         });
@@ -136,7 +136,7 @@ class Neo4jUsers extends Component {
 
     confirm = () => {
         const userToDelete = this.state.activeUser;
-        this.setState({ 
+        this.setState({
             confirmOpen: false,
             activeUser: null,
         });
@@ -154,38 +154,52 @@ class Neo4jUsers extends Component {
         return (
             <div className="Neo4jUsers">
                 <h3>Users</h3>
-                
-                <Button basic color='green' onClick={e => this.openAssign()}>
-                    Manage User Roles
-                </Button>
-                <Button basic color='green' onClick={e => this.refresh()}>
-                    Refresh
-                </Button>
 
-                { message }
+                <Grid>
+                    <Grid.Row columns={2}>
+                        <Grid.Column>
+                            {message || 'Browse, filter, and delete users'}
+                        </Grid.Column>
+                        <Grid.Column>
+                            <Button basic color='green' onClick={e => this.openAssign()}>
+                                Manage Roles
+                            </Button>
 
-                <AssignRoleModal open={this.state.assignOpen}
-                    onCancel={this.closeAssign}
-                    onConfirm={this.confirmRoleAssignment}/>
+                            <Button basic color='green' onClick={e => this.refresh()}>
+                                Refresh
+                            </Button>
+                        </Grid.Column>
+                    </Grid.Row>
 
-                {/* <Confirm open={this.state.assignOpen} 
+
+                    <AssignRoleModal open={this.state.assignOpen}
+                        onCancel={this.closeAssign}
+                        onConfirm={this.confirmRoleAssignment} />
+
+                    {/* <Confirm open={this.state.assignOpen} 
                     content='Not yet implemented.  Getting there!'
                     onCancel={this.closeAssign} 
                     onConfirm={this.closeAssign}/> */}
 
-                <Confirm 
-                    header='Delete User'
-                    content='Are you sure? This action cannot be undone!'
-                    open={this.state.confirmOpen} 
-                    onCancel={this.close} 
-                    onConfirm={this.confirm}/>
+                    <Confirm
+                        header='Delete User'
+                        content='Are you sure? This action cannot be undone!'
+                        open={this.state.confirmOpen}
+                        onCancel={this.close}
+                        onConfirm={this.confirm} />
 
-                <CypherDataTable
-                    showPagination={true}
-                    query={this.query}
-                    refresh={this.state.childRefresh}
-                    displayColumns={this.displayColumns}
-                />
+                    <Grid.Row columns={1}>
+                        <Grid.Column>
+                            <CypherDataTable
+                                showPagination={true}
+                                query={this.query}
+                                refresh={this.state.childRefresh}
+                                displayColumns={this.displayColumns}
+                            />
+                        </Grid.Column>
+                    </Grid.Row>
+
+                </Grid>
             </div>
         );
     }
