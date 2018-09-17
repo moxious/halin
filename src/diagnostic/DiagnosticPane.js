@@ -7,6 +7,7 @@ import { Cypher } from 'graph-app-kit/components/Cypher';
 import Functions from './Functions';
 import Procedures from './Procedures';
 import PageCache from './PageCache';
+import StoreFiles from './StoreFiles';
 import './DiagnosticPane.css';
 
 const renderJMX = ({ pending, error, result }) => {
@@ -33,6 +34,12 @@ class DiagnosticPane extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <PageCache/>
+                        </Grid.Column>
+                    </Grid.Row>
+
+                    <Grid.Row columns={1}>
+                        <Grid.Column>
+                            <StoreFiles/>
                         </Grid.Column>
                     </Grid.Row>
 
