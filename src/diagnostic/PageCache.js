@@ -59,6 +59,10 @@ class PageCache extends Component {
                     query={this.state.query}
                     allowColumnSelect={true}
                     displayColumns={this.state.displayColumns}
+                    showPagination={false}
+                    defaultPageSize={1}
+                    sortable={false}
+                    filterable={false}
                     rate={this.state.rate}/>
             </div>
         );
