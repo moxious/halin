@@ -36,7 +36,7 @@ class Halin extends Component {
         render: () => this.paneWrapper(<PerformancePane/>),
       },
       {
-        menuItem: 'Permissions',
+        menuItem: 'User Management',
         render: () => this.paneWrapper(<PermissionsPane/>),
       },
       {
