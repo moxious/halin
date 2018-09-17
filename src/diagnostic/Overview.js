@@ -3,6 +3,7 @@ import * as PropTypes from 'prop-types';
 import { Message } from 'semantic-ui-react';
 import { Image, Grid } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css';
+import ClusterNode from '../data/ClusterNode';
 import _ from 'lodash';
 import './Overview.css';
 
@@ -27,7 +28,8 @@ class Overview extends Component {
         return s1.run('CALL dbms.cluster.overview()', {})
             .then(results => {
                 console.log('CLUSTER RESULTS',results);
-                this.setState({ mode: 'CLUSTER', topology: results });
+                const clusterNodes = results.records.map(rec => new ClusterNode(rec));
+                this.setState({ mode: 'CLUSTER', topology: clusterNodes });
             })
             .catch(err => {
                 const str = `${err}`;
@@ -107,6 +109,20 @@ class Overview extends Component {
         ]);
     }
 
+    renderTopology() {
+        return (
+            <ul>
+                {
+                    this.state.topology.map((clusterNode, key) => 
+                        <li key={key}>
+                            {clusterNode.getAddress()}: {clusterNode.role}, supporting protocols
+                            &nbsp;{clusterNode.protocols().join(', ')}
+                        </li>)
+                }
+            </ul>
+        )
+    }
+
     render() {
         return (
             (this.state.name && this.state.mode) ? (
@@ -136,6 +152,11 @@ class Overview extends Component {
                                                 ) : ''
                                             }
                                         </li>
+                                        {
+                                            this.state.topology ? (
+                                                <li>Cluster Topology: {this.renderTopology()}</li>
+                                            ) : ''
+                                        }
                                     </ul>                                    
                                 </Grid.Column>
                                 <Grid.Column>
