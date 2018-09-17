@@ -3,15 +3,38 @@ import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import * as PropTypes from "prop-types";
 import _ from 'lodash';
+import { Grid } from 'semantic-ui-react';
 import ColumnSelector from './ColumnSelector';
 import './CypherDataTable.css';
 
 const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
 
-const toNumber = val => {
+const toInt = val => {
     if (_.isNil(val)) { return 'n/a'; }
     const num = parseInt(val, 10);
     return num.toLocaleString();
+};
+
+const toFloat = val => {
+    if (_.isNil(val)) { return 'n/a'; }
+    const num = parseFloat(val, 10);
+    return num;
+};
+
+const humanDataSize = (bytes, si) => {
+    var thresh = si ? 1000 : 1024;
+    if(Math.abs(bytes) < thresh) {
+        return bytes + ' B';
+    }
+    var units = si
+        ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
+        : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
+    var u = -1;
+    do {
+        bytes /= thresh;
+        ++u;
+    } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+    return bytes.toFixed(1)+' '+units[u];
 };
 
 const convertMsToTime = (millis) => {
@@ -44,7 +67,23 @@ class CypherDataTable extends Component {
     }
 
     static numField(item) {
-        return <div className='_numberField'>{toNumber(item.value)}</div>;
+        return <div className='_numberField'>{toInt(item.value)}</div>;
+    }
+
+    static dataSizeField(item) {
+        return <div className='_dataSizeField'>{humanDataSize(item.value)}</div>
+    }
+
+    static pctField(item) {
+        if (_.isNil(item.value)) {
+            return 'n/a %';
+        }
+
+        const num = toFloat(item.value);
+        const pct = num * 100;
+        const chopped = Math.round(pct * 100)/100;  // 2 decimal places
+        console.log('RATIO ',item.value,'->',pct,'->',chopped);
+        return <div className='_pctField'>{chopped} %</div>;
     }
 
     static timeField(item) {
@@ -173,14 +212,21 @@ class CypherDataTable extends Component {
     render() {
         return this.state.items ? (
             <div className='CypherDataTable'>
+                <Grid>
                 {
                     this.allowColumnSelect ?
-                        <ColumnSelector
-                            onSelect={this.updateColumns}
-                            displayColumns={this.state.displayColumns} /> :
+                        <Grid.Row columns={1}>
+                            <Grid.Column>
+                                <ColumnSelector
+                                    onSelect={this.updateColumns}
+                                    displayColumns={this.state.displayColumns} /> 
+                            </Grid.Column>
+                        </Grid.Row>:
                         ''
                 }
 
+                <Grid.Row columns={1}>
+                <Grid.Column>
                 <ReactTable
                     // By default, filter only catches data if the value STARTS WITH
                     // the entered string.  This makes it less picky.
@@ -201,6 +247,9 @@ class CypherDataTable extends Component {
                     onResizedChange={this.onResizedChange}
                     onExpandedChange={this.onExpandedChange}
                 />
+                </Grid.Column>
+                </Grid.Row>
+                </Grid>
             </div>
         ) : 'Loading...';
     }
