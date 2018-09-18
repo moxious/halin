@@ -6,7 +6,6 @@ import JMXDisplay from '../jmx/JMXDisplay';
 import { Cypher } from 'graph-app-kit/components/Cypher';
 import Functions from './Functions';
 import Procedures from './Procedures';
-import StoreFiles from './StoreFiles';
 import './DiagnosticPane.css';
 import GeneratePackage from './GeneratePackage';
 import uuid from 'uuid';
@@ -49,12 +48,6 @@ class DiagnosticPane extends Component {
                                 node={this.props.node} 
                                 driver={this.props.driver}
                             />
-                        </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={1}>
-                        <Grid.Column>
-                            <StoreFiles key={this.state.key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
                     </Grid.Row>
 
