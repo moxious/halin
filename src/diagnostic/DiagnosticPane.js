@@ -29,7 +29,6 @@ class DiagnosticPane extends Component {
     render() {
         return (
             <div className="DiagnosticPane" key={this.state.key}>
-            {this.state.key}
                 <Grid divided='vertically'>
                     <Grid.Row columns={1}>
                         <Grid.Column>
