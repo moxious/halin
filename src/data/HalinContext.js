@@ -107,8 +107,8 @@ export default class HalinContext {
     // CSV lib doesn't escape double quotes properly so we have to do it manually
     // in our json.  CSV is dark evil magic, you don't want to know, other than
     // just this: escape " with "" (not \\") to appease the CSV gods.
-    csvize = val =>
-        JSON.stringify(val).replace(/\\([\s\S])|(")/g,"\"$1$2");
+    csvize = val => val;
+        // JSON.stringify(val).replace(/\\([\s\S])|(")/g,"\"$1$2");
 
     _nodeDiagnostics(clusterNode) {
         const node = clusterNode.getAddress();

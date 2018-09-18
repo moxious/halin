@@ -5740,10 +5740,6 @@ rc@^1.0.1, rc@^1.1.6, rc@^1.1.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-csv@^1.0.15-RC2:
-  version "1.0.15-RC2"
-  resolved "https://registry.yarnpkg.com/react-csv/-/react-csv-1.0.15-RC2.tgz#ea0a163228107f80b177f43b283ff51ade64dd9f"
-
 react-dev-utils@^4.2.1:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/react-dev-utils/-/react-dev-utils-4.2.1.tgz#9f2763e7bafa1a1b9c52254d2a479deec280f111"

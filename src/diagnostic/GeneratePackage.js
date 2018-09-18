@@ -3,7 +3,6 @@ import * as PropTypes from "prop-types";
 import { Button, Icon } from 'semantic-ui-react';
 import uuid from 'uuid';
 import status from '../status/index';
-import { CSVLink } from 'react-csv';
 import moment from 'moment';
 
 class GeneratePackage extends Component {
@@ -55,6 +54,18 @@ class GeneratePackage extends Component {
         console.log('Generating package');
     };
 
+    buildURI = data => {
+        const pretty = JSON.stringify(data, null, 2);
+        const blob = new Blob([pretty], { type: 'text/json' });
+        const dataURI = `data:text/json;chartset=utf-8,${pretty}`;
+
+        const URL = window.URL || window.webkitURL;
+
+        return (typeof URL.createObjectURL === 'undefined') ? 
+            dataURI :
+            URL.createObjectURL(blob);
+    };
+
     render() {
         let message = status.formatStatusMessage(this);
 
@@ -62,20 +73,19 @@ class GeneratePackage extends Component {
             <div className='GeneratePackage'>
                 <Button basic
                         onClick={this.generatePackage}>
-                    <Icon name='download'/>
+                    <Icon name='cog'/>
                     Generate Package
                 </Button>
 
                 { message }
 
                 { this.state.diagnosticData ? (
-                    <CSVLink 
-                        headers={this.state.headers}
-                        className="ui basic button"
-                        filename={`neo4j-diagnostics-${this.state.dataGenerated}.csv`}
-                        data={this.state.diagnosticData}>
+                    <Button basic 
+                        download={`neo4j-diagnostics-${this.state.dataGenerated}.json`}
+                        href={this.buildURI(this.state.diagnosticData)}>
+                        <Icon name="download"/>
                         Download Package
-                    </CSVLink>
+                    </Button>
                 ) : '' }
             </div>
         );
