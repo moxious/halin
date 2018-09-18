@@ -11,6 +11,12 @@ class GeneratePackage extends Component {
         key: uuid.v4(),
         message: null,
         error: null,
+        headers: [
+            { label: 'domain', key: 'domain' },
+            { label: 'node', key: 'node' },
+            { label: 'key', key: 'key' },
+            { label: 'value', key: 'value' },
+        ],
     };
     
     constructor(props, context) {
@@ -64,6 +70,7 @@ class GeneratePackage extends Component {
 
                 { this.state.diagnosticData ? (
                     <CSVLink 
+                        headers={this.state.headers}
                         className="ui basic button"
                         filename={`neo4j-diagnostics-${this.state.dataGenerated}.csv`}
                         data={this.state.diagnosticData}>

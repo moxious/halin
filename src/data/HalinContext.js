@@ -104,6 +104,12 @@ export default class HalinContext {
         }
     }
 
+    // CSV lib doesn't escape double quotes properly so we have to do it manually
+    // in our json.  CSV is dark evil magic, you don't want to know, other than
+    // just this: escape " with "" (not \\") to appease the CSV gods.
+    csvize = val =>
+        JSON.stringify(val).replace(/\\([\s\S])|(")/g,"\"$1$2");
+
     _nodeDiagnostics(clusterNode) {
         const node = clusterNode.getAddress();
         const mkEntry = (domain, key, value) =>
@@ -123,14 +129,14 @@ export default class HalinContext {
             session.run(query, {})
                 .then(results => results.records[0])
                 .then(record => record.get('value'))
-                .catch(err => JSON.stringify(err))  // Convert errors into the value.
+                .catch(err => this.csvize(err))  // Convert errors into the value.
                 .then(value => mkEntry(domain, key, value));
 
         // Format all JMX data into records.
         const genJMX = session.run("CALL dbms.queryJmx('*:*')", {})
             .then(results => 
                 results.records.map(rec =>
-                    mkEntry('jmx', rec.get('name'), JSON.stringify(rec.get('attributes')))));
+                    mkEntry('jmx', rec.get('name'), this.csvize(rec.get('attributes')))));
 
         // Format node config into records.
         const genConfig = session.run('CALL dbms.listConfig()', {})
@@ -146,7 +152,7 @@ export default class HalinContext {
         const indexes = session.run('CALL db.indexes()', {})
             .then(results =>
                 results.records.map((rec, idx) =>
-                    mkEntry('index', idx, JSON.stringify({
+                    mkEntry('index', idx, this.csvize({
                         description: rec.get('description'),
                         label: rec.get('label'),
                         properties: rec.get('properties'),
@@ -191,6 +197,7 @@ export default class HalinContext {
         promises.push(halinDiagPromises);
 
         return Promise.all(promises)
-            .then(arrayOfArrays => _.flatten(arrayOfArrays));
+            .then(arrayOfArrays => _.flatten(arrayOfArrays))
+            .then(arr => _.sortBy(arr, 'domain'));
     }
 }
