@@ -138,6 +138,23 @@ export default class HalinContext {
                 results.records.map(rec => 
                     mkEntry('config', rec.get('name'), rec.get('value'))))
 
+        const constraints = session.run('CALL db.constraints()', {})
+            .then(results =>
+                results.records.map((rec, idx) => 
+                    mkEntry('constraint', idx, rec.get('description'))));
+
+        const indexes = session.run('CALL db.indexes()', {})
+            .then(results =>
+                results.records.map((rec, idx) =>
+                    mkEntry('index', idx, JSON.stringify({
+                        description: rec.get('description'),
+                        label: rec.get('label'),
+                        properties: rec.get('properties'),
+                        state: rec.get('state'),
+                        type: rec.get('type'),
+                        provider: rec.get('provider'),
+                    }))));
+
         const otherPromises = [
             noFailCheck('algo', 'RETURN algo.version() as value', 'version'),
             noFailCheck('apoc', 'RETURN apoc.version() as value', 'version'),
@@ -145,7 +162,7 @@ export default class HalinContext {
             noFailCheck('schema', 'call db.labels() yield label return collect(label) as value', 'labels'),
         ];
 
-        return Promise.all([genJMX, genConfig, ...otherPromises])
+        return Promise.all([indexes, constraints, genJMX, genConfig, ...otherPromises])
             .then(arrayOfArrays => _.flatten(arrayOfArrays))
             .then(results => results.concat(basics))
             .finally(() => session.close());
