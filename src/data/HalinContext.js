@@ -1,12 +1,13 @@
 import nd from '../neo4jDesktop/index';
 import ClusterNode from '../data/ClusterNode';
 import _ from 'lodash';
+import Promise from 'bluebird';
+import uuid from 'uuid';
 
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 export default class HalinContext {
     constructor() {
-        this.initialize();
         this.project = null;
         this.graph = null;
         this.drivers = {};
@@ -20,14 +21,26 @@ export default class HalinContext {
             return this.drivers[addr];
         }
 
-        const driver = neo4j.driver(addr, neo4j.auth.basic(username, password));
+        const driver = neo4j.driver(addr, neo4j.auth.basic(username, password), {
+            encrypted: true,
+        });
         this.drivers[addr] = driver;
         return driver;
     }
 
-    checkForCluster() {
-        const session = this.base.driver.session();
+    shutdown() {
+        console.log('Shutting down halin context');
+        Object.values(this.drivers).map(driver => driver.close());
+    }
 
+    isCluster() {
+        // Must have more than one node
+        return this.clusterNodes && this.clusterNodes.length > 1;
+    }
+
+    checkForCluster(activeDb) {
+        const session = this.base.driver.session();
+        console.log('activeDb', activeDb);
         return session.run('CALL dbms.cluster.overview()', {})
             .then(results => {
                 this.clusterNodes = results.records.map(rec => new ClusterNode(rec))
@@ -39,7 +52,21 @@ export default class HalinContext {
             .catch(err => {
                 const str = `${err}`;
                 if (str.indexOf('no procedure') > -1) {
-                    // Not a cluster, this isn't an error.
+                    // Halin will look at single node databases
+                    // running in desktop as clusters of size 1.
+                    const rec = {
+                        id: uuid.v4(),
+                        addresses: nd.getAddressesForGraph(activeDb.graph),
+                        role: 'SINGLE',
+                        database: 'default',
+                    };
+
+                    // Psuedo object behaves like a cypher result record.
+                    // Somewhere, a strong typing enthusiast is screaming. ;)
+                    const get = key => rec[key];
+                    rec.get = get;
+
+                    this.clusterNodes = [new ClusterNode(rec)];
                 } else {
                     throw err;
                 }
@@ -47,6 +74,10 @@ export default class HalinContext {
             .finally(() => session.close());
     }
 
+    /**
+     * Returns a promise that resolves to the HalinContext object completed,
+     * or rejects.
+     */
     initialize() {
         try {
             return nd.getFirstActive()
@@ -61,13 +92,11 @@ export default class HalinContext {
                     this.base.driver = this.driverFor(uri);
 
                     console.log('HalinContext created', this);
-                    // return this.checkForCluster();
+                    return this.checkForCluster(active);
                 })
-                .catch(err => {
-                    console.error('Error initializing Halin Context', err);
-                })
+                .then(() => this)
         } catch (e) {
-            console.error('General Halin Context error', e);
+            return Promise.reject(new Error('General Halin Context error', e));
         }
     }
 }
