@@ -17,7 +17,8 @@
     "react-table": "^6.8.6",
     "react-timeseries-charts": "^0.15.3",
     "ringjs": "^0.0.1",
-    "uri-parser": "^1.0.1"
+    "uri-parser": "^1.0.1",
+    "uuid": "^3.3.2"
   },
   "scripts": {
     "start": "react-scripts start",
