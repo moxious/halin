@@ -104,12 +104,6 @@ export default class HalinContext {
         }
     }
 
-    // CSV lib doesn't escape double quotes properly so we have to do it manually
-    // in our json.  CSV is dark evil magic, you don't want to know, other than
-    // just this: escape " with "" (not \\") to appease the CSV gods.
-    csvize = val => val;
-        // JSON.stringify(val).replace(/\\([\s\S])|(")/g,"\"$1$2");
-
     _nodeDiagnostics(clusterNode) {
         const node = clusterNode.getAddress();
         const mkEntry = (domain, key, value) =>
@@ -129,37 +123,48 @@ export default class HalinContext {
             session.run(query, {})
                 .then(results => results.records[0])
                 .then(record => record.get('value'))
-                .catch(err => this.csvize(err))  // Convert errors into the value.
-                .then(value => mkEntry(domain, key, value));
+                .catch(err => err)  // Convert errors into the value.
+                .then(value => {
+                    const obj = {};
+                    obj[domain] = {};
+                    obj[domain][key] = value;
+                    return obj;
+                });
 
         // Format all JMX data into records.
+        // Put the whole thing into an object keyed on jmx.
         const genJMX = session.run("CALL dbms.queryJmx('*:*')", {})
             .then(results => 
-                results.records.map(rec =>
-                    mkEntry('jmx', rec.get('name'), this.csvize(rec.get('attributes')))));
+                results.records.map(rec => ({
+                    name: rec.get('name'),
+                    attributes: rec.get('attributes'),
+                })))
+            .then(array => ({ JMX: array }))
 
         // Format node config into records.
         const genConfig = session.run('CALL dbms.listConfig()', {})
             .then(results =>
-                results.records.map(rec => 
-                    mkEntry('config', rec.get('name'), rec.get('value'))))
+                results.records.map(rec => ({
+                    name: rec.get('name'), value: rec.get('value'),
+                })))
+            .then(allConfig => ({ configuration: allConfig }));
 
         const constraints = session.run('CALL db.constraints()', {})
             .then(results =>
-                results.records.map((rec, idx) => 
-                    mkEntry('constraint', idx, rec.get('description'))));
+                results.records.map((rec, idx) => ({ idx, description: rec.get('description') })))
+            .then(allConstraints => ({ constraints: allConstraints }));
 
         const indexes = session.run('CALL db.indexes()', {})
             .then(results =>
-                results.records.map((rec, idx) =>
-                    mkEntry('index', idx, this.csvize({
-                        description: rec.get('description'),
-                        label: rec.get('label'),
-                        properties: rec.get('properties'),
-                        state: rec.get('state'),
-                        type: rec.get('type'),
-                        provider: rec.get('provider'),
-                    }))));
+                results.records.map((rec, idx) => ({
+                    description: rec.get('description'),
+                    label: rec.get('label'),
+                    properties: rec.get('properties'),
+                    state: rec.get('state'),
+                    type: rec.get('type'),
+                    provider: rec.get('provider'),
+                })))
+            .then(allIndexes => ({ indexes: allIndexes }));
 
         const otherPromises = [
             noFailCheck('algo', 'RETURN algo.version() as value', 'version'),
@@ -169,35 +174,36 @@ export default class HalinContext {
         ];
 
         return Promise.all([indexes, constraints, genJMX, genConfig, ...otherPromises])
-            .then(arrayOfArrays => _.flatten(arrayOfArrays))
-            .then(results => results.concat(basics))
+            .then(arrayOfDiagnosticObjects => _.merge(...arrayOfDiagnosticObjects))
             .finally(() => session.close());
     }
 
     _halinDiagnostics() {
-        const mkEntry = (key, value) => 
-            _.merge({ domain: 'halin', node: 'n/a' }, { key, value });
+        const halin = {
+            drivers: Object.keys(this.drivers).map(uri => ({
+                domain: `${this.domain}-driver`,
+                node: uri, 
+                key: 'encrypted',
+                value: _.get(this.drivers[uri]._config, 'encrypted'),
+            })),
+            diagnosticsGenerated: moment.utc().toISOString(),
+            version: appPkg.version,
+        };
 
-        const halinDrivers = Object.keys(this.drivers).map(uri => ({
-            domain: `${this.domain}-driver`,
-            node: uri, 
-            key: 'encrypted',
-            value: _.get(this.drivers[uri]._config, 'encrypted'),
-        }));
-
-        return Promise.resolve([
-            mkEntry('diagnosticsGenerated', moment.utc().toISOString()),
-            mkEntry('halinVersion', appPkg.version),
-        ].concat(halinDrivers));
+        return Promise.resolve(halin);
     }
 
     runDiagnostics() {
-        const halinDiagPromises = this._halinDiagnostics();
-        const promises = this.clusterNodes.map(clusterNode => this._nodeDiagnostics(clusterNode));
-        promises.push(halinDiagPromises);
+        const diagnostics = {};
 
-        return Promise.all(promises)
-            .then(arrayOfArrays => _.flatten(arrayOfArrays))
-            .then(arr => _.sortBy(arr, 'domain'));
+        const allNodeDiags = Promise.all(this.clusterNodes.map(clusterNode => this._nodeDiagnostics(clusterNode)))
+            .then(nodeDiagnostics => ({ clusterNodes: nodeDiagnostics }));
+        
+        const halinDiags = this._halinDiagnostics();
+
+        // Each object resolves to a diagnostic object with 1 key, and sub properties.
+        // All diagnostics are just a merge of those objects.
+        return Promise.all([halinDiags, allNodeDiags])
+            .then(arrayOfObjects => _.merge(...arrayOfObjects))
     }
 }
