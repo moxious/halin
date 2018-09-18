@@ -9,6 +9,7 @@ import Procedures from './Procedures';
 import PageCache from './PageCache';
 import StoreFiles from './StoreFiles';
 import './DiagnosticPane.css';
+import GeneratePackage from './GeneratePackage';
 import uuid from 'uuid';
 
 const renderJMX = ({ pending, error, result }) => {
@@ -33,6 +34,22 @@ class DiagnosticPane extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <Overview key={this.state.key} node={this.props.node} driver={this.props.driver}/>
+                        </Grid.Column>
+                    </Grid.Row>
+
+                    <Grid.Row columns={1}>
+                        <Grid.Column>
+                            <h3>Generate a diagnostic package</h3> 
+                            
+                            <p>This function creates a file that can be downloaded.
+                            This package can help others troubleshoot issues and
+                            provide advice.</p>
+
+                            <GeneratePackage 
+                                key={this.state.key} 
+                                node={this.props.node} 
+                                driver={this.props.driver}
+                            />
                         </Grid.Column>
                     </Grid.Row>
 

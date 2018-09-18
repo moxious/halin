@@ -99,4 +99,12 @@ export default class HalinContext {
             return Promise.reject(new Error('General Halin Context error', e));
         }
     }
+
+    runDiagnostics() {
+        const data = [
+            { node: 'foo', domain: 'bar', key: 'baz', value: 'quux' },            
+        ];
+
+        return Promise.resolve(data);
+    }
 }
