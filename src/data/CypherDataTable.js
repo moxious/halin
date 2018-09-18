@@ -7,6 +7,7 @@ import { Grid } from 'semantic-ui-react';
 import ColumnSelector from './ColumnSelector';
 import './CypherDataTable.css';
 import uuid from 'uuid';
+import NodeLabel from '../NodeLabel';
 
 const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
 
@@ -227,32 +228,30 @@ class CypherDataTable extends Component {
                         ''
                 }
 
-                <Grid.Row columns={1}>
-                    <Grid.Column>
-                        <ReactTable
-                            // By default, filter only catches data if the value STARTS WITH
-                            // the entered string.  This makes it less picky.
-                            defaultFilterMethod={(filter, row, column) => {
-                                const id = filter.pivotId || filter.id
-                                return row[id] !== undefined ? String(row[id]).indexOf(filter.value) > -1 : true
-                            }}
-                            data={this.state.items}
-                            sortable={this.sortable}
-                            filterable={this.filterable}
-                            defaultPageSize={this.defaultPageSize()}
-                            pageSizeOptions={this.pageSizeOptions}
-                            showPagination={this.showPagination()}
-                            columns={this.state.displayColumns}
-                            onPageChange={this.onPageChange}
-                            onPageSizeChange={this.onPageSizeChange}
-                            onSortedChange={this.onSortedChange}
-                            onResizedChange={this.onResizedChange}
-                            onExpandedChange={this.onExpandedChange}
-                        />
+                    <Grid.Row columns={1}>
+                        <Grid.Column>
+                            <ReactTable
+                                // By default, filter only catches data if the value STARTS WITH
+                                // the entered string.  This makes it less picky.
+                                defaultFilterMethod={(filter, row, column) => {
+                                    const id = filter.pivotId || filter.id
+                                    return row[id] !== undefined ? String(row[id]).indexOf(filter.value) > -1 : true
+                                }}
+                                data={this.state.items}
+                                sortable={this.sortable}
+                                filterable={this.filterable}
+                                defaultPageSize={this.defaultPageSize()}
+                                pageSizeOptions={this.pageSizeOptions}
+                                showPagination={this.showPagination()}
+                                columns={this.state.displayColumns}
+                                onPageChange={this.onPageChange}
+                                onPageSizeChange={this.onPageSizeChange}
+                                onSortedChange={this.onSortedChange}
+                                onResizedChange={this.onResizedChange}
+                                onExpandedChange={this.onExpandedChange}
+                            />
 
-                            { (this.props.driver && this.props.node) ?                     
-                                    this.props.node.getAddress()
-                            : '' }
+                            <NodeLabel node={this.props.node}/>
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>

@@ -12,6 +12,7 @@ import {
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import Ring from 'ringjs';
+import NodeLabel from '../NodeLabel';
 
 const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
 
@@ -310,9 +311,7 @@ class CypherTimeseries extends Component {
                                 </ChartRow>
                             </ChartContainer>
 
-                            { (this.props.driver && this.props.node) ?                     
-                                    this.props.node.getAddress()
-                            : '' }
+                            <NodeLabel node={this.props.node}/>
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>
