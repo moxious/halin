@@ -21,7 +21,6 @@ class GeneratePackage extends Component {
     constructor(props, context) {
         super(props, context)
         this.driver = props.driver || context.driver;
-
     }
 
     generatePackage = () => {
@@ -29,12 +28,14 @@ class GeneratePackage extends Component {
             message: status.message('Generating package', 'Please wait while data is gathered'),
         });
 
-        const fail = err =>
+        const fail = err => {
+            console.error(err);
             this.setState({
                 diagnosticData: null,
                 dataGenerated: null,
                 error: status.message('Failed to generate package', `${err}`),
             });
+        };
 
         try {
             return window.halinContext.runDiagnostics()
@@ -73,7 +74,7 @@ class GeneratePackage extends Component {
             <div className='GeneratePackage'>
                 <Button basic
                         onClick={this.generatePackage}>
-                    <Icon name='cog'/>
+                    <Icon name='cogs'/>
                     Generate Package
                 </Button>
 
