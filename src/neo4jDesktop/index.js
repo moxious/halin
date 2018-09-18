@@ -54,6 +54,16 @@ const getFirstActive = () => {
         })
 };
 
+const getAddressesForGraph = graph => {
+    const protocols = Object.keys(graph.connection.configuration.protocols);
+
+    return protocols.map(proto => {
+        const host = graph.connection.configuration.protocols[proto].host;
+        const port = graph.connection.configuration.protocols[proto].port;
+        return `${proto}://${host}:${port}`;
+    });
+};
+
 export default {
-    getFirstActive, getActiveGraphs, getActiveProjects,
+    getFirstActive, getActiveGraphs, getActiveProjects, getAddressesForGraph,
 };
