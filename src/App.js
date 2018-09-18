@@ -15,16 +15,47 @@ import DiagnosticPane from './diagnostic/DiagnosticPane';
 import './App.css';
 import 'semantic-ui-css/semantic.min.css';
 import HalinContext from './data/HalinContext';
+import uuid from 'uuid';
 
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 class Halin extends Component {
   state = {
-    cTag: 1
-  };
-
-  reRunManually = () => {
-    this.setState(state => ({ cTag: state.cTag + 1 }));
+    cTag: 1,
+    halin: null,
+    initPromise: null,
+    panes: (driver=null, node=null, key=uuid.v4()) => ([
+      // Because panes get reused across cluster nodes, we have to 
+      // give them all a unique key so that as we recreate panes, we're passing down
+      // different props that get separately constructed, and not reusing the same
+      // objects.  
+      // https://stackoverflow.com/questions/29074690/react-why-components-constructor-is-called-only-once
+      {
+        menuItem: 'Performance',
+        render: () => this.paneWrapper(
+          <PerformancePane key={key} node={node} driver={driver}/>),
+      },
+      {
+        menuItem: 'User Management',
+        render: () => this.paneWrapper(
+          <PermissionsPane key={key} node={node} driver={driver}/>),
+      },
+      {
+        menuItem: 'Database',
+        render: () => this.paneWrapper(
+          <DBSize key={key} node={node} driver={driver}/>),
+      },
+      {
+        menuItem: 'Configuration',
+        render: () => this.paneWrapper(
+          <Neo4jConfiguration key={key} node={node} driver={driver}/>),
+      },
+      {
+        menuItem: 'Diagnostics',
+        render: () => this.paneWrapper(
+          <DiagnosticPane key={key} node={node} driver={driver}/>),
+      },
+    ]),
   };
 
   paneWrapper = obj =>
@@ -33,38 +64,42 @@ class Halin extends Component {
   componentDidMount() {
     try {
       window.halinContext = new HalinContext();
+
+      const initPromise = window.halinContext.initialize()
+        .catch(err => {
+          console.error('Error initializing halin context', err);
+          return window.halinContext;
+        })
+        .then(ctx => {
+          console.log('setting halin on state');
+          this.setState({ halin: ctx });
+        });
+
+      this.setState({ initPromise });
     } catch (e) {
       console.error(e);
     }
   }
 
-  render() {
-    const panes = [
-      {
-        menuItem: 'Performance',
-        render: () => this.paneWrapper(<PerformancePane />),
-      },
-      {
-        menuItem: 'User Management',
-        render: () => this.paneWrapper(<PermissionsPane />),
-      },
-      {
-        menuItem: 'Database',
-        render: () => this.paneWrapper(<DBSize />),
-      },
-      {
-        menuItem: 'Configuration',
-        render: () => this.paneWrapper(<Neo4jConfiguration />),
-      },
-      {
-        menuItem: 'Diagnostics',
-        render: () => this.paneWrapper(
-          <DiagnosticPane />
-        ),
-      },
-    ]
+  componentWillUnmount() {
+    window.halinContext.shutdown();
+  }
 
-    return (
+  renderCluster() {
+    const nodePanes = this.state.halin.clusterNodes.map(node => ({
+      menuItem: `${node.getAddress()} (${node.role})`,
+      render: () => this.renderSingleNode(this.state.halin.driverFor(node.getBoltAddress()), node),
+    }));
+
+    return <Tab panes={nodePanes} />;
+  }
+
+  renderSingleNode(driver=null, node=null) {
+    return <Tab panes={this.state.panes(driver, node)} />;
+  }
+
+  render() {
+    return (!this.state.halin ? 'Loading...' : (
       <div className="App" key="app">
         <header className="App-header">
           <Image className="App-logo" src='img/halingraph.gif' size='tiny' />
@@ -72,11 +107,11 @@ class Halin extends Component {
 
         <Render if={this.props.connected}>
           <div className='MainBody'>
-            <Tab panes={panes} />
+            {this.renderCluster()}
           </div>
         </Render>
       </div>
-    );
+    ));
   }
 }
 

@@ -6,32 +6,35 @@ import MemoryMonitor from './MemoryMonitor';
 import SystemLoad from './SystemLoad';
 import GCMonitor from './GCMonitor';
 import ActiveQueries from './ActiveQueries';
+import uuid from 'uuid';
 
 class PerformancePane extends Component {
     render() {
+        const key = uuid.v4();
+
         return (
             <div className="PerformancePane">
-                <h3>Neo4j System Performance</h3>
+                <h3>System Performance</h3>
                 <Grid divided='vertically'>
                     <Grid.Row columns={2}>
                         <Grid.Column>
-                            <SystemLoad/>
+                            <SystemLoad key={key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
 
                         <Grid.Column>
-                            <MemoryMonitor/>
-                        </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={1}>
-                        <Grid.Column>
-                            <ActiveQueries/>
+                            <MemoryMonitor key={key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
                     </Grid.Row>
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <GCMonitor/>
+                            <ActiveQueries key={key} node={this.props.node} driver={this.props.driver}/>
+                        </Grid.Column>
+                    </Grid.Row>
+
+                    <Grid.Row columns={1}>
+                        <Grid.Column>
+                            <GCMonitor key={key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>  

@@ -1,6 +1,6 @@
 {
   "name": "halin",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "private": true,
   "dependencies": {
     "bluebird": "^3.5.2",
@@ -11,13 +11,15 @@
     "pondjs": "^0.8.9",
     "prop-types": "^15.6.0",
     "react": "^16.0.0",
+    "react-csv": "^1.0.15-RC2",
     "react-dom": "^16.0.0",
     "react-scripts": "1.0.16",
     "react-sortable-tree": "^2.2.0",
     "react-table": "^6.8.6",
     "react-timeseries-charts": "^0.15.3",
     "ringjs": "^0.0.1",
-    "uri-parser": "^1.0.1"
+    "uri-parser": "^1.0.1",
+    "uuid": "^3.3.2"
   },
   "scripts": {
     "start": "react-scripts start",

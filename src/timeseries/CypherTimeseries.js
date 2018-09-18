@@ -12,6 +12,7 @@ import {
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import Ring from 'ringjs';
+import NodeLabel from '../NodeLabel';
 
 const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
 
@@ -264,7 +265,7 @@ class CypherTimeseries extends Component {
                     defaultPageSize={1}
                     columns={this.displayColumns} /> */}
 
-                <Grid divided='vertically'>
+                <Grid>
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <Legend type="swatch"
@@ -281,32 +282,38 @@ class CypherTimeseries extends Component {
                             <span style={this.dateStyle}>{`${this.state.time}`}</span>
                         </Grid.Column> */}
                     </Grid.Row>
-                    <ChartContainer 
-                        showGrid={this.showGrid}
-                        showGridPosition={this.showGridPosition}
-                        width={this.width} 
-                        timeRange={timeRange}>
-                        <ChartRow height="150">
-                            <YAxis id="y" 
-                                min={this.getChartMin()} 
-                                max={this.getChartMax()} 
-                                width="70" 
-                                showGrid={true}
-                                type="linear"/>
-                            <Charts>
-                                {
-                                    this.displayColumns.map((col, idx) => 
-                                        <LineChart key={`ct-${idx}`}
-                                            axis="y" 
-                                            style={style} 
-                                            columns={[col.accessor]}
-                                            series={dataSeries}
-                                            />
-                                    )
-                                }
-                            </Charts>
-                        </ChartRow>
-                    </ChartContainer>
+                    <Grid.Row columns={1}>
+                        <Grid.Column textAlign='left'>
+                            <ChartContainer 
+                                showGrid={this.showGrid}
+                                showGridPosition={this.showGridPosition}
+                                width={this.width} 
+                                timeRange={timeRange}>
+                                <ChartRow height="150">
+                                    <YAxis id="y" 
+                                        min={this.getChartMin()} 
+                                        max={this.getChartMax()} 
+                                        width="70" 
+                                        showGrid={true}
+                                        type="linear"/>
+                                    <Charts>
+                                        {
+                                            this.displayColumns.map((col, idx) => 
+                                                <LineChart key={`ct-${idx}`}
+                                                    axis="y" 
+                                                    style={style} 
+                                                    columns={[col.accessor]}
+                                                    series={dataSeries}
+                                                    />
+                                            )
+                                        }
+                                    </Charts>
+                                </ChartRow>
+                            </ChartContainer>
+
+                            <NodeLabel node={this.props.node}/>
+                        </Grid.Column>
+                    </Grid.Row>
                 </Grid>
             </div>
         ) : 'Loading...';

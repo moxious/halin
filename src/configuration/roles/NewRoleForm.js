@@ -18,13 +18,12 @@ class NewRoleForm extends Component {
     constructor(props, context) {
         super(props, context);
         this.driver = props.driver || context.driver;
-
         this.onRoleCreate = props.onRoleCreate || (() => null);
     }
 
-    createUser() {
+    createRole() {
         this.setState({ pending: true });
-
+        console.log('Creating role with driver ',this.driver);
         const session = this.driver.session();
 
         const role = this.state.role;
@@ -62,13 +61,13 @@ class NewRoleForm extends Component {
     submit(event) {
         console.log('submit', this.state);
         event.preventDefault();
-        this.createUser();
+        this.createRole();
     }
     
     handleChange(field, event) {
         const mod = {};
         mod[field] = event.target.value;
-        console.log(mod);
+        // console.log(mod);
         this.setState(mod);
     }
 

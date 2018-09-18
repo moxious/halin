@@ -8,9 +8,11 @@ import NewUserForm from './users/NewUserForm';
 
 import Neo4jRoles from './roles/Neo4jRoles';
 import NewRoleForm from './roles/NewRoleForm';
+import uuid from 'uuid';
 
 class PermissionsPane extends Component {
     state = {
+        key: uuid.v4(),
         childRefresh: 1,
     };
 
@@ -27,19 +29,35 @@ class PermissionsPane extends Component {
                 <Grid divided='vertically'>
                     <Grid.Row columns={2}>
                         <Grid.Column>
-                            <NewUserForm onUserCreate={username => this.event('user', username)}/>
+                            <NewUserForm 
+                                key={this.state.key} 
+                                driver={this.props.driver} 
+                                node={this.props.node} 
+                                onUserCreate={username => this.event('user', username)}/>
                         </Grid.Column>
                         <Grid.Column>
-                            <NewRoleForm onRoleCreate={role => this.event('role', role)}/>
+                            <NewRoleForm 
+                                key={this.state.key} 
+                                driver={this.props.driver} 
+                                node={this.props.node} 
+                                onRoleCreate={role => this.event('role', role)}/>
                         </Grid.Column>
                     </Grid.Row>
 
                     <Grid.Row columns={2}>
                         <Grid.Column>
-                            <Neo4jUsers refresh={this.state.childRefresh}/>
+                            <Neo4jUsers 
+                                key={this.state.key} 
+                                driver={this.props.driver} 
+                                node={this.props.node}                         
+                                refresh={this.state.childRefresh}/>
                         </Grid.Column>
                         <Grid.Column>
-                            <Neo4jRoles refresh={this.state.childRefresh}/>
+                            <Neo4jRoles 
+                                key={this.state.key} 
+                                driver={this.props.driver} 
+                                node={this.props.node}                        
+                                refresh={this.state.childRefresh}/>
                         </Grid.Column>
                     </Grid.Row>
 

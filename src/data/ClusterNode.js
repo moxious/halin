@@ -14,10 +14,12 @@ export default class ClusterNode {
         this.database = record.get('database');
     }
 
-    getAddress() {
-        const boltUri = this.addresses.filter(addr => addr.indexOf('bolt') > -1)[0];
+    getBoltAddress() {
+        return this.addresses.filter(addr => addr.indexOf('bolt') > -1)[0];
+    }
 
-        const parsed = Parser.parse(boltUri);
+    getAddress() {
+        const parsed = Parser.parse(this.getBoltAddress());
         return parsed.host;
     }
 

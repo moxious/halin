@@ -50,6 +50,8 @@ class ActiveQueries extends Component {
             <div className="ActiveQueries">
                 <h2>Active Queries</h2> 
                 <CypherDataTable
+                    driver={this.props.driver}
+                    node={this.props.node}
                     query={this.query}
                     allowColumnSelect={true}
                     refresh={this.state.childRefresh}
