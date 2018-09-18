@@ -6,6 +6,7 @@ import MemoryMonitor from './MemoryMonitor';
 import SystemLoad from './SystemLoad';
 import GCMonitor from './GCMonitor';
 import ActiveQueries from './ActiveQueries';
+import PageCache from '../diagnostic/PageCache';
 import uuid from 'uuid';
 
 class PerformancePane extends Component {
@@ -29,6 +30,12 @@ class PerformancePane extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <ActiveQueries key={key} node={this.props.node} driver={this.props.driver}/>
+                        </Grid.Column>
+                    </Grid.Row>
+
+                    <Grid.Row columns={1}>
+                        <Grid.Column>
+                            <PageCache key={key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
                     </Grid.Row>
 
