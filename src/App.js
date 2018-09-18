@@ -51,7 +51,7 @@ class Halin extends Component {
           <Neo4jConfiguration key={key} node={node} driver={driver}/>),
       },
       {
-        menuItem: 'Diagnostics',
+        menuItem: 'Summary',
         render: () => this.paneWrapper(
           <DiagnosticPane key={key} node={node} driver={driver}/>),
       },
