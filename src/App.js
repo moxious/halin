@@ -50,11 +50,6 @@ class Halin extends Component {
         render: () => this.paneWrapper(
           <Neo4jConfiguration key={key} node={node} driver={driver}/>),
       },
-      {
-        menuItem: 'Summary',
-        render: () => this.paneWrapper(
-          <DiagnosticPane key={key} node={node} driver={driver}/>),
-      },
     ]),
   };
 
@@ -91,7 +86,23 @@ class Halin extends Component {
       render: () => this.renderSingleNode(this.state.halin.driverFor(node.getBoltAddress()), node),
     }));
 
-    return <Tab panes={nodePanes} />;
+    const diagnosticPane = {
+      menuItem: 'Diagnostics',
+      render: () => {
+        const node = this.state.halin.clusterNodes[0];
+        const driver = this.state.halin.driverFor(node.getBoltAddress());
+
+        console.log('Diag on', node, driver);
+
+        return (
+          <DiagnosticPane 
+            node={node}
+            driver={driver}/>
+        );
+      },
+    };
+
+    return <Tab panes={nodePanes.concat([diagnosticPane])} />;
   }
 
   renderSingleNode(driver=null, node=null) {
