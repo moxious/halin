@@ -24,15 +24,27 @@ class GeneratePackage extends Component {
             message: status.message('Generating package', 'Please wait while data is gathered'),
         });
 
-        window.halinContext.runDiagnostics()
-            .then(data => {
-                this.setState({
-                    diagnosticData: data,
-                    dataGenerated: moment().format('YYYY-MM-DD-HH-mm-ss'),
-                    message: status.message('Diagnostics gathered', 
-                        'Data is now available for download, click the button below'),
-                });
-            })
+        const fail = err =>
+            this.setState({
+                diagnosticData: null,
+                dataGenerated: null,
+                error: status.message('Failed to generate package', `${err}`),
+            });
+
+        try {
+            return window.halinContext.runDiagnostics()
+                .then(data => {
+                    this.setState({
+                        diagnosticData: data,
+                        dataGenerated: moment().format('YYYY-MM-DD-HH-mm-ss'),
+                        message: status.message('Diagnostics gathered', 
+                            'Data is now available for download, click the button below'),
+                    });
+                })
+                .catch(err => fail(err));
+        } catch (err) {
+            fail(err);
+        }
 
         console.log('Generating package');
     };
