@@ -143,7 +143,9 @@ class CypherTimeseries extends Component {
                     // It's a bad idea to run long-running queries with a short window.
                     // It puts too much load on the system and does a bad job updating the
                     // graphic.
-                    console.warn('CypherTimeseries query is taking a lot of time relative to your execution window.  Consider adjusting', this);
+                    console.warn('CypherTimeseries query is taking a lot of time relative to your execution window.  Consider adjusting', {
+                        elapsedMs, query: this.query, parameters: this.state.parameters,
+                    });
                 }
 
                 // Take the first result only.  This component only works with single-record queries.
