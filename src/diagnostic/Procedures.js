@@ -43,6 +43,8 @@ class Procedures extends Component {
                 <h3>Installed Procedures</h3>
 
                 <CypherDataTable
+                    driver={this.props.driver}
+                    node={this.props.node}
                     showPagination={true}
                     query={this.state.query}
                     rate={1000 * 60 * 60} /* Very slow, barely ever, this stuff doesn't change */

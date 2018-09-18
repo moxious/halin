@@ -6,8 +6,10 @@ import 'semantic-ui-css/semantic.min.css';
 import status from '../../status/index';
 import './Neo4jUsers.css';
 import AssignRoleModal from '../roles/AssignRoleModal';
+import uuid from 'uuid';
 
 class Neo4jUsers extends Component {
+    key = uuid.v4();
     query = 'call dbms.security.listUsers()';
     displayColumns = [
         {
@@ -163,8 +165,10 @@ class Neo4jUsers extends Component {
                         </Grid.Column>
                     </Grid.Row>
 
-
-                    <AssignRoleModal open={this.state.assignOpen}
+                    <AssignRoleModal key={this.key}
+                        driver={this.props.driver}
+                        node={this.props.node}
+                        open={this.state.assignOpen}
                         onCancel={this.closeAssign}
                         onConfirm={this.confirmRoleAssignment} />
 
@@ -183,6 +187,8 @@ class Neo4jUsers extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <CypherDataTable
+                                driver={this.props.driver}
+                                node={this.props.node}
                                 showPagination={true}
                                 query={this.query}
                                 refresh={this.state.childRefresh}
