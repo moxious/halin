@@ -121,8 +121,7 @@ export default class HalinContext {
         // Query must return 'value'
         const noFailCheck = (domain, query, key) =>
             session.run(query, {})
-                .then(results => results.records[0])
-                .then(record => record.get('value'))
+                .then(results => results.records[0].get('value'))
                 .catch(err => err)  // Convert errors into the value.
                 .then(value => {
                     const obj = {};
@@ -166,11 +165,11 @@ export default class HalinContext {
                 })))
             .then(allIndexes => ({ indexes: allIndexes }));
 
-        const otherPromises = [
-            noFailCheck('algo', 'RETURN algo.version() as value', 'version'),
+        const otherPromises = [            
             noFailCheck('apoc', 'RETURN apoc.version() as value', 'version'),
             noFailCheck('nodes', 'MATCH (n) RETURN count(n) as value', 'count'),
             noFailCheck('schema', 'call db.labels() yield label return collect(label) as value', 'labels'),
+            noFailCheck('algo', 'RETURN algo.version() as value', 'version'),
         ];
 
         return Promise.all([indexes, constraints, genJMX, genConfig, ...otherPromises])
@@ -188,9 +187,21 @@ export default class HalinContext {
             })),
             diagnosticsGenerated: moment.utc().toISOString(),
             version: appPkg.version,
+            activeHalinProject: this.project,
+            activeHalinGraph: this.graph,
         };
 
         return Promise.resolve(halin);
+    }
+
+    _neo4jDesktopDiagnostics() {
+        const api = window.neo4jDesktopApi;
+
+        if (!api) {
+            return Promise.resolve({ neo4jDesktop: 'MISSING' });
+        }
+
+        return api.getContext();
     }
 
     runDiagnostics() {
@@ -201,9 +212,11 @@ export default class HalinContext {
         
         const halinDiags = this._halinDiagnostics();
 
+        const neo4jDesktopDiags = this._neo4jDesktopDiagnostics();
+
         // Each object resolves to a diagnostic object with 1 key, and sub properties.
         // All diagnostics are just a merge of those objects.
-        return Promise.all([halinDiags, allNodeDiags])
+        return Promise.all([halinDiags, allNodeDiags, neo4jDesktopDiags])
             .then(arrayOfObjects => _.merge(...arrayOfObjects))
     }
 }
