@@ -9,6 +9,7 @@ import Procedures from './Procedures';
 import PageCache from './PageCache';
 import StoreFiles from './StoreFiles';
 import './DiagnosticPane.css';
+import uuid from 'uuid';
 
 const renderJMX = ({ pending, error, result }) => {
     return pending ? (
@@ -21,35 +22,40 @@ const renderJMX = ({ pending, error, result }) => {
   };
 
 class DiagnosticPane extends Component {
+    state = {
+        key: uuid.v4(),
+    };
+
     render() {
         return (
-            <div className="DiagnosticPane">
+            <div className="DiagnosticPane" key={this.state.key}>
+            {this.state.key}
                 <Grid divided='vertically'>
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <Overview/>
+                            <Overview key={this.state.key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
                     </Grid.Row>
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <PageCache/>
+                            <PageCache key={this.state.key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
                     </Grid.Row>
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <StoreFiles/>
+                            <StoreFiles key={this.state.key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
                     </Grid.Row>
 
                     <Grid.Row columns={2}>
                         <Grid.Column>
-                            <Functions/>
+                            <Functions key={this.state.key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
 
                         <Grid.Column>
-                            <Procedures/>
+                            <Procedures key={this.state.key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>    
                     </Grid.Row>
 
