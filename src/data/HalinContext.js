@@ -8,6 +8,13 @@ import appPkg from '../package.json';
 
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
+/**
+ * HalinContext is a controller object that keeps track of state and permits diagnostic
+ * reporting.
+ * 
+ * It creates its own drivers and does not use the Neo4j Desktop API provided drivers.
+ * The main app will attach it to the window object as a global.
+ */
 export default class HalinContext {
     domain = 'halin';
 
@@ -104,17 +111,23 @@ export default class HalinContext {
         }
     }
 
+    /**
+     * @param clusterNode{ClusterNode} 
+     * @return Promise{Object} of diagnostic information about that node.
+     */
     _nodeDiagnostics(clusterNode) {
         const node = clusterNode.getAddress();
         const mkEntry = (domain, key, value) =>
             _.merge({ node }, { domain, key, value });
 
-        const basics = [
-            mkEntry(this.domain, 'protocols', clusterNode.protocols()),
-            mkEntry(this.domain, 'role', clusterNode.role),
-            mkEntry(this.domain, 'database', clusterNode.database),
-            mkEntry(this.domain, 'id', clusterNode.id),
-        ];
+        const basics = {
+            basics: {
+                protocols: clusterNode.protocols(),
+                role: clusterNode.role,
+                database: clusterNode.database,
+                id: clusterNode.id,
+            },
+        };
 
         const session = this.driverFor(clusterNode.getBoltAddress()).session();
 
@@ -139,6 +152,23 @@ export default class HalinContext {
                     attributes: rec.get('attributes'),
                 })))
             .then(array => ({ JMX: array }))
+
+        const users = session.run('CALL dbms.security.listUsers()', {})
+            .then(results =>
+                results.records.map(rec => ({
+                    username: rec.get('username'),
+                    flags: rec.get('flags'),
+                    roles: rec.get('roles'),
+                })))
+            .then(allUsers => ({ users: allUsers }));
+
+        const roles = session.run('CALL dbms.security.listRoles()', {})
+            .then(results =>
+                results.records.map(rec => ({
+                    role: rec.get('role'),
+                    users: rec.get('users'),
+                })))
+                .then(allRoles => ({ roles: allRoles }));
 
         // Format node config into records.
         const genConfig = session.run('CALL dbms.listConfig()', {})
@@ -172,28 +202,37 @@ export default class HalinContext {
             noFailCheck('algo', 'RETURN algo.version() as value', 'version'),
         ];
 
-        return Promise.all([indexes, constraints, genJMX, genConfig, ...otherPromises])
-            .then(arrayOfDiagnosticObjects => _.merge(...arrayOfDiagnosticObjects))
+        return Promise.all([
+            users, roles, indexes, constraints, genJMX, genConfig, ...otherPromises])
+            .then(arrayOfDiagnosticObjects => _.merge(basics, ...arrayOfDiagnosticObjects))
             .finally(() => session.close());
     }
 
+    /**
+     * @return Promise{Object} of halin diagnostics.
+     */
     _halinDiagnostics() {
         const halin = {
-            drivers: Object.keys(this.drivers).map(uri => ({
-                domain: `${this.domain}-driver`,
-                node: uri, 
-                key: 'encrypted',
-                value: _.get(this.drivers[uri]._config, 'encrypted'),
-            })),
-            diagnosticsGenerated: moment.utc().toISOString(),
-            version: appPkg.version,
-            activeHalinProject: this.project,
-            activeHalinGraph: this.graph,
+            halin: {
+                drivers: Object.keys(this.drivers).map(uri => ({
+                    domain: `${this.domain}-driver`,
+                    node: uri, 
+                    key: 'encrypted',
+                    value: _.get(this.drivers[uri]._config, 'encrypted'),
+                })),
+                diagnosticsGenerated: moment.utc().toISOString(),
+                activeProject: this.project,
+                activeGraph: this.graph,
+                ...appPkg,
+            }   
         };
 
         return Promise.resolve(halin);
     }
 
+    /**
+     * @return Promise{Object} of Neo4j Desktop API diagnostics.
+     */
     _neo4jDesktopDiagnostics() {
         const api = window.neo4jDesktopApi;
 
@@ -201,9 +240,17 @@ export default class HalinContext {
             return Promise.resolve({ neo4jDesktop: 'MISSING' });
         }
 
-        return api.getContext();
+        return api.getContext()
+            .then(context => ({
+                neo4jDesktop: context,
+            }));
     }
 
+    /**
+     * Run all diagnostics available to halin
+     * @return Promise{Object} a large, heavyweight diagnostic object suitable for
+     * analysis or shipping to the user.
+     */
     runDiagnostics() {
         const diagnostics = {};
 
