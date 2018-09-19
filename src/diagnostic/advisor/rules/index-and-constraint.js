@@ -7,13 +7,13 @@ const indexes = pkg => {
     const node = pkg.nodes[0];
 
     if (node.indexes.length === 0) {
-        findings.push(new InspectionResult(InspectionResult.INFO,
+        findings.push(new InspectionResult(InspectionResult.WARN,
             'You have no database indexes defined', null,
             'Consider using database indexes to speed query access'));
     }
 
     if (node.constraints.length === 0) {
-        findings.push(new InspectionResult(InspectionResult.INFO,
+        findings.push(new InspectionResult(InspectionResult.WARN,
             'You have no constraints defined',
             null,
             'Consider using constraints to assert semantics about your data, and speed access'));

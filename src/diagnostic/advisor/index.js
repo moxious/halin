@@ -20,8 +20,10 @@ import network from './rules/network';
 import indexAndConstraint from './rules/index-and-constraint';
 
 const dummy = diag => {
-    return new InspectionResult(InspectionResult.INFO, 
-        `You're running Halin ${diag.halin.version}, good for you!  You're already ahead of the game.`);
+    return [
+        new InspectionResult(InspectionResult.INFO, 
+            `You're running Halin ${diag.halin.version}, good for you!  You're already ahead of the game.`),
+    ];
 }
 
 const rules = [
