@@ -1,9 +1,10 @@
 {
   "name": "halin",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "neo4jDesktop": {
     "apiVersion": "^1.2.0"
-  },  
+  }, 
+  "homepage": ".",
   "private": false,
   "dependencies": {
     "bluebird": "^3.5.2",
