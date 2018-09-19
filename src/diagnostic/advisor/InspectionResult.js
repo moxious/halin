@@ -25,7 +25,7 @@ export default class InspectionResult {
 InspectionResult.WARN = 'warning';
 InspectionResult.PASS = 'pass';
 InspectionResult.ERROR = 'error';
-InspectionResult.INFO = 'informational';
+InspectionResult.INFO = 'info';
 InspectionResult.validLevels = new Set(
     InspectionResult.WARN,
     InspectionResult.PASS,
