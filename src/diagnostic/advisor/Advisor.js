@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ReactTable from 'react-table';
 import { Icon } from 'semantic-ui-react';
+import './Advisor.css';
 
 export default class Advisor extends Component {
     state = {
@@ -52,7 +53,7 @@ export default class Advisor extends Component {
                 show: false
             },
             {
-                Header: 'Advice',
+                Header: 'Suggested Action',
                 accessor: 'advice',
                 style: { whiteSpace: 'unset', textAlign: 'left' }
             },

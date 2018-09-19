@@ -37,11 +37,11 @@ class DiagnosticPane extends Component {
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <h3>Generate a diagnostic package</h3> 
+                            <h3>Run Diagnostics</h3> 
                             
-                            <p>This function creates a file that can be downloaded.
-                            This package can help others troubleshoot issues and
-                            provide advice.</p>
+                            <p>This function runs a suite of tests and can provide advice on how
+                               to improve your configuration.  A file will be generated with all
+                               diagnostics, which you can send to Neo4j to help troubleshoot issues.</p>
 
                             <GeneratePackage 
                                 key={this.state.key} 

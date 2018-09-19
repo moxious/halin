@@ -80,7 +80,14 @@ class GeneratePackage extends Component {
                     Run Diagnostics!
                 </Button>
 
-                { message }
+                <div style={{
+                    marginTop: '15px',
+                    marginLeft: '50px',
+                    marginRight: '50px',
+                    marginBottom: '15px',
+                }}>
+                    { message }
+                </div>
 
                 { this.state.diagnosticData ? 
                     <Advisor 

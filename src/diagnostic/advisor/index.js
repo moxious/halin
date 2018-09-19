@@ -22,7 +22,9 @@ import indexAndConstraint from './rules/index-and-constraint';
 const dummy = diag => {
     return [
         new InspectionResult(InspectionResult.INFO, 
-            `You're running Halin ${diag.halin.version}, good for you!  You're already ahead of the game.`),
+            `You're running Halin ${diag.halin.version}, good for you!  You're already ahead of the game.`,
+            null,
+            'None. Good on you!'),
     ];
 }
 
