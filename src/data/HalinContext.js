@@ -116,12 +116,9 @@ export default class HalinContext {
      * @return Promise{Object} of diagnostic information about that node.
      */
     _nodeDiagnostics(clusterNode) {
-        const node = clusterNode.getAddress();
-        const mkEntry = (domain, key, value) =>
-            _.merge({ node }, { domain, key, value });
-
         const basics = {
             basics: {
+                address: clusterNode.getBoltAddress(),
                 protocols: clusterNode.protocols(),
                 role: clusterNode.role,
                 database: clusterNode.database,
@@ -252,10 +249,8 @@ export default class HalinContext {
      * analysis or shipping to the user.
      */
     runDiagnostics() {
-        const diagnostics = {};
-
         const allNodeDiags = Promise.all(this.clusterNodes.map(clusterNode => this._nodeDiagnostics(clusterNode)))
-            .then(nodeDiagnostics => ({ clusterNodes: nodeDiagnostics }));
+            .then(nodeDiagnostics => ({ nodes: nodeDiagnostics }));
         
         const halinDiags = this._halinDiagnostics();
 

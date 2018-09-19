@@ -4,6 +4,8 @@ import { Button, Icon } from 'semantic-ui-react';
 import uuid from 'uuid';
 import status from '../status/index';
 import moment from 'moment';
+import Advisor from './advisor/Advisor';
+import advisor from './advisor/index';
 
 class GeneratePackage extends Component {
     state = {
@@ -43,8 +45,8 @@ class GeneratePackage extends Component {
                     this.setState({
                         diagnosticData: data,
                         dataGenerated: moment().format('YYYY-MM-DD-HH-mm-ss'),
-                        message: status.message('Diagnostics gathered', 
-                            'Data is now available for download, click the button below'),
+                        message: status.message('Diagnostics Gathered!', 
+                            'Please inspect your advisor results below, and download the package.'),
                     });
                 })
                 .catch(err => fail(err));
@@ -75,10 +77,17 @@ class GeneratePackage extends Component {
                 <Button basic
                         onClick={this.generatePackage}>
                     <Icon name='cogs'/>
-                    Generate Package
+                    Run Diagnostics!
                 </Button>
 
                 { message }
+
+                { this.state.diagnosticData ? 
+                    <Advisor 
+                        key={uuid.v4()} 
+                        data={advisor.generateRecommendations(this.state.diagnosticData)}
+                    /> : 
+                  '' }
 
                 { this.state.diagnosticData ? (
                     <Button basic 

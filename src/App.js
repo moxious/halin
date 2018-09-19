@@ -66,7 +66,6 @@ class Halin extends Component {
           return window.halinContext;
         })
         .then(ctx => {
-          console.log('setting halin on state');
           this.setState({ halin: ctx });
         });
 
@@ -83,7 +82,9 @@ class Halin extends Component {
   renderCluster() {
     const nodePanes = this.state.halin.clusterNodes.map(node => ({
       menuItem: `${node.getAddress()} (${node.role})`,
-      render: () => this.renderSingleNode(this.state.halin.driverFor(node.getBoltAddress()), node),
+      render: () => 
+        this.paneWrapper(
+          this.renderSingleNode(this.state.halin.driverFor(node.getBoltAddress()), node)),
     }));
 
     const diagnosticPane = {
@@ -91,8 +92,6 @@ class Halin extends Component {
       render: () => {
         const node = this.state.halin.clusterNodes[0];
         const driver = this.state.halin.driverFor(node.getBoltAddress());
-
-        console.log('Diag on', node, driver);
 
         return (
           <DiagnosticPane 

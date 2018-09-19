@@ -27,7 +27,6 @@ class Overview extends Component {
         const s1 = this.driver.session();
         return s1.run('CALL dbms.cluster.overview()', {})
             .then(results => {
-                console.log('CLUSTER RESULTS',results);
                 const clusterNodes = results.records.map(rec => new ClusterNode(rec));
                 this.setState({ mode: 'CLUSTER', topology: clusterNodes });
             })
@@ -142,9 +141,13 @@ class Overview extends Component {
                                     <ul>
                                         <li>Database is running in mode {this.state.mode} on {this.state.address}</li>
                                         <li>Halin is running under user&nbsp;
-                                            {(_.get(this.state.user, 'username') || 'loading...')} 
+                                            <strong>
+                                                {(_.get(this.state.user, 'username') || 'loading...')}
+                                            </strong> 
                                             &nbsp;with roles&nbsp;
-                                            {(_.get(this.state.user, 'roles') || ['(none)']).join(', ')}
+                                            <strong>
+                                                {(_.get(this.state.user, 'roles') || ['(none)']).join(', ')}
+                                            </strong>
                                             {
                                                 _.get(this.state.user, 'flags') ? (
                                                     ' and flags: ' + (
@@ -154,11 +157,6 @@ class Overview extends Component {
                                                 ) : ''
                                             }
                                         </li>
-                                        {
-                                            this.state.topology ? (
-                                                <li>Cluster Topology: {this.renderTopology()}</li>
-                                            ) : ''
-                                        }
                                     </ul>                                    
                                 </Grid.Column>
                                 <Grid.Column>
