@@ -1,5 +1,6 @@
 import nd from '../neo4jDesktop/index';
 import ClusterNode from '../data/ClusterNode';
+import DataFeed from '../data/DataFeed';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import uuid from 'uuid';
@@ -22,6 +23,21 @@ export default class HalinContext {
         this.project = null;
         this.graph = null;
         this.drivers = {};
+        this.dataFeeds = {};
+        this.driverOptions = {
+            encrypted: true,
+            connectionTimeout: 10000,
+        };
+    }
+
+    getDataFeed(feedOptions) {
+        const df = new DataFeed(feedOptions);
+        const feed = this.dataFeeds[df.name];
+        if (feed) { return feed; }
+        this.dataFeeds[df.name] = df;
+        console.log('Halin starting new DataFeed: ', df.name.slice(0, 120) + '...');
+        df.start();
+        return df;
     }
 
     /**
@@ -31,16 +47,18 @@ export default class HalinContext {
         if (this.drivers[addr]) {
             return this.drivers[addr];
         }
+        
+        const driver = neo4j.driver(addr, 
+            neo4j.auth.basic(username, password), 
+            this.driverOptions);
 
-        const driver = neo4j.driver(addr, neo4j.auth.basic(username, password), {
-            encrypted: true,
-        });
         this.drivers[addr] = driver;
         return driver;
     }
 
     shutdown() {
         console.log('Shutting down halin context');
+        Object.values(this.dataFeeds).map(df => df.stop);
         Object.values(this.drivers).map(driver => driver.close());
     }
 

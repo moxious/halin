@@ -6,15 +6,11 @@ import * as PropTypes from "prop-types";
 import {
     TimeSeries,
     TimeRange,
-    TimeEvent,
     Stream,
 } from "pondjs";
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
-import Ring from 'ringjs';
 import NodeLabel from '../NodeLabel';
-
-const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
 
 const DEFAULT_PALETTE = [
     '#f68b24', 'steelblue', '#619F3A', '#dfecd7', 
@@ -43,6 +39,17 @@ class CypherTimeseries extends Component {
         } else if (!props.displayColumns) {
             throw new Error('displayColumns is required');
         }
+
+        this.feed = window.halinContext.getDataFeed({
+            node: props.node,
+            driver: props.driver,
+            query: props.query,
+            rate: props.rate, 
+            windowWidth: props.timeWindowWidth,
+            displayColumns: props.displayColumns,
+            params: {},
+            onData: (newData, dataFeed) => this.onData(newData, dataFeed),
+        });
 
         this.query = props.query;
         this.rate = props.rate || 1000;
@@ -117,11 +124,10 @@ class CypherTimeseries extends Component {
 
         this.setState({ 
             disabled,
-            events: new Ring(Math.floor((this.timeWindowWidth / this.rate) * 1.25)),
+            ...this.feed.currentState(),
         });
-        this.stream = new Stream();
 
-        this.sampleData();
+        this.stream = new Stream();
     }
 
     componentWillUnmount() {
@@ -131,53 +137,8 @@ class CypherTimeseries extends Component {
         }
     }
 
-    sampleData() {
-        const session = this.driver.session();
-
-        const startTime = new Date().getTime();
-
-        return session.run(this.query, this.state.parameters || {})
-            .then(results => {
-                const elapsedMs = new Date().getTime() - startTime;
-
-                if (elapsedMs > (this.rate / 2)) {
-                    // It's a bad idea to run long-running queries with a short window.
-                    // It puts too much load on the system and does a bad job updating the
-                    // graphic.
-                    console.warn('CypherTimeseries query is taking a lot of time relative to your execution window.  Consider adjusting', {
-                        elapsedMs, query: this.query, parameters: this.state.parameters,
-                    });
-                }
-
-                // Take the first result only.  This component only works with single-record queries.
-                const rec = results.records[0];
-                const data = {};
-
-                // Plug query data values into data map, converting ints as necessary.
-                this.displayColumns.forEach(col => {
-                    const val = rec.get(col.accessor);
-                    data[col.accessor] = neo4j.isInt(val) ? neo4j.integer.toNumber(val) : val;
-                })
-
-                if (this.mounted) {
-                    this.timeout = setTimeout(() => this.sampleData(), this.rate);
-
-                    const t = new Date();
-                    const event = new TimeEvent(t, data);
-                    const newEvents = this.state.events;
-                    newEvents.push(event);
-                    this.setState({
-                        lastDataArrived: new Date(),
-                        data: [data],
-                        time: t,
-                        event: newEvents
-                    });
-                }
-            })
-            .catch(err => {
-                console.error('Failed to execute timeseries query', err);
-            })
-            .finally(() => session.close());
+    onData(newData, dataFeed) {
+        return this.mounted ? this.setState(newData) : null;
     }
 
     getChartMin() {
