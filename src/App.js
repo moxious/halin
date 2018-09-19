@@ -9,9 +9,9 @@ import Neo4jConfiguration from './configuration/Neo4jConfiguration';
 import PerformancePane from './performance/PerformancePane';
 import DBSize from './performance/DBSize';
 import PermissionsPane from './configuration/PermissionsPane';
-import { Tab, Image } from 'semantic-ui-react'
+import { Tab } from 'semantic-ui-react'
 import DiagnosticPane from './diagnostic/DiagnosticPane';
-
+import status from './status/index';
 import './App.css';
 import 'semantic-ui-css/semantic.min.css';
 import HalinContext from './data/HalinContext';
@@ -24,6 +24,7 @@ class Halin extends Component {
     cTag: 1,
     halin: null,
     initPromise: null,
+    error: null,
     panes: (driver=null, node=null, key=uuid.v4()) => ([
       // Because panes get reused across cluster nodes, we have to 
       // give them all a unique key so that as we recreate panes, we're passing down
@@ -63,6 +64,7 @@ class Halin extends Component {
       const initPromise = window.halinContext.initialize()
         .catch(err => {
           console.error('Error initializing halin context', err);
+          this.setState({ error: err });
           return window.halinContext;
         })
         .then(ctx => {
@@ -110,6 +112,8 @@ class Halin extends Component {
   }
 
   render() {
+    const err = (this.state.error ? status.formatStatusMessage(this) : null);
+
     return (!this.state.halin ? 'Loading...' : (
       <div className="App" key="app">
         {/* <header className="App-header">
@@ -118,7 +122,7 @@ class Halin extends Component {
 
         <Render if={this.props.connected}>
           <div className='MainBody'>
-            {this.renderCluster()}
+            {err ? err : this.renderCluster()}
           </div>
         </Render>
       </div>
