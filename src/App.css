@@ -10,6 +10,11 @@
 
 .PaneWrapper {
   padding-top: 15px;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.PaneWrapper.primary {
   border-left: 1px solid #d4d4d5;
   border-right: 1px solid #d4d4d5;
   border-bottom: 1px solid #d4d4d5;

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import * as PropTypes from "prop-types";
-import { Button, Icon } from 'semantic-ui-react';
+import { Button, Icon, Loader } from 'semantic-ui-react';
 import uuid from 'uuid';
 import status from '../status/index';
 import moment from 'moment';
@@ -12,6 +12,7 @@ class GeneratePackage extends Component {
         key: uuid.v4(),
         message: null,
         error: null,
+        loading: false,
         headers: [
             { label: 'domain', key: 'domain' },
             { label: 'node', key: 'node' },
@@ -28,6 +29,7 @@ class GeneratePackage extends Component {
     generatePackage = () => {
         this.setState({
             message: status.message('Generating package', 'Please wait while data is gathered'),
+            loading: true,
         });
 
         const fail = err => {
@@ -43,6 +45,7 @@ class GeneratePackage extends Component {
             return window.halinContext.runDiagnostics()
                 .then(data => {
                     this.setState({
+                        loading: false,
                         diagnosticData: data,
                         dataGenerated: moment().format('YYYY-MM-DD-HH-mm-ss'),
                         message: status.message('Diagnostics Gathered!', 
@@ -87,6 +90,10 @@ class GeneratePackage extends Component {
                     marginBottom: '15px',
                 }}>
                     { message }
+                </div>
+
+                <div>
+                    <Loader inline='centered' active={this.state.loading}/>
                 </div>
 
                 { this.state.diagnosticData ? 

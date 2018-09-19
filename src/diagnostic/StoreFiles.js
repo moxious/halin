@@ -38,6 +38,8 @@ class StoreFiles extends Component {
             <div className='StoreFiles'>
                 <h3>Store File Sizes</h3>
                 <CypherDataTable
+                    driver={this.props.driver}
+                    node={this.props.node}
                     query={this.state.query}
                     allowColumnSelect={true}
                     displayColumns={this.state.displayColumns}

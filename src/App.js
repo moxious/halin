@@ -53,8 +53,8 @@ class Halin extends Component {
     ]),
   };
 
-  paneWrapper = obj =>
-    <div className='PaneWrapper'>{obj}</div>;
+  paneWrapper = (obj, cls='secondary') =>
+    <div className={`PaneWrapper ${cls}`}>{obj}</div>;
 
   componentDidMount() {
     try {
@@ -84,7 +84,8 @@ class Halin extends Component {
       menuItem: `${node.getAddress()} (${node.role})`,
       render: () => 
         this.paneWrapper(
-          this.renderSingleNode(this.state.halin.driverFor(node.getBoltAddress()), node)),
+          this.renderSingleNode(this.state.halin.driverFor(node.getBoltAddress()), node),
+          'primary'),
     }));
 
     const diagnosticPane = {
@@ -105,15 +106,15 @@ class Halin extends Component {
   }
 
   renderSingleNode(driver=null, node=null) {
-    return <Tab panes={this.state.panes(driver, node)} />;
+    return <Tab menu={{ secondary: true, pointing: true }} panes={this.state.panes(driver, node)} />;
   }
 
   render() {
     return (!this.state.halin ? 'Loading...' : (
       <div className="App" key="app">
-        <header className="App-header">
+        {/* <header className="App-header">
           <Image className="App-logo" src='img/halingraph.gif' size='tiny' />
-        </header>
+        </header> */}
 
         <Render if={this.props.connected}>
           <div className='MainBody'>

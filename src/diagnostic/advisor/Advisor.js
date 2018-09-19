@@ -65,7 +65,7 @@ export default class Advisor extends Component {
             <div className='Advisor'>
                 <h3>Advisor Results</h3>
 
-                <p>We have taken an automatic look at your configuration, and have some feedback.</p>
+                <p>We had a look at your configuration, and have some feedback.</p>
 
                 <ReactTable
                     defaultFilterMethod={(filter, row, column) => {

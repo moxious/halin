@@ -51,7 +51,7 @@ export default class HalinContext {
 
     checkForCluster(activeDb) {
         const session = this.base.driver.session();
-        console.log('activeDb', activeDb);
+        // console.log('activeDb', activeDb);
         return session.run('CALL dbms.cluster.overview()', {})
             .then(results => {
                 this.clusterNodes = results.records.map(rec => new ClusterNode(rec))
