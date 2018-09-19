@@ -1,7 +1,10 @@
 {
   "name": "halin",
-  "version": "0.0.2",
-  "private": true,
+  "version": "0.0.3",
+  "neo4jDesktop": {
+    "apiVersion": "^1.2.0"
+  },  
+  "private": false,
   "dependencies": {
     "bluebird": "^3.5.2",
     "graph-app-kit": "^0.7.0",
@@ -24,6 +27,8 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "postbuild": "rm -rf dist && mv build dist",
+    "prepublishOnly": "npm run build"
   }
 }
