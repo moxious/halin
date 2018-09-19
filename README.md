@@ -10,7 +10,9 @@ This app works on local db:s with no auth, or on remote connections (with or wit
 
 ## Screenshot
 
-![Halin Screenshot](img/halin.png "Halin Screenshot")
+![Halin Screenshot: Performance](img/performance.png "Halin Screenshot")
+
+![Halin Screenshot: Advisor](img/advisor.png "Halin Screenshot")
 
 ## Commands
  
