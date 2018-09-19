@@ -37,6 +37,7 @@ class GeneratePackage extends Component {
             this.setState({
                 diagnosticData: null,
                 dataGenerated: null,
+                loading: false,
                 error: status.message('Failed to generate package', `${err}`),
             });
         };
@@ -48,8 +49,8 @@ class GeneratePackage extends Component {
                         loading: false,
                         diagnosticData: data,
                         dataGenerated: moment().format('YYYY-MM-DD-HH-mm-ss'),
-                        message: status.message('Diagnostics Gathered!', 
-                            'Please inspect your advisor results below, and download the package.'),
+                        message: null,
+                        error: null,
                     });
                 })
                 .catch(err => fail(err));
