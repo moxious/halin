@@ -17,6 +17,7 @@ import InspectionResult from './InspectionResult';
 import memory from './rules/mem';
 import cluster from './rules/cluster';
 import network from './rules/network';
+import indexAndConstraint from './rules/index-and-constraint';
 
 const dummy = diag => {
     return new InspectionResult(InspectionResult.INFO, 
@@ -28,6 +29,7 @@ const rules = [
     ...memory,
     ...cluster,
     ...network,
+    ...indexAndConstraint,
 ];
 
 const generateRecommendations = diagPackage => {
