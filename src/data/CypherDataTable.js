@@ -8,6 +8,7 @@ import ColumnSelector from './ColumnSelector';
 import './CypherDataTable.css';
 import uuid from 'uuid';
 import NodeLabel from '../NodeLabel';
+import Spinner from '../Spinner';
 
 const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
 
@@ -256,7 +257,7 @@ class CypherDataTable extends Component {
                     </Grid.Row>
                 </Grid>
             </div>
-        ) : 'Loading...';
+        ) : <Spinner active={true}/>;
     }
 }
 

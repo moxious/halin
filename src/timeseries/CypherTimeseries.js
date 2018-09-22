@@ -9,6 +9,7 @@ import {
     Stream,
 } from "pondjs";
 import uuid from 'uuid';
+import Spinner from '../Spinner';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import NodeLabel from '../NodeLabel';
@@ -215,14 +216,6 @@ class CypherTimeseries extends Component {
 
         return this.state.data ? (
             <div className="CypherTimeseries">
-                {/* <ReactTable
-                    data={this.state.data}
-                    sortable={false}
-                    filterable={false}
-                    showPagination={false}
-                    defaultPageSize={1}
-                    columns={this.displayColumns} /> */}
-
                 <Grid>
                     <Grid.Row columns={1}>
                         <Grid.Column>
@@ -274,7 +267,7 @@ class CypherTimeseries extends Component {
                     </Grid.Row>
                 </Grid>
             </div>
-        ) : 'Loading...';
+        ) : <Spinner active={true}/>;
     }
 }
 
