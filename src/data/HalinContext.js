@@ -119,7 +119,6 @@ export default class HalinContext {
      */
     cleanup(pkg) {
         const deepReplace = (keyToClean, newVal, object) => {
-            console.log('RECURSE', Object.keys(object));
             let found = false;
 
             _.each(object, (val, key) => {
