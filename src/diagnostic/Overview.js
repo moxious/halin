@@ -130,7 +130,7 @@ class Overview extends Component {
                 <div className='Overview'>
                     <Message>
                         <Message.Header>
-                                        Neo4j {this.state.edition} version(s) {this.state.versions.join(', ')}            
+                            Neo4j {this.state.edition} version(s) {this.state.versions.join(', ')}
                         </Message.Header>
                         <Grid>
                             <Grid.Row columns={3}>
