@@ -18,6 +18,7 @@ const ports = pkg => {
 
     pkg.nodes.forEach(node => {
         const who = node.basics.address;
+        let looksGood = true;
 
         Object.keys(expected).forEach(settingName => {
             const setting = node.configuration.filter(a => a.name === settingName);
@@ -29,8 +30,14 @@ const ports = pkg => {
                     `The port configured for ${who} on ${setting} is ${port}, which is non-standard`,
                     null,
                     `Consider using the default port, ${expected[setting]} if firewall rules allow.`));
+                looksGood = false;
             }
         });
+
+        if (looksGood) {
+            findings.push(new InspectionResult(InspectionResult.PASS,
+                `Network port settings for ${who} look good!`));
+        }
     });
 
     return findings;

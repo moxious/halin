@@ -10,16 +10,24 @@ const memSettings = pkg => {
     const findings = [];
 
     pkg.nodes.forEach(node => {
+        let incomplete = false;
+        const addr = node.basics.address;
+
         settings.forEach(setting => {
-            const addr = node.basics.address;
             const nodeSetting = node.configuration.filter(s => s.name === setting)[0];
 
             if (nodeSetting && !nodeSetting.value) {
                 findings.push(new InspectionResult(InspectionResult.WARN,
                     `${addr} has no value specified for ${setting}`, null,
                     'For best performance, these values should be set. Consider running neo4j-admin memrec'));
+                incomplete = true;
             }
         });
+
+        if (!incomplete) {
+            findings.push(new InspectionResult(InspectionResult.PASS,
+                `${addr} has configured memory settings.  Good!`));
+        }
     });
 
     return findings;

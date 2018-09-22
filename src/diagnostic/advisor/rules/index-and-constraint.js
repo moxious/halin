@@ -10,6 +10,11 @@ const indexes = pkg => {
         findings.push(new InspectionResult(InspectionResult.WARN,
             'You have no database indexes defined', null,
             'Consider using database indexes to speed query access'));
+    } else {
+        findings.push(new InspectionResult(
+            InspectionResult.PASS,
+            'You have defined indexes.  Good!'
+        ));
     }
 
     if (node.constraints.length === 0) {
@@ -17,6 +22,11 @@ const indexes = pkg => {
             'You have no constraints defined',
             null,
             'Consider using constraints to assert semantics about your data, and speed access'));
+    } else {
+        findings.push(new InspectionResult(
+            InspectionResult.PASS,
+            'You have defined constraints.  Good!'
+        ));
     }
 
     const notOnline = node.indexes.filter(idx => idx.state !== 'ONLINE');
