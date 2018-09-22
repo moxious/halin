@@ -1,5 +1,27 @@
 import InspectionResult from '../InspectionResult';
 
+const atLeastOneAdmin = pkg => {
+    const findings = [];
+    pkg.nodes.forEach(node => {
+        const addr = node.basics.address;
+        const admins = node.users.filter(u => u.roles.indexOf('admin') > -1);
+        if (admins.length === 0) {
+            findings.push(new InspectionResult(
+                InspectionResult.ERROR,
+                `Node ${addr} has no admin users`,
+                'Ensure system has a user with role admin'
+            ));
+        } else {
+            findings.push(new InspectionResult(
+                InspectionResult.PASS,
+                `Node ${addr} has admin users specified`
+            ));
+        }
+    });
+
+    return findings;
+};
+
 const userConsistency = pkg => {
     if(pkg.nodes.length === 1) {
         return [];
@@ -56,6 +78,11 @@ const userConsistency = pkg => {
                 `Node ${addr} is missing users ${diff} which are defined elsewhere in the cluster`,
                 'Consider creating the appropriate users to sync them across the cluster'
             ));
+        } else {
+            findings.push(new InspectionResult(
+                InspectionResult.PASS,
+                `Node ${addr} has a consistent user set`
+            ));
         }
 
         if (roleDifference.size > 0) {
@@ -65,6 +92,11 @@ const userConsistency = pkg => {
                 `Node ${addr} is missing roles ${diff} which are defined elsewhere in the cluster`,
                 'Consider creating the appropriate roles to sync them across the cluster'
             ));
+        } else {
+            findings.push(new InspectionResult(
+                InspectionResult.PASS,
+                `Node ${addr} has a consistent role set`
+            ));
         }
     });
     
@@ -72,5 +104,5 @@ const userConsistency = pkg => {
 };
 
 export default [
-    userConsistency,
+    userConsistency, atLeastOneAdmin,
 ];
