@@ -105,6 +105,10 @@ export default class HalinContext {
                     rec.get = get;
 
                     this.clusterNodes = [new ClusterNode(rec)];
+
+                    // Force driver creation and ping, this is basically
+                    // just connecting to the whole cluster.
+                    return this.clusterNodes.map(cn => this.ping(cn));
                 } else {
                     throw err;
                 }
@@ -169,6 +173,27 @@ export default class HalinContext {
         } catch (e) {
             return Promise.reject(new Error('General Halin Context error', e));
         }
+    }
+
+    /**
+     * Ping a cluster node with a trivial query, just to keep connections
+     * alive and verify it's still listening.  This forces driver creation
+     * for a node if it hasn't already happened.
+     * @param {ClusterNode} the node to ping
+     * @returns {Promise} that resolves to true or false for ping success
+     */
+    ping(clusterNode) {
+        const addr = clusterNode.getBoltAddress();
+        const driver = this.driverFor(addr);
+
+        const session = driver.session();
+
+        return session.run('RETURN true as value', {})
+            .then(result => result.records[0].get('value'))
+            .catch(err => {
+                console.error('HalinContext: failed to ping',addr);
+                return false;
+            });
     }
 
     /**
