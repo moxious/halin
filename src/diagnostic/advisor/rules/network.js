@@ -65,6 +65,49 @@ const netAddrs = pkg => {
     return findings;
 };
 
+const backup = pkg => {
+    const findings = [];
+
+    const getBackupAddr = node => {
+        const config = node.configuration
+            .filter(a => (a.name === 'dbms.backup.address'))[0];
+        return _.get(config, 'value');
+    };
+
+    const isBackupEnabled = node => {
+        const setting = node.configuration
+            .filter(a => (a.name === 'dbms.backup.enabled'))[0];
+        return setting && (setting.value==='true' || setting.value === true);
+    };
+
+    pkg.nodes.forEach(node => {
+        const addr = node.basics.address;
+
+        if (isBackupEnabled(node)) {
+            const backupAddr = getBackupAddr(node);
+
+            if((''+backupAddr).toLowerCase().indexOf('localhost') > -1) {
+                findings.push(new InspectionResult(InspectionResult.PASS,
+                    addr,
+                    'Backups are enabled, but only on localhost.'));
+            } else {
+                findings.push(new InspectionResult(InspectionResult.WARN,
+                    addr,
+                    `You have backups enabled on a remote address (${backupAddr}).`,
+                    `For best security, please ensure you have proper firewalling 
+                    to allow ony authorized parties to access your backup address`));
+            }
+        } else {
+            findings.push(new InspectionResult(InspectionResult.INFO,
+                addr, 
+                'Backup is not enabled on this machine',
+                'Consider using backup when moving to production'));
+        }
+    });
+
+    return findings;
+};
+
 export default [
-    netAddrs, ports,
+    netAddrs, ports, backup,
 ];

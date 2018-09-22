@@ -9,6 +9,7 @@
 - GraphConnect 2018 feedback!
 - Initialize cluster connections on startup for better performance
 - Advisor results come broken out by machine
+- Added checking for backup status, network security to advisor
 
 ## 0.0.7
 
