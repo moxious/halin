@@ -8,6 +8,7 @@ import {
     TimeRange,
     Stream,
 } from "pondjs";
+import uuid from 'uuid';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import NodeLabel from '../NodeLabel';
@@ -33,23 +34,13 @@ class CypherTimeseries extends Component {
     constructor(props, context) {
         super(props, context);
         this.driver = props.driver || context.driver;
+        this.id = uuid.v4();
 
         if (!props.query) {
             throw new Error('query is required');
         } else if (!props.displayColumns) {
             throw new Error('displayColumns is required');
         }
-
-        this.feed = window.halinContext.getDataFeed({
-            node: props.node,
-            driver: props.driver,
-            query: props.query,
-            rate: props.rate, 
-            windowWidth: props.timeWindowWidth,
-            displayColumns: props.displayColumns,
-            params: {},
-            onData: (newData, dataFeed) => this.onData(newData, dataFeed),
-        });
 
         this.query = props.query;
         this.rate = props.rate || 1000;
@@ -78,8 +69,7 @@ class CypherTimeseries extends Component {
 
     // Compute min of Y axis when user hasn't told us value range.
     adjustableMin(obj) {
-        const values = Object.values(obj);
-        const computedMin = Math.min(...values) * 0.9;
+        const computedMin = this.feed.min() * 0.9;
 
         if (computedMin < this.minObservedValue) {
             this.minObservedValue = computedMin;
@@ -91,7 +81,7 @@ class CypherTimeseries extends Component {
     // Compute max of Y axis when user hasn't told us value range.
     adjustableMax(obj) {
         const values = Object.values(obj);
-        const computedMax = Math.max(...values) * 1.1;
+        const computedMax = this.feed.max() * 1.1;
 
         if (computedMax > this.maxObservedValue) {
             this.maxObservedValue = computedMax;
@@ -102,6 +92,19 @@ class CypherTimeseries extends Component {
     
     componentDidMount() {
         this.mounted = true;
+
+        this.feed = window.halinContext.getDataFeed({
+            node: this.props.node,
+            driver: this.props.driver,
+            query: this.props.query,
+            rate: this.props.rate, 
+            windowWidth: this.props.timeWindowWidth,
+            displayColumns: this.props.displayColumns,
+            params: {},
+        });
+
+        this.feed.onData = (newData, dataFeed) => 
+            this.onData(newData, dataFeed);
 
         const disabled = {};
 
@@ -132,9 +135,6 @@ class CypherTimeseries extends Component {
 
     componentWillUnmount() {
         this.mounted = false;
-        if (this.interval) {
-            clearInterval(this.interval);
-        }
     }
 
     onData(newData, dataFeed) {
