@@ -5,15 +5,30 @@ import 'react-table/react-table.css';
 import './Neo4jConfiguration.css';
 
 class Neo4jConfiguration extends Component {
+    // URL path to where a config item can be looked up.
+    baseURL = 'https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_';
+
     state = {
         rate: (1000 * 60 * 60),
         query: 'call dbms.listConfig()',
         displayColumns: [
-            { Header: 'Name', accessor: 'name' },
+            { 
+                Header: 'Name', 
+                accessor: 'name',
+                Cell: props => 
+                    <div className='Neo4jConfig_Name'>
+                        <a 
+                            target='neo4jConfig' 
+                            href={this.baseURL + props.value}>
+                            {props.value}
+                        </a>                    
+                    </div>
+            },
             { 
                 Header: 'Value', 
                 accessor: 'value',
-                Cell: props => <div className='Neo4jConfig_Value'>{props.value}</div>
+                Cell: props => 
+                    <div className='Neo4jConfig_Value'>{props.value}</div>
             },
             // {
             //     Header: 'Editable?',
