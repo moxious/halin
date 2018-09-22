@@ -7,7 +7,7 @@ import {
 import { Render } from 'graph-app-kit/components/Render';
 import Neo4jConfiguration from './configuration/Neo4jConfiguration';
 import PerformancePane from './performance/PerformancePane';
-import DBSize from './performance/DBSize';
+import DatabasePane from './db/DatabasePane';
 import PermissionsPane from './configuration/PermissionsPane';
 import { Tab } from 'semantic-ui-react'
 import DiagnosticPane from './diagnostic/DiagnosticPane';
@@ -44,7 +44,7 @@ class Halin extends Component {
       {
         menuItem: 'Database',
         render: () => this.paneWrapper(
-          <DBSize key={key} node={node} driver={driver}/>),
+          <DatabasePane key={key} node={node} driver={driver}/>),
       },
       {
         menuItem: 'Configuration',
