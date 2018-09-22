@@ -1,5 +1,11 @@
 # Halin Release Notes
 
+## 0.1.0
+
+- Removed passwords and sensitive information from diagnostic dumps
+- Added links to configuration entries reference documentation
+- Changed download diagnostic package button to be more clear
+
 ## 0.0.7
 
 - Fixed several issues with package.json
