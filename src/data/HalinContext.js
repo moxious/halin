@@ -6,6 +6,7 @@ import Promise from 'bluebird';
 import uuid from 'uuid';
 import moment from 'moment';
 import appPkg from '../package.json';
+import ClusterManager from './cluster/ClusterManager';
 
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
@@ -28,6 +29,14 @@ export default class HalinContext {
             encrypted: true,
             connectionTimeout: 10000,
         };
+        this.mgr = new ClusterManager(this);
+    }
+
+    /**
+     * @returns {ClusterManager}
+     */
+    getClusterManager() {
+        return this.mgr;
     }
 
     getDataFeed(feedOptions) {
