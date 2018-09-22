@@ -1,24 +1,24 @@
 import React, { Component } from 'react';
-import "semantic-ui-css/semantic.min.css";
+import 'semantic-ui-css/semantic.min.css';
 import { Grid } from 'semantic-ui-react';
 import Overview from './Overview';
-import JMXDisplay from '../jmx/JMXDisplay';
-import { Cypher } from 'graph-app-kit/components/Cypher';
 import Functions from './Functions';
 import Procedures from './Procedures';
 import './DiagnosticPane.css';
 import GeneratePackage from './GeneratePackage';
 import uuid from 'uuid';
+// import JMXDisplay from '../jmx/JMXDisplay';
+// import { Cypher } from 'graph-app-kit/components/Cypher';
 
-const renderJMX = ({ pending, error, result }) => {
-    return pending ? (
-      <div style={{ height: "60px" }}>pending</div>
-    ) : error ? (
-      <div style={{ height: "60px" }}>{error.message}</div>
-    ) : result ? (
-      <JMXDisplay data={result} />
-    ) : null;
-  };
+// const renderJMX = ({ pending, error, result }) => {
+//     return pending ? (
+//       <div style={{ height: "60px" }}>pending</div>
+//     ) : error ? (
+//       <div style={{ height: "60px" }}>{error.message}</div>
+//     ) : result ? (
+//       <JMXDisplay data={result} />
+//     ) : null;
+//   };
 
 class DiagnosticPane extends Component {
     state = {
@@ -61,11 +61,11 @@ class DiagnosticPane extends Component {
                         </Grid.Column>    
                     </Grid.Row>
 
-                    <Grid.Row columns={1}>
+                    {/* <Grid.Row columns={1}>
                         <Grid.Column>
                             <Cypher query="CALL dbms.queryJmx('*:*')" render={renderJMX} interval={3000} />
                         </Grid.Column>
-                    </Grid.Row>
+                    </Grid.Row> */}
                 </Grid>  
             </div>
         );
