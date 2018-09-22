@@ -22,6 +22,17 @@ const clusterOpFailure = (node, err) => ({
     success: false, node, addr: node.getBoltAddress(), err
 });
 
+const packageClusterOpResults = results => {
+    // Overall we're a success only if all underlying promises
+    // were.  Otherwise we failed.
+    const success = 
+        results.filter(r => r.success).length === results.length;
+
+    // Incude results so that we can see individual
+    // operation failures if appropriate.
+    return { success, results };
+};
+
 export default class ClusterManager {
     constructor(halinCtx) {
         this.ctx = halinCtx;
@@ -55,16 +66,7 @@ export default class ClusterManager {
         });
 
         return Promise.all(promises)
-            .then(results => {
-                // Overall we're a success only if all underlying promises
-                // were.  Otherwise we failed.
-                const success = 
-                    results.filter(r => r.success).length === results.length;
-
-                // Incude results so that we can see individual
-                // operation failures if appropriate.
-                return { success, results };
-            });
+            .then(packageClusterOpResults);
     }
 
     addUser(user) {
@@ -110,19 +112,15 @@ export default class ClusterManager {
     }
 
     /** Specific to a particular node */
-    addNodeRole(driver, username, role) {
-        const session = driver.session();
-
-        return session.run('call dbms.security.addRoleToUser({role}, {username})', { username, role })
-            .finally(() => session.close());
+    addNodeRole(driver, username, role, session) {
+        console.log('ADD ROLE', username, role);
+        return session.run('call dbms.security.addRoleToUser({role}, {username})', { username, role });
     }
 
     /** Specific to a particular node */
-    removeNodeRole(driver, username, role) {
-        const session = driver.session();
-
-        return session.run('call dbms.security.removeRoleFromUser({role}, {username})', { username, role })
-            .finally(() => session.close());
+    removeNodeRole(driver, username, role, session) {
+        console.log('REMOVE ROLE', username, role);
+        return session.run('call dbms.security.removeRoleFromUser({role}, {username})', { username, role });
     }
 
     /**
@@ -131,9 +129,10 @@ export default class ClusterManager {
      * @returns {Promise} that resolves to a clusterOp result
      */
     associateUserToRoles(user, roles) {
+        console.log('CM associate',user,'to',roles);
         if (!_.isArray(roles)) { 
             throw new Error('roles must be an array');
-        } if (!_.isObject(user) || !user.username || !user.roles) {
+        } if (!_.isObject(user) || !user.username) {
             throw new Error('user must be an object with username');
         }
 
@@ -152,13 +151,22 @@ export default class ClusterManager {
         const gatherRoles = (node, driver, session) => {
             return session.run('CALL dbms.security.listRolesForUser({username})',
                 {username})
+                .then(results => {
+                    console.log('gather raw', results);
+                    return results;
+                })
                 .then(results => 
-                    results.records.map(r => r.get('value')));
+                    results.records.map(r => r.get('value')))
+                .then(r => {
+                    console.log('gather roles made',r);
+                    return r;
+                })
         };
 
         const determineDifferences = (rolesHere, node, driver, session) => {
-            const oldRoles = new Set(...rolesHere);
-            const newRoles = new Set(...roles);
+            console.log("determine differences",rolesHere, roles);
+            const oldRoles = new Set(rolesHere);
+            const newRoles = new Set(roles);
             const toDelete = new Set(
                 [...oldRoles].filter(x => !newRoles.has(x))
             );
@@ -170,19 +178,25 @@ export default class ClusterManager {
                 [...oldRoles].filter(x => newRoles.has(x))
             );
     
+            console.log('Determine differences',
+                'rolesHere=',rolesHere, 'newRoles=', newRoles);
             console.log('Role modification: ', 
                 node.getBoltAddress(), 'adding', 
-                toAdd, 
-                'removing', toDelete, 
-                'preserving', toPreserve);
-            return { toAdd, toDelete, toPreserve };
+                [...toAdd], 
+                'removing', [...toDelete], 
+                'preserving', [...toPreserve]);
+            return { 
+                toAdd: [...toAdd], 
+                toDelete: [...toDelete], 
+                toPreserve: [...toPreserve],
+            };
         };
 
-        const applyChanges = (roleChanges, node, driver) => {
+        const applyChanges = (roleChanges, node, driver, session) => {
             const { toAdd, toDelete } = roleChanges;
 
-            const addPromises = [...toAdd].map(role => this.addNodeRole(driver, username, role));
-            const delPromises = [...toDelete].map(role => this.removeNodeRole(driver, username, role));
+            const addPromises = [...toAdd].map(role => this.addNodeRole(driver, username, role, session));
+            const delPromises = [...toDelete].map(role => this.removeNodeRole(driver, username, role, session));
 
             const allRolePromises = 
                 addPromises.concat(delPromises);
@@ -200,10 +214,13 @@ export default class ClusterManager {
                     const results = `Assigned roles to ${username}. ${addedStr} ${removedStr}`;
                     return clusterOpSuccess(node, results);
                 })
-                .catch(err => clusterOpFailure(node, err));
+                .catch(err => {
+                    console.error('Cluster operation failure applying role changes', err);
+                    return clusterOpFailure(node, err);
+                });
         };
 
-        this.ctx.clusterNodes.map(node => {
+        const allPromises = this.ctx.clusterNodes.map(node => {
             const addr = node.getBoltAddress();
             const driver = this.ctx.driverFor(addr);
 
@@ -216,5 +233,8 @@ export default class ClusterManager {
                 .catch(err => clusterOpFailure(node, err))
                 .finally(() => s.close());
         });
+
+        return Promise.all(allPromises)
+            .then(packageClusterOpResults);
     }
 }
