@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as PropTypes from "prop-types";
-import { Button, Icon, Loader } from 'semantic-ui-react';
+import { Button, Icon } from 'semantic-ui-react';
+import Spinner from '../Spinner';
 import uuid from 'uuid';
 import status from '../status/index';
 import moment from 'moment';
@@ -93,9 +94,9 @@ class GeneratePackage extends Component {
                     { message }
                 </div>
 
-                <div>
-                    <Loader inline='centered' active={this.state.loading}/>
-                </div>
+                {
+                    this.state.loading ? <Spinner active={this.state.loading} /> : ''
+                }
 
                 { this.state.diagnosticData ? 
                     <Advisor 
