@@ -42,6 +42,10 @@ export default class Advisor extends Component {
                 },
             },
             {
+                Header: 'Machine',
+                accessor: 'addr',
+            },
+            {
                 Header: 'Finding',
                 accessor: 'finding',
                 style: { whiteSpace: 'unset', textAlign: 'left' },

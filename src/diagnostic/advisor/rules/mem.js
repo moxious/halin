@@ -18,7 +18,8 @@ const memSettings = pkg => {
 
             if (nodeSetting && !nodeSetting.value) {
                 findings.push(new InspectionResult(InspectionResult.WARN,
-                    `${addr} has no value specified for ${setting}`, null,
+                    addr,
+                    `No value specified for ${setting}`, null,
                     'For best performance, these values should be set. Consider running neo4j-admin memrec'));
                 incomplete = true;
             }
@@ -26,7 +27,8 @@ const memSettings = pkg => {
 
         if (!incomplete) {
             findings.push(new InspectionResult(InspectionResult.PASS,
-                `${addr} has configured memory settings.  Good!`));
+                addr, 
+                `Found configured memory settings.  Good!`));
         }
     });
 

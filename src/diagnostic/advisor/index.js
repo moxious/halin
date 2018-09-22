@@ -22,7 +22,7 @@ import users from './rules/users';
 
 const dummy = diag => {
     return [
-        new InspectionResult(InspectionResult.INFO, 
+        new InspectionResult(InspectionResult.INFO, 'localhost',
             `You're running Halin ${diag.halin.version}, good for you!  You're already ahead of the game.`,
             null,
             'None. Good on you!'),

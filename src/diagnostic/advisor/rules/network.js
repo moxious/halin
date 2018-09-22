@@ -27,7 +27,8 @@ const ports = pkg => {
 
             if (port !== expected[setting]) {
                 findings.push(new InspectionResult(InspectionResult.INFO, 
-                    `The port configured for ${who} on ${setting} is ${port}, which is non-standard`,
+                    who,
+                    `The port configured for ${setting} is ${port}, which is non-standard`,
                     null,
                     `Consider using the default port, ${expected[setting]} if firewall rules allow.`));
                 looksGood = false;
@@ -36,7 +37,7 @@ const ports = pkg => {
 
         if (looksGood) {
             findings.push(new InspectionResult(InspectionResult.PASS,
-                `Network port settings for ${who} look good!`));
+                who, `Network port settings look good!`));
         }
     });
 
@@ -54,7 +55,8 @@ const netAddrs = pkg => {
 
         if (val.match(/^10\.*/) || val.match(/^192\.168\.*/)) {
             findings.push(new InspectionResult(InspectionResult.WARN,
-                `Your default_advertised_address on ${who} is an internal reserved IP address.
+                who,
+                `Your default_advertised_address is an internal reserved IP address.
                  This configuration is likely to cause problems for other users on other networks`,
                  null, 'Set dbms.connectors.default_advertised_address to an externally valid IP or DNS name'));
         }

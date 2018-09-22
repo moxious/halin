@@ -7,14 +7,14 @@ const atLeastOneAdmin = pkg => {
         const admins = node.users.filter(u => u.roles.indexOf('admin') > -1);
         if (admins.length === 0) {
             findings.push(new InspectionResult(
-                InspectionResult.ERROR,
-                `Node ${addr} has no admin users`,
+                InspectionResult.ERROR, addr,
+                `Machine has no admin users`,
                 'Ensure system has a user with role admin'
             ));
         } else {
             findings.push(new InspectionResult(
-                InspectionResult.PASS,
-                `Node ${addr} has admin users specified`
+                InspectionResult.PASS, addr,
+                `Machine has admin users specified`
             ));
         }
     });
@@ -37,8 +37,10 @@ const userConsistency = pkg => {
         const users = node.users.map(u => u.username);
         const roles = node.roles.map(r => r.role);
 
-        userSets[addr] = new Set(...users);
-        roleSets[addr] = new Set(...roles);
+        console.log(addr, users, roles);
+
+        userSets[addr] = new Set(users);
+        roleSets[addr] = new Set(roles);
     });
 
     // Create union sets across all members to get a total
@@ -48,13 +50,17 @@ const userConsistency = pkg => {
     let allUnionRoles = new Set([]);
 
     Object.values(userSets).forEach(aSet => {
-        allUnionUsers = new Set([...allUnionUsers, ...aSet]);
+        const both = [...allUnionUsers].concat([...aSet]);
+        allUnionUsers = new Set(both);
     });
     
     Object.values(roleSets).forEach(aSet => {
-        allUnionRoles = new Set([...allUnionRoles, ...aSet]);
+        const both = [...allUnionRoles].concat([...aSet]);
+        allUnionRoles = new Set(both);
     });
     
+    console.log('ALL UNION USERS', [...allUnionUsers]);
+    console.log('ALL UNION ROLES', [...allUnionRoles]);
     // Now, look through each cluster node and determine whether
     // a paricular node is falling short of the total set.
     const addrs = Object.keys(userSets);
@@ -74,28 +80,28 @@ const userConsistency = pkg => {
         if(userDifference.size > 0) {
             const diff = [...userDifference].join(', ');
             findings.push(new InspectionResult(
-                InspectionResult.ERROR,
-                `Node ${addr} is missing users ${diff} which are defined elsewhere in the cluster`,
+                InspectionResult.ERROR, addr,
+                `Machine is missing users ${diff} which are defined elsewhere in the cluster`,
                 'Consider creating the appropriate users to sync them across the cluster'
             ));
         } else {
             findings.push(new InspectionResult(
-                InspectionResult.PASS,
-                `Node ${addr} has a consistent user set`
+                InspectionResult.PASS, addr,
+                `Machine has a consistent user set`
             ));
         }
 
         if (roleDifference.size > 0) {
             const diff = [...roleDifference].join(', ');
             findings.push(new InspectionResult(
-                InspectionResult.ERROR,
-                `Node ${addr} is missing roles ${diff} which are defined elsewhere in the cluster`,
+                InspectionResult.ERROR, addr,
+                `Machine is missing roles ${diff} which are defined elsewhere in the cluster`,
                 'Consider creating the appropriate roles to sync them across the cluster'
             ));
         } else {
             findings.push(new InspectionResult(
-                InspectionResult.PASS,
-                `Node ${addr} has a consistent role set`
+                InspectionResult.PASS, addr,
+                `Machine has a consistent role set`
             ));
         }
     });

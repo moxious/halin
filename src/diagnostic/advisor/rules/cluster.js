@@ -5,6 +5,7 @@ const clusterSize = pkg => {
 
     if (pkg.nodes.length % 2 === 0) {
         findings.push(new InspectionResult(InspectionResult.WARN,
+            'overall',
             `You have an even number of cluster nodes (${pkg.nodes.length})`,
             null,
             'Consider using an odd number of nodes to better balance'));
