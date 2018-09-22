@@ -74,16 +74,37 @@ export default class ClusterManager {
         }
 
         return this.mapQueryAcrossCluster(
-            'CALL dbms.security.createUser({username}, {password})',
+            'CALL dbms.security.createUser({username}, {password}, false)',
             { username, password }
         );
     } 
+
+    deleteUser(user) {
+        const { username } = user;
+        if (!username) {
+            throw new Error('Call with an object containing keys username');
+        }
+
+        return this.mapQueryAcrossCluster(
+            'CALL dbms.security.deleteUser({username})',
+            { username }
+        );
+    }
 
     addRole(role) {
         if (!role) { throw new Error('Must provide role'); }
 
         return this.mapQueryAcrossCluster(
             'CALL dbms.security.createRole({role})',
+            { role }
+        );
+    }
+
+    deleteRole(role) {
+        if (!role) throw new Error('Must provide role');
+
+        return this.mapQueryAcrossCluster(
+            'CALL dbms.security.deleteRole({role})',
             { role }
         );
     }
