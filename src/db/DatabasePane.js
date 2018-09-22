@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import DBSize from '../performance/DBSize';
-import Functions from '../diagnostic/Functions';
-import Procedures from '../diagnostic/Procedures';
+import DBSize from './DBSize';
+import Functions from './Functions';
+import Procedures from './Procedures';
 
 import { Grid } from 'semantic-ui-react';
 import uuid from 'uuid';
