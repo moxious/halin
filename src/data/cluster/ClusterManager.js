@@ -117,7 +117,6 @@ export default class ClusterManager {
         }
 
         const username = user.username;
-        const newRoles = roles;
 
         // Strategy:
         // For each cluster node:
@@ -159,7 +158,7 @@ export default class ClusterManager {
         };
 
         const applyChanges = (roleChanges, node, driver) => {
-            const { toAdd, toDelete, toPreserve } = roleChanges;
+            const { toAdd, toDelete } = roleChanges;
 
             const addPromises = [...toAdd].map(role => this.addNodeRole(driver, username, role));
             const delPromises = [...toDelete].map(role => this.removeNodeRole(driver, username, role));

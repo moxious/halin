@@ -26,37 +26,41 @@ class NewUserForm extends Component {
     createUser() {
         this.setState({ pending: true });
 
-        const session = this.driver.session();
+        const mgr = window.halinContext.getClusterManager();
 
-        const username = this.state.username;
+        const user = {
+            username: this.state.username,
+            password: this.state.password,
+        };
 
-        return session.run(`
-            call dbms.security.createUser({username}, {password}, false)
-        `, this.state)
-            .then(results => {
-                // On success this call sends nothing back.
-                this.setState({ 
-                    pending: false, 
-                    message: {
-                        header: 'Success',
-                        body: `Created user ${username}`,
-                    },
-                    error: null,
-                });
-                this.onUserCreate(username);
+        return mgr.addUser(user)
+            .then(res => {
+                console.log('ClusterMgr result', res);
+                const action = `Creating user ${user.username}`;
+
+                if (res.success) {
+                    this.setState({
+                        pending: false,
+                        message: status.fromClusterOp(action, res),
+                        error: null,
+                    });
+                } else {
+                    const firstErr = res.results.filter(i => i.err)[0].err;
+                    console.log('first err', firstErr, firstErr.message);
+
+                    this.setState({
+                        pending: false,
+                        message: null,
+                        error: status.fromClusterOp(action, res),
+                    });
+                }
             })
-            .catch(err => {
-                const msg = {
-                    header: 'Error',
-                    body: `Could not create ${username}: ${err}`,
-                };
-                this.setState({ 
-                    message: null,
-                    error: msg, 
-                    pending: false 
-                });
-            })
-            .finally(() => session.close());
+            .catch(err => this.setState({
+                pending: false,
+                message: null,
+                error: status.message('Error',
+                    `Could not create ${user.username}: ${err}`),
+            }));
     }
 
     formValid() {
