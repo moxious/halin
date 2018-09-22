@@ -18,6 +18,7 @@ import memory from './rules/mem';
 import cluster from './rules/cluster';
 import network from './rules/network';
 import indexAndConstraint from './rules/index-and-constraint';
+import users from './rules/users';
 
 const dummy = diag => {
     return [
@@ -34,6 +35,7 @@ const rules = [
     ...cluster,
     ...network,
     ...indexAndConstraint,
+    ...users,
 ];
 
 const generateRecommendations = diagPackage => {
