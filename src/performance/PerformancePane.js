@@ -16,7 +16,6 @@ class PerformancePane extends Component {
 
         return (
             <div className="PerformancePane">
-                <h3>System Performance</h3>
                 <Grid divided='vertically'>
                     <Grid.Row columns={2}>
                         <Grid.Column>
