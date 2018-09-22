@@ -34,24 +34,21 @@ class NewUserForm extends Component {
         };
 
         return mgr.addUser(user)
-            .then(res => {
-                console.log('ClusterMgr result', res);
+            .then(clusterOpRes => {
+                console.log('ClusterMgr result', clusterOpRes);
                 const action = `Creating user ${user.username}`;
 
-                if (res.success) {
+                if (clusterOpRes.success) {
                     this.setState({
                         pending: false,
-                        message: status.fromClusterOp(action, res),
+                        message: status.fromClusterOp(action, clusterOpRes),
                         error: null,
                     });
                 } else {
-                    const firstErr = res.results.filter(i => i.err)[0].err;
-                    console.log('first err', firstErr, firstErr.message);
-
                     this.setState({
                         pending: false,
                         message: null,
-                        error: status.fromClusterOp(action, res),
+                        error: status.fromClusterOp(action, clusterOpRes),
                     });
                 }
             })
