@@ -116,12 +116,31 @@ class Neo4jUsers extends Component {
         });
     };
 
-    confirmRoleAssignment = (component, message) => {
+    confirmRoleAssignment = (component, clusterOpResult) => {
         this.refresh();
-        this.setState({
-            assignOpen: false,
-            message,
-        });
+        console.log('ClusterOpResult', clusterOpResult);
+        const action = `Assign roles`;
+
+        if (clusterOpResult instanceof Error) {
+            this.setState({
+                assignOpen: false,
+                message: null,
+                error: status.message(`Error on ${action}`,
+                    `${clusterOpResult}`),
+            });
+        } else if (clusterOpResult.success) {
+            this.setState({
+                assignOpen: false,
+                message: status.fromClusterOp(action, clusterOpResult),
+                error: false,
+            });
+        } else {
+            this.setState({
+                assignOpen: false,
+                message: null,
+                error: status.fromClusterOp(action, clusterOpResult),
+            });
+        }
     }
 
     closeAssign = () => {
