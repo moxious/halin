@@ -109,7 +109,7 @@ class GeneratePackage extends Component {
                         download={`neo4j-diagnostics-${this.state.dataGenerated}.json`}
                         href={this.buildURI(this.state.diagnosticData)}>
                         <Icon name="download"/>
-                        Download Package
+                        Download Diagnostics
                     </Button>
                 ) : '' }
             </div>
