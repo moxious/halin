@@ -47,11 +47,11 @@ const userConsistency = pkg => {
     let allUnionUsers = new Set([]);
     let allUnionRoles = new Set([]);
 
-    Object.values(userSets).map(aSet => {
+    Object.values(userSets).forEach(aSet => {
         allUnionUsers = new Set([...allUnionUsers, ...aSet]);
     });
     
-    Object.values(roleSets).map(aSet => {
+    Object.values(roleSets).forEach(aSet => {
         allUnionRoles = new Set([...allUnionRoles, ...aSet]);
     });
     
