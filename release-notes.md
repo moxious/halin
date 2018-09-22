@@ -2,9 +2,13 @@
 
 ## 0.1.0
 
+- Promoted User Management to cluster-wide operations
 - Removed passwords and sensitive information from diagnostic dumps
 - Added links to configuration entries reference documentation
 - Changed download diagnostic package button to be more clear
+- GraphConnect 2018 feedback!
+- Initialize cluster connections on startup for better performance
+- Advisor results come broken out by machine
 
 ## 0.0.7
 
