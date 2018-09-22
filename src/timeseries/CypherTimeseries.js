@@ -29,6 +29,8 @@ class CypherTimeseries extends Component {
         time: new Date(),
         lastDataArrived: new Date(),
         disabled: {},
+        minObservedValue: Infinity,
+        maxObservedValue: -Infinity,
     };
 
     constructor(props, context) {
@@ -45,8 +47,8 @@ class CypherTimeseries extends Component {
         this.query = props.query;
         this.rate = props.rate || 1000;
         this.width = props.width || 800;
-        this.min = props.min || (data => this.adjustableMin(data));
-        this.max = props.max || (data => this.adjustableMax(data));
+        this.min = props.min || (data => this.state.minObservedValue);
+        this.max = props.max || (data => this.state.maxObservedValue);
         this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 5;  // 5 min
         this.displayColumns = props.displayColumns;
         this.palette = props.palette || DEFAULT_PALETTE;
@@ -62,33 +64,7 @@ class CypherTimeseries extends Component {
             borderWidth: 1,
             borderColor: "#F4F4F4"
         };
-
-        this.maxObservedValue = -Infinity;
-        this.minObservedValue = Infinity;
     }
-
-    // Compute min of Y axis when user hasn't told us value range.
-    adjustableMin(obj) {
-        const computedMin = this.feed.min() * 0.9;
-
-        if (computedMin < this.minObservedValue) {
-            this.minObservedValue = computedMin;
-        }
-
-        return Math.min(computedMin, this.minObservedValue);
-    };
-    
-    // Compute max of Y axis when user hasn't told us value range.
-    adjustableMax(obj) {
-        const values = Object.values(obj);
-        const computedMax = this.feed.max() * 1.1;
-
-        if (computedMax > this.maxObservedValue) {
-            this.maxObservedValue = computedMax;
-        }
-
-        return Math.max(computedMax, this.maxObservedValue);
-    };
     
     componentDidMount() {
         this.mounted = true;
@@ -138,7 +114,28 @@ class CypherTimeseries extends Component {
     }
 
     onData(newData, dataFeed) {
-        return this.mounted ? this.setState(newData) : null;
+        if (this.mounted) {
+            const computedMin = this.feed.min() * 0.9;
+            const computedMax = this.feed.max() * 1.1;
+
+            const maxObservedValue = Math.max(
+                this.state.maxObservedValue,
+                computedMax
+            );
+
+            const minObservedValue = Math.min(
+                this.state.minObservedValue,
+                computedMin
+            );
+
+            this.setState({
+                ...newData, 
+                maxObservedValue,
+                minObservedValue,
+            });
+        } else {
+            return null;
+        }
     }
 
     getChartMin() {
