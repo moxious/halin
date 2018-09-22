@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { Grid } from 'semantic-ui-react';
 import Overview from './Overview';
-import Functions from './Functions';
-import Procedures from './Procedures';
 import './DiagnosticPane.css';
 import GeneratePackage from './GeneratePackage';
 import uuid from 'uuid';
@@ -49,16 +47,6 @@ class DiagnosticPane extends Component {
                                 driver={this.props.driver}
                             />
                         </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={2}>
-                        <Grid.Column>
-                            <Functions key={this.state.key} node={this.props.node} driver={this.props.driver}/>
-                        </Grid.Column>
-
-                        <Grid.Column>
-                            <Procedures key={this.state.key} node={this.props.node} driver={this.props.driver}/>
-                        </Grid.Column>    
                     </Grid.Row>
 
                     {/* <Grid.Row columns={1}>
