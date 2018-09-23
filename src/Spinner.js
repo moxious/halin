@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Loader, Image } from 'semantic-ui-react';
+import { Image } from 'semantic-ui-react';
 import './Spinner.css';
 
 /**
