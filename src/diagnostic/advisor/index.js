@@ -19,6 +19,7 @@ import cluster from './rules/cluster';
 import network from './rules/network';
 import indexAndConstraint from './rules/index-and-constraint';
 import users from './rules/users';
+import config from './rules/config';
 
 const dummy = diag => {
     return [
@@ -29,6 +30,9 @@ const dummy = diag => {
     ];
 }
 
+/**
+ * The entire rule chain is simply a concat of all rules in all of the imported modules.
+ */
 const rules = [
     dummy,
     ...memory,
@@ -36,8 +40,14 @@ const rules = [
     ...network,
     ...indexAndConstraint,
     ...users,
+    ...config,
 ];
 
+/**
+ * Generate advisor recommendations for a diagnostic package.
+ * @param {Object} diagPackage the diagnostic package produced by Halin Context
+ * @returns {Array} an array of InspectionResult objects.
+ */
 const generateRecommendations = diagPackage => {
     if (_.isNil(diagPackage) || !_.isObject(diagPackage) || !diagPackage.halin) {
         throw new Error('Invalid diagnostics package');
