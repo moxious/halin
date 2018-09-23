@@ -2,14 +2,17 @@
 
 ## 0.1.0
 
+Lots and lots of GraphConnect 2018 Feedback
+
 - Promoted User Management to cluster-wide operations
-- Removed passwords and sensitive information from diagnostic dumps
 - Added links to configuration entries reference documentation
+- Removed passwords and sensitive information from diagnostic dumps
+- Added "Ping" component to diagnostic page to measure round-trip times
 - Changed download diagnostic package button to be more clear
-- GraphConnect 2018 feedback!
 - Initialize cluster connections on startup for better performance
 - Advisor results come broken out by machine
 - Added checking for backup status, network security to advisor
+- Added app footer with link to the page
 
 ## 0.0.7
 
