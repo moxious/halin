@@ -12,6 +12,7 @@ import PermissionsPane from './configuration/PermissionsPane';
 import { Tab } from 'semantic-ui-react'
 import DiagnosticPane from './diagnostic/DiagnosticPane';
 import status from './status/index';
+import AppFooter from './AppFooter';
 import './App.css';
 import 'semantic-ui-css/semantic.min.css';
 import HalinContext from './data/HalinContext';
@@ -141,6 +142,8 @@ class Halin extends Component {
             {err ? err : this.renderCluster()}
           </div>
         </Render>
+
+        <AppFooter/>
       </div>
     ));
   }
