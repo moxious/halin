@@ -8,6 +8,7 @@ import moment from 'moment';
 import appPkg from '../package.json';
 import ClusterManager from './cluster/ClusterManager';
 
+import assert from 'assert';
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 /**
@@ -180,7 +181,8 @@ export default class HalinContext {
      * alive and verify it's still listening.  This forces driver creation
      * for a node if it hasn't already happened.
      * @param {ClusterNode} the node to ping
-     * @returns {Promise} that resolves to true or false for ping success
+     * @returns {Promise} that resolves to an object with an elapsedMs field
+     * or an err field populated.
      */
     ping(clusterNode) {
         const addr = clusterNode.getBoltAddress();
@@ -188,11 +190,19 @@ export default class HalinContext {
 
         const session = driver.session();
 
+        const startTime = new Date().getTime();
         return session.run('RETURN true as value', {})
-            .then(result => result.records[0].get('value'))
+            .then(result => {
+                const elapsedMs = new Date().getTime() - startTime;
+                
+                const v = result.records[0].get('value');
+                assert(v === true);
+
+                return { clusterNode, elapsedMs, err: null };
+            })
             .catch(err => {
                 console.error('HalinContext: failed to ping',addr);
-                return false;
+                return { clusterNode, elapsedMs: -1, err };
             });
     }
 
