@@ -102,12 +102,15 @@ class CypherTimeseries extends Component {
         // as the time window is wide.  I'm arbitrarily adding 25% just so we don't miss
         // data.
 
+        const curState = this.feed.currentState();
+
         this.setState({ 
             disabled,
-            ...this.feed.currentState(),
+            ...curState,
         });
 
         this.stream = new Stream();
+        this.onData(curState, this.feed);
     }
 
     componentWillUnmount() {
@@ -214,7 +217,7 @@ class CypherTimeseries extends Component {
             new Date(this.state.time.getTime() + (30 * 1000))
         );
 
-        return this.state.data ? (
+        return (this.state.data && this.mounted) ? (
             <div className="CypherTimeseries">
                 <Grid>
                     <Grid.Row columns={1}>
