@@ -21,16 +21,15 @@ const ports = pkg => {
         let looksGood = true;
 
         Object.keys(expected).forEach(settingName => {
-            const setting = node.configuration.filter(a => a.name === settingName);
-            const val = _.get(setting, 'value') || '';
+            const val = node.configuration[settingName];
             const port = val.split(':')[1];
 
-            if (port !== expected[setting]) {
+            if (port !== expected[settingName]) {
                 findings.push(new InspectionResult(InspectionResult.INFO, 
                     who,
-                    `The port configured for ${setting} is ${port}, which is non-standard`,
+                    `The port configured for ${settingName} is ${port}, which is non-standard`,
                     null,
-                    `Consider using the default port, ${expected[setting]} if firewall rules allow.`));
+                    `Consider using the default port, ${expected[settingName]} if firewall rules allow.`));
                 looksGood = false;
             }
         });
@@ -50,8 +49,7 @@ const netAddrs = pkg => {
     pkg.nodes.forEach(node => {
         const who = node.basics.address;
 
-        const addr = node.configuration.filter(a => a.name === 'dbms.connectors.default_advertised_address')[0];
-        const val = _.get(addr, 'value');
+        const val = node.configuration['dbms.connectors.default_advertised_address'];
 
         if (val.match(/^10\.*/) || val.match(/^192\.168\.*/)) {
             findings.push(new InspectionResult(InspectionResult.WARN,
@@ -68,23 +66,16 @@ const netAddrs = pkg => {
 const backup = pkg => {
     const findings = [];
 
-    const getBackupAddr = node => {
-        const config = node.configuration
-            .filter(a => (a.name === 'dbms.backup.address'))[0];
-        return _.get(config, 'value');
-    };
-
     const isBackupEnabled = node => {
-        const setting = node.configuration
-            .filter(a => (a.name === 'dbms.backup.enabled'))[0];
-        return setting && (setting.value==='true' || setting.value === true);
+        const val = node.configuration['dbms.backup.enabled'];
+        return val && (val==='true' || val === true);
     };
 
     pkg.nodes.forEach(node => {
         const addr = node.basics.address;
 
         if (isBackupEnabled(node)) {
-            const backupAddr = getBackupAddr(node);
+            const backupAddr = node.configuration['dbms.backup.address'];
 
             if((''+backupAddr).toLowerCase().indexOf('localhost') > -1) {
                 findings.push(new InspectionResult(InspectionResult.PASS,

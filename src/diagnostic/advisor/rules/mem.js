@@ -14,9 +14,9 @@ const memSettings = pkg => {
         const addr = node.basics.address;
 
         settings.forEach(setting => {
-            const nodeSetting = node.configuration.filter(s => s.name === setting)[0];
+            const val = node.configuration[setting];
 
-            if (nodeSetting && !nodeSetting.value) {
+            if (!val) {
                 findings.push(new InspectionResult(InspectionResult.WARN,
                     addr,
                     `No value specified for ${setting}`, null,

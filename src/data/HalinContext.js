@@ -264,10 +264,15 @@ export default class HalinContext {
 
         // Format node config into records.
         const genConfig = session.run('CALL dbms.listConfig()', {})
-            .then(results =>
-                results.records.map(rec => ({
-                    name: rec.get('name'), value: rec.get('value'),
-                })))
+            .then(results => {
+                const configMap = {};
+                results.records.forEach(rec => {
+                    const key = rec.get('name');
+                    const value = rec.get('value');
+                    configMap[key] = value;
+                });
+                return configMap;
+            })
             .then(allConfig => ({ configuration: allConfig }));
 
         const constraints = session.run('CALL db.constraints()', {})
