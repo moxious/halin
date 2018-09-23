@@ -2,8 +2,25 @@ import React from 'react';
 import { Message } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 
+const message = (header, body) => ({ header, body });
+
 export default {
-    message: (header, body) => ({ header, body }),
+    message,
+
+    fromClusterOp: (action, opResult) => {
+        // In an op result there can be many errors.
+        const errors = opResult.results.filter(i => i.err);
+
+        const errStrs = errors.map(error =>
+            `On node ${error.node.getBoltAddress()}: ${error.err}`)
+            .join(', ');
+
+        if (opResult.success) {
+            return message('Success', action);
+        } else {
+            return message(`Error: ${action}`, errStrs);
+        }
+    },
 
     formatStatusMessage: (component) => {
         let message = '';

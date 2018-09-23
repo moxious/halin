@@ -8,6 +8,8 @@ import {
     TimeRange,
     Stream,
 } from "pondjs";
+import uuid from 'uuid';
+import Spinner from '../Spinner';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import NodeLabel from '../NodeLabel';
@@ -28,11 +30,14 @@ class CypherTimeseries extends Component {
         time: new Date(),
         lastDataArrived: new Date(),
         disabled: {},
+        minObservedValue: Infinity,
+        maxObservedValue: -Infinity,
     };
 
     constructor(props, context) {
         super(props, context);
         this.driver = props.driver || context.driver;
+        this.id = uuid.v4();
 
         if (!props.query) {
             throw new Error('query is required');
@@ -40,22 +45,11 @@ class CypherTimeseries extends Component {
             throw new Error('displayColumns is required');
         }
 
-        this.feed = window.halinContext.getDataFeed({
-            node: props.node,
-            driver: props.driver,
-            query: props.query,
-            rate: props.rate, 
-            windowWidth: props.timeWindowWidth,
-            displayColumns: props.displayColumns,
-            params: {},
-            onData: (newData, dataFeed) => this.onData(newData, dataFeed),
-        });
-
         this.query = props.query;
         this.rate = props.rate || 1000;
         this.width = props.width || 800;
-        this.min = props.min || (data => this.adjustableMin(data));
-        this.max = props.max || (data => this.adjustableMax(data));
+        this.min = props.min || (data => this.state.minObservedValue);
+        this.max = props.max || (data => this.state.maxObservedValue);
         this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 5;  // 5 min
         this.displayColumns = props.displayColumns;
         this.palette = props.palette || DEFAULT_PALETTE;
@@ -71,37 +65,23 @@ class CypherTimeseries extends Component {
             borderWidth: 1,
             borderColor: "#F4F4F4"
         };
-
-        this.maxObservedValue = -Infinity;
-        this.minObservedValue = Infinity;
     }
-
-    // Compute min of Y axis when user hasn't told us value range.
-    adjustableMin(obj) {
-        const values = Object.values(obj);
-        const computedMin = Math.min(...values) * 0.9;
-
-        if (computedMin < this.minObservedValue) {
-            this.minObservedValue = computedMin;
-        }
-
-        return Math.min(computedMin, this.minObservedValue);
-    };
-    
-    // Compute max of Y axis when user hasn't told us value range.
-    adjustableMax(obj) {
-        const values = Object.values(obj);
-        const computedMax = Math.max(...values) * 1.1;
-
-        if (computedMax > this.maxObservedValue) {
-            this.maxObservedValue = computedMax;
-        }
-
-        return Math.max(computedMax, this.maxObservedValue);
-    };
     
     componentDidMount() {
         this.mounted = true;
+
+        this.feed = window.halinContext.getDataFeed({
+            node: this.props.node,
+            driver: this.props.driver,
+            query: this.props.query,
+            rate: this.props.rate, 
+            windowWidth: this.props.timeWindowWidth,
+            displayColumns: this.props.displayColumns,
+            params: {},
+        });
+
+        this.feed.onData = (newData, dataFeed) => 
+            this.onData(newData, dataFeed);
 
         const disabled = {};
 
@@ -122,23 +102,44 @@ class CypherTimeseries extends Component {
         // as the time window is wide.  I'm arbitrarily adding 25% just so we don't miss
         // data.
 
+        const curState = this.feed.currentState();
+
         this.setState({ 
             disabled,
-            ...this.feed.currentState(),
+            ...curState,
         });
 
         this.stream = new Stream();
+        this.onData(curState, this.feed);
     }
 
     componentWillUnmount() {
         this.mounted = false;
-        if (this.interval) {
-            clearInterval(this.interval);
-        }
     }
 
     onData(newData, dataFeed) {
-        return this.mounted ? this.setState(newData) : null;
+        if (this.mounted) {
+            const computedMin = this.feed.min() * 0.9;
+            const computedMax = this.feed.max() * 1.1;
+
+            const maxObservedValue = Math.max(
+                this.state.maxObservedValue,
+                computedMax
+            );
+
+            const minObservedValue = Math.min(
+                this.state.minObservedValue,
+                computedMin
+            );
+
+            this.setState({
+                ...newData, 
+                maxObservedValue,
+                minObservedValue,
+            });
+        } else {
+            return null;
+        }
     }
 
     getChartMin() {
@@ -216,16 +217,8 @@ class CypherTimeseries extends Component {
             new Date(this.state.time.getTime() + (30 * 1000))
         );
 
-        return this.state.data ? (
+        return (this.state.data && this.mounted) ? (
             <div className="CypherTimeseries">
-                {/* <ReactTable
-                    data={this.state.data}
-                    sortable={false}
-                    filterable={false}
-                    showPagination={false}
-                    defaultPageSize={1}
-                    columns={this.displayColumns} /> */}
-
                 <Grid>
                     <Grid.Row columns={1}>
                         <Grid.Column>
@@ -277,7 +270,7 @@ class CypherTimeseries extends Component {
                     </Grid.Row>
                 </Grid>
             </div>
-        ) : 'Loading...';
+        ) : <Spinner active={true}/>;
     }
 }
 

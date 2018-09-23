@@ -3,7 +3,6 @@ import * as PropTypes from 'prop-types';
 import { Button, Modal, Dropdown, Grid } from 'semantic-ui-react';
 import status from '../../status/index';
 import _ from 'lodash';
-import Promise from 'bluebird';
 
 class AssignRoleModal extends Component {
     state = {
@@ -83,50 +82,14 @@ class AssignRoleModal extends Component {
 
     ok = () => {
         const username = this.state.activeUser.username;
-        const oldRoles = new Set(this.state.activeUser.roles);
-        const newRoles = new Set(this.state.activeUser.newRoles);
-        const rolesToDelete = new Set(
-            [...oldRoles].filter(x => !newRoles.has(x))
-        );
-        const rolesToAdd = new Set(
-            [...newRoles].filter(x => !oldRoles.has(x))
-        );
-        // The roles they already have, which user wants to preserve (set intersection)
-        const rolesPreserved = new Set(
-            [...oldRoles].filter(x => newRoles.has(x))
-        );
+        // const oldRoles = this.state.activeUser.roles;
+        const newRoles = this.state.activeUser.newRoles;
 
-        console.log('Role modification: adding', 
-            rolesToAdd, 
-            'removing', rolesToDelete, 
-            'preserving', rolesPreserved);
+        const mgr = window.halinContext.getClusterManager();
 
-        const allRolePromises = 
-            [...rolesToAdd].map(role => this.addRole(username, role))
-                .concat([...rolesToDelete].map(role => this.removeRole(username, role)));
-
-        // If cypher fails we will show err message in modal.
-        // TODO -- not wrapped in a TX.  It's possible for adding some roles to fail, others
-        // to succeed.
-        return Promise.all(allRolePromises)
-            .then(() => {
-                // Returns nothing on success.
-                this.setState({ open: false });
-
-                const added = [...rolesToAdd].join(', ');
-                const removed = [...rolesToDelete].join(', ');
-
-                const addedStr = added ? 'Added: ' + added : '';
-                const removedStr = removed ? 'Removed: ' + removed : '';
-
-                // Fire callback to parent.
-                const result = _.merge(
-                    status.message('Success', 
-                        `Assigned roles to ${username}. ${addedStr} ${removedStr}`), 
-                    this.state.activeUser);
-                
-                return this.state.onConfirm(this, result);
-            });
+        return mgr.associateUserToRoles({ username }, newRoles)
+            .then(clusterOpRes => this.state.onConfirm(this, clusterOpRes))
+            .catch(err => this.state.onConfirm(this, err));
     };
 
     componentDidMount() {

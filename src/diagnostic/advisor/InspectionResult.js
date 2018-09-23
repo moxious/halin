@@ -9,7 +9,8 @@ export default class InspectionResult {
      * @param evidence (optional) data showing the issue
      * @param advice (optional) corrective action if applicable.
      */
-    constructor(level, finding, evidence=null, advice='none') {
+    constructor(level, addr, finding, evidence=null, advice='none') {
+        this.addr = addr;
         this.level = level;
         this.finding = finding;
         this.evidence = evidence;

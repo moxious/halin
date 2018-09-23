@@ -24,34 +24,34 @@ class NewRoleForm extends Component {
     createRole() {
         this.setState({ pending: true });
         console.log('Creating role with driver ',this.driver);
-        const session = this.driver.session();
+        
+        const mgr = window.halinContext.getClusterManager();
 
-        const role = this.state.role;
+        return mgr.addRole(this.state.role)
+            .then(clusterOpRes => {
+                console.log('ClusterMgr result', clusterOpRes);
+                const action = `Creating role ${this.state.role}`;
 
-        return session.run(`
-            call dbms.security.createRole({role})
-        `, this.state)
-            .then(results => {
-                // On success this call sends nothing back.
-                const msg = {
-                    header: 'Success',
-                    body: `Created role ${role}`,
-                };
-                this.setState({ 
-                    pending: false, 
-                    message: msg,
-                    error: null,
-                });
-                return this.onRoleCreate(role);
+                if (clusterOpRes.success) {
+                    this.setState({
+                        pending: false,
+                        message: status.fromClusterOp(action, clusterOpRes),
+                        error: null,
+                    });
+                } else {
+                    this.setState({
+                        pending: false,
+                        message: null,
+                        error: status.fromClusterOp(action, clusterOpRes),
+                    });
+                }
             })
-            .catch(err => {
-                const msg = {
-                    header: 'Error',
-                    body: `Failed to create role ${role}: ${err}`,
-                };
-                this.setState({ error: msg, message: null, pending: false });
-            })
-            .finally(() => session.close());
+            .catch(err => this.setState({
+                pending: false,
+                message: null,
+                error: status.message('Error',
+                    `Could not create role ${this.state.role}: ${err}`),
+            }));
     }
 
     formValid() {

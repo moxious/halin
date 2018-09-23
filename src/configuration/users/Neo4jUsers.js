@@ -63,6 +63,8 @@ class Neo4jUsers extends Component {
         this.setState({
             refresh: val,
             childRefresh: val,
+            message: null,
+            error: null,
         });
     }
 
@@ -78,30 +80,33 @@ class Neo4jUsers extends Component {
     deleteUser(row) {
         console.log('DELETE USER ', row);
 
-        const session = this.driver.session();
+        const mgr = window.halinContext.getClusterManager();
 
-        return session.run('call dbms.security.deleteUser({username})', { username: row.username })
-            .then(results => {
-                // Just increment refresh to any other value, signals to child to reload data.
-                this.setState({
-                    message: {
-                        header: 'Success',
-                        body: `Deleted user ${row.username}`,
-                    },
-                    error: null,
-                    childRefresh: this.state.childRefresh + 1
-                });
+        return mgr.deleteUser(row)
+            .then(clusterOpRes => {
+                console.log('ClusterMgr result', clusterOpRes);
+                const action = `Deleting user ${row.username}`;
+
+                if (clusterOpRes.success) {
+                    this.setState({
+                        pending: false,
+                        message: status.fromClusterOp(action, clusterOpRes),
+                        error: null,
+                    });
+                } else {
+                    this.setState({
+                        pending: false,
+                        message: null,
+                        error: status.fromClusterOp(action, clusterOpRes),
+                    });
+                }
             })
-            .catch(err => {
-                this.setState({
-                    message: null,
-                    error: {
-                        header: 'Error',
-                        body: `Failed to delete ${row.username}: ${err}`,
-                    },
-                });
-            })
-            .finally(() => session.close);
+            .catch(err => this.setState({
+                pending: false,
+                message: null,
+                error: status.message('Error',
+                    `Could not delete user ${row.username}: ${err}`),
+            }));
     }
 
     openAssign = (row) => {
@@ -111,12 +116,31 @@ class Neo4jUsers extends Component {
         });
     };
 
-    confirmRoleAssignment = (component, message) => {
+    confirmRoleAssignment = (component, clusterOpResult) => {
         this.refresh();
-        this.setState({
-            assignOpen: false,
-            message,
-        });
+        console.log('ClusterOpResult', clusterOpResult);
+        const action = `Assign roles`;
+
+        if (clusterOpResult instanceof Error) {
+            this.setState({
+                assignOpen: false,
+                message: null,
+                error: status.message(`Error on ${action}`,
+                    `${clusterOpResult}`),
+            });
+        } else if (clusterOpResult.success) {
+            this.setState({
+                assignOpen: false,
+                message: status.fromClusterOp(action, clusterOpResult),
+                error: false,
+            });
+        } else {
+            this.setState({
+                assignOpen: false,
+                message: null,
+                error: status.fromClusterOp(action, clusterOpResult),
+            });
+        }
     }
 
     closeAssign = () => {

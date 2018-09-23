@@ -7,11 +7,12 @@ import {
 import { Render } from 'graph-app-kit/components/Render';
 import Neo4jConfiguration from './configuration/Neo4jConfiguration';
 import PerformancePane from './performance/PerformancePane';
-import DBSize from './performance/DBSize';
+import DatabasePane from './db/DatabasePane';
 import PermissionsPane from './configuration/PermissionsPane';
 import { Tab } from 'semantic-ui-react'
 import DiagnosticPane from './diagnostic/DiagnosticPane';
 import status from './status/index';
+import AppFooter from './AppFooter';
 import './App.css';
 import 'semantic-ui-css/semantic.min.css';
 import HalinContext from './data/HalinContext';
@@ -36,15 +37,15 @@ class Halin extends Component {
         render: () => this.paneWrapper(
           <PerformancePane key={key} node={node} driver={driver}/>),
       },
-      {
-        menuItem: 'User Management',
-        render: () => this.paneWrapper(
-          <PermissionsPane key={key} node={node} driver={driver}/>),
-      },
+      // {
+      //   menuItem: 'User Management',
+      //   render: () => this.paneWrapper(
+      //     <PermissionsPane key={key} node={node} driver={driver}/>),
+      // },
       {
         menuItem: 'Database',
         render: () => this.paneWrapper(
-          <DBSize key={key} node={node} driver={driver}/>),
+          <DatabasePane key={key} node={node} driver={driver}/>),
       },
       {
         menuItem: 'Configuration',
@@ -90,21 +91,37 @@ class Halin extends Component {
           'primary'),
     }));
 
+    const userMgmtPane = {
+      menuItem: 'User Management',
+      render: () => {
+        const node = this.state.halin.clusterNodes[0];
+        const driver = this.state.halin.driverFor(node.getBoltAddress());
+
+        return this.paneWrapper(
+          <PermissionsPane node={node} driver={driver}/>,
+          'primary'
+        );
+      },
+    };
+
     const diagnosticPane = {
       menuItem: 'Diagnostics',
       render: () => {
         const node = this.state.halin.clusterNodes[0];
         const driver = this.state.halin.driverFor(node.getBoltAddress());
 
-        return (
+        return this.paneWrapper(
           <DiagnosticPane 
             node={node}
-            driver={driver}/>
+            driver={driver}/>,
+          'primary'
         );
       },
     };
 
-    return <Tab panes={nodePanes.concat([diagnosticPane])} />;
+    return <Tab panes={nodePanes.concat([
+      userMgmtPane, diagnosticPane
+    ])} />;
   }
 
   renderSingleNode(driver=null, node=null) {
@@ -125,6 +142,8 @@ class Halin extends Component {
             {err ? err : this.renderCluster()}
           </div>
         </Render>
+
+        <AppFooter/>
       </div>
     ));
   }

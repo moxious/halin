@@ -64,29 +64,41 @@ class Neo4jRoles extends Component {
         this.setState({
             refresh: val,
             childRefresh: val,
+            message: null,
+            error: null,
         });
     }
 
     deleteRole(row) {
         console.log('DELETE ROLE', row);
 
-        const session = this.driver.session();
+        const mgr = window.halinContext.getClusterManager();
 
-        return session.run('call dbms.security.deleteRole({role})', { role: row.role })
-            .then(results => {
-                this.setState({
-                    message: status.message('Success', `Deleted role ${row.role}`),
-                    error: null,
-                    childRefresh: this.state.childRefresh + 1,
-                })
+        return mgr.deleteRole(row.role)
+            .then(clusterOpRes => {
+                console.log('ClusterMgr result', clusterOpRes);
+                const action = `Deleting role ${row.role}`;
+
+                if (clusterOpRes.success) {
+                    this.setState({
+                        pending: false,
+                        message: status.fromClusterOp(action, clusterOpRes),
+                        error: null,
+                    });
+                } else {
+                    this.setState({
+                        pending: false,
+                        message: null,
+                        error: status.fromClusterOp(action, clusterOpRes),
+                    });
+                }
             })
-            .catch(err => {
-                this.setState({
-                    message: null,
-                    error: status.message('Error', `Failed to delete role ${row.role}: ${err}`),
-                })
-            })
-            .finally(() => session.close());
+            .catch(err => this.setState({
+                pending: false,
+                message: null,
+                error: status.message('Error',
+                    `Could not delete role ${row.role}: ${err}`),
+            }));
     }
 
     open = (row) => {

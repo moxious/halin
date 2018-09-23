@@ -50,6 +50,28 @@ export default class DataFeed {
         return this.sampleData();
     }
 
+    /**
+     * Get the minmum value that occurs in the feed.
+     */
+    min() {
+        if (!this.state.data || this.state.data.length === 0) { return 0; }
+        const minObs = obs => Math.min(...Object.values(obs));
+
+        const allMins = this.state.data.map(obs => minObs(obs));
+        return Math.min(...allMins);
+    }
+
+    /**
+     * Get the maximum value that occurs in the feed.
+     */
+    max() {
+        if (!this.state.data || this.state.data.length === 0) { return 1; }
+        const maxObs = obs => Math.max(...Object.values(obs));
+
+        const allMaxes = this.state.data.map(obs => maxObs(obs));
+        return Math.max(...allMaxes);
+    }
+
     sampleData() {
         const session = this.driver.session();
         const startTime = new Date().getTime();

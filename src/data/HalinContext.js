@@ -6,7 +6,9 @@ import Promise from 'bluebird';
 import uuid from 'uuid';
 import moment from 'moment';
 import appPkg from '../package.json';
+import ClusterManager from './cluster/ClusterManager';
 
+import assert from 'assert';
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 /**
@@ -28,6 +30,14 @@ export default class HalinContext {
             encrypted: true,
             connectionTimeout: 10000,
         };
+        this.mgr = new ClusterManager(this);
+    }
+
+    /**
+     * @returns {ClusterManager}
+     */
+    getClusterManager() {
+        return this.mgr;
     }
 
     getDataFeed(feedOptions) {
@@ -43,13 +53,13 @@ export default class HalinContext {
     /**
      * Create a new driver for a given address.
      */
-    driverFor(addr, username=_.get(this.base, 'username'), password=_.get(this.base, 'password')) {
+    driverFor(addr, username = _.get(this.base, 'username'), password = _.get(this.base, 'password')) {
         if (this.drivers[addr]) {
             return this.drivers[addr];
         }
-        
-        const driver = neo4j.driver(addr, 
-            neo4j.auth.basic(username, password), 
+
+        const driver = neo4j.driver(addr,
+            neo4j.auth.basic(username, password),
             this.driverOptions);
 
         this.drivers[addr] = driver;
@@ -96,11 +106,48 @@ export default class HalinContext {
                     rec.get = get;
 
                     this.clusterNodes = [new ClusterNode(rec)];
+
+                    // Force driver creation and ping, this is basically
+                    // just connecting to the whole cluster.
+                    return this.clusterNodes.map(cn => this.ping(cn));
                 } else {
                     throw err;
                 }
             })
             .finally(() => session.close());
+    }
+
+    /**
+     * Take a diagnostic package and return a cleaned up version of the same, removing
+     * sensitive data that shouldn't go out.
+     * This function intentionally modifies its argument.
+     */
+    cleanup(pkg) {
+        const deepReplace = (keyToClean, newVal, object) => {
+            let found = false;
+
+            _.each(object, (val, key) => {
+                if (key === keyToClean) {
+                    console.log('found target key');
+                    found = true;
+                } else if(_.isArray(val)) {
+                    object[key] = val.map(v => deepReplace(keyToClean, newVal, v));
+                } else if (_.isObject(val)) {
+                    
+                    object[key] = deepReplace(keyToClean, newVal, val);
+                }
+            });
+
+            if (found) {
+                const copy = _.cloneDeep(object);
+                copy[keyToClean] = newVal;
+                return copy;
+            }
+
+            return object;
+        };
+
+        return deepReplace('password', '********', _.cloneDeep(pkg));
     }
 
     /**
@@ -127,6 +174,36 @@ export default class HalinContext {
         } catch (e) {
             return Promise.reject(new Error('General Halin Context error', e));
         }
+    }
+
+    /**
+     * Ping a cluster node with a trivial query, just to keep connections
+     * alive and verify it's still listening.  This forces driver creation
+     * for a node if it hasn't already happened.
+     * @param {ClusterNode} the node to ping
+     * @returns {Promise} that resolves to an object with an elapsedMs field
+     * or an err field populated.
+     */
+    ping(clusterNode) {
+        const addr = clusterNode.getBoltAddress();
+        const driver = this.driverFor(addr);
+
+        const session = driver.session();
+
+        const startTime = new Date().getTime();
+        return session.run('RETURN true as value', {})
+            .then(result => {
+                const elapsedMs = new Date().getTime() - startTime;
+                
+                const v = result.records[0].get('value');
+                assert(v === true);
+
+                return { clusterNode, elapsedMs, err: null };
+            })
+            .catch(err => {
+                console.error('HalinContext: failed to ping',addr);
+                return { clusterNode, elapsedMs: -1, err };
+            });
     }
 
     /**
@@ -161,7 +238,7 @@ export default class HalinContext {
         // Format all JMX data into records.
         // Put the whole thing into an object keyed on jmx.
         const genJMX = session.run("CALL dbms.queryJmx('*:*')", {})
-            .then(results => 
+            .then(results =>
                 results.records.map(rec => ({
                     name: rec.get('name'),
                     attributes: rec.get('attributes'),
@@ -183,14 +260,32 @@ export default class HalinContext {
                     role: rec.get('role'),
                     users: rec.get('users'),
                 })))
-                .then(allRoles => ({ roles: allRoles }));
+            .then(allRoles => ({ roles: allRoles }));
 
         // Format node config into records.
         const genConfig = session.run('CALL dbms.listConfig()', {})
-            .then(results =>
-                results.records.map(rec => ({
-                    name: rec.get('name'), value: rec.get('value'),
-                })))
+            .then(results => {
+                const configMap = {};
+                results.records.forEach(rec => {
+                    const key = rec.get('name');
+                    const value = rec.get('value');
+
+                    // Configs can have duplicate keys!
+                    // which sucks.  but we need to detect that.
+                    // If a second value is found, push it on to an array.
+                    if (configMap.hasOwnProperty(key)) {
+                        const presentValue = configMap[key];
+                        if (_.isArray(presentValue)) {
+                            presentValue.push(value);
+                        } else {
+                            configMap[key] = [presentValue, value];
+                        }
+                    } else {
+                        configMap[key] = value;
+                    }
+                });
+                return configMap;
+            })
             .then(allConfig => ({ configuration: allConfig }));
 
         const constraints = session.run('CALL db.constraints()', {})
@@ -210,7 +305,7 @@ export default class HalinContext {
                 })))
             .then(allIndexes => ({ indexes: allIndexes }));
 
-        const otherPromises = [            
+        const otherPromises = [
             noFailCheck('apoc', 'RETURN apoc.version() as value', 'version'),
             noFailCheck('nodes', 'MATCH (n) RETURN count(n) as value', 'count'),
             noFailCheck('schema', 'call db.labels() yield label return collect(label) as value', 'labels'),
@@ -219,7 +314,8 @@ export default class HalinContext {
 
         return Promise.all([
             users, roles, indexes, constraints, genJMX, genConfig, ...otherPromises])
-            .then(arrayOfDiagnosticObjects => _.merge(basics, ...arrayOfDiagnosticObjects))
+            .then(arrayOfDiagnosticObjects =>
+                _.merge(basics, ...arrayOfDiagnosticObjects))
             .finally(() => session.close());
     }
 
@@ -231,15 +327,15 @@ export default class HalinContext {
             halin: {
                 drivers: Object.keys(this.drivers).map(uri => ({
                     domain: `${this.domain}-driver`,
-                    node: uri, 
+                    node: uri,
                     key: 'encrypted',
                     value: _.get(this.drivers[uri]._config, 'encrypted'),
                 })),
                 diagnosticsGenerated: moment.utc().toISOString(),
-                activeProject: this.project,
-                activeGraph: this.graph,
+                activeProject: this.cleanup(this.project),
+                activeGraph: this.cleanup(this.graph),
                 ...appPkg,
-            }   
+            }
         };
 
         return Promise.resolve(halin);
@@ -257,7 +353,7 @@ export default class HalinContext {
 
         return api.getContext()
             .then(context => ({
-                neo4jDesktop: context,
+                neo4jDesktop: this.cleanup(_.cloneDeep(context)),
             }));
     }
 
@@ -269,7 +365,7 @@ export default class HalinContext {
     runDiagnostics() {
         const allNodeDiags = Promise.all(this.clusterNodes.map(clusterNode => this._nodeDiagnostics(clusterNode)))
             .then(nodeDiagnostics => ({ nodes: nodeDiagnostics }));
-        
+
         const halinDiags = this._halinDiagnostics();
 
         const neo4jDesktopDiags = this._neo4jDesktopDiagnostics();

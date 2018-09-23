@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import ReactTable from 'react-table';
 import { Icon } from 'semantic-ui-react';
 import './Advisor.css';
+import _ from 'lodash';
 
 export default class Advisor extends Component {
     state = {
@@ -42,6 +43,29 @@ export default class Advisor extends Component {
                 },
             },
             {
+                Header: 'Machine',
+                accessor: 'addr',
+                filterMethod: (filter, row) => {
+                    if (filter.value === "all") {
+                        return true;
+                    }
+
+                    return row[filter.id] === filter.value;
+                },
+                Filter: ({ filter, onChange }) =>
+                    <select
+                        onChange={event => onChange(event.target.value)}
+                        style={{ width: "100%" }}
+                        value={filter ? filter.value : "all"}
+                    >
+                        <option value="all">All</option>
+                        {
+                            this.getMachines().map((i, idx) =>
+                                <option key={idx} value={i}>{i}</option>)
+                        }
+                    </select>,
+            },
+            {
                 Header: 'Finding',
                 accessor: 'finding',
                 style: { whiteSpace: 'unset', textAlign: 'left' },
@@ -59,6 +83,14 @@ export default class Advisor extends Component {
             },
         ],
     };
+
+    getMachines() {
+        if (!this.props.data) { return []; }
+        console.log(this.props.data);
+
+        const allAddrs = this.props.data.map(inspResult => inspResult.addr);
+        return _.uniq(allAddrs).sort();
+    }
 
     render() {
         return (this.props.data ?
