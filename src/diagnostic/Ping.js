@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import status from '../status/index';
 import Spinner from '../Spinner';
+import NodeLabel from '../NodeLabel';
 import { Button, Icon, Table } from 'semantic-ui-react';
 
 export default class Ping extends Component {
@@ -49,7 +50,7 @@ export default class Ping extends Component {
         let message = status.formatStatusMessage(this);
 
         return this.state.pingResults ? (
-            <div class='Ping'>
+            <div className='Ping'>
                 <h2>Ping</h2>
 
                 Ping sends a trivial cypher query to the server and measures how long it takes the response
@@ -68,7 +69,9 @@ export default class Ping extends Component {
                     {
                         this.state.pingResults.map((r, idx) => 
                             <Table.Row key={idx}>
-                                <Table.Cell>{r.clusterNode.getBoltAddress()}</Table.Cell>
+                                <Table.Cell>
+                                    <NodeLabel node={r.clusterNode}/>
+                                </Table.Cell>
                                 <Table.Cell>{r.elapsedMs}</Table.Cell>
                                 <Table.Cell>{r.err ? `${r.err}` : 'none'}</Table.Cell>
                             </Table.Row>)
