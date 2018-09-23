@@ -1,5 +1,4 @@
 import InspectionResult from '../InspectionResult';
-import _ from 'lodash';
 
 const ports = pkg => {
     const findings = [];
@@ -22,6 +21,12 @@ const ports = pkg => {
 
         Object.keys(expected).forEach(settingName => {
             const val = node.configuration[settingName];
+
+            if (val === undefined) {
+                // Undefined counts as default.
+                return;
+            }
+
             const port = val.split(':')[1];
 
             if (port !== expected[settingName]) {
