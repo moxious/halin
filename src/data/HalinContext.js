@@ -269,7 +269,20 @@ export default class HalinContext {
                 results.records.forEach(rec => {
                     const key = rec.get('name');
                     const value = rec.get('value');
-                    configMap[key] = value;
+
+                    // Configs can have duplicate keys!
+                    // which sucks.  but we need to detect that.
+                    // If a second value is found, push it on to an array.
+                    if (configMap.hasOwnProperty(key)) {
+                        const presentValue = configMap[key];
+                        if (_.isArray(presentValue)) {
+                            presentValue.push(value);
+                        } else {
+                            configMap[key] = [presentValue, value];
+                        }
+                    } else {
+                        configMap[key] = value;
+                    }
                 });
                 return configMap;
             })
