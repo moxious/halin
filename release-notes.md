@@ -1,5 +1,12 @@
 # Halin Release Notes
 
+## 0.1.1
+
+- Halin can now run independent of Neo4j Desktop as a web app. (`yarn start`)
+- Scripts to deploy to AWS S3
+- Whether or not cluster connections are encrypted depends on Desktop settings
+and user preference via the connection dialog
+
 ## 0.1.0
 
 Lots and lots of GraphConnect 2018 Feedback
