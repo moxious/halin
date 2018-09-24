@@ -6,14 +6,14 @@ const overloading = pkg => {
 
     pkg.nodes.forEach(node => {
         const settings = Object.keys(node.configuration);
-        let overloaded = false;
+        // let overloaded = false;
         const addr = node.basics.address;
         
         settings.forEach(setting => {
             const val = node.configuration[setting];
             if (_.isArray(val)) {
                 const n = val.length;
-                overloaded = true;
+                // overloaded = true;
                 findings.push(new InspectionResult(InspectionResult.ERROR, addr,
                     `Configuration item ${setting} has ${n} values specified`,
                     'Entries should exist in the configuration file only once. Edit your configuration to ensure it is correct'));

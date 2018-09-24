@@ -27,8 +27,8 @@ export default class HalinContext {
         this.drivers = {};
         this.dataFeeds = {};
         this.driverOptions = {
-            encrypted: true,
             connectionTimeout: 10000,
+            trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
         };
         this.mgr = new ClusterManager(this);
     }
@@ -54,13 +54,16 @@ export default class HalinContext {
      * Create a new driver for a given address.
      */
     driverFor(addr, username = _.get(this.base, 'username'), password = _.get(this.base, 'password')) {
+        const tlsLevel = _.get(this.base, 'tlsLevel');
+        const encrypted = (tlsLevel === 'REQUIRED' ? true : false);
+
         if (this.drivers[addr]) {
             return this.drivers[addr];
         }
 
+        const allOptions = _.merge({ encrypted }, this.driverOptions);
         const driver = neo4j.driver(addr,
-            neo4j.auth.basic(username, password),
-            this.driverOptions);
+            neo4j.auth.basic(username, password), allOptions);
 
         this.drivers[addr] = driver;
         return driver;
@@ -158,6 +161,7 @@ export default class HalinContext {
         try {
             return nd.getFirstActive()
                 .then(active => {
+                    console.log('FIRST ACTIVE', active);
                     this.project = active.project;
                     this.graph = active.graph;
 
