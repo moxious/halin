@@ -9,6 +9,8 @@ Primary features:
 2. Advisor and Diagnostics:  Checks your Neo4j configuration and finds problems, makes suggestions on how to improve.
 3. User & Role Management: allows you to administer users & roles across any number of machines.
 
+A copy of Halin is hosted publicly on S3 here: [http://halin.s3-website-us-east-1.amazonaws.com/](http://halin.s3-website-us-east-1.amazonaws.com/)
+
 ## Running Halin in Development Mode
 
 1. Clone the repo
