@@ -157,10 +157,6 @@ class Halin extends Component {
 
     return (!this.state.halin ? 'Loading...' : (
       <div className="App" key="app">
-        {/* <header className="App-header">
-          <Image className="App-logo" src='img/halingraph.gif' size='tiny' />
-        </header> */}
-
         <Render if={this.props.connected}>
           <div className='MainBody'>
             {err ? err : this.renderCluster()}
