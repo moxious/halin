@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import * as PropTypes from 'prop-types';
 import { Render } from 'graph-app-kit/components/Render';
-import { Button, Form, Modal, Message } from "semantic-ui-react";
+import { Button, Form, Modal, Message, Checkbox } from "semantic-ui-react";
 
 class ConnectForm extends Component {
     state = {
@@ -12,7 +12,16 @@ class ConnectForm extends Component {
         encrypted: false,
     };
 
-    inputUpdated = (_, { name, value }) => {
+    inputUpdated = (_, data) => {
+        const { name, value } = data;
+
+        if (name === 'encrypted') {
+            // Checkbox passed through checked property, not value.
+            return this.setState({
+                [name]: data.checked,
+            });
+        }
+
         this.setState({ [name]: value });
     };
 
@@ -68,13 +77,12 @@ class ConnectForm extends Component {
                         </Form.Field>
 
                         <Form.Field>
-                            <label>Encrypt Connection</label>
-                            <Form.Input 
+                            <Checkbox                                 
                                 checked={encrypted}
                                 name="encrypted"
                                 onChange={this.inputUpdated}
                                 type="checkbox"
-                            />
+                                label='Encrypt Connection'/>
                         </Form.Field>
 
                         <Render if={errorMsg}>
