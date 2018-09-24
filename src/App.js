@@ -9,7 +9,7 @@ import Neo4jConfiguration from './configuration/Neo4jConfiguration';
 import PerformancePane from './performance/PerformancePane';
 import DatabasePane from './db/DatabasePane';
 import PermissionsPane from './configuration/PermissionsPane';
-import { Tab } from 'semantic-ui-react'
+import { Tab, Button } from 'semantic-ui-react'
 import DiagnosticPane from './diagnostic/DiagnosticPane';
 import status from './status/index';
 import AppFooter from './AppFooter';
@@ -19,6 +19,7 @@ import HalinContext from './data/HalinContext';
 import Neo4jDesktopStandIn from './neo4jDesktop/Neo4jDesktopStandIn';
 import uuid from 'uuid';
 import _ from 'lodash';
+import Troubleshooting from './neo4jDesktop/Troubleshooting';
 
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
@@ -132,6 +133,20 @@ class Halin extends Component {
 
   render() {
     const err = (this.state.error ? status.formatStatusMessage(this) : null);
+
+    if (err) {
+      return (
+        <div className='MainBody'>
+          { err }
+
+          <Troubleshooting error={this.state.error}/>
+
+          <Button basic onClick={() => window.location.reload()}>
+            <i className="icon refresh"/> Try Again
+          </Button>
+        </div>
+      )
+    }
 
     return (!this.state.halin ? 'Loading...' : (
       <div className="App" key="app">
