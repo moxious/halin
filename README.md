@@ -14,6 +14,13 @@ Primary features:
 1. Clone the repo
 2. `yarn install`
 3. `yarn start`
+
+### Running Stand Alone
+
+Browse to http://localhost:3000/ and you're ready to go.
+
+### Running as a GraphApp
+
 4. Inside of Neo4j Desktop, go to application settings, scroll all the way to the bottom, enable development mode
 5. For development app entry point, use http://localhost:3000/ (that's where yarn start will serve the app)
 6. For development app root path, enter /absolute/path/to/halin where you cloned the repo
