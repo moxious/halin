@@ -29,7 +29,7 @@ export default {
             message = 
                 <Message negative>
                     <Message.Header>{component.state.error.header || 'Error'}</Message.Header>
-                    <p>{component.state.error.body}</p>
+                    <p>{component.state.error.body || `${component.state.error}`}</p>
                 </Message>
         } else if(component.state.message) {
             message = 
