@@ -8,6 +8,14 @@
   padding-right: 15px;
 }
 
+.MainBodyError {
+  padding-top: 50px;
+  display: block;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .PaneWrapper {
   padding-top: 15px;
   padding-left: 15px;

@@ -136,12 +136,19 @@ class Halin extends Component {
 
     if (err) {
       return (
-        <div className='MainBody'>
+        <div className='MainBodyError'>
           { err }
 
           <Troubleshooting error={this.state.error}/>
 
-          <Button basic onClick={() => window.location.reload()}>
+          <Button 
+            basic 
+            style={{
+              display: 'block',
+              marginLeft: 'auto',
+              marginRight: 'auto',
+            }}
+            onClick={() => window.location.reload()}>
             <i className="icon refresh"/> Try Again
           </Button>
         </div>
