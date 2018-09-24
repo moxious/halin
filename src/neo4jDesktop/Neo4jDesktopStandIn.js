@@ -1,10 +1,20 @@
 import React, { Component } from 'react';
 import ShimConnectModal from './ShimConnectModal';
+import uuid from 'uuid';
 
 const buildFakeContext = (data) => {
-    console.log('buildFakeContext',data);
+    console.log('buildFakeContext', data);
     const { host, port, username, password, name, encrypted } = data;
     const fakeContext = {
+        implementation: 'Halin.Neo4jDesktopStandIn',
+        global: {
+            online: true,
+            settings: {
+                allowSendReports: true,
+                allowSendStats: true,
+                allowStoreCredentials: true
+            }
+        },
         projects: [
             {
                 name,
@@ -12,8 +22,12 @@ const buildFakeContext = (data) => {
                     {
                         name,
                         status: 'ACTIVE',
+                        databaseStatus: 'RUNNING',
+                        databaseType: 'neo4j',
+                        id: uuid.v4(),
                         connection: {
                             configuration: {
+                                path: '.',
                                 protocols: {
                                     'bolt': {
                                         host,
@@ -70,7 +84,7 @@ export default class Neo4jDesktopStandIn extends Component {
         }
 
         return (
-            <ShimConnectModal 
+            <ShimConnectModal
                 key='modal'
                 errorMsg=''
                 onSubmit={this.onSubmit}
