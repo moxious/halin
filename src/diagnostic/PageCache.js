@@ -29,12 +29,12 @@ class PageCache extends Component {
         displayColumns: [
             { Header: 'Usage Ratio', accessor: 'usageRatio', Cell: cdt.pctField },
             { Header: 'Hit Ratio', accessor: 'hitRatio', Cell: cdt.pctField },
-            { Header: 'Bytes Read', accessor: 'bytesRead', Cell: cdt.dataSizeField },
-            { Header: 'Bytes Written', accessor: 'bytesWritten', Cell: cdt.dataSizeField },
+            { Header: 'Read', accessor: 'bytesRead', Cell: cdt.dataSizeField },
+            { Header: 'Written', accessor: 'bytesWritten', Cell: cdt.dataSizeField },
 
             { Header: 'Faults', accessor: 'faults', Cell: cdt.numField },            
-            { Header: 'Flushes', accessor: 'flushes', Cell: cdt.numField },
-            { Header: 'Evictions', accessor: 'evictions', Cell: cdt.numField },
+            { Header: 'Flushes', accessor: 'flushes', Cell: cdt.numField, show: false },
+            { Header: 'Evictions', accessor: 'evictions', Cell: cdt.numField, show: false },
 
             { Header: 'Eviction Except.', accessor: 'evictionExceptions', Cell: cdt.numField, show: false },
             { Header: 'File Mappings', accessor: 'fileMappings', Cell: cdt.numField, show: false },
@@ -55,7 +55,7 @@ class PageCache extends Component {
         return (
             <div className='PageCache'>
                 <h3>Page Cache Statistics</h3>
-                <CypherDataTable
+                <CypherDataTable 
                     driver={this.props.driver}
                     node={this.props.node}
                     query={this.state.query}
