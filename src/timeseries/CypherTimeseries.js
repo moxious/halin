@@ -15,7 +15,7 @@ import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } fr
 import NodeLabel from '../NodeLabel';
 
 const DEFAULT_PALETTE = [
-    '#f68b24', 'steelblue', '#619F3A', '#dfecd7', 
+    '#f68b24', 'steelblue', '#619F3A', '#dfecd7', '#e14594', '#7045af', '#2b3595',
 ];
 
 /**
