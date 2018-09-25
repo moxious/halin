@@ -31,7 +31,7 @@ class ConnectForm extends Component {
         const { open, errorMsg, onClose } = this.props;
         const { username, password, host, port, encrypted } = this.state;
         return (
-            <Modal size="tiny" open={open} onClose={onClose}>
+            <Modal size="tiny" closeOnEscape={false} closeOnDimmerClick={false} open={open} onClose={onClose}>
                 <Modal.Header>Connect to a graph</Modal.Header>
                 <Modal.Content>
                     <Form error={errorMsg ? true : false}>
