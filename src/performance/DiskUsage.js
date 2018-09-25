@@ -8,29 +8,37 @@ class DiskUsage extends Component {
         rate: 1000,
         width: 400,
         query: `
-            CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Store file sizes') 
+            CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Store sizes') 
             YIELD attributes 
             WITH
-                attributes.LogicalLogSize.value as logicalLog, 
-                attributes.StringStoreSize.value as stringStore, 
-                attributes.ArrayStoreSize.value as arrayStore, 
-                attributes.RelationshipStoreSize.value as relStore, 
+                attributes.CountStoreSize.value as countStore,
+                attributes.IndexStoreSize.value as indexStore,
+                attributes.LabelStoreSize.value as labelStore,
+                attributes.NodeStoreSize.value as nodeStore,
                 attributes.PropertyStoreSize.value as propStore, 
+                attributes.RelationshipStoreSize.value as relStore, 
+                attributes.SchemaStoreSize.value as schemaStore,
+                attributes.StringStoreSize.value as stringStore, 
                 attributes.TotalStoreSize.value as total, 
-                attributes.NodeStoreSize.value as nodeStore
+                attributes.TransactionLogsSize.value as txLogs,                 
+                attributes.ArrayStoreSize.value as arrayStore
             RETURN 
-                logicalLog, stringStore, arrayStore, 
+                countStore, indexStore, labelStore,
+                schemaStore, txLogs,
+                stringStore, arrayStore, 
                 relStore, propStore, total, nodeStore;        
         `,
 
         displayColumns: [
             { Header: 'Total Disk', accessor: 'total' },
-            { Header: 'Node Store', accessor: 'nodeStore', show: false },
-            { Header: 'Prop Store', accessor: 'propStore', show: false },
-            { Header: 'Rel Store', accessor: 'relStore', show: false },
-            { Header: 'Strings', accessor: 'stringStore', show: false },
-            { Header: 'Arrays', accessor: 'arrayStore', show: false },
-            { Header: 'Logical Log', accessor: 'logicalLog', show: false },
+            { Header: 'Nodes', accessor: 'nodeStore' },
+            { Header: 'Rels', accessor: 'relStore' },
+            { Header: 'Props', accessor: 'propStore' },
+            { Header: 'Index', accessor: 'indexStore' },
+            { Header: 'Schema', accessor: 'schemaStore' },
+            { Header: 'TXs', accessor: 'txLogs' },
+            { Header: 'Strings', accessor: 'stringStore' },
+            { Header: 'Arrays', accessor: 'arrayStore' },            
         ],
     };
 
