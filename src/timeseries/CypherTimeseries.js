@@ -32,6 +32,7 @@ class CypherTimeseries extends Component {
         disabled: {},
         minObservedValue: Infinity,
         maxObservedValue: -Infinity,
+        tracker: null,
     };
 
     constructor(props, context) {
@@ -119,8 +120,8 @@ class CypherTimeseries extends Component {
 
     onData(newData, dataFeed) {
         if (this.mounted) {
-            const computedMin = this.feed.min() * 0.9;
-            const computedMax = this.feed.max() * 1.1;
+            const computedMin = this.feed.min() * 0.85;
+            const computedMax = this.feed.max() * 1.15;
 
             const maxObservedValue = Math.max(
                 this.state.maxObservedValue,
@@ -199,6 +200,14 @@ class CypherTimeseries extends Component {
         // console.log('disabled',this.state.disabled);
     };
 
+    handleTrackerChanged = (t, scale) => {
+        this.setState({
+            tracker: t,
+            trackerEvent: t && this.dataSeries.at(this.dataSeries.bisect(t)),
+            trackerX: t && scale(t)
+        });
+    };
+
     render() {
         if (!this.state.events) { return 'Loading...'; }
         const style = styler(this.displayColumns.map((col, idx) => ({
@@ -207,7 +216,7 @@ class CypherTimeseries extends Component {
             width: 3,
         })));
 
-        const dataSeries = new TimeSeries({
+        this.dataSeries = new TimeSeries({
             name: "Data Series",
             events: this.state.events.toArray(),
         });
@@ -216,6 +225,13 @@ class CypherTimeseries extends Component {
             new Date(this.state.time.getTime() - (this.timeWindowWidth)),
             new Date(this.state.time.getTime() + (30 * 1000))
         );
+
+        // const tracker = this.state.tracker ? `${this.state.tracker}` : "";
+        // const markerStyle = {
+        //     backgroundColor: "rgba(255, 255, 255, 0.8)",
+        //     color: "#AAA",
+        //     marginLeft: "5px"
+        // };        
 
         return (this.state.data && this.mounted) ? (
             <div className="CypherTimeseries">
@@ -236,12 +252,29 @@ class CypherTimeseries extends Component {
                             <span style={this.dateStyle}>{`${this.state.time}`}</span>
                         </Grid.Column> */}
                     </Grid.Row>
+                    {/* <Grid.Row columns={1}>
+                        <Grid.Column>
+                        {this.state.tracker ? (
+                            <div style={{ position: "relative" }}>
+                                <div style={{ position: "absolute", left: this.state.trackerX }}>
+                                    <div style={markerStyle}>
+                                        Data In: {
+                                            (this.state.trackerEvent.get("totalMem") || 'foo')
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        ) : null}
+                        </Grid.Column>
+                    </Grid.Row> */}
                     <Grid.Row columns={1}>
                         <Grid.Column textAlign='left'>
                             <ChartContainer 
                                 showGrid={this.showGrid}
                                 showGridPosition={this.showGridPosition}
                                 width={this.width} 
+                                trackerPosition={this.state.tracker}
+                                onTrackerChanged={this.handleTrackerChanged}
                                 timeRange={timeRange}>
                                 <ChartRow height="150">
                                     <YAxis id="y" 
@@ -257,7 +290,7 @@ class CypherTimeseries extends Component {
                                                     axis="y" 
                                                     style={style} 
                                                     columns={[col.accessor]}
-                                                    series={dataSeries}
+                                                    series={this.dataSeries}
                                                     />
                                             )
                                         }
