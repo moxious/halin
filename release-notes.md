@@ -1,5 +1,10 @@
 # Halin Release Notes
 
+## 0.2.0
+
+- New disk usage timeseries monitor
+- Bugfix: you can't escape the first connection modal.
+
 ## 0.1.1
 
 - Halin can now run independent of Neo4j Desktop as a web app. (`yarn start`)
