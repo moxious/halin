@@ -80,16 +80,16 @@ const backup = pkg => {
         const addr = node.basics.address;
 
         if (isBackupEnabled(node)) {
-            const backupAddr = node.configuration['dbms.backup.address'];
+            const backupAddr = ''+node.configuration['dbms.backup.address'];
 
-            if((''+backupAddr).toLowerCase().indexOf('localhost') > -1) {
+            if(backupAddr.match(/(localhost|127\.0\.0\.1)/i)) {
                 findings.push(new InspectionResult(InspectionResult.PASS,
                     addr,
                     'Backups are enabled, but only on localhost.'));
             } else {
                 findings.push(new InspectionResult(InspectionResult.WARN,
                     addr,
-                    `You have backups enabled on a remote address (${backupAddr}).`,
+                    `You have backups enabled on a remote network device or address (${backupAddr}).`,
                     `For best security, please ensure you have proper firewalling 
                     to allow ony authorized parties to access your backup address`));
             }
