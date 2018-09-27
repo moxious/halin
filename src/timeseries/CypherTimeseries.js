@@ -24,6 +24,7 @@ const DEFAULT_PALETTE = [
  */
 class CypherTimeseries extends Component {
     state = {
+        startTime: new Date(),
         query: null,
         data: null,
         events: null,
@@ -33,6 +34,7 @@ class CypherTimeseries extends Component {
         minObservedValue: Infinity,
         maxObservedValue: -Infinity,
         tracker: null,
+        timeRange: null,
     };
 
     constructor(props, context) {
@@ -51,7 +53,7 @@ class CypherTimeseries extends Component {
         this.width = props.width || 800;
         this.min = props.min || (data => this.state.minObservedValue);
         this.max = props.max || (data => this.state.maxObservedValue);
-        this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 5;  // 5 min
+        this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 2;  // 2 min
         this.displayColumns = props.displayColumns;
         this.palette = props.palette || DEFAULT_PALETTE;
         this.showGrid = _.isNil(props.showGrid) ? false : props.showGrid;
@@ -108,6 +110,7 @@ class CypherTimeseries extends Component {
         this.setState({ 
             disabled,
             ...curState,
+            startTime: new Date(),
         });
 
         this.stream = new Stream();
@@ -133,11 +136,35 @@ class CypherTimeseries extends Component {
                 computedMin
             );
 
-            this.setState({
-                ...newData, 
+            // Start of the window is the greater of two values, either when the component started,
+            // or the current moment minus the window.  This means data scroll starts on the left and moves
+            // to the right.  When it gets to the far right, the whole timeline scrolls along.
+            const startTime = new Date(Math.max(this.state.startTime.getTime(), 
+                (newData.time.getTime() - (this.timeWindowWidth))));
+            
+            // The end time is the greater of two values: the start time plus the window,
+            // or the current data point + 1 sec into the future.
+            const endTime = new Date(Math.max(
+                this.state.startTime.getTime() + this.timeWindowWidth, 
+                newData.time.getTime() + (1000)));
+
+            const timeRange = new TimeRange(startTime, endTime);
+            //     new Date(newData.time.getTime() - (this.timeWindowWidth)),
+            //     new Date(newData.time.getTime() + (10 * 1000))
+            // );
+
+            const newState = {
+                ...newData,
                 maxObservedValue,
                 minObservedValue,
-            });
+                timeRange,
+            };
+
+            // if (!this.state.timeRange) {
+            //     newState.timeRange = timeRange;
+            // }
+
+            this.setState(newState);
         } else {
             return null;
         }
@@ -199,7 +226,11 @@ class CypherTimeseries extends Component {
         toggle(foundIdx);
         // console.log('disabled',this.state.disabled);
     };
-
+    
+    handleTimeRangeChange = timeRange => {
+        this.setState({ timeRange });
+    };
+    
     handleTrackerChanged = (t, scale) => {
         this.setState({
             tracker: t,
@@ -220,11 +251,6 @@ class CypherTimeseries extends Component {
             name: "Data Series",
             events: this.state.events.toArray(),
         });
-
-        const timeRange = new TimeRange(
-            new Date(this.state.time.getTime() - (this.timeWindowWidth)),
-            new Date(this.state.time.getTime() + (30 * 1000))
-        );
 
         // const tracker = this.state.tracker ? `${this.state.tracker}` : "";
         // const markerStyle = {
@@ -273,9 +299,11 @@ class CypherTimeseries extends Component {
                                 showGrid={this.showGrid}
                                 showGridPosition={this.showGridPosition}
                                 width={this.width} 
+                                enablePanZoom={true}
                                 trackerPosition={this.state.tracker}
                                 onTrackerChanged={this.handleTrackerChanged}
-                                timeRange={timeRange}>
+                                onTimeRangeChanged={this.handleTimeRangeChange}
+                                timeRange={this.state.timeRange}>
                                 <ChartRow height="150">
                                     <YAxis id="y" 
                                         min={this.getChartMin()} 
