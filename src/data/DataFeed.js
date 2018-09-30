@@ -18,6 +18,7 @@ export default class DataFeed {
         this.rate = props.rate || 1000;
         this.displayColumns = props.displayColumns;
         this.windowWidth = props.windowWidth || (1000 * 60 * 7);
+        this.feedStartTime = null;
 
         this.state = {
             data: null,
@@ -35,19 +36,36 @@ export default class DataFeed {
         this.name = `${this.node.getBoltAddress()}-${this.query}}`;
     }
 
+    /**
+     * @returns {Object} the last/current fetched data state of the feed.
+     */
     currentState() {
         return this.state;
     }
 
+    /**
+     * Stop the feed.  It will no longer poll.
+     */
     stop() {
         if (this.timeout) {
             clearTimeout(this.timeout);
+            this.feedStartTime = null;
         }
     }
 
+    /**
+     * Start the feed.  If the feed is already running, this stops/restarts it.
+     */
     start() {
         this.stop();
         return this.sampleData();
+    }
+
+    /**
+     * Return true if the feed is running, false otherwise.
+     */
+    isRunning() {
+        return this.feedStartTime !== null;
     }
 
     /**
@@ -72,7 +90,16 @@ export default class DataFeed {
         return Math.max(...allMaxes);
     }
 
+    /**
+     * Take a single sample of data.
+     * @returns {Promise} that when resolving calls the onData function and returns
+     * its result.
+     */
     sampleData() {
+        if (!this.feedStartTime) {
+            this.feedStartTime = new Date();
+        }
+
         const session = this.driver.session();
         const startTime = new Date().getTime();
 

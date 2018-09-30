@@ -136,22 +136,25 @@ class CypherTimeseries extends Component {
                 computedMin
             );
 
-            // Start of the window is the greater of two values, either when the component started,
-            // or the current moment minus the window.  This means data scroll starts on the left and moves
-            // to the right.  When it gets to the far right, the whole timeline scrolls along.
-            const startTime = new Date(Math.max(this.state.startTime.getTime(), 
-                (newData.time.getTime() - (this.timeWindowWidth))));
-            
-            // The end time is the greater of two values: the start time plus the window,
-            // or the current data point + 1 sec into the future.
-            const endTime = new Date(Math.max(
-                this.state.startTime.getTime() + this.timeWindowWidth, 
-                newData.time.getTime() + (1000)));
+            const futurePad = 1000; // ms into the future to show blank space on graph
+            const fst = this.feed.feedStartTime.getTime();
+
+            let startTime, endTime;
+
+            if ((newData.time.getTime() - fst) >= this.timeWindowWidth) {
+                // In this condition, the data feed has historical data to fill the full window.
+                // That means our end time should be the present, and our start time should reach back
+                // to timeWindowWidth ago.
+                startTime = newData.time.getTime() - this.timeWindowWidth;
+                endTime = newData.time.getTime() + futurePad;
+            } else {
+                // We don't have a full time window worth of data.  So to show the most, we start at the feed
+                // start time, and end at the time window width.
+                startTime = fst;
+                endTime = fst + this.timeWindowWidth + futurePad;
+            } 
 
             const timeRange = new TimeRange(startTime, endTime);
-            //     new Date(newData.time.getTime() - (this.timeWindowWidth)),
-            //     new Date(newData.time.getTime() + (10 * 1000))
-            // );
 
             const newState = {
                 ...newData,
