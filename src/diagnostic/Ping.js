@@ -3,6 +3,8 @@ import status from '../status/index';
 import Spinner from '../Spinner';
 import NodeLabel from '../NodeLabel';
 import { Button, Icon, Table } from 'semantic-ui-react';
+import SignalMeter from '../data/SignalMeter';
+import datautil from '../data/util';
 
 export default class Ping extends Component {
     state = {
@@ -46,6 +48,11 @@ export default class Ping extends Component {
             });
     }
 
+    haveErrors() {
+        if (!this.state.pingResults) { return false; }
+        return this.state.pingResults.filter(pr => pr.err).length > 0;
+    }
+
     render() {
         let message = status.formatStatusMessage(this);
 
@@ -61,8 +68,10 @@ export default class Ping extends Component {
                     <Table.Header>
                         <Table.Row>
                             <Table.HeaderCell>Machine</Table.HeaderCell>
+                            <Table.HeaderCell>Role</Table.HeaderCell>
                             <Table.HeaderCell>Result (ms)</Table.HeaderCell>
-                            <Table.HeaderCell>Other Information</Table.HeaderCell>
+                            <Table.HeaderCell>Status</Table.HeaderCell>
+                            { this.haveErrors() ? <Table.HeaderCell>Other Information</Table.HeaderCell> : '' }
                         </Table.Row>
                     </Table.Header>
                     <tbody>
@@ -72,8 +81,14 @@ export default class Ping extends Component {
                                 <Table.Cell>
                                     <NodeLabel node={r.clusterNode}/>
                                 </Table.Cell>
+                                <Table.Cell>{r.clusterNode.role}</Table.Cell>
                                 <Table.Cell>{r.elapsedMs}</Table.Cell>
-                                <Table.Cell>{r.err ? `${r.err}` : 'none'}</Table.Cell>
+                                <Table.Cell>
+                                    <SignalMeter 
+                                        strength={datautil.signalStrengthFromPing(r.elapsedMs, r.err)}
+                                    />
+                                </Table.Cell>
+                                { this.haveErrors() ? <Table.Cell>{r.err ? `${r.err}` : 'none'}</Table.Cell> : '' }
                             </Table.Row>)
                     }
                     </tbody>

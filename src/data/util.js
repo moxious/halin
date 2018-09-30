@@ -19,5 +19,33 @@ export default {
     },
 
     roundPct: num => Math.round(num * 100),
+
+    /**
+     * Given a ping time in ms, return a strength rating (0-100).
+     * These are somewhat arbitrary, based on experience with remote databases
+     * on cloud setups.
+     * @param {Number} ms the number of milliseconds to respond to a ping.
+     * @param {Error} if specified, the strength will be zero.
+     * @returns {Number} from 0-100 for signal strength.
+     */
+    signalStrengthFromPing: (ms, err) => {
+        if (err) {
+            return 0;
+        }
+
+        if (ms >= 300) {
+            return 25;
+        }
+
+        if (ms >= 200) {
+            return 50;
+        }
+
+        if (ms > 100) {
+            return 75;
+        }
+
+        return 100;
+    },
 };
 
