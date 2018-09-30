@@ -19,6 +19,7 @@ export default class DataFeed {
         this.displayColumns = props.displayColumns;
         this.windowWidth = props.windowWidth || (1000 * 60 * 7);
         this.feedStartTime = null;
+        this.lastElapsedMs = -1;
 
         this.state = {
             data: null,
@@ -105,14 +106,14 @@ export default class DataFeed {
 
         return session.run(this.query, this.params)
             .then(results => {
-                const elapsedMs = new Date().getTime() - startTime;
+                this.lastElapsedMs = new Date().getTime() - startTime;
 
-                if (elapsedMs > this.rate) {
+                if (this.lastElapsedMs > this.rate) {
                     // It's a bad idea to run long-running queries with a short window.
                     // It puts too much load on the system and does a bad job updating the
                     // graphic.
                     console.warn('DataFeed query is taking a lot of time relative to your execution window.  Consider adjusting', {
-                        elapsedMs, addr: this.node.getBoltAddress(),
+                        elapsedMs: this.lastElapsedMs, addr: this.node.getBoltAddress(),
                     });
                 }
 
@@ -142,6 +143,9 @@ export default class DataFeed {
             })
             .catch(err => {
                 console.error('Failed to execute timeseries query', err);
+                if (this.onError) {
+                    this.onError(err, this);
+                }
             })
             .finally(() => session.close());
     }
