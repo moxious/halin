@@ -1,10 +1,10 @@
 {
   "name": "halin",
   "description": "Halin helps you monitor and improve your Neo4j graph",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "neo4jDesktop": {
     "apiVersion": "^1.2.0"
-  }, 
+  },
   "icons": [
     {
       "src": "./public/img/halin-icon.png",
@@ -12,8 +12,8 @@
     }
   ],
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/moxious/halin.git"
+    "type": "git",
+    "url": "https://github.com/moxious/halin.git"
   },
   "homepage": "http://halin.s3-website-us-east-1.amazonaws.com/",
   "private": false,
@@ -26,6 +26,7 @@
     "pondjs": "^0.8.9",
     "prop-types": "^15.6.0",
     "react": "^16.0.0",
+    "react-d3-components": "^0.9.1",
     "react-dom": "^16.0.0",
     "react-scripts": "1.0.16",
     "react-sortable-tree": "^2.2.0",

@@ -1,5 +1,11 @@
 # Halin Release Notes
 
+## 0.3.0
+
+- Fix issue #10; 127.0.0.1 backups are not recognized as local
+- Improved timeseries moving window behavior
+- Added an OS sub-window with operating system memory statistics
+
 ## 0.2.0
 
 - New disk usage timeseries monitor
