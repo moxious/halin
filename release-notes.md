@@ -1,5 +1,12 @@
 # Halin Release Notes
 
+## 0.3.1
+
+Bugfixes
+
+- Issue #14: systems which don't have swap memory show an eternal loading spinner
+- Issue #13: time windows are inappropriately reset when switching between tabs
+
 ## 0.3.0
 
 - Fix issue #10; 127.0.0.1 backups are not recognized as local
