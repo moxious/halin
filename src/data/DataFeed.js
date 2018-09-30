@@ -146,6 +146,9 @@ export default class DataFeed {
                 if (this.onError) {
                     this.onError(err, this);
                 }
+
+                // Back off and schedule next call to be 2x the normal window.
+                this.timeout = setTimeout(() => this.sampleData(), this.rate * 2);
             })
             .finally(() => session.close());
     }
