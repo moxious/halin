@@ -9,6 +9,7 @@ import './CypherDataTable.css';
 import uuid from 'uuid';
 import NodeLabel from '../NodeLabel';
 import Spinner from '../Spinner';
+import datautil from '../data/util';
 
 const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
 
@@ -22,22 +23,6 @@ const toFloat = val => {
     if (_.isNil(val)) { return 'n/a'; }
     const num = parseFloat(val, 10);
     return num;
-};
-
-const humanDataSize = (bytes, si) => {
-    var thresh = si ? 1000 : 1024;
-    if(Math.abs(bytes) < thresh) {
-        return bytes + ' B';
-    }
-    var units = si
-        ? ['kB','MB','GB','TB','PB','EB','ZB','YB']
-        : ['KiB','MiB','GiB','TiB','PiB','EiB','ZiB','YiB'];
-    var u = -1;
-    do {
-        bytes /= thresh;
-        ++u;
-    } while(Math.abs(bytes) >= thresh && u < units.length - 1);
-    return bytes.toFixed(1)+' '+units[u];
 };
 
 const convertMsToTime = (millis) => {
@@ -75,7 +60,7 @@ class CypherDataTable extends Component {
     }
 
     static dataSizeField(item) {
-        return <div className='_dataSizeField'>{humanDataSize(item.value)}</div>
+        return <div className='_dataSizeField'>{datautil.humanDataSize(item.value, true)}</div>
     }
 
     static pctField(item) {
