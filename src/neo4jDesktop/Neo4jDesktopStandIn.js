@@ -3,7 +3,7 @@ import ShimConnectModal from './ShimConnectModal';
 import uuid from 'uuid';
 
 const buildFakeContext = (data) => {
-    console.log('buildFakeContext', data);
+    console.log('Stand-alone Halin Context', data);
     const { host, port, username, password, name, encrypted } = data;
     const fakeContext = {
         implementation: 'Halin.Neo4jDesktopStandIn',
