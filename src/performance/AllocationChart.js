@@ -24,20 +24,19 @@ export default class AllocationChart extends Component {
     componentWillReceiveProps(props) {
         // Take the free and total the user gave us and compute 
         // percentages, fill in the gaps.
-        if (props.total && props.free) {
-            const newState = {
-                populated: true,
-                free: props.free,
-                total: props.total,
-                freePct: (props.free / props.total),
-                allocPct: 1 - (props.free / props.total),
-                alloc: (props.total - props.free),
-                pieWidth: props.pieWidth || defaultWidth,
-                pieHeight: props.pieHeight || defaultHeight,
-            };
+        const newState = {
+            populated: true,
+            valid: true,
+            free: props.free,
+            total: props.total,
+            freePct: (props.free / props.total),
+            allocPct: 1 - (props.free / props.total),
+            alloc: (props.total - props.free),
+            pieWidth: props.pieWidth || defaultWidth,
+            pieHeight: props.pieHeight || defaultHeight,
+        };
 
-            this.setState(newState);
-        }
+        this.setState(newState);
     }
 
     tooltip = (label, value) => {
@@ -73,6 +72,7 @@ export default class AllocationChart extends Component {
             <div className='AllocationChart'>
                 <h5>{this.props.label} Total: {tot}</h5>
                 { this.state.populated ? 
+                    ((this.state.total && this.state.total > 0) ? 
                     <PieChart
                         data={this.makeData()}
                         tooltipHtml={this.tooltip}
@@ -81,7 +81,7 @@ export default class AllocationChart extends Component {
                         colorScale={d3.scale.category20()}
                         margin={{top: 10, bottom: 10, left: 100, right: 100}}
                         sort={this.state.sort}
-                    />            
+                    /> : <h5>None/Not Enabled</h5>)
                 : <Spinner active={true} /> }
             </div>
         )
