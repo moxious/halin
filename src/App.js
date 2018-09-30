@@ -7,6 +7,7 @@ import {
 import { Render } from 'graph-app-kit/components/Render';
 import Neo4jConfiguration from './configuration/Neo4jConfiguration';
 import PerformancePane from './performance/PerformancePane';
+import OSPane from './performance/OSPane';
 import DatabasePane from './db/DatabasePane';
 import PermissionsPane from './configuration/PermissionsPane';
 import { Tab, Button } from 'semantic-ui-react'
@@ -40,20 +41,25 @@ class Halin extends Component {
         render: () => this.paneWrapper(
           <PerformancePane key={key} node={node} driver={driver} />),
       },
+      {
+        menuItem: 'Configuration',
+        render: () => this.paneWrapper(
+          <Neo4jConfiguration key={key} node={node} driver={driver} />),
+      },
+      {
+        menuItem: 'OS',
+        render: () => this.paneWrapper(
+          <OSPane key={key} node={node} driver={driver} />),
+      },
       // {
       //   menuItem: 'User Management',
       //   render: () => this.paneWrapper(
       //     <PermissionsPane key={key} node={node} driver={driver}/>),
       // },
       {
-        menuItem: 'Database',
+        menuItem: 'Data',
         render: () => this.paneWrapper(
           <DatabasePane key={key} node={node} driver={driver} />),
-      },
-      {
-        menuItem: 'Configuration',
-        render: () => this.paneWrapper(
-          <Neo4jConfiguration key={key} node={node} driver={driver} />),
       },
     ]),
   };

@@ -4,10 +4,8 @@ import { Grid } from 'semantic-ui-react';
 // import HeapComponent from './HeapComponent';
 import MemoryMonitor from './MemoryMonitor';
 import SystemLoad from './SystemLoad';
-import DiskUsage from './DiskUsage';
 import GCMonitor from './GCMonitor';
 import ActiveQueries from './ActiveQueries';
-import PageCache from '../diagnostic/PageCache';
 import StoreFiles from '../diagnostic/StoreFiles';
 import uuid from 'uuid';
 
@@ -25,16 +23,6 @@ class PerformancePane extends Component {
 
                         <Grid.Column>
                             <MemoryMonitor key={key} node={this.props.node} driver={this.props.driver}/>
-                        </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={2}>
-                        <Grid.Column>
-                            <DiskUsage key={key} node={this.props.node} driver={this.props.driver}/>
-                        </Grid.Column>
-                    
-                        <Grid.Column>
-                            <PageCache key={key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
                     </Grid.Row>
 
