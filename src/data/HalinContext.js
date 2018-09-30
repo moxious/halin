@@ -192,22 +192,40 @@ export default class HalinContext {
         const addr = clusterNode.getBoltAddress();
         const driver = this.driverFor(addr);
 
-        const session = driver.session();
+        // Gets or creates a ping data feed for this cluster node.
+        // Data feed keeps running so that we can deliver the data to the user,
+        // but also have a feed of data to know if the cord is getting unplugged
+        // as the app runs.
+        const pingFeed = this.getDataFeed({
+            node: clusterNode,
+            driver,
+            query: 'RETURN true as value',
+            params: {},
+            rate: 1000,
+            windowWidth: 10 * 1000,   // Keep last 10 pings
+            displayColumns: [ { Header: 'Value', accessor: 'value' } ],
+        });
 
-        const startTime = new Date().getTime();
-        return session.run('RETURN true as value', {})
-            .then(result => {
-                const elapsedMs = new Date().getTime() - startTime;
-                
-                const v = result.records[0].get('value');
-                assert(v === true);
+        // Caller needs a promise.  The feed is already running, so 
+        // We return a promise that resolves the next time the data feed
+        // comes back with a result.
+        return new Promise((resolve, reject) => {
+            const onPingData = (newData, dataFeed) => {
+                return resolve({
+                    clusterNode, 
+                    elapsedMs: pingFeed.lastElapsedMs,
+                    err: null,
+                });
+            };
 
-                return { clusterNode, elapsedMs, err: null };
-            })
-            .catch(err => {
-                console.error('HalinContext: failed to ping',addr);
-                return { clusterNode, elapsedMs: -1, err };
-            });
+            const onError = (err, dataFeed) => {
+                console.error('HalinContext: failed to ping', addr, err);
+                reject(err, dataFeed);
+            };
+
+            pingFeed.onData = onPingData;
+            pingFeed.onError = onError;
+        });
     }
 
     /**
