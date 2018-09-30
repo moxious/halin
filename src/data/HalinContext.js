@@ -45,7 +45,7 @@ export default class HalinContext {
         const feed = this.dataFeeds[df.name];
         if (feed) { return feed; }
         this.dataFeeds[df.name] = df;
-        console.log('Halin starting new DataFeed: ', df.name.slice(0, 120) + '...');
+        // console.log('Halin starting new DataFeed: ', df.name.slice(0, 120) + '...');
         df.start();
         return df;
     }
@@ -161,7 +161,7 @@ export default class HalinContext {
         try {
             return nd.getFirstActive()
                 .then(active => {
-                    console.log('FIRST ACTIVE', active);
+                    // console.log('FIRST ACTIVE', active);
                     this.project = active.project;
                     this.graph = active.graph;
 
