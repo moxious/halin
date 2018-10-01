@@ -36,12 +36,6 @@ class DiagnosticPane extends Component {
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <Ping key={this.state.key} node={this.props.node} driver={this.props.driver}/>
-                        </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={1}>
-                        <Grid.Column>
                             <h3>Run Diagnostics</h3> 
                             
                             <p>This function runs a suite of tests and can provide advice on how
@@ -56,11 +50,11 @@ class DiagnosticPane extends Component {
                         </Grid.Column>
                     </Grid.Row>
 
-                    {/* <Grid.Row columns={1}>
+                    <Grid.Row columns={1}>
                         <Grid.Column>
-                            <Cypher query="CALL dbms.queryJmx('*:*')" render={renderJMX} interval={3000} />
+                            <Ping key={this.state.key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
-                    </Grid.Row> */}
+                    </Grid.Row>
                 </Grid>  
             </div>
         );
