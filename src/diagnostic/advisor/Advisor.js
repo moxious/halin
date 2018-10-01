@@ -11,6 +11,7 @@ export default class Advisor extends Component {
             { 
                 Header: 'Level', 
                 accessor: 'level',
+                width: 100,
                 filterMethod: (filter, row) => {
                     if (filter.value === "all") {
                         return true;
