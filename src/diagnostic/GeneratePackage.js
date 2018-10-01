@@ -6,6 +6,7 @@ import uuid from 'uuid';
 import status from '../status/index';
 import moment from 'moment';
 import Advisor from './advisor/Advisor';
+import ConfigurationDiff from './ConfigurationDiff';
 import advisor from './advisor/index';
 
 class GeneratePackage extends Component {
@@ -74,16 +75,42 @@ class GeneratePackage extends Component {
             URL.createObjectURL(blob);
     };
 
+    renderDiagnosticAdvice() {
+        if (!this.state.diagnosticData) {
+            return '';
+        }
+
+        return (
+            <div className='DiagnosticAdvice'>
+                <Advisor 
+                    key={uuid.v4()} 
+                    data={advisor.generateRecommendations(this.state.diagnosticData)}
+                /> : 
+
+                <ConfigurationDiff data={this.state.diagnosticData} />
+            </div>
+        )
+    }
+
     render() {
         let message = status.formatStatusMessage(this);
 
         return (
             <div className='GeneratePackage'>
-                <Button basic
+                <Button basic disabled={this.state.loading}
                         onClick={this.generatePackage}>
                     <Icon name='cogs'/>
                     Run Diagnostics!
                 </Button>
+
+                { this.state.diagnosticData ? (
+                    <Button basic 
+                        download={`neo4j-diagnostics-${this.state.dataGenerated}.json`}
+                        href={this.buildURI(this.state.diagnosticData)}>
+                        <Icon name="download"/>
+                        Download Diagnostics
+                    </Button>
+                ) : '' }
 
                 <div style={{
                     marginTop: '15px',
@@ -98,21 +125,7 @@ class GeneratePackage extends Component {
                     this.state.loading ? <Spinner active={this.state.loading} /> : ''
                 }
 
-                { this.state.diagnosticData ? 
-                    <Advisor 
-                        key={uuid.v4()} 
-                        data={advisor.generateRecommendations(this.state.diagnosticData)}
-                    /> : 
-                  '' }
-
-                { this.state.diagnosticData ? (
-                    <Button basic 
-                        download={`neo4j-diagnostics-${this.state.dataGenerated}.json`}
-                        href={this.buildURI(this.state.diagnosticData)}>
-                        <Icon name="download"/>
-                        Download Diagnostics
-                    </Button>
-                ) : '' }
+                { this.renderDiagnosticAdvice() }
             </div>
         );
     }
