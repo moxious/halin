@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import * as PropTypes from "prop-types";
-import { Button, Icon } from 'semantic-ui-react';
+import { Button, Icon, Tab } from 'semantic-ui-react';
 import Spinner from '../Spinner';
 import uuid from 'uuid';
 import status from '../status/index';
@@ -80,16 +80,27 @@ class GeneratePackage extends Component {
             return '';
         }
 
-        return (
-            <div className='DiagnosticAdvice'>
-                <Advisor 
-                    key={uuid.v4()} 
-                    data={advisor.generateRecommendations(this.state.diagnosticData)}
-                /> : 
+        const panes = [
+            { 
+                menuItem: 'Advisor', 
+                render: () => 
+                    <Tab.Pane>
+                        <Advisor 
+                            key={uuid.v4()} 
+                            data={advisor.generateRecommendations(this.state.diagnosticData)}
+                        />
+                    </Tab.Pane>,
+            },
+            { 
+                menuItem: 'Configuration Diff', 
+                render: () => 
+                    <Tab.Pane>
+                        <ConfigurationDiff data={this.state.diagnosticData} />
+                    </Tab.Pane> 
+            },
+        ];
 
-                <ConfigurationDiff data={this.state.diagnosticData} />
-            </div>
-        )
+        return (<Tab menu={{ borderless: true, attached: false, tabular: false }} panes={panes} />);
     }
 
     render() {

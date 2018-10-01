@@ -27,8 +27,9 @@ export default class ConfigurationDiff extends Component {
                     </div>,
             },
             {
-                Header: 'All Values Match', 
+                Header: 'Values Match', 
                 accessor: 'unanimous',
+                width: 125,
                 filterMethod: (filter, row) => {
                     if (filter.value === "all") {
                         return true;
@@ -49,8 +50,8 @@ export default class ConfigurationDiff extends Component {
                         <option value="false">No</option>
                     </select>,
                 Cell: props => props.value ? 
-                    <Icon circular color='green' name='checkmark'/> : 
-                    <Icon circular color='red' name='cancel' />,
+                    <Icon color='green' name='checkmark'/> : 
+                    <Icon color='red' name='cancel' />,
             },
         ];
 
@@ -87,7 +88,9 @@ export default class ConfigurationDiff extends Component {
         console.lo
         return (
             <div className='ConfigurationDiff'>
-                <h4>Configuration Diff</h4>
+                <h3>Configuration Difference</h3>
+
+                Use the table below to explore similarities and differences between node configurations.
 
                 <ReactTable
                     // By default, filter only catches data if the value STARTS WITH
