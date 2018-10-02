@@ -1,27 +1,15 @@
 import React, { Component } from 'react';
 import CypherTimeseries from '../timeseries/CypherTimeseries';
 import uuid from 'uuid';
+import queryLibrary from '../data/query-library';
 
 class SystemLoad extends Component {
     state = {
         key: uuid.v4(),
         rate: 1000,
         width: 400,
-        query: `
-            CALL dbms.queryJmx('java.lang:type=OperatingSystem') 
-            YIELD attributes 
-            WITH 
-                attributes.SystemLoadAverage as SystemLoad, 
-                attributes.ProcessCpuLoad as ProcessLoad 
-            RETURN 
-                SystemLoad.value as systemLoad, 
-                ProcessLoad.value as processLoad;
-        `,
-
-        displayColumns: [
-            { Header: 'System Load', accessor: 'systemLoad'}, 
-            { Header: 'Process Load', accessor: 'processLoad' },
-        ],
+        query: queryLibrary.OS_LOAD_STATS.query, 
+        displayColumns: queryLibrary.OS_LOAD_STATS.columns,
     };
 
     render() {

@@ -1,34 +1,16 @@
 import React, { Component } from 'react';
 import CypherTimeseries from '../timeseries/CypherTimeseries';
 import uuid from 'uuid';
+import queryLibrary from '../data/query-library';
 
 class TransactionMonitor extends Component {
     state = {
         key: uuid.v4(),
         rate: 1000,
         width: 400,
-        query: `
-            CALL dbms.queryJmx("org.neo4j:instance=kernel#0,name=Transactions") 
-            YIELD attributes WITH attributes as a 
-            RETURN 
-                a.NumberOfRolledBackTransactions.value as rolledBack, 
-                a.NumberOfOpenTransactions.value as open, 
-                a.LastCommittedTxId.value as lastCommittedId, 
-                a.NumberOfOpenedTransactions.value as opened, 
-                a.PeakNumberOfConcurrentTransactions.value as concurrent, 
-                a.NumberOfCommittedTransactions.value as committed
-        `,
-
-        displayColumns: [
-            { Header: 'Rolled Back', accessor: 'rolledBack' },
-            { Header: 'Open', accessor: 'open' },
-        ],
-        legendOnlyColumns: [
-            { Header: 'Peak Concurrent', accessor: 'concurrent' },
-            { Header: 'Opened', accessor: 'opened' },
-            { Header: 'Committed', accessor: 'committed' },
-            { Header: 'Last Committed', accessor: 'lastCommittedId' },
-        ],
+        query: queryLibrary.JMX_TRANSACTIONS.query,
+        displayColumns: queryLibrary.JMX_TRANSACTIONS.columns,
+        legendOnlyColumns: queryLibrary.JMX_TRANSACTIONS.legendOnlyColumns,
     };
 
     onUpdate = (childQueryState) => {

@@ -1,30 +1,41 @@
 import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
+import queryLibrary from '../data/query-library';
 
 class GCPauseTime extends Component {
     state = {
         key: uuid.v4(),
         rate: 1000,
         width: 400,
-        query: `
-            CALL dbms.queryJmx('java.lang:name=G1 Young Generation,type=GarbageCollector') 
-            YIELD name, attributes 
-            WHERE name =~ '(?i).*garbage.*' 
-            WITH attributes.LastGcInfo.value.properties as lastGC 
-            
-            RETURN 
-                /* lastGC.startTime as startTime, */
-                lastGC.duration as duration,
-                lastGC.GcThreadCount as threadCount
-            LIMIT 1;
-        `,
+        query: queryLibrary.JMX_GARBAGE_COLLECTOR.query,
+    };
+
+    dataFeedMaker = node => {
+        const halin = window.halinContext;
+
+        const addr = node.getBoltAddress();
+        const driver = halin.driverFor(addr);
+
+        const feed = halin.getDataFeed({
+            node,
+            driver,
+            query: this.state.query,
+            rate: this.state.rate,
+            windowWidth: 1000 * 60 * 5,
+
+            // Get data for a single value only.
+            displayColumns: queryLibrary.JMX_GARBAGE_COLLECTOR.columns,
+            params: {},
+        });
+
+        return feed;
     };
 
     render() {
         return (
             <div className="GCPauseTime">
-                <h3>GC Pause Time (ms)</h3>
+                <h3>Last GC Pause Time (ms)</h3>
                 <ClusterTimeseries key={this.state.key}
                     query={this.state.query} 
                     width={this.state.width}

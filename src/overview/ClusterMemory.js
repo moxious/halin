@@ -1,21 +1,14 @@
 import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
+import queryLibrary from '../data/query-library';
 
 class ClusterMemory extends Component {
     state = {
         key: uuid.v4(),
         rate: 1000,
         width: 400,
-        query: `
-            CALL dbms.queryJmx('java.lang:type=Memory') yield attributes 
-            WITH 
-                attributes.HeapMemoryUsage as heap
-            WITH 
-                heap.value.properties as heapProps        
-            return 
-                heapProps.used as heapUsed
-        `,
+        query: queryLibrary.JMX_MEMORY_STATS.query,
     };
 
     render() {
