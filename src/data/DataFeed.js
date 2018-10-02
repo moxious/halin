@@ -7,7 +7,23 @@ const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
  * DataFeed is an abstraction that polls a cypher query
  * against a driver in a configurable way, and can happen
  * in the background independent of a component being 
- * mounted or not mounted.  
+ * mounted or not mounted.
+ * 
+ * Data feeds must have a query, and must have a set of displayColumns of the form
+ * [ { Header: 'foo', accessor: 'bar' }, ... ].
+ * 
+ * This indicates that the 'bar' field is coming back from the cypher query.
+ * 
+ * DataFeeds may have "augmentationFunctions".  Every time new data is received from the
+ * feed, the augmentation functions are run. In this way you can add computed values that
+ * aren't present in the output with any javascript.
+ * 
+ * DataFeeds may have "aliases".  This permits dynamically renaming columns from a cypher
+ * output to some other column name.  For example, to separate the same "freeMem" field
+ * amongst a set of 4 different results from cluster members.
+ * 
+ * DataFeeds may be started and stopped, and can have multiple listeners who get notified
+ * when new data is available.
  */
 export default class DataFeed {
     constructor(props) {
@@ -19,12 +35,12 @@ export default class DataFeed {
         this.displayColumns = props.displayColumns;
         
         // A list of aliases can be passed, allowing renaming of columns.
-        this.alias = props.alias || {};
+        this.aliases = props.alias ? [props.alias] : [];
 
         // An augmentation function can be passed to allow computing values that
         // aren't in the query, on the basis of some external function.
-        this.augmentData = props.augmentData;
-
+        this.augmentFns = props.augmentData ? [props.augmentData] : [];
+        this.debug = props.debug;
         this.windowWidth = props.windowWidth || (1000 * 60 * 7);
         this.feedStartTime = null;
         this.lastElapsedMs = -1;
@@ -39,10 +55,12 @@ export default class DataFeed {
         this.listeners = props.onData ? [props.onData] : [];
 
         if (!this.node || !this.driver || !this.query || !this.displayColumns) {
+            console.error(props);
             throw new Error('Missing one of required props displayColumns, node, driver, query');
         }
 
-        this.name = `${this.node.getBoltAddress()}-${this.query}}`;
+        const qtag = this.query.replace(/\s*[\r\n]+\s*/g, ' ');
+        this.name = `${this.node.getBoltAddress()}-${qtag}}`;
     }
 
     /**
@@ -50,6 +68,29 @@ export default class DataFeed {
      */
     currentState() {
         return this.state;
+    }
+
+    addAugmentationFunction(fn) {
+        if (this.augmentFns.indexOf(fn) === -1) {
+            this.augmentFns.push(fn);
+        }
+
+        return this.augmentFns;
+    }
+
+    removeAugmentationFunction(fn) {
+        const idx = this.augmentFns.indexOf(fn);
+        if (idx > -1) {
+            this.augmentFns.splice(idx, 1);
+        }
+        return this.augmentFns;
+    }
+
+    addAliases(aliases) {
+        if (this.aliases.indexOf(aliases) !== -1) {
+            this.aliases.push(aliases);
+        }
+        return this.aliases;
     }
 
     addListener(listener) {
@@ -186,12 +227,17 @@ export default class DataFeed {
                     data[col.accessor] = neo4j.isInt(val) ? neo4j.integer.toNumber(val) : val;
                 });
 
-                if (this.augmentData) {
-                    data = _.merge(data, this.augmentData(data));
-                }
+                // Progressively merge data from the augmentation functions, if
+                // present.
+                this.augmentFns.forEach(fn => {
+                    data = _.merge(data, fn(data));
+                });
 
-                Object.keys(this.alias).forEach(aliasKey => {
-                    data[this.alias[aliasKey]] = data[aliasKey];
+                // Apply aliases if specified.
+                this.aliases.forEach(aliasObj => {
+                    Object.keys(aliasObj).forEach(aliasKey => {
+                        data[aliasObj[aliasKey]] = data[aliasKey];
+                    });
                 });
 
                 this.timeout = setTimeout(() => this.sampleData(), this.rate);
