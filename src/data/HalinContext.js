@@ -8,7 +8,6 @@ import moment from 'moment';
 import appPkg from '../package.json';
 import ClusterManager from './cluster/ClusterManager';
 
-import assert from 'assert';
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 /**
@@ -223,7 +222,7 @@ export default class HalinContext {
                 reject(err, dataFeed);
             };
 
-            pingFeed.onData = onPingData;
+            pingFeed.addListener(onPingData);
             pingFeed.onError = onError;
         });
     }
