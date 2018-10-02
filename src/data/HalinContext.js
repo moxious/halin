@@ -25,11 +25,16 @@ export default class HalinContext {
         this.graph = null;
         this.drivers = {};
         this.dataFeeds = {};
+        this.pollRate = 1000;
         this.driverOptions = {
             connectionTimeout: 10000,
             trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
         };
         this.mgr = new ClusterManager(this);
+    }
+
+    getPollRate() {
+        return this.pollRate;
     }
 
     /**
@@ -42,7 +47,9 @@ export default class HalinContext {
     getDataFeed(feedOptions) {
         const df = new DataFeed(feedOptions);
         const feed = this.dataFeeds[df.name];
-        if (feed) { return feed; }
+        if (feed) { 
+            return feed; 
+        }
         this.dataFeeds[df.name] = df;
         // console.log('Halin starting new DataFeed: ', df.name.slice(0, 120) + '...');
         df.start();
