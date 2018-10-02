@@ -85,7 +85,6 @@ export default class ConfigurationDiff extends Component {
             );
         }
 
-        console.lo
         return (
             <div className='ConfigurationDiff'>
                 <h3>Configuration Difference</h3>
