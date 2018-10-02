@@ -5,6 +5,7 @@ import ClusterMemory from './ClusterMemory';
 import GCPauseTime from './GCPauseTime';
 import PageCacheFaults from './PageCacheFaults';
 import TransactionsOpen from './TransactionsOpen';
+import UsedMemory from './UsedMemory';
 
 export default class ClusterOverviewPane extends Component {
     render() {
@@ -28,6 +29,12 @@ export default class ClusterOverviewPane extends Component {
 
                         <Grid.Column>
                             <TransactionsOpen />
+                        </Grid.Column>
+                    </Grid.Row>
+
+                    <Grid.Row columns={2}>
+                        <Grid.Column>
+                            <UsedMemory />
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>
