@@ -17,6 +17,7 @@ export default class DataFeed {
         this.params = props.params || {};
         this.rate = props.rate || 1000;
         this.displayColumns = props.displayColumns;
+        this.alias = props.alias || {};
         this.windowWidth = props.windowWidth || (1000 * 60 * 7);
         this.feedStartTime = null;
         this.lastElapsedMs = -1;
@@ -132,6 +133,9 @@ export default class DataFeed {
                 this.displayColumns.forEach(col => {
                     const val = rec.get(col.accessor);
                     data[col.accessor] = neo4j.isInt(val) ? neo4j.integer.toNumber(val) : val;
+                    if (this.alias[col.accessor]) {
+                        data[this.alias[col.accessor]] = data[col.accessor];
+                    }
                 })
 
                 this.timeout = setTimeout(() => this.sampleData(), this.rate);
