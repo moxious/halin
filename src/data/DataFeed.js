@@ -17,7 +17,14 @@ export default class DataFeed {
         this.params = props.params || {};
         this.rate = props.rate || 1000;
         this.displayColumns = props.displayColumns;
+        
+        // A list of aliases can be passed, allowing renaming of columns.
         this.alias = props.alias || {};
+
+        // An augmentation function can be passed to allow computing values that
+        // aren't in the query, on the basis of some external function.
+        this.augmentData = props.augmentData;
+
         this.windowWidth = props.windowWidth || (1000 * 60 * 7);
         this.feedStartTime = null;
         this.lastElapsedMs = -1;
@@ -29,7 +36,7 @@ export default class DataFeed {
             lastDataArrived: new Date(),
         };
 
-        this.onData = props.onData || (() => null);
+        this.listeners = props.onData ? [props.onData] : [];
 
         if (!this.node || !this.driver || !this.query || !this.displayColumns) {
             throw new Error('Missing one of required props displayColumns, node, driver, query');
@@ -43,6 +50,23 @@ export default class DataFeed {
      */
     currentState() {
         return this.state;
+    }
+
+    addListener(listener) {
+        if (this.listeners.indexOf(listener) === -1) {
+            this.listeners.push(listener);
+        }
+
+        return this.listeners;
+    }
+
+    removeListener(listener) {
+        const idx = this.listeners.indexOf(listener);
+        if (idx > -1) {
+            this.listeners.splice(idx, 1);
+        }
+
+        return this.listeners;
     }
 
     /**
@@ -73,14 +97,29 @@ export default class DataFeed {
     /**
      * Get the minmum value that occurs in the feed.
      */
-    min(cols=this.displayColumns) {
+    min(cols=this.displayColumns, debug=false) {
         if (!this.state.data || this.state.data.length === 0) { return 0; }
-        const minObs = obs => Math.min(...Object.values(obs));
+
+        const timeEvents = this.state.events.toArray();
+
+        // TimeEvent data is structured in a weird way for this computation we want
+        // to do so I tacked on an _original field which is nasty, but works.
+        const dataPackets = timeEvents.map(te => te._original);
+
+        const minObs = obs => {
+            const vals = Object.values(obs).filter(i => !Number.isNaN(i));
+            return Math.min(...vals);
+        };
 
         const pickFields = cols.map(c => c.accessor);
-        const allMins = this.state.data
+        const allMins = dataPackets
             .map(obs => _.pick(obs, pickFields))
             .map(obs => minObs(obs));
+
+        if (debug) {
+            console.log('MIN cols=',cols,'is',allMins);
+        }
+        
         return Math.min(...allMins);
     }
 
@@ -88,15 +127,27 @@ export default class DataFeed {
      * Get the maximum value that occurs in the feed.
      * @param cols find the max only considering the provided columns (defaults to all)
      */
-    max(cols=this.displayColumns) {
+    max(cols=this.displayColumns, debug=false) {
         if (!this.state.data || this.state.data.length === 0) { return 1; }
-        const maxObs = obs => Math.max(...Object.values(obs));
+        
+        const maxObs = obs => {
+            const vals = Object.values(obs).filter(i => !Number.isNaN(i));
+            return Math.max(...vals);
+        };
+
+        const timeEvents = this.state.events.toArray();
+        const dataPackets = timeEvents.map(te => te._original);
 
         const pickFields = cols.map(c => c.accessor);
-        const allMaxes = this.state.data
+        const allMaxes = dataPackets
             .map(obs => _.pick(obs, pickFields))
             .map(obs => maxObs(obs));
-        return Math.max(...allMaxes);
+
+        if (debug) {
+            console.log('MIN cols=',cols,'is',allMaxes);
+        }
+    
+        return Math.max(100, Math.max(...allMaxes));
     }
 
     /**
@@ -127,21 +178,31 @@ export default class DataFeed {
 
                 // Take the first result only.  This component only works with single-record queries.
                 const rec = results.records[0];
-                const data = {};
+                let data = {};
 
                 // Plug query data values into data map, converting ints as necessary.
                 this.displayColumns.forEach(col => {
                     const val = rec.get(col.accessor);
                     data[col.accessor] = neo4j.isInt(val) ? neo4j.integer.toNumber(val) : val;
-                    if (this.alias[col.accessor]) {
-                        data[this.alias[col.accessor]] = data[col.accessor];
-                    }
-                })
+                });
+
+                if (this.augmentData) {
+                    data = _.merge(data, this.augmentData(data));
+                }
+
+                Object.keys(this.alias).forEach(aliasKey => {
+                    data[this.alias[aliasKey]] = data[aliasKey];
+                });
 
                 this.timeout = setTimeout(() => this.sampleData(), this.rate);
 
                 const t = new Date();
                 const event = new TimeEvent(t, data);
+                
+                // Tack on the extra field so that other computations can
+                // access the data in the original format.
+                event._original = data;
+
                 const newEvents = this.state.events;
                 newEvents.push(event);
                 this.state.lastDataArrived = new Date();
@@ -150,7 +211,7 @@ export default class DataFeed {
                 this.state.event = newEvents;
 
                 // Let our user know we have something new.
-                return this.onData(this.state, this);
+                return this.listeners.map(listener => listener(this.state, this));
             })
             .catch(err => {
                 console.error('Failed to execute timeseries query', err);
