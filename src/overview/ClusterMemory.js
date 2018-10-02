@@ -21,6 +21,8 @@ class ClusterMemory extends Component {
     render() {
         return (
             <div className="ClusterMemory">
+                <h3>Heap Size (bytes)</h3>
+
                 <ClusterTimeseries key={this.state.key}
                     query={this.state.query} 
                     width={this.state.width}
