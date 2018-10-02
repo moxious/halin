@@ -1,7 +1,7 @@
 import Ring from 'ringjs';
-import { TimeEvent } from "pondjs";
-
-const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
+import { TimeEvent } from 'pondjs';
+import _ from 'lodash';
+const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 /**
  * DataFeed is an abstraction that polls a cypher query
@@ -72,22 +72,29 @@ export default class DataFeed {
     /**
      * Get the minmum value that occurs in the feed.
      */
-    min() {
+    min(cols=this.displayColumns) {
         if (!this.state.data || this.state.data.length === 0) { return 0; }
         const minObs = obs => Math.min(...Object.values(obs));
 
-        const allMins = this.state.data.map(obs => minObs(obs));
+        const pickFields = cols.map(c => c.accessor);
+        const allMins = this.state.data
+            .map(obs => _.pick(obs, pickFields))
+            .map(obs => minObs(obs));
         return Math.min(...allMins);
     }
 
     /**
      * Get the maximum value that occurs in the feed.
+     * @param cols find the max only considering the provided columns (defaults to all)
      */
-    max() {
+    max(cols=this.displayColumns) {
         if (!this.state.data || this.state.data.length === 0) { return 1; }
         const maxObs = obs => Math.max(...Object.values(obs));
 
-        const allMaxes = this.state.data.map(obs => maxObs(obs));
+        const pickFields = cols.map(c => c.accessor);
+        const allMaxes = this.state.data
+            .map(obs => _.pick(obs, pickFields))
+            .map(obs => maxObs(obs));
         return Math.max(...allMaxes);
     }
 
