@@ -32,7 +32,7 @@ class TransactionMonitor extends Component {
     };
 
     onUpdate = (childQueryState) => {
-        console.log('child query state',childQueryState);
+        // console.log('child query state',childQueryState);
     };
 
     render() {
