@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
+import queryLibrary from '../data/query-library';
 
 class PageCacheFaults extends Component {
     state = {
@@ -87,8 +88,7 @@ class PageCacheFaults extends Component {
             driver,
             query: this.state.query,
             rate: this.state.rate,
-            windowWidth: 1000 * 60 * 5, /* 5 min */
-            augmentData: this.augmentData(node),
+            windowWidth: 1000 * 60 * 5,
 
             // Get data for a single value only.
             displayColumns: [
@@ -100,6 +100,8 @@ class PageCacheFaults extends Component {
             alias: { faultsPerSecond: this.keyFor(addr) },
             params: {},
         });
+
+        feed.addAugmentationFunction(this.augmentData(node));
 
         return feed;
     };
