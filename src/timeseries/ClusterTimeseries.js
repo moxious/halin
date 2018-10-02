@@ -9,6 +9,7 @@ import {
 } from "pondjs";
 import uuid from 'uuid';
 import Spinner from '../Spinner';
+import queryLibrary from '../data/query-library';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 
@@ -67,6 +68,24 @@ class ClusterTimeseries extends Component {
         this.nodes = window.halinContext.clusterNodes.map(node => node.getBoltAddress());
     }
 
+    /**
+     * Check and see if query is a standard query.  If so, retrieve its columns.
+     */
+    findColumns(query) {
+        let columns = null;
+        Object.keys(queryLibrary).forEach(entry => {
+            if (!entry.query) { return; }
+            if (entry.query === query) {
+                columns = entry.columns;
+            }
+        });
+
+        // If columns cannot be found, just use the display property.
+        return columns ? columns : [
+            { Header: this.displayProperty, accessor: this.displayProperty },
+        ];
+    }
+
     componentDidMount() {
         this.mounted = true;
 
@@ -97,9 +116,7 @@ class ClusterTimeseries extends Component {
                     windowWidth: this.props.timeWindowWidth,
 
                     // Get data for a single value only.
-                    displayColumns: [
-                        { Header: this.displayProperty, accessor: this.displayProperty },
-                    ],
+                    displayColumns: this.findColumns(this.props.query),
 
                     // Alias the display property value as a second key (the address)
                     // This allows us to pick apart the data in multiple feeds.
