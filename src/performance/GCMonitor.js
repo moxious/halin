@@ -1,24 +1,10 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../data/CypherDataTable';
+import queryLibrary from '../data/query-library';
 
 class GCMonitor extends Component {
-    query = `
-        CALL dbms.queryJmx('java.lang:name=G1 Young Generation,type=GarbageCollector') 
-        YIELD name, attributes 
-        WHERE name =~ '(?i).*garbage.*' 
-        WITH attributes.LastGcInfo.value.properties as lastGC 
-        
-        RETURN 
-            lastGC.startTime as startTime,
-            lastGC.duration as duration,
-            lastGC.GcThreadCount as threadCount
-        LIMIT 1;
-    `;
-
-    displayColumns = [
-        { Header: 'Duration', accessor: 'duration' },
-        { Header: 'Thread Count', accessor: 'threadCount' },
-    ];
+    query = queryLibrary.JMX_GARBAGE_COLLECTOR.query;
+    displayColumns = queryLibrary.JMX_GARBAGE_COLLECTOR.columns;
 
     render() {
         return (
