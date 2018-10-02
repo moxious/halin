@@ -22,6 +22,8 @@ const DEFAULT_PALETTE = [
  */
 class ClusterTimeseries extends Component {
     state = {
+        chartLowLimit: 0,
+        chartHighLimit: 50,
         startTime: new Date(),
         query: null,
         data: null,
@@ -39,20 +41,21 @@ class ClusterTimeseries extends Component {
         super(props, context);
         this.id = uuid.v4();
 
-        if (!props.query) {
-            throw new Error('query is required');
+        if (!props.query && !props.feedMaker) {
+            throw new Error('Either query OR feedmaker is a required property');
         } else if (!props.displayProperty) {
             throw new Error('displayProperty is required');
         }
 
         this.query = props.query;
-        this.rate = props.rate || 1000;
+        this.rate = props.rate || 2000;
         this.width = props.width || 800;
         this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 2;  // 2 min
         this.displayProperty = props.displayProperty;
         this.palette = props.palette || DEFAULT_PALETTE;
         this.showGrid = _.isNil(props.showGrid) ? false : props.showGrid;
         this.showGridPosition = _.isNil(props.showGridPosition) ? 'over' : props.showGridPosition;
+        this.feedMaker = props.feedMaker;
 
         this.dateStyle = {
             fontSize: 12,
@@ -63,7 +66,7 @@ class ClusterTimeseries extends Component {
 
         this.nodes = window.halinContext.clusterNodes.map(node => node.getBoltAddress());
     }
-    
+
     componentDidMount() {
         this.mounted = true;
 
@@ -79,23 +82,31 @@ class ClusterTimeseries extends Component {
 
             this.streams[addr] = new Stream();
 
-            const feed = halin.getDataFeed({
-                node,
-                driver,
-                query: this.props.query,
-                rate: this.props.rate, 
-                windowWidth: this.props.timeWindowWidth,
+            let feed;
 
-                // Get data for a single value only.
-                displayColumns: [
-                    { Header: this.displayProperty, accessor: this.displayProperty },
-                ],
+            // If the user specified a feed making function, use that one.
+            // Otherwise construct the reasonable default.
+            if (this.props.feedMaker) {
+                feed = this.props.feedMaker(node);
+            } else {
+                feed = halin.getDataFeed({
+                    node,
+                    driver,
+                    query: this.props.query,
+                    rate: this.props.rate,
+                    windowWidth: this.props.timeWindowWidth,
 
-                // Alias the display property value as a second key (the address)
-                // This allows us to pick apart the data in multiple feeds.
-                alias: { [this.displayProperty]: this.keyFor(addr) },
-                params: {},
-            });
+                    // Get data for a single value only.
+                    displayColumns: [
+                        { Header: this.displayProperty, accessor: this.displayProperty },
+                    ],
+
+                    // Alias the display property value as a second key (the address)
+                    // This allows us to pick apart the data in multiple feeds.
+                    alias: { [this.displayProperty]: this.keyFor(addr) },
+                    params: {},
+                });
+            }
 
             this.feeds[addr] = feed;
 
@@ -104,10 +115,10 @@ class ClusterTimeseries extends Component {
                 this.onData(node, newData, dataFeed);
 
             // And attach that to the feed.
-            this.feeds[addr].onData = this.onDataCallbacks[addr];
+            this.feeds[addr].addListener(this.onDataCallbacks[addr]);
 
             const curState = this.feeds[addr].currentState();
-            this.feeds[addr].onData(curState, this.feeds[addr]);
+            this.onDataCallbacks[addr](curState, this.feeds[addr]);
         });
 
         const noneDisabled = {};
@@ -115,8 +126,7 @@ class ClusterTimeseries extends Component {
             noneDisabled[this.keyFor(addr)] = false;
         });
 
-
-        this.setState({ 
+        this.setState({
             startTime: new Date(),
             disabled: noneDisabled,
         });
@@ -129,65 +139,67 @@ class ClusterTimeseries extends Component {
     onData(clusterNode, newData, dataFeed) {
         const addr = clusterNode.getBoltAddress();
 
-        if (this.mounted) {
-            const cols = [ { accessor: this.displayProperty, Header: this.displayProperty } ];
-            const computedMin = dataFeed.min(cols) * 0.85;
-            const computedMax = dataFeed.max(cols) * 1.15;
+        if (!this.mounted) { return; }
 
-            const maxObservedValue = Math.max(
-                this.state.maxObservedValue,
-                computedMax
-            );
+        const cols = [{ accessor: this.displayProperty, Header: this.displayProperty }];
+        const computedMin = dataFeed.min(cols, this.props.debug) * 0.85;
+        const computedMax = dataFeed.max(cols, this.props.debug) * 1.15;
 
-            const minObservedValue = Math.min(
-                this.state.minObservedValue,
-                computedMin
-            );
+        const maxObservedValue = Math.max(
+            this.state.maxObservedValue,
+            computedMax
+        );
 
-            const futurePad = 1000; // ms into the future to show blank space on graph
-            const fst = dataFeed.feedStartTime.getTime();
+        const minObservedValue = Math.min(
+            this.state.minObservedValue,
+            computedMin
+        );
 
-            let startTime, endTime;
+        const futurePad = 1000; // ms into the future to show blank space on graph
+        const fst = dataFeed.feedStartTime.getTime();
 
-            if ((newData.time.getTime() - fst) >= this.timeWindowWidth) {
-                // In this condition, the data feed has historical data to fill the full window.
-                // That means our end time should be the present, and our start time should reach back
-                // to timeWindowWidth ago.
-                startTime = newData.time.getTime() - this.timeWindowWidth;
-                endTime = newData.time.getTime() + futurePad;
-            } else {
-                // We don't have a full time window worth of data.  So to show the most, we start at the feed
-                // start time, and end at the time window width.
-                startTime = fst;
-                endTime = fst + this.timeWindowWidth + futurePad;
-            } 
+        let startTime, endTime;
 
-            const timeRange = new TimeRange(startTime, endTime);
-
-            const newState = {
-                ...newData,
-                maxObservedValue,
-                minObservedValue,
-                timeRange,
-            };
-
-            // Each address has unique data state.
-            const stateAddendum = {};
-            stateAddendum[addr] = newState;
-            this.setState(stateAddendum);
+        if ((newData.time.getTime() - fst) >= this.timeWindowWidth) {
+            // In this condition, the data feed has historical data to fill the full window.
+            // That means our end time should be the present, and our start time should reach back
+            // to timeWindowWidth ago.
+            startTime = newData.time.getTime() - this.timeWindowWidth;
+            endTime = newData.time.getTime() + futurePad;
         } else {
-            return null;
+            // We don't have a full time window worth of data.  So to show the most, we start at the feed
+            // start time, and end at the time window width.
+            startTime = fst;
+            endTime = fst + this.timeWindowWidth + futurePad;
         }
+
+        const timeRange = new TimeRange(startTime, endTime);
+
+        const newState = {
+            ...newData,
+            maxObservedValue,
+            minObservedValue,
+            timeRange,
+        };
+
+        // Each address has unique data state.
+        const stateAddendum = {};
+        stateAddendum[addr] = newState;
+        if (this.props.debug) {
+            console.log('ClusterTimeseries state update', 
+                stateAddendum, 'min=', computedMin, 'max=',computedMax);
+        }
+        this.setState(stateAddendum);
     }
 
     getChartMin() {
         const allMins = this.nodes.map(addr => this.state[addr].minObservedValue);
-        return Math.min(...allMins);
+        return Math.min(Math.min(...allMins), this.state.chartLowLimit);
     }
 
     getChartMax() {
         const allMaxes = this.nodes.map(addr => this.state[addr].maxObservedValue);
-        return Math.max(...allMaxes);
+        return Math.max(Math.max(...allMaxes), this.state.chartHighLimit);
     }
 
     chooseColor(idx) {
@@ -206,7 +218,7 @@ class ClusterTimeseries extends Component {
     }
 
     legendClick = data => {
-        console.log('Legend clicked',data);
+        console.log('Legend clicked', data);
 
         const toggle = key => {
             const disabledNew = _.cloneDeep(this.state.disabled);
@@ -216,11 +228,11 @@ class ClusterTimeseries extends Component {
 
         toggle(data);
     };
-    
+
     handleTimeRangeChange = timeRange => {
         this.setState({ timeRange });
     };
-    
+
     handleTrackerChanged = (t, scale) => {
         this.setState({
             tracker: t,
@@ -230,7 +242,7 @@ class ClusterTimeseries extends Component {
     };
 
     keyFor(addr) {
-        return `${addr}`.replace(/[^a-zA-Z0-9]/g, '');
+        return `${addr}`.replace(/[^a-zA-Z0-9]/g, '');        
     }
 
     render() {
@@ -269,7 +281,7 @@ class ClusterTimeseries extends Component {
                                 onSelectionChange={this.legendClick}
                                 categories={this.nodes.map((addr, idx) => ({
                                     key: this.keyFor(addr),
-                                    label: addr,
+                                    label: window.halinContext.clusterNodes[idx].getLabel(),
                                     style: { fill: this.chooseColor(idx) },
                                 }))}
                             />
@@ -277,22 +289,22 @@ class ClusterTimeseries extends Component {
                     </Grid.Row>
                     <Grid.Row columns={1}>
                         <Grid.Column textAlign='left'>
-                            <ChartContainer 
+                            <ChartContainer
                                 showGrid={this.showGrid}
                                 showGridPosition={this.showGridPosition}
-                                width={this.width} 
+                                width={this.width}
                                 timeRange={timeRange}>
                                 <ChartRow height="150">
-                                    <YAxis id="y" 
-                                        min={this.getChartMin()} 
-                                        max={this.getChartMax()} 
-                                        width="70" 
+                                    <YAxis id="y"
+                                        min={this.getChartMin()}
+                                        max={this.getChartMax()}
+                                        width="70"
                                         showGrid={true}
-                                        type="linear"/>
+                                        type="linear" />
                                     <Charts>
                                         {
-                                            this.nodes.map((addr, idx) => 
-                                                <LineChart 
+                                            this.nodes.map((addr, idx) =>
+                                                <LineChart
                                                     key={this.keyFor(addr)}
                                                     axis="y"
                                                     style={style}
@@ -308,7 +320,7 @@ class ClusterTimeseries extends Component {
                     </Grid.Row>
                 </Grid>
             </div>
-        ) : <Spinner active={true}/>;
+        ) : <Spinner active={true} />;
     }
 }
 

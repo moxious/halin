@@ -64,7 +64,7 @@ export default class OSStats extends Component {
             params: {},
         });
 
-        this.feed.onData = (newData, dataFeed) => {
+        const onDataListener = (newData, dataFeed) => {
             // Don't need any of the timeseries stuff, just one data packet.
             // console.log(newData.data[0]);
 
@@ -72,7 +72,9 @@ export default class OSStats extends Component {
             if (this.mounted) {
                 this.setState({ data });
             }
-        }
+        };
+
+        this.feed.addListener(onDataListener);
     }
 
     componentWillUnmount() {
