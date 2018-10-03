@@ -3,6 +3,10 @@ import { TimeEvent } from 'pondjs';
 import _ from 'lodash';
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
+// Fun fact!  Infinity isn't a number, and so Number.isNaN should be true for
+// infinity....but it isn't.  https://twitter.com/mdavidallen/status/1047472617115017216
+const actualNumber = i => !Number.isNaN(i) && !(i === Infinity) && !(i === -Infinity);
+
 /**
  * DataFeed is an abstraction that polls a cypher query
  * against a driver in a configurable way, and can happen
@@ -153,7 +157,7 @@ export default class DataFeed {
         const dataPackets = timeEvents.map(te => te._original);
 
         const minObs = obs => {
-            const vals = Object.values(obs).filter(i => !Number.isNaN(i));
+            const vals = Object.values(obs).filter(actualNumber);
             return Math.min(...vals);
         };
 
@@ -177,7 +181,7 @@ export default class DataFeed {
         if (!this.state.data || this.state.data.length === 0) { return 1; }
         
         const maxObs = obs => {
-            const vals = Object.values(obs).filter(i => !Number.isNaN(i));
+            const vals = Object.values(obs).filter(actualNumber);
             return Math.max(...vals);
         };
 
