@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
-import queryLibrary from '../data/query-library';
 
 class OpenFileDescriptors extends Component {
     state = {
@@ -23,13 +22,14 @@ class OpenFileDescriptors extends Component {
     };
 
     onUpdate = (childQueryState) => {
-        console.log('child query state',childQueryState);
+        // console.log('child query state',childQueryState);
     };
 
+    // JMX gives us maximum FDs and open FDs, but we want number of used FDs,
+    // so we have to augment the data structure because the timeseries doesn't do math
+    // for us.
     augmentData = (node) => (data) => {
         const fdUsed = data.fdMax - data.fdOpen;
-        console.log('augment',data,fdUsed);
-
         return { fdUsed };
     };
 
