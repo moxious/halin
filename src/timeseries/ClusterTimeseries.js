@@ -57,6 +57,7 @@ class ClusterTimeseries extends Component {
         this.showGrid = _.isNil(props.showGrid) ? false : props.showGrid;
         this.showGridPosition = _.isNil(props.showGridPosition) ? 'over' : props.showGridPosition;
         this.feedMaker = props.feedMaker;
+        this.onUpdate = props.onUpdate;
 
         this.dateStyle = {
             fontSize: 12,
@@ -116,8 +117,10 @@ class ClusterTimeseries extends Component {
                     windowWidth: this.props.timeWindowWidth,
 
                     // Get data for a single value only.
-                    displayColumns: this.findColumns(this.props.query),
-
+                    displayColumns: [
+                        { Header: this.displayProperty, accessor: this.displayProperty },
+                    ],
+                    
                     // Alias the display property value as a second key (the address)
                     // This allows us to pick apart the data in multiple feeds.
                     alias: { [this.displayProperty]: this.keyFor(addr) },
@@ -206,7 +209,11 @@ class ClusterTimeseries extends Component {
             console.log('ClusterTimeseries state update', 
                 stateAddendum, 'min=', computedMin, 'max=',computedMax);
         }
+
         this.setState(stateAddendum);
+        if (this.onUpdate) {
+            this.onUpdate(this.state);
+        }
     }
 
     getChartMin() {
