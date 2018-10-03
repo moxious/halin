@@ -24,10 +24,6 @@ class UsedMemory extends Component {
         return { physUsed };
     };
 
-    keyFor(addr) {
-        return `${addr}`.replace(/[^a-zA-Z0-9]/g, '');
-    }
-
     dataFeedMaker = node => {
         const halin = window.halinContext;
 
@@ -44,7 +40,7 @@ class UsedMemory extends Component {
 
             // Alias the display property value as a second key (the address)
             // This allows us to pick apart the data in multiple feeds.
-            alias: { physUsed: this.keyFor(addr) },
+            alias: { physUsed: ClusterTimeseries.keyFor(addr) },
             params: {},
         });
 

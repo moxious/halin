@@ -70,6 +70,16 @@ class ClusterTimeseries extends Component {
     }
 
     /**
+     * Timeseries uses specialized keys that let it find the right observation in a series of 
+     * strings.  In general we key data by the bolt address of the host that it came from in 
+     * a cluster feed.  But there are some formatting restrictions.  So across components this
+     * is a standard method of determining the data key for a given bolt address.
+     */
+    static keyFor(addr) {
+        return `${addr}`.replace(/[^a-zA-Z0-9]/g, '');        
+    }
+
+    /**
      * Check and see if query is a standard query.  If so, retrieve its columns.
      */
     findColumns(query) {
@@ -123,7 +133,7 @@ class ClusterTimeseries extends Component {
                     
                     // Alias the display property value as a second key (the address)
                     // This allows us to pick apart the data in multiple feeds.
-                    alias: { [this.displayProperty]: this.keyFor(addr) },
+                    alias: { [this.displayProperty]: ClusterTimeseries.keyFor(addr) },
                     params: {},
                 });
             }
@@ -143,7 +153,7 @@ class ClusterTimeseries extends Component {
 
         const noneDisabled = {};
         this.nodes.forEach(addr => {
-            noneDisabled[this.keyFor(addr)] = false;
+            noneDisabled[ClusterTimeseries.keyFor(addr)] = false;
         });
 
         this.setState({
@@ -232,7 +242,7 @@ class ClusterTimeseries extends Component {
         }
 
         const addr = this.nodes[idx];
-        const key = this.keyFor(addr);
+        const key = ClusterTimeseries.keyFor(addr);
 
         if (this.state.disabled[key]) {
             return 'transparent';
@@ -265,13 +275,9 @@ class ClusterTimeseries extends Component {
         });
     };
 
-    keyFor(addr) {
-        return `${addr}`.replace(/[^a-zA-Z0-9]/g, '');        
-    }
-
     render() {
         const style = styler(this.nodes.map((addr, idx) => ({
-            key: this.keyFor(addr),
+            key: ClusterTimeseries.keyFor(addr),
             color: this.chooseColor(idx),
             width: 3,
         })));
@@ -304,7 +310,7 @@ class ClusterTimeseries extends Component {
                                 style={style}
                                 onSelectionChange={this.legendClick}
                                 categories={this.nodes.map((addr, idx) => ({
-                                    key: this.keyFor(addr),
+                                    key: ClusterTimeseries.keyFor(addr),
                                     label: window.halinContext.clusterNodes[idx].getLabel(),
                                     style: { fill: this.chooseColor(idx) },
                                 }))}
@@ -329,10 +335,10 @@ class ClusterTimeseries extends Component {
                                         {
                                             this.nodes.map((addr, idx) =>
                                                 <LineChart
-                                                    key={this.keyFor(addr)}
+                                                    key={ClusterTimeseries.keyFor(addr)}
                                                     axis="y"
                                                     style={style}
-                                                    columns={[this.keyFor(addr)]}
+                                                    columns={[ClusterTimeseries.keyFor(addr)]}
                                                     series={this.dataSeries[addr]}
                                                 />
                                             )

@@ -33,10 +33,6 @@ class OpenFileDescriptors extends Component {
         return { fdUsed };
     };
 
-    keyFor(addr) {
-        return `${addr}`.replace(/[^a-zA-Z0-9]/g, '');
-    }
-
     dataFeedMaker = node => {
         console.log('making FD feed');
         const halin = window.halinContext;
@@ -54,7 +50,7 @@ class OpenFileDescriptors extends Component {
 
             // Alias the display property value as a second key (the address)
             // This allows us to pick apart the data in multiple feeds.
-            alias: { fdUsed: this.keyFor(addr) },
+            alias: { fdUsed: ClusterTimeseries.keyFor(addr) },
             params: {},
         });
 

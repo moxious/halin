@@ -66,10 +66,6 @@ class PageCacheFaults extends Component {
         return { faultsPerSecond };
     };
 
-    keyFor(addr) {
-        return `${addr}`.replace(/[^a-zA-Z0-9]/g, '');
-    }
-
     dataFeedMaker = node => {
         const halin = window.halinContext;
 
@@ -90,7 +86,7 @@ class PageCacheFaults extends Component {
 
             // Alias the display property value as a second key (the address)
             // This allows us to pick apart the data in multiple feeds.
-            alias: { faultsPerSecond: this.keyFor(addr) },
+            alias: { faultsPerSecond: ClusterTimeseries.keyFor(addr) },
             params: {},
         });
 
