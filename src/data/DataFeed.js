@@ -1,6 +1,7 @@
 import Ring from 'ringjs';
 import { TimeEvent } from 'pondjs';
 import _ from 'lodash';
+import queryLibrary from './query-library';
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 // Fun fact!  Infinity isn't a number, and so Number.isNaN should be true for
@@ -53,6 +54,8 @@ export default class DataFeed {
         this.windowWidth = props.windowWidth || (1000 * 60 * 7);
         this.feedStartTime = null;
 
+        this.label = this.findLabel(this.query);
+
         this.state = {
             data: null,
             events: new Ring(Math.floor((this.windowWidth / this.rate) * 1.25)),
@@ -69,6 +72,18 @@ export default class DataFeed {
 
         const qtag = this.query.replace(/\s*[\r\n]+\s*/g, ' ');
         this.name = `${this.node.getBoltAddress()}-${qtag}-${JSON.stringify(this.displayColumns)}}`;
+    }
+
+    findLabel(query) {
+        let bestLabel = null;
+
+        Object.keys(queryLibrary).forEach(queryType => {
+            if (queryLibrary[queryType].query === query) {
+                bestLabel = queryType;
+            }
+        });
+
+        return bestLabel || 'Unlabeled';
     }
 
     /**
@@ -154,7 +169,34 @@ export default class DataFeed {
      * Summarize statistics about what's running and how well it's going.
      */
     stats() {
+        const packets = this.getDataPackets();
+        
+        const timings = packets.map(p => p._sampleTime);
+        const sum = timings.reduce((a, b) => a + b, 0);
+        const avg = sum / timings.length;
 
+        let values = _.cloneDeep(timings);
+        values.sort((a, b) => a - b);
+        let lowMiddle = Math.floor((values.length - 1) / 2);
+        let highMiddle = Math.ceil((values.length - 1) / 2);
+        let median = (values[lowMiddle] + values[highMiddle]) / 2;
+
+        return {
+            name: this.name,
+            label: this.label,
+            node: this.node,
+            address: this.node.getBoltAddress(),
+            query: this.query,
+            packets: packets.length,
+            averageResponseTime: avg,
+            medianResponseTime: median,
+            bestResponseTime: Math.min(...timings),
+            worstResponseTime: Math.max(...timings),
+            timings,
+            listeners: this.listeners.length,
+            augFns: this.augmentFns.length,
+            aliases: this.aliases.length,
+        };
     }
 
     /**
