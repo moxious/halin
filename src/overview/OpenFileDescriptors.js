@@ -19,6 +19,7 @@ class OpenFileDescriptors extends Component {
             { Header: 'fdOpen', accessor: 'fdOpen' },
             { Header: 'fdMax', accessor: 'fdMax' },
         ],
+        displayProperty: 'fdUsed',
     };
 
     onUpdate = (childQueryState) => {
@@ -34,7 +35,6 @@ class OpenFileDescriptors extends Component {
     };
 
     dataFeedMaker = node => {
-        console.log('making FD feed');
         const halin = window.halinContext;
 
         const addr = node.getBoltAddress();
@@ -50,7 +50,7 @@ class OpenFileDescriptors extends Component {
 
             // Alias the display property value as a second key (the address)
             // This allows us to pick apart the data in multiple feeds.
-            alias: { fdUsed: ClusterTimeseries.keyFor(addr) },
+            alias: { fdUsed: ClusterTimeseries.keyFor(addr, this.state.displayProperty) },
             params: {},
         });
 
@@ -67,7 +67,7 @@ class OpenFileDescriptors extends Component {
                     width={this.state.width}
                     feedMaker={this.dataFeedMaker}
                     onUpdate={this.onUpdate}
-                    displayProperty="fdUsed"
+                    displayProperty={this.state.displayProperty}
                 />
             </div>
         )

@@ -10,9 +10,7 @@ class UsedMemory extends Component {
         width: 400,
         query: queryLibrary.OS_MEMORY_STATS.query,
 
-        displayColumns: [
-            { Header: 'Used', accessor: 'physUsed' },
-        ],
+        displayProperty: 'physUsed',
     };
 
     onUpdate = (childQueryState) => {
@@ -37,13 +35,10 @@ class UsedMemory extends Component {
             rate: this.state.rate,
             windowWidth: 1000 * 60 * 5, /* 5 min */
             displayColumns: queryLibrary.OS_MEMORY_STATS.columns,
-
-            // Alias the display property value as a second key (the address)
-            // This allows us to pick apart the data in multiple feeds.
-            alias: { physUsed: ClusterTimeseries.keyFor(addr) },
             params: {},
         });
 
+        feed.addAliases({ physUsed: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
         feed.addAugmentationFunction(this.augmentData(node));
         return feed;
     };
@@ -57,7 +52,7 @@ class UsedMemory extends Component {
                     width={this.state.width}
                     feedMaker={this.dataFeedMaker}
                     onUpdate={this.onUpdate}
-                    displayProperty={this.state.displayColumns[0].accessor}
+                    displayProperty={this.state.displayProperty}
                 />
             </div>
         )

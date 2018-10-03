@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import 'semantic-ui-css/semantic.min.css';
-import { Grid } from 'semantic-ui-react';
+import { Grid, Label } from 'semantic-ui-react';
 import {
     TimeSeries,
     TimeRange,
     Stream,
-} from "pondjs";
+} from 'pondjs';
 import uuid from 'uuid';
 import Spinner from '../Spinner';
 import queryLibrary from '../data/query-library';
@@ -75,14 +75,18 @@ class ClusterTimeseries extends Component {
      * a cluster feed.  But there are some formatting restrictions.  So across components this
      * is a standard method of determining the data key for a given bolt address.
      */
-    static keyFor(addr) {
-        return `${addr}`.replace(/[^a-zA-Z0-9]/g, '');        
+    static keyFor(addr, field) {
+        if (!addr || !field) {
+            throw new Error('Must provide both addr and field');
+        }
+
+        return `${addr}-${field}`.replace(/[^a-zA-Z0-9]/g, '');        
     }
 
     /**
      * Check and see if query is a standard query.  If so, retrieve its columns.
      */
-    findColumns(query) {
+    findColumns(query=this.props.query) {
         let columns = null;
         Object.keys(queryLibrary).forEach(entry => {
             if (!entry.query) { return; }
@@ -127,15 +131,12 @@ class ClusterTimeseries extends Component {
                     windowWidth: this.props.timeWindowWidth,
 
                     // Get data for a single value only.
-                    displayColumns: [
-                        { Header: this.displayProperty, accessor: this.displayProperty },
-                    ],
+                    displayColumns: this.findColumns(),
                     
-                    // Alias the display property value as a second key (the address)
-                    // This allows us to pick apart the data in multiple feeds.
-                    alias: { [this.displayProperty]: ClusterTimeseries.keyFor(addr) },
                     params: {},
                 });
+
+                feed.addAliases({ [this.displayProperty]: ClusterTimeseries.keyFor(addr, this.displayProperty) });
             }
 
             this.feeds[addr] = feed;
@@ -153,7 +154,7 @@ class ClusterTimeseries extends Component {
 
         const noneDisabled = {};
         this.nodes.forEach(addr => {
-            noneDisabled[ClusterTimeseries.keyFor(addr)] = false;
+            noneDisabled[ClusterTimeseries.keyFor(addr, this.displayProperty)] = false;
         });
 
         this.setState({
@@ -226,13 +227,21 @@ class ClusterTimeseries extends Component {
         }
     }
 
+    getObservedMins() {
+        return this.nodes.map(addr => this.state[addr].minObservedValue);
+    }
+
+    getObservedMaxes() {
+        return this.nodes.map(addr => this.state[addr].maxObservedValue);
+    }
+
     getChartMin() {
-        const allMins = this.nodes.map(addr => this.state[addr].minObservedValue);
+        const allMins = this.getObservedMins();
         return Math.min(Math.min(...allMins), this.state.chartLowLimit);
     }
 
     getChartMax() {
-        const allMaxes = this.nodes.map(addr => this.state[addr].maxObservedValue);
+        const allMaxes = this.getObservedMaxes();
         return Math.max(Math.max(...allMaxes), this.state.chartHighLimit);
     }
 
@@ -242,7 +251,7 @@ class ClusterTimeseries extends Component {
         }
 
         const addr = this.nodes[idx];
-        const key = ClusterTimeseries.keyFor(addr);
+        const key = ClusterTimeseries.keyFor(addr, this.displayProperty);
 
         if (this.state.disabled[key]) {
             return 'transparent';
@@ -277,7 +286,7 @@ class ClusterTimeseries extends Component {
 
     render() {
         const style = styler(this.nodes.map((addr, idx) => ({
-            key: ClusterTimeseries.keyFor(addr),
+            key: ClusterTimeseries.keyFor(addr, this.displayProperty),
             color: this.chooseColor(idx),
             width: 3,
         })));
@@ -310,7 +319,7 @@ class ClusterTimeseries extends Component {
                                 style={style}
                                 onSelectionChange={this.legendClick}
                                 categories={this.nodes.map((addr, idx) => ({
-                                    key: ClusterTimeseries.keyFor(addr),
+                                    key: ClusterTimeseries.keyFor(addr, this.displayProperty),
                                     label: window.halinContext.clusterNodes[idx].getLabel(),
                                     style: { fill: this.chooseColor(idx) },
                                 }))}
@@ -335,10 +344,10 @@ class ClusterTimeseries extends Component {
                                         {
                                             this.nodes.map((addr, idx) =>
                                                 <LineChart
-                                                    key={ClusterTimeseries.keyFor(addr)}
+                                                    key={ClusterTimeseries.keyFor(addr, this.displayProperty)}
                                                     axis="y"
                                                     style={style}
-                                                    columns={[ClusterTimeseries.keyFor(addr)]}
+                                                    columns={[ClusterTimeseries.keyFor(addr, this.displayProperty)]}
                                                     series={this.dataSeries[addr]}
                                                 />
                                             )
@@ -349,6 +358,16 @@ class ClusterTimeseries extends Component {
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>
+
+                <Label>
+                    Max
+                    <Label.Detail>{Math.max(...this.getObservedMaxes())}</Label.Detail>
+                </Label>
+
+                <Label>
+                    Min
+                    <Label.Detail>{Math.min(...this.getObservedMins())}</Label.Detail>
+                </Label>
             </div>
         ) : <Spinner active={true} />;
     }

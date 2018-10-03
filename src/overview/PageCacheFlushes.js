@@ -3,13 +3,13 @@ import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/query-library';
 
-class PageCacheFaults extends Component {
+class PageCacheFlushes extends Component {
     state = {
         key: uuid.v4(),
         rate: 2000,
         width: 400,
         query: queryLibrary.JMX_PAGE_CACHE.query,
-        displayProperty: 'faultsPerSecond',
+        displayProperty: 'flushesPerSecond',
     };
 
     componentWillMount() {
@@ -38,15 +38,15 @@ class PageCacheFaults extends Component {
             this.nodeObservations[addr].pollStartTime = new Date().getTime();
 
             // No previous data to monitor, so start at zero by default.
-            return { faultsPerSecond: 0 };
+            return { flushesPerSecond: 0 };
         } 
 
         // Determine how many faults happened in the past period for this node.
         // Figure out how much time elapsed since the last sample for that node,
         // and then compute the fps.
-        const faultsThisPeriod = data.faults - this.nodeObservations[addr].last;
+        const flushesThisPeriod = data.flushes - this.nodeObservations[addr].last;
         const elapsedTimeInSec = (new Date().getTime() - this.nodeObservations[addr].pollStartTime) / 1000;
-        const faultsPerSecond = faultsThisPeriod / elapsedTimeInSec;
+        const flushesPerSecond = flushesThisPeriod / elapsedTimeInSec;
 
         /*
         if (addr.match(/node3/)) {
@@ -61,12 +61,12 @@ class PageCacheFaults extends Component {
         */
 
         // Set window values for next go-around.
-        this.nodeObservations[addr].last = data.faults;
+        this.nodeObservations[addr].last = data.flushes;
         this.nodeObservations[addr].pollStartTime = new Date().getTime();
 
-        const aug = { faultsPerSecond };
+        const aug = { flushesPerSecond };
         if (addr.match(/node2/)) {
-            console.log('AUG FAULT', data, aug);
+            console.log('AUG FLUSH', data, aug);
         }
         return aug;
     };
@@ -83,20 +83,21 @@ class PageCacheFaults extends Component {
             query: this.state.query,
             rate: this.state.rate,
             windowWidth: 1000 * 60 * 5,
+            // Get data for a single value only.
             displayColumns: queryLibrary.JMX_PAGE_CACHE.columns,
             params: {},
         });
 
-        feed.addAliases({ faultsPerSecond: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
+        feed.addAliases({ flushesPerSecond: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
         feed.addAugmentationFunction(this.augmentData(node));
-
+        feed.debug = true;
         return feed;
     };
 
     render() {
         return (
-            <div className="PageCacheFaults">
-                <h3>Page Cache Faults/sec</h3>
+            <div className="PageCacheFlushes">
+                <h3>Page Cache Flushes/sec</h3>
                 <ClusterTimeseries key={this.state.key}
                     width={this.state.width}
                     feedMaker={this.dataFeedMaker}
@@ -108,4 +109,4 @@ class PageCacheFaults extends Component {
     }
 }
 
-export default PageCacheFaults;
+export default PageCacheFlushes;

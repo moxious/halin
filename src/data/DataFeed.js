@@ -37,6 +37,11 @@ export default class DataFeed {
         // A list of aliases can be passed, allowing renaming of columns.
         this.aliases = props.alias ? [props.alias] : [];
 
+        if (this.aliases.length > 0) {
+            console.warn('Warning: use addAliases() rather than passing in DataFeed constructor',
+                this.aliases);
+        }
+
         // An augmentation function can be passed to allow computing values that
         // aren't in the query, on the basis of some external function.
         this.augmentFns = props.augmentData ? [props.augmentData] : [];
@@ -87,7 +92,7 @@ export default class DataFeed {
     }
 
     addAliases(aliases) {
-        if (this.aliases.indexOf(aliases) !== -1) {
+        if (this.aliases.indexOf(aliases) === -1) {
             this.aliases.push(aliases);
         }
         return this.aliases;
@@ -212,9 +217,8 @@ export default class DataFeed {
                     // It's a bad idea to run long-running queries with a short window.
                     // It puts too much load on the system and does a bad job updating the
                     // graphic.
-                    console.warn('DataFeed query is taking a lot of time relative to your execution window.  Consider adjusting', {
-                        elapsedMs: this.lastElapsedMs, addr: this.node.getBoltAddress(),
-                    });
+                    console.warn(`DataFeed: query took ${this.lastElapsedMs} against window of ${this.rate}`,
+                        this.name.slice(0, 150));
                 }
 
                 // Take the first result only.  This component only works with single-record queries.
@@ -235,7 +239,9 @@ export default class DataFeed {
 
                 // Apply aliases if specified.
                 this.aliases.forEach(aliasObj => {
+                    if (this.debug) { console.log('AliasObj',aliasObj); }
                     Object.keys(aliasObj).forEach(aliasKey => {
+                        if (this.debug) { console.log('Alias',aliasObj[aliasKey],aliasKey); }
                         data[aliasObj[aliasKey]] = data[aliasKey];
                     });
                 });
