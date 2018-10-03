@@ -284,6 +284,8 @@ class CypherTimeseries extends Component {
                     Min
                     <Label.Detail>{this.getChartMin()}</Label.Detail>
                 </Label>
+
+                <NodeLabel node={this.props.node}/>
             </div>
         );
     }
@@ -377,8 +379,7 @@ class CypherTimeseries extends Component {
                         </Grid.Column>
                     </Grid.Row>
                     { this.renderLegendOnlyColumns() }
-                    { this.renderChartMetadata() }
-                    <NodeLabel node={this.props.node}/>
+                    { this.renderChartMetadata() }                    
                 </Grid>
             </div>
         ) : <Spinner active={true}/>;

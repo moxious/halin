@@ -269,6 +269,11 @@ class ClusterTimeseries extends Component {
         toggle(data);
     };
 
+    toggleMetadata = () => {
+        const metadata = !this.state.metadata;
+        this.setState({ metadata });
+    };
+
     handleTimeRangeChange = timeRange => {
         this.setState({ timeRange });
     };
