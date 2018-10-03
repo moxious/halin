@@ -169,7 +169,11 @@ class ClusterTimeseries extends Component {
 
         if (!this.mounted) { return; }
 
+        // Minimum computed only on the basis of our single display property.
+        // The data packet may have other stuff in it, in different data ranges.  We don't
+        // want max/min of that, because it isn't displayed.
         const cols = [{ accessor: this.displayProperty, Header: this.displayProperty }];
+
         const computedMin = dataFeed.min(cols, this.props.debug) * 0.85;
         const computedMax = dataFeed.max(cols, this.props.debug) * 1.15;
 
