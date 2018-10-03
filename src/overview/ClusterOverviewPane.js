@@ -6,6 +6,7 @@ import GCPauseTime from './GCPauseTime';
 import PageCacheFaults from './PageCacheFaults';
 import TransactionsOpen from './TransactionsOpen';
 import UsedMemory from './UsedMemory';
+import OpenFileDescriptors from './OpenFileDescriptors';
 
 export default class ClusterOverviewPane extends Component {
     render() {
@@ -35,6 +36,10 @@ export default class ClusterOverviewPane extends Component {
                     <Grid.Row columns={2}>
                         <Grid.Column>
                             <UsedMemory />
+                        </Grid.Column>
+
+                        <Grid.Column>
+                            <OpenFileDescriptors />
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>
