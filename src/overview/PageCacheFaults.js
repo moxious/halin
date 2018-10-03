@@ -8,14 +8,7 @@ class PageCacheFaults extends Component {
         key: uuid.v4(),
         rate: 2000,
         width: 400,
-        query: `
-            CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Page cache')
-            YIELD attributes 
-            WITH 
-                attributes.Faults.value as faults
-            RETURN 
-                faults;
-        `,
+        query: queryLibrary.JMX_PAGE_CACHE.query,
     };
 
     componentWillMount() {
