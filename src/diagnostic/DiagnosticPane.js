@@ -6,18 +6,6 @@ import './DiagnosticPane.css';
 import GeneratePackage from './GeneratePackage';
 import Ping from './Ping';
 import uuid from 'uuid';
-// import JMXDisplay from '../jmx/JMXDisplay';
-// import { Cypher } from 'graph-app-kit/components/Cypher';
-
-// const renderJMX = ({ pending, error, result }) => {
-//     return pending ? (
-//       <div style={{ height: "60px" }}>pending</div>
-//     ) : error ? (
-//       <div style={{ height: "60px" }}>{error.message}</div>
-//     ) : result ? (
-//       <JMXDisplay data={result} />
-//     ) : null;
-//   };
 
 class DiagnosticPane extends Component {
     state = {
