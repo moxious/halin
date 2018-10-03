@@ -33,9 +33,7 @@ class UsedMemory extends Component {
             driver,
             query: this.state.query,
             rate: this.state.rate,
-            windowWidth: 1000 * 60 * 5, /* 5 min */
             displayColumns: queryLibrary.OS_MEMORY_STATS.columns,
-            params: {},
         });
 
         feed.addAliases({ physUsed: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });

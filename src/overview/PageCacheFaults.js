@@ -65,9 +65,6 @@ class PageCacheFaults extends Component {
         this.nodeObservations[addr].pollStartTime = new Date().getTime();
 
         const aug = { faultsPerSecond };
-        if (addr.match(/node2/)) {
-            console.log('AUG FAULT', data, aug);
-        }
         return aug;
     };
 
@@ -82,9 +79,7 @@ class PageCacheFaults extends Component {
             driver,
             query: this.state.query,
             rate: this.state.rate,
-            windowWidth: 1000 * 60 * 5,
             displayColumns: queryLibrary.JMX_PAGE_CACHE.columns,
-            params: {},
         });
 
         feed.addAliases({ faultsPerSecond: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });

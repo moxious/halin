@@ -22,11 +22,7 @@ class GCPauseTime extends Component {
             driver,
             query: this.state.query,
             rate: this.state.rate,
-            windowWidth: 1000 * 60 * 5,
-
-            // Get data for a single value only.
             displayColumns: queryLibrary.JMX_GARBAGE_COLLECTOR.columns,
-            params: {},
         });
 
         return feed;

@@ -45,15 +45,10 @@ class OpenFileDescriptors extends Component {
             driver,
             query: this.state.query,
             rate: this.state.rate,
-            windowWidth: 1000 * 60 * 5, /* 5 min */
             displayColumns: this.state.displayColumns,
-
-            // Alias the display property value as a second key (the address)
-            // This allows us to pick apart the data in multiple feeds.
-            alias: { fdUsed: ClusterTimeseries.keyFor(addr, this.state.displayProperty) },
-            params: {},
         });
 
+        feed.addAliases({ fdUsed: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
         feed.addAugmentationFunction(this.augmentData(node));
         return feed;
     };

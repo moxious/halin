@@ -65,9 +65,6 @@ class PageCacheFlushes extends Component {
         this.nodeObservations[addr].pollStartTime = new Date().getTime();
 
         const aug = { flushesPerSecond };
-        if (addr.match(/node2/)) {
-            console.log('AUG FLUSH', data, aug);
-        }
         return aug;
     };
 
@@ -82,15 +79,13 @@ class PageCacheFlushes extends Component {
             driver,
             query: this.state.query,
             rate: this.state.rate,
-            windowWidth: 1000 * 60 * 5,
             // Get data for a single value only.
             displayColumns: queryLibrary.JMX_PAGE_CACHE.columns,
-            params: {},
         });
 
         feed.addAliases({ flushesPerSecond: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
         feed.addAugmentationFunction(this.augmentData(node));
-        feed.debug = true;
+        // feed.debug = true;
         return feed;
     };
 
