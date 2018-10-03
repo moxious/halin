@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/query-library';
+import _ from 'lodash';
 
 class PageCacheFlushes extends Component {
     state = {
@@ -15,7 +16,6 @@ class PageCacheFlushes extends Component {
     componentWillMount() {
         this.start = new Date().getTime();
         this.pollStartTime = new Date().getTime();
-        this.faultsAsOfLastObservation = -1;
         this.nodeObservations = {};
     }
 
