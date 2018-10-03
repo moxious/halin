@@ -36,6 +36,7 @@ class ClusterTimeseries extends Component {
         tracker: null,
         timeRange: null,
         disabled: {},
+        metadata: false,
     };
 
     constructor(props, context) {
@@ -51,7 +52,7 @@ class ClusterTimeseries extends Component {
         this.query = props.query;
         this.rate = props.rate || 2000;
         this.width = props.width || 800;
-        this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 2;  // 2 min
+        this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 5;  // 5 min
         this.displayProperty = props.displayProperty;
         this.palette = props.palette || DEFAULT_PALETTE;
         this.showGrid = _.isNil(props.showGrid) ? false : props.showGrid;
@@ -129,11 +130,7 @@ class ClusterTimeseries extends Component {
                     query: this.props.query,
                     rate: this.props.rate,
                     windowWidth: this.props.timeWindowWidth,
-
-                    // Get data for a single value only.
                     displayColumns: this.findColumns(),
-                    
-                    params: {},
                 });
 
                 feed.addAliases({ [this.displayProperty]: ClusterTimeseries.keyFor(addr, this.displayProperty) });
@@ -284,6 +281,24 @@ class ClusterTimeseries extends Component {
         });
     };
 
+    renderChartMetadata() {
+        if (!this.state.metadata) { return ''; }
+
+        return (
+            <div class='ChartMetadata'>
+                <Label>
+                    Max
+                    <Label.Detail>{Math.max(...this.getObservedMaxes())}</Label.Detail>
+                </Label>
+
+                <Label>
+                    Min
+                    <Label.Detail>{Math.min(...this.getObservedMins())}</Label.Detail>
+                </Label>
+            </div>
+        );
+    }
+
     render() {
         const style = styler(this.nodes.map((addr, idx) => ({
             key: ClusterTimeseries.keyFor(addr, this.displayProperty),
@@ -359,15 +374,7 @@ class ClusterTimeseries extends Component {
                     </Grid.Row>
                 </Grid>
 
-                <Label>
-                    Max
-                    <Label.Detail>{Math.max(...this.getObservedMaxes())}</Label.Detail>
-                </Label>
-
-                <Label>
-                    Min
-                    <Label.Detail>{Math.min(...this.getObservedMins())}</Label.Detail>
-                </Label>
+                { this.renderChartMetadata() }
             </div>
         ) : <Spinner active={true} />;
     }

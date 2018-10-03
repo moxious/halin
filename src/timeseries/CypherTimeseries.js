@@ -35,6 +35,7 @@ class CypherTimeseries extends Component {
         maxObservedValue: -Infinity,
         tracker: null,
         timeRange: null,
+        metadata: true,
     };
 
     constructor(props, context) {
@@ -270,6 +271,23 @@ class CypherTimeseries extends Component {
         );
     }
 
+    renderChartMetadata() {
+        if (!this.state.metadata) { return ''; }
+        return (
+            <div className='ChartMetadata'>
+                <Label>
+                    Max
+                    <Label.Detail>{this.getChartMax()}</Label.Detail>
+                </Label>
+
+                <Label>
+                    Min
+                    <Label.Detail>{this.getChartMin()}</Label.Detail>
+                </Label>
+            </div>
+        );
+    }
+
     render() {
         if (!this.state.events) { return 'Loading...'; }
         const style = styler(this.displayColumns.map((col, idx) => ({
@@ -359,6 +377,7 @@ class CypherTimeseries extends Component {
                         </Grid.Column>
                     </Grid.Row>
                     { this.renderLegendOnlyColumns() }
+                    { this.renderChartMetadata() }
                     <NodeLabel node={this.props.node}/>
                 </Grid>
             </div>
