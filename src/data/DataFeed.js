@@ -60,7 +60,7 @@ export default class DataFeed {
         }
 
         const qtag = this.query.replace(/\s*[\r\n]+\s*/g, ' ');
-        this.name = `${this.node.getBoltAddress()}-${qtag}}`;
+        this.name = `${this.node.getBoltAddress()}-${qtag}-${JSON.stringify(this.displayColumns)}}`;
     }
 
     /**
@@ -240,6 +240,9 @@ export default class DataFeed {
                     });
                 });
 
+                if (this.debug) {
+                    console.log('event', data);
+                }
                 this.timeout = setTimeout(() => this.sampleData(), this.rate);
 
                 const t = new Date();
