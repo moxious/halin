@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
+import { Button } from 'semantic-ui-react';
 import uuid from 'uuid';
 
 class OpenFileDescriptors extends Component {
@@ -48,16 +49,42 @@ class OpenFileDescriptors extends Component {
             displayColumns: this.state.displayColumns,
         });
 
-        feed.addAliases({ fdUsed: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
+        feed.addAliases({ 
+            fdUsed: ClusterTimeseries.keyFor(addr, 'fdUsed'),
+            fdOpen: ClusterTimeseries.keyFor(addr, 'fdOpen'),
+            fdMax: ClusterTimeseries.keyFor(addr, 'fdMax'),
+        });
+
         feed.addAugmentationFunction(this.augmentData(node));
         return feed;
     };
 
+    toggleView = (val) => {
+        console.log('toggle',val);
+        this.setState({ displayProperty: val });
+    };
+
     render() {
+        const buttons = [
+            { label: 'Used', field: 'fdUsed' },
+            { label: 'Available', field: 'fdOpen' },
+            { label: 'Max', field: 'fdMax' },
+        ];
+
         return (
             <div className="OpenFileDescriptors">
-                <h3>Open File Descriptors</h3>
+                <h3>File Descriptors</h3>
                 
+                <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
+                    buttons.map((b,idx) =>
+                        <Button size='tiny'
+                            key={idx}
+                            active={this.state.displayProperty===b.field}
+                            onClick={() => this.toggleView(b.field)}>
+                            { b.label }
+                        </Button>)
+                }</Button.Group>
+
                 <ClusterTimeseries key={this.state.key}
                     width={this.state.width}
                     feedMaker={this.dataFeedMaker}
