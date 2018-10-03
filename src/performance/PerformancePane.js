@@ -6,7 +6,6 @@ import MemoryMonitor from './MemoryMonitor';
 import SystemLoad from './SystemLoad';
 import GCMonitor from './GCMonitor';
 import TransactionMonitor from './TransactionMonitor';
-import ClusterMemory from '../overview/ClusterMemory';
 import ActiveQueries from './ActiveQueries';
 import StoreFiles from '../diagnostic/StoreFiles';
 import uuid from 'uuid';
@@ -33,7 +32,7 @@ class PerformancePane extends Component {
                             <TransactionMonitor key={key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
                         <Grid.Column>
-                            <ClusterMemory key={key}/>
+                            <GCMonitor key={key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
                     </Grid.Row>
 
@@ -46,12 +45,6 @@ class PerformancePane extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <StoreFiles key={key} node={this.props.node} driver={this.props.driver}/>
-                        </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={1}>
-                        <Grid.Column>
-                            <GCMonitor key={key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>  
