@@ -46,7 +46,6 @@ class UsedMemory extends Component {
             // This allows us to pick apart the data in multiple feeds.
             alias: { physUsed: this.keyFor(addr) },
             params: {},
-            debug: true,
         });
 
         feed.addAugmentationFunction(this.augmentData(node));
