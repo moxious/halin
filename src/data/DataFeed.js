@@ -166,10 +166,6 @@ export default class DataFeed {
             .map(obs => _.pick(obs, pickFields))
             .map(obs => minObs(obs));
 
-        if (debug) {
-            console.log('MIN cols=',cols,'is',allMins);
-        }
-        
         return Math.min(...allMins);
     }
 
@@ -193,11 +189,7 @@ export default class DataFeed {
             .map(obs => _.pick(obs, pickFields))
             .map(obs => maxObs(obs));
 
-        if (debug) {
-            console.log('MIN cols=',cols,'is',allMaxes);
-        }
-    
-        return Math.max(100, Math.max(...allMaxes));
+        return Math.max(...allMaxes);
     }
 
     /**
