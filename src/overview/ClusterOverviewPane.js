@@ -5,6 +5,7 @@ import ClusterMemory from './ClusterMemory';
 import GCPauseTime from './GCPauseTime';
 import PageCacheFaults from './PageCacheFaults';
 import PageCacheFlushes from './PageCacheFlushes';
+import PageCacheTracking from './PageCacheTracking';
 import TransactionsOpen from './TransactionsOpen';
 import UsedMemory from './UsedMemory';
 import OpenFileDescriptors from './OpenFileDescriptors';
@@ -30,21 +31,15 @@ export default class ClusterOverviewPane extends Component {
 
                     <Grid.Row columns={3}>
                         <Grid.Column>
-                            <PageCacheFaults />
+                            <PageCacheTracking />
                         </Grid.Column>
 
                         <Grid.Column>
-                            <PageCacheFlushes />
+                            <TransactionsOpen />
                         </Grid.Column>
 
                         <Grid.Column>
                             <OpenFileDescriptors />
-                        </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={3}>
-                        <Grid.Column>
-                            <TransactionsOpen />
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>
