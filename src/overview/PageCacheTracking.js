@@ -134,7 +134,6 @@ class PageCacheTracking extends Component {
                 <ClusterTimeseries key={this.state.key}
                     width={this.state.width}
                     feedMaker={this.dataFeedMaker}
-                    debug={true}
                     onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />

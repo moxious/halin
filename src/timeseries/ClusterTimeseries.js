@@ -37,7 +37,7 @@ class ClusterTimeseries extends Component {
         tracker: null,
         timeRange: null,
         disabled: {},
-        metadata: true,
+        metadata: false,
         displayProperty: null,
     };
 

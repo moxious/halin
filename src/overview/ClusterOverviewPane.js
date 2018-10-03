@@ -3,8 +3,8 @@ import { Grid } from 'semantic-ui-react';
 
 import ClusterMemory from './ClusterMemory';
 import GCPauseTime from './GCPauseTime';
-import PageCacheFaults from './PageCacheFaults';
-import PageCacheFlushes from './PageCacheFlushes';
+// import PageCacheFaults from './PageCacheFaults';
+// import PageCacheFlushes from './PageCacheFlushes';
 import PageCacheTracking from './PageCacheTracking';
 import TransactionsOpen from './TransactionsOpen';
 import UsedMemory from './UsedMemory';

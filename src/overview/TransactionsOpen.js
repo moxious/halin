@@ -15,7 +15,7 @@ class TransactionsOpen extends Component {
     };
 
     onUpdate = (childQueryState) => {
-        console.log('TransactionsOpen update',childQueryState);
+        // console.log('TransactionsOpen update',childQueryState);
     };
 
     toggleView = (val) => {

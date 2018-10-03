@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/query-library';
-import _ from 'lodash';
 
 class PageCacheFlushes extends Component {
     state = {
