@@ -109,6 +109,7 @@ const configurationDiff = (setOfSets, nameAccessor='key') => {
     };
 };
 
+/*
 const sos = {
     a: {
         x: 1,
@@ -128,6 +129,7 @@ const sos = {
 // Sample use:
 // console.log(sos);
 // console.log(JSON.stringify(configurationDiff(sos), null, 2));
+*/
 
 export default {
     configurationDiff,
