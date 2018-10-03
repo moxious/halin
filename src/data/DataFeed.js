@@ -52,7 +52,6 @@ export default class DataFeed {
         this.debug = props.debug;
         this.windowWidth = props.windowWidth || (1000 * 60 * 7);
         this.feedStartTime = null;
-        this.lastElapsedMs = -1;
 
         this.state = {
             data: null,
@@ -144,17 +143,25 @@ export default class DataFeed {
         return this.feedStartTime !== null;
     }
 
+    getDataPackets() {
+        // TimeEvent data is structured in a weird way for this computation we want
+        // to do so I tacked on an _original field which is nasty, but works.
+        const timeEvents = this.state.events.toArray();
+        return timeEvents.map(te => te._original);
+    }
+
+    /**
+     * Summarize statistics about what's running and how well it's going.
+     */
+    stats() {
+
+    }
+
     /**
      * Get the minmum value that occurs in the feed.
      */
     min(cols=this.displayColumns, debug=false) {
         if (!this.state.data || this.state.data.length === 0) { return 0; }
-
-        const timeEvents = this.state.events.toArray();
-
-        // TimeEvent data is structured in a weird way for this computation we want
-        // to do so I tacked on an _original field which is nasty, but works.
-        const dataPackets = timeEvents.map(te => te._original);
 
         const minObs = obs => {
             const vals = Object.values(obs).filter(actualNumber);
@@ -162,7 +169,7 @@ export default class DataFeed {
         };
 
         const pickFields = cols.map(c => c.accessor);
-        const allMins = dataPackets
+        const allMins = this.getDataPackets()
             .map(obs => _.pick(obs, pickFields))
             .map(obs => minObs(obs));
 
@@ -181,11 +188,8 @@ export default class DataFeed {
             return Math.max(...vals);
         };
 
-        const timeEvents = this.state.events.toArray();
-        const dataPackets = timeEvents.map(te => te._original);
-
         const pickFields = cols.map(c => c.accessor);
-        const allMaxes = dataPackets
+        const allMaxes = this.getDataPackets()
             .map(obs => _.pick(obs, pickFields))
             .map(obs => maxObs(obs));
 
@@ -207,19 +211,21 @@ export default class DataFeed {
 
         return session.run(this.query, this.params)
             .then(results => {
-                this.lastElapsedMs = new Date().getTime() - startTime;
+                const elapsedMs = new Date().getTime() - startTime;
 
-                if (this.lastElapsedMs > this.rate) {
+                if (elapsedMs > this.rate) {
                     // It's a bad idea to run long-running queries with a short window.
                     // It puts too much load on the system and does a bad job updating the
                     // graphic.
-                    console.warn(`DataFeed: query took ${this.lastElapsedMs} against window of ${this.rate}`,
+                    console.warn(`DataFeed: query took ${elapsedMs} against window of ${this.rate}`,
                         this.name.slice(0, 150));
                 }
 
                 // Take the first result only.  This component only works with single-record queries.
                 const rec = results.records[0];
-                let data = {};
+
+                // Record elapsed time for every sample
+                let data = { _sampleTime: elapsedMs };
 
                 // Plug query data values into data map, converting ints as necessary.
                 this.displayColumns.forEach(col => {

@@ -30,6 +30,7 @@ export default class HalinContext {
             connectionTimeout: 10000,
             trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
         };
+        this.debug = true;
         this.mgr = new ClusterManager(this);
     }
 
@@ -68,6 +69,9 @@ export default class HalinContext {
         }
 
         const allOptions = _.merge({ encrypted }, this.driverOptions);
+        if (this.debug) {
+            console.log('Driver connection', { addr, username, allOptions });
+        }
         const driver = neo4j.driver(addr,
             neo4j.auth.basic(username, password), allOptions);
 
