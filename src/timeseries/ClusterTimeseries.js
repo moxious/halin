@@ -10,6 +10,7 @@ import {
 import uuid from 'uuid';
 import Spinner from '../Spinner';
 import queryLibrary from '../data/query-library';
+import datautil from '../data/util';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 
@@ -23,8 +24,8 @@ const DEFAULT_PALETTE = [
  */
 class ClusterTimeseries extends Component {
     state = {
-        chartLowLimit: 0,
-        chartHighLimit: 50,
+        chartLowLimit: Infinity,
+        chartHighLimit: -Infinity,
         startTime: new Date(),
         query: null,
         data: null,
@@ -36,7 +37,8 @@ class ClusterTimeseries extends Component {
         tracker: null,
         timeRange: null,
         disabled: {},
-        metadata: false,
+        metadata: true,
+        displayProperty: null,
     };
 
     constructor(props, context) {
@@ -49,11 +51,11 @@ class ClusterTimeseries extends Component {
             throw new Error('displayProperty is required');
         }
 
+        this.state.displayProperty = props.displayProperty;
         this.query = props.query;
         this.rate = props.rate || 2000;
         this.width = props.width || 800;
         this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 5;  // 5 min
-        this.displayProperty = props.displayProperty;
         this.palette = props.palette || DEFAULT_PALETTE;
         this.showGrid = _.isNil(props.showGrid) ? false : props.showGrid;
         this.showGridPosition = _.isNil(props.showGridPosition) ? 'over' : props.showGridPosition;
@@ -98,8 +100,21 @@ class ClusterTimeseries extends Component {
 
         // If columns cannot be found, just use the display property.
         return columns ? columns : [
-            { Header: this.displayProperty, accessor: this.displayProperty },
+            { Header: this.state.displayProperty, accessor: this.state.displayProperty },
         ];
+    }
+
+    componentWillReceiveProps(props) {
+        this.setState({ 
+            displayProperty: props.displayProperty,
+
+            // Reset observed values to reset y axis
+            minObservedValue: Infinity,
+            maxObservedValue: -Infinity,
+            
+            // On next incremental, reset the vertical axis.
+            resetY: true,
+        });
     }
 
     componentDidMount() {
@@ -133,7 +148,7 @@ class ClusterTimeseries extends Component {
                     displayColumns: this.findColumns(),
                 });
 
-                feed.addAliases({ [this.displayProperty]: ClusterTimeseries.keyFor(addr, this.displayProperty) });
+                feed.addAliases({ [this.state.displayProperty]: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
             }
 
             this.feeds[addr] = feed;
@@ -151,7 +166,7 @@ class ClusterTimeseries extends Component {
 
         const noneDisabled = {};
         this.nodes.forEach(addr => {
-            noneDisabled[ClusterTimeseries.keyFor(addr, this.displayProperty)] = false;
+            noneDisabled[ClusterTimeseries.keyFor(addr, this.state.displayProperty)] = false;
         });
 
         this.setState({
@@ -172,20 +187,24 @@ class ClusterTimeseries extends Component {
         // Minimum computed only on the basis of our single display property.
         // The data packet may have other stuff in it, in different data ranges.  We don't
         // want max/min of that, because it isn't displayed.
-        const cols = [{ accessor: this.displayProperty, Header: this.displayProperty }];
+        const cols = [{ accessor: this.state.displayProperty, Header: this.state.displayProperty }];
 
         const computedMin = dataFeed.min(cols, this.props.debug) * 0.85;
         const computedMax = dataFeed.max(cols, this.props.debug) * 1.15;
 
-        const maxObservedValue = Math.max(
-            this.state.maxObservedValue,
-            computedMax
-        );
+        if (this.debug) {
+            console.log('computedMin/Max',computedMin,computedMax,'from',this.state.displayProperty);
+        }
 
-        const minObservedValue = Math.min(
-            this.state.minObservedValue,
+        const maxObservedValue = computedMax; /*Math.max(
+            (this.resetY ? -Infinity : this.state.maxObservedValue),
+            computedMax
+        );*/
+
+        const minObservedValue = computedMin; /*Math.min(
+            (this.resetY ? Infinity : this.state.minObservedValue),
             computedMin
-        );
+        );*/
 
         const futurePad = 1000; // ms into the future to show blank space on graph
         const fst = dataFeed.feedStartTime.getTime();
@@ -243,7 +262,8 @@ class ClusterTimeseries extends Component {
 
     getChartMax() {
         const allMaxes = this.getObservedMaxes();
-        return Math.max(Math.max(...allMaxes), this.state.chartHighLimit);
+        // return Math.max(Math.max(...allMaxes), this.state.chartHighLimit);
+        return Math.max(...allMaxes);
     }
 
     chooseColor(idx) {
@@ -252,7 +272,7 @@ class ClusterTimeseries extends Component {
         }
 
         const addr = this.nodes[idx];
-        const key = ClusterTimeseries.keyFor(addr, this.displayProperty);
+        const key = ClusterTimeseries.keyFor(addr, this.state.displayProperty);
 
         if (this.state.disabled[key]) {
             return 'transparent';
@@ -292,17 +312,27 @@ class ClusterTimeseries extends Component {
 
     renderChartMetadata() {
         if (!this.state.metadata) { return ''; }
-
+        const obsMin = Math.min(...this.getObservedMins());
+        const obsMax = Math.max(...this.getObservedMaxes());
         return (
-            <div class='ChartMetadata'>
+            <div className='ChartMetadata'>
                 <Label>
                     Max
-                    <Label.Detail>{Math.max(...this.getObservedMaxes())}</Label.Detail>
+                    <Label.Detail>{
+                        datautil.roundToPlaces(obsMax, 2)
+                    }</Label.Detail>
                 </Label>
 
                 <Label>
                     Min
-                    <Label.Detail>{Math.min(...this.getObservedMins())}</Label.Detail>
+                    <Label.Detail>{
+                        datautil.roundToPlaces(obsMin, 2)
+                    }</Label.Detail>
+                </Label>
+
+                <Label>
+                    Range
+                    <Label.Detail>{datautil.roundToPlaces(obsMax-obsMin,2)}</Label.Detail>
                 </Label>
             </div>
         );
@@ -310,7 +340,7 @@ class ClusterTimeseries extends Component {
 
     render() {
         const style = styler(this.nodes.map((addr, idx) => ({
-            key: ClusterTimeseries.keyFor(addr, this.displayProperty),
+            key: ClusterTimeseries.keyFor(addr, this.state.displayProperty),
             color: this.chooseColor(idx),
             width: 3,
         })));
@@ -343,7 +373,7 @@ class ClusterTimeseries extends Component {
                                 style={style}
                                 onSelectionChange={this.legendClick}
                                 categories={this.nodes.map((addr, idx) => ({
-                                    key: ClusterTimeseries.keyFor(addr, this.displayProperty),
+                                    key: ClusterTimeseries.keyFor(addr, this.state.displayProperty),
                                     label: window.halinContext.clusterNodes[idx].getLabel(),
                                     style: { fill: this.chooseColor(idx) },
                                 }))}
@@ -368,10 +398,10 @@ class ClusterTimeseries extends Component {
                                         {
                                             this.nodes.map((addr, idx) =>
                                                 <LineChart
-                                                    key={ClusterTimeseries.keyFor(addr, this.displayProperty)}
+                                                    key={ClusterTimeseries.keyFor(addr, this.state.displayProperty)}
                                                     axis="y"
                                                     style={style}
-                                                    columns={[ClusterTimeseries.keyFor(addr, this.displayProperty)]}
+                                                    columns={[ClusterTimeseries.keyFor(addr, this.state.displayProperty)]}
                                                     series={this.dataSeries[addr]}
                                                 />
                                             )
