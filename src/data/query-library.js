@@ -6,6 +6,11 @@ const cdt = CypherDataTable;
  * queries with various data feeds, they can be reused and centralized.
  */
 export default {
+    PING: {
+        query: 'RETURN true AS value',
+        columns: [ { Header: 'Value', accessor: 'value' } ],
+    },
+
     JMX_PAGE_CACHE: {
         query: `
         CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Page cache')

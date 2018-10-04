@@ -7,6 +7,7 @@ import uuid from 'uuid';
 import moment from 'moment';
 import appPkg from '../package.json';
 import ClusterManager from './cluster/ClusterManager';
+import queryLibrary from '../data/query-library';
 
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
@@ -209,11 +210,11 @@ export default class HalinContext {
         const pingFeed = this.getDataFeed({
             node: clusterNode,
             driver,
-            query: 'RETURN true as value',
+            query: queryLibrary.PING.query,
             params: {},
             rate: 1000,
             windowWidth: 10 * 1000,   // Keep last 10 pings
-            displayColumns: [ { Header: 'Value', accessor: 'value' } ],
+            displayColumns: queryLibrary.PING.columns,
         });
 
         // Caller needs a promise.  The feed is already running, so 
