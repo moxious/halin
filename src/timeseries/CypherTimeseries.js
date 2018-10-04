@@ -7,9 +7,10 @@ import {
     TimeSeries,
     TimeRange,
     Stream,
-} from "pondjs";
+} from 'pondjs';
 import uuid from 'uuid';
 import Spinner from '../Spinner';
+import datautil from '../data/util';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import NodeLabel from '../NodeLabel';
@@ -277,12 +278,12 @@ class CypherTimeseries extends Component {
             <div className='ChartMetadata'>
                 <Label>
                     Max
-                    <Label.Detail>{this.getChartMax()}</Label.Detail>
+                    <Label.Detail>{datautil.roundToPlaces(this.getChartMax(), 2)}</Label.Detail>
                 </Label>
 
                 <Label>
                     Min
-                    <Label.Detail>{this.getChartMin()}</Label.Detail>
+                    <Label.Detail>{datautil.roundToPlaces(this.getChartMin(), 2)}</Label.Detail>
                 </Label>
 
                 <NodeLabel node={this.props.node}/>
