@@ -366,6 +366,7 @@ export default class HalinContext {
                 diagnosticsGenerated: moment.utc().toISOString(),
                 activeProject: this.cleanup(this.project),
                 activeGraph: this.cleanup(this.graph),
+                dataFeeds: Object.values(this.dataFeeds).map(df => df.stats()),
                 ...appPkg,
             }
         };
