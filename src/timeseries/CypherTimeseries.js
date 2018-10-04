@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import 'semantic-ui-css/semantic.min.css';
-import { Grid } from 'semantic-ui-react';
+import { Grid, Label } from 'semantic-ui-react';
 import * as PropTypes from "prop-types";
 import {
     TimeSeries,
     TimeRange,
     Stream,
-} from "pondjs";
+} from 'pondjs';
 import uuid from 'uuid';
 import Spinner from '../Spinner';
+import datautil from '../data/util';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import NodeLabel from '../NodeLabel';
@@ -35,6 +36,7 @@ class CypherTimeseries extends Component {
         maxObservedValue: -Infinity,
         tracker: null,
         timeRange: null,
+        metadata: true,
     };
 
     constructor(props, context) {
@@ -55,6 +57,7 @@ class CypherTimeseries extends Component {
         this.max = props.max || (data => this.state.maxObservedValue);
         this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 2;  // 2 min
         this.displayColumns = props.displayColumns;
+        this.legendOnlyColumns = props.legendOnlyColumns || [];
         this.palette = props.palette || DEFAULT_PALETTE;
         this.showGrid = _.isNil(props.showGrid) ? false : props.showGrid;
         this.showGridPosition = _.isNil(props.showGridPosition) ? 'over' : props.showGridPosition;
@@ -79,12 +82,17 @@ class CypherTimeseries extends Component {
             query: this.props.query,
             rate: this.props.rate, 
             windowWidth: this.props.timeWindowWidth,
-            displayColumns: this.props.displayColumns,
+
+            // Fetch data for both kinds of columns in the data feed so that
+            // the data gets destructured correctly.
+            displayColumns: this.props.displayColumns.concat(this.props.legendOnlyColumns || []),
             params: {},
         });
 
-        this.feed.onData = (newData, dataFeed) => 
+        const onDataListener = (newData, dataFeed) => 
             this.onData(newData, dataFeed);
+
+        this.feed.addListener(onDataListener);
 
         const disabled = {};
 
@@ -123,8 +131,8 @@ class CypherTimeseries extends Component {
 
     onData(newData, dataFeed) {
         if (this.mounted) {
-            const computedMin = this.feed.min() * 0.85;
-            const computedMax = this.feed.max() * 1.15;
+            const computedMin = this.feed.min(this.displayColumns) * 0.85;
+            const computedMax = this.feed.max(this.displayColumns) * 1.15;
 
             const maxObservedValue = Math.max(
                 this.state.maxObservedValue,
@@ -168,6 +176,9 @@ class CypherTimeseries extends Component {
             // }
 
             this.setState(newState);
+            if(this.props.onUpdate) {
+                this.props.onUpdate(newState);   
+            }
         } else {
             return null;
         }
@@ -241,6 +252,44 @@ class CypherTimeseries extends Component {
             trackerX: t && scale(t)
         });
     };
+
+    renderLegendOnlyColumns() {
+        if (!this.legendOnlyColumns || this.legendOnlyColumns.length === 0 || !this.state.data) {
+            return '';
+        }
+
+        return (
+            <Grid.Row columns={1}>
+                <Grid.Column>
+                    {this.legendOnlyColumns.map((col, i)=>
+                        <Label key={i}>
+                            {col.Header}
+                            <Label.Detail>{_.get(this.state.data[0], col.accessor)}</Label.Detail>
+                        </Label>
+                    )}
+                </Grid.Column>
+            </Grid.Row>
+        );
+    }
+
+    renderChartMetadata() {
+        if (!this.state.metadata) { return ''; }
+        return (
+            <div className='ChartMetadata'>
+                <Label>
+                    Max
+                    <Label.Detail>{datautil.roundToPlaces(this.getChartMax(), 2)}</Label.Detail>
+                </Label>
+
+                <Label>
+                    Min
+                    <Label.Detail>{datautil.roundToPlaces(this.getChartMin(), 2)}</Label.Detail>
+                </Label>
+
+                <NodeLabel node={this.props.node}/>
+            </div>
+        );
+    }
 
     render() {
         if (!this.state.events) { return 'Loading...'; }
@@ -328,10 +377,10 @@ class CypherTimeseries extends Component {
                                     </Charts>
                                 </ChartRow>
                             </ChartContainer>
-
-                            <NodeLabel node={this.props.node}/>
                         </Grid.Column>
                     </Grid.Row>
+                    { this.renderLegendOnlyColumns() }
+                    { this.renderChartMetadata() }                    
                 </Grid>
             </div>
         ) : <Spinner active={true}/>;

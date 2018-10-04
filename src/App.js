@@ -10,8 +10,10 @@ import PerformancePane from './performance/PerformancePane';
 import OSPane from './performance/OSPane';
 import DatabasePane from './db/DatabasePane';
 import PermissionsPane from './configuration/PermissionsPane';
+import ClusterOverviewPane from './overview/ClusterOverviewPane';
 import { Tab, Button } from 'semantic-ui-react'
 import DiagnosticPane from './diagnostic/DiagnosticPane';
+import SettingsPane from './settings/SettingsPane';
 import status from './status/index';
 import AppFooter from './AppFooter';
 import './App.css';
@@ -65,7 +67,9 @@ class Halin extends Component {
   };
 
   paneWrapper = (obj, cls = 'secondary') =>
-    <div className={`PaneWrapper ${cls}`}>{obj}</div>;
+    <Tab.Pane>
+      <div className={`PaneWrapper ${cls}`}>{obj}</div>
+    </Tab.Pane>;
 
   componentDidMount() {
     try {
@@ -93,7 +97,7 @@ class Halin extends Component {
 
   renderCluster() {
     const nodePanes = this.state.halin.clusterNodes.map(node => ({
-      menuItem: `${node.getAddress()} (${node.role})`,
+      menuItem: `${node.getLabel()} (${node.role})`,
       render: () =>
         this.paneWrapper(
           this.renderSingleNode(this.state.halin.driverFor(node.getBoltAddress()), node),
@@ -128,9 +132,19 @@ class Halin extends Component {
       },
     };
 
-    return <Tab panes={nodePanes.concat([
-      userMgmtPane, diagnosticPane
-    ])} />;
+    const overviewPane = {
+      menuItem: 'Overview',
+      render: () => this.paneWrapper(<ClusterOverviewPane />, 'primary'),
+    };
+
+    const settingsPane = {
+      menuItem: { key: 'settings', icon: 'settings', content: 'Settings' },
+      render: () => this.paneWrapper(<SettingsPane />, 'primary'),
+    };
+
+    return <Tab panes={[overviewPane].concat(nodePanes.concat([
+      userMgmtPane, diagnosticPane, settingsPane,
+    ]))} />;
   }
 
   renderSingleNode(driver = null, node = null) {

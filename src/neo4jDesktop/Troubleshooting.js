@@ -4,7 +4,7 @@ import { Message } from 'semantic-ui-react';
 export default class Troubleshooting extends Component {
     renderList(suggestions) {
         if (!suggestions) { return ''; }
-        return suggestions.map(someText => <p>{someText}</p>);
+        return suggestions.map((someText, idx) => <p key={idx}>{someText}</p>);
     }
 
     render() {

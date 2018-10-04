@@ -1,5 +1,16 @@
 # Halin Release Notes
 
+## 0.4.0
+
+- Introduced the concept of a cluster timeseries, showing one data element for all nodes
+in the cluster.
+- Based on that, added a Cluster Overview tab with cluster timeseries for heap size,
+GC pause, page cache faults, transactions open, used memory, file descriptors, and others,
+following templated Grafana dashboards suggested by DGordon.
+- Introduced the concept in Diagnostics of a "Configuration Diff Tool" allowing users to
+quickly find where configuration disagrees across all nodes of the cluster.
+- Data feed stats on the settings page
+
 ## 0.3.1
 
 Bugfixes

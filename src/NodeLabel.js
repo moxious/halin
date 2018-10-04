@@ -11,10 +11,10 @@ export default class NodeLabel extends Component {
             <Popup trigger={
                 <div className="ui image label" style={{hover:'none'}}>
                     <Image src="img/neo4j_logo_globe.png" size="mini"/>
-                    {this.props.node ? this.props.node.getAddress() + ' ' + this.props.node.role : 'NONE' }
+                    {this.props.node ? this.props.node.getLabel() + ' ' + this.props.node.role : 'NONE' }
                 </div>
             } content={
-                this.props.node ? this.props.node.getBoltAddress() : 'N/A'
+                this.props.node ? this.props.node.getLabel() : 'N/A'
             }/>
         )
     }

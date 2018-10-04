@@ -56,6 +56,18 @@ export default class Ping extends Component {
     render() {
         let message = status.formatStatusMessage(this);
 
+        let rows = [
+            { header: 'Machine', show: true, render: r => <NodeLabel node={r.clusterNode} /> },
+            { header: 'Role', show: true, render: r => r.clusterNode.role },
+            { header: 'Result (ms)', show: true, render: r => r.elapsedMs },
+            { header: 'Status', show: true, render: r => <SignalMeter strength={datautil.signalStrengthFromPing(r.elapsedMs, r.err) } /> },
+            { 
+                header: 'Other Information',
+                show: this.haveErrors(),
+                render: r => r.err ? `${r.err}` : 'none',
+            },
+        ];
+
         return this.state.pingResults ? (
             <div className='Ping'>
                 <h2>Ping</h2>
@@ -66,32 +78,19 @@ export default class Ping extends Component {
                 { message }
                 <Table celled>
                     <Table.Header>
-                        <Table.Row>
-                            <Table.HeaderCell>Machine</Table.HeaderCell>
-                            <Table.HeaderCell>Role</Table.HeaderCell>
-                            <Table.HeaderCell>Result (ms)</Table.HeaderCell>
-                            <Table.HeaderCell>Status</Table.HeaderCell>
-                            { this.haveErrors() ? <Table.HeaderCell>Other Information</Table.HeaderCell> : '' }
-                        </Table.Row>
+                        <Table.Row>{ 
+                            rows.map((r, i) => <Table.HeaderCell key={i}>{r.header}</Table.HeaderCell>) 
+                        }</Table.Row>
                     </Table.Header>
-                    <tbody>
+                    <Table.Body>
                     {
-                        this.state.pingResults.map((r, idx) => 
-                            <Table.Row key={idx}>
-                                <Table.Cell>
-                                    <NodeLabel node={r.clusterNode}/>
-                                </Table.Cell>
-                                <Table.Cell>{r.clusterNode.role}</Table.Cell>
-                                <Table.Cell>{r.elapsedMs}</Table.Cell>
-                                <Table.Cell>
-                                    <SignalMeter 
-                                        strength={datautil.signalStrengthFromPing(r.elapsedMs, r.err)}
-                                    />
-                                </Table.Cell>
-                                { this.haveErrors() ? <Table.Cell>{r.err ? `${r.err}` : 'none'}</Table.Cell> : '' }
-                            </Table.Row>)
+                        this.state.pingResults.map((r, resultIdx) => 
+                            <Table.Row key={resultIdx}>{
+                                rows.map((row, rowIdx) => 
+                                    <Table.Cell key={rowIdx}>{row.render(r)}</Table.Cell>)
+                            }</Table.Row>)
                     }
-                    </tbody>
+                    </Table.Body>
                 </Table>
 
                 <Button basic onClick={() => this.ping()}>

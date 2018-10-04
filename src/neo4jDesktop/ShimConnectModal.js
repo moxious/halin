@@ -2,14 +2,22 @@ import React, { Component } from "react";
 import * as PropTypes from 'prop-types';
 import { Render } from 'graph-app-kit/components/Render';
 import { Button, Form, Modal, Message, Checkbox } from "semantic-ui-react";
+import _ from 'lodash';
+
+let privateLocalCreds = {};
+try {
+    privateLocalCreds = require('./cluster-credentials.json');
+} catch (e) {
+    console.log('No pre-configured halin credentials were found, but that\'s OK', e);
+}
 
 class ConnectForm extends Component {
     state = {
-        username: "neo4j",
-        password: "",
-        host: 'localhost',
-        port: 7687,
-        encrypted: false,
+        username: privateLocalCreds.username || process.env.NEO4J_USERNAME || 'neo4j',
+        password: privateLocalCreds.password || process.env.NEO4J_PASSWORD,
+        host: privateLocalCreds.host || process.env.NEO4J_URI || 'localhost',
+        port: privateLocalCreds.port || 7687,
+        encrypted: _.isNil(privateLocalCreds.encrypted) ? false : privateLocalCreds.encrypted,
     };
 
     inputUpdated = (_, data) => {

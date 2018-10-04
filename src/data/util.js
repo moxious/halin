@@ -18,6 +18,9 @@ export default {
         return bytes.toFixed(1) + ' ' + units[u];
     },
 
+    roundToPlaces: (num, places=2) => 
+        Math.round(num * Math.pow(10, places)) / Math.pow(10, places),
+
     roundPct: num => Math.round(num * 100),
 
     /**

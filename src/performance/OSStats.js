@@ -5,6 +5,7 @@ import { Grid } from 'semantic-ui-react';
 import uuid from 'uuid';
 import AllocationChart from './AllocationChart';
 import datautil from '../data/util';
+import queryLibrary from '../data/query-library';
 
 export default class OSStats extends Component {
     state = {
@@ -12,43 +13,8 @@ export default class OSStats extends Component {
         rate: 1000,
         pieWidth: 300,
         pieHeight: 300,
-        query: `
-            CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
-            YIELD attributes 
-            WITH
-                attributes.OpenFileDescriptorCount.value as fdOpen,
-                attributes.MaxFileDescriptorCount.value as fdMax,
-
-                attributes.FreePhysicalMemorySize.value as physFree,
-                attributes.TotalPhysicalMemorySize.value as physTotal,
-
-                attributes.CommittedVirtualMemorySize.value as virtCommitted,
-                attributes.FreeSwapSpaceSize.value as swapFree,
-                attributes.TotalSwapSpaceSize.value as swapTotal,
-
-                attributes.Name.value as osName,
-                attributes.Version.value as osVersion,
-                attributes.Arch.value as arch,
-                attributes.AvailableProcessors.value as processors
-            RETURN 
-                fdOpen, fdMax,
-                physFree, physTotal,
-                virtCommitted, swapFree, swapTotal,
-                osName, osVersion, arch, processors;
-        `,
-        displayColumns: [
-            { Header: 'Open FDs', accessor: 'fdOpen' },
-            { Header: 'Max FDs', accessor: 'fdMax' },
-            { Header: 'Physical Memory (Free)', accessor: 'physFree' },
-            { Header: 'Physical Memory (Total)', accessor: 'physTotal' },
-            { Header: 'Virtual Memory (Committed)', accessor: 'virtCommitted' },
-            { Header: 'Swap memory (Free)', accessor: 'swapFree' },
-            { Header: 'Swap memory (Total)', accessor: 'swapTotal' },
-            { Header: 'OS Name', accessor: 'osName' },
-            { Header: 'OS Version', accessor: 'osVersion' },
-            { Header: 'Arch', accessor: 'arch' },
-            { Header: 'Processors', accessor: 'processors' },
-        ],
+        query: queryLibrary.OS_MEMORY_STATS.query,
+        displayColumns: queryLibrary.OS_MEMORY_STATS.columns,
     }
 
     componentDidMount() {
@@ -64,7 +30,7 @@ export default class OSStats extends Component {
             params: {},
         });
 
-        this.feed.onData = (newData, dataFeed) => {
+        const onDataListener = (newData, dataFeed) => {
             // Don't need any of the timeseries stuff, just one data packet.
             // console.log(newData.data[0]);
 
@@ -72,7 +38,9 @@ export default class OSStats extends Component {
             if (this.mounted) {
                 this.setState({ data });
             }
-        }
+        };
+
+        this.feed.addListener(onDataListener);
     }
 
     componentWillUnmount() {

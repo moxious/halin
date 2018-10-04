@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import "semantic-ui-css/semantic.min.css";
 import './PermissionsPane.css';
 import { Grid, Message, Icon } from 'semantic-ui-react';
-// import HeapComponent from './HeapComponent';
 import Neo4jUsers from './users/Neo4jUsers';
 import NewUserForm from './users/NewUserForm';
 

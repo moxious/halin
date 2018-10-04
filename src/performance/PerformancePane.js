@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
 import "semantic-ui-css/semantic.min.css";
 import { Grid } from 'semantic-ui-react';
-// import HeapComponent from './HeapComponent';
 import MemoryMonitor from './MemoryMonitor';
 import SystemLoad from './SystemLoad';
 import GCMonitor from './GCMonitor';
+import TransactionMonitor from './TransactionMonitor';
 import ActiveQueries from './ActiveQueries';
 import StoreFiles from '../diagnostic/StoreFiles';
 import uuid from 'uuid';
@@ -26,6 +26,15 @@ class PerformancePane extends Component {
                         </Grid.Column>
                     </Grid.Row>
 
+                    <Grid.Row columns={2}>
+                        <Grid.Column>
+                            <TransactionMonitor key={key} node={this.props.node} driver={this.props.driver}/>
+                        </Grid.Column>
+                        <Grid.Column>
+                            <GCMonitor key={key} node={this.props.node} driver={this.props.driver}/>
+                        </Grid.Column>
+                    </Grid.Row>
+
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <ActiveQueries key={key} node={this.props.node} driver={this.props.driver}/>
@@ -35,12 +44,6 @@ class PerformancePane extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <StoreFiles key={key} node={this.props.node} driver={this.props.driver}/>
-                        </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={1}>
-                        <Grid.Column>
-                            <GCMonitor key={key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>  

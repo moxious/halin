@@ -7,8 +7,8 @@ import uuid from 'uuid';
 import moment from 'moment';
 import appPkg from '../package.json';
 import ClusterManager from './cluster/ClusterManager';
+import queryLibrary from '../data/query-library';
 
-import assert from 'assert';
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 /**
@@ -26,11 +26,17 @@ export default class HalinContext {
         this.graph = null;
         this.drivers = {};
         this.dataFeeds = {};
+        this.pollRate = 1000;
         this.driverOptions = {
             connectionTimeout: 10000,
             trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
         };
+        this.debug = true;
         this.mgr = new ClusterManager(this);
+    }
+
+    getPollRate() {
+        return this.pollRate;
     }
 
     /**
@@ -43,7 +49,9 @@ export default class HalinContext {
     getDataFeed(feedOptions) {
         const df = new DataFeed(feedOptions);
         const feed = this.dataFeeds[df.name];
-        if (feed) { return feed; }
+        if (feed) { 
+            return feed; 
+        }
         this.dataFeeds[df.name] = df;
         // console.log('Halin starting new DataFeed: ', df.name.slice(0, 120) + '...');
         df.start();
@@ -62,6 +70,9 @@ export default class HalinContext {
         }
 
         const allOptions = _.merge({ encrypted }, this.driverOptions);
+        if (this.debug) {
+            console.log('Driver connection', { addr, username, allOptions });
+        }
         const driver = neo4j.driver(addr,
             neo4j.auth.basic(username, password), allOptions);
 
@@ -199,11 +210,11 @@ export default class HalinContext {
         const pingFeed = this.getDataFeed({
             node: clusterNode,
             driver,
-            query: 'RETURN true as value',
+            query: queryLibrary.PING.query,
             params: {},
             rate: 1000,
             windowWidth: 10 * 1000,   // Keep last 10 pings
-            displayColumns: [ { Header: 'Value', accessor: 'value' } ],
+            displayColumns: queryLibrary.PING.columns,
         });
 
         // Caller needs a promise.  The feed is already running, so 
@@ -223,7 +234,7 @@ export default class HalinContext {
                 reject(err, dataFeed);
             };
 
-            pingFeed.onData = onPingData;
+            pingFeed.addListener(onPingData);
             pingFeed.onError = onError;
         });
     }
@@ -356,6 +367,7 @@ export default class HalinContext {
                 diagnosticsGenerated: moment.utc().toISOString(),
                 activeProject: this.cleanup(this.project),
                 activeGraph: this.cleanup(this.graph),
+                dataFeeds: Object.values(this.dataFeeds).map(df => df.stats()),
                 ...appPkg,
             }
         };

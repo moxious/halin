@@ -15,12 +15,28 @@ export default class ClusterNode {
     }
 
     getBoltAddress() {
-        return this.addresses.filter(addr => addr.indexOf('bolt') > -1)[0];
+        if (this.boltAddress) {
+            return this.boltAddress;
+        }
+
+        this.boltAddress = this.addresses.filter(addr => addr.indexOf('bolt') > -1)[0];
+        return this.boltAddress;
     }
 
     getAddress() {
         const parsed = Parser.parse(this.getBoltAddress());
         return parsed.host;
+    }
+
+    getLabel() {
+        const addr = this.getAddress();
+        if (addr.match(/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/)) {
+            // IP address
+            return addr;
+        }
+
+        // Return the first portion of the hostname.
+        return addr.split('.')[0];
     }
 
     protocols() {
