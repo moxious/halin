@@ -24,3 +24,4 @@ chrome-user-data
 *.swo
 dist
 grafana
+cluster-credentials.json
