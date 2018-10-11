@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import * as PropTypes from "prop-types";
-import { Button, Icon, Tab } from 'semantic-ui-react';
+import { Button, Icon, Tab, Message } from 'semantic-ui-react';
 import Spinner from '../Spinner';
 import uuid from 'uuid';
 import status from '../status/index';
@@ -15,6 +15,7 @@ class GeneratePackage extends Component {
         message: null,
         error: null,
         loading: false,
+        userIsAdmin: false,
         headers: [
             { label: 'domain', key: 'domain' },
             { label: 'node', key: 'node' },
@@ -103,16 +104,34 @@ class GeneratePackage extends Component {
         return (<Tab menu={{ borderless: true, attached: false, tabular: false }} panes={panes} />);
     }
 
+    componentDidMount() {
+        if (window.halinContext.getCurrentUser().roles.indexOf('admin') === -1) {
+            return this.setState({ userIsAdmin: false });
+        }
+
+        return this.setState({ userIsAdmin: true });
+    }
+
     render() {
         let message = status.formatStatusMessage(this);
 
         return (
             <div className='GeneratePackage'>
-                <Button basic disabled={this.state.loading}
+                <Button basic disabled={this.state.loading || !this.state.userIsAdmin}
                         onClick={this.generatePackage}>
                     <Icon name='cogs'/>
                     Run Diagnostics!
                 </Button>
+
+                { !this.state.userIsAdmin ? 
+                    <Message warning icon>
+                        <Icon name='warning' />
+                        <Message.Content>
+                            Only users with role 'admin' may use this function.
+                        </Message.Content>
+                    </Message>              
+                  : ''
+                }
 
                 { this.state.diagnosticData ? (
                     <Button basic 

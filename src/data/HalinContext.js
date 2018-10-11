@@ -124,7 +124,9 @@ export default class HalinContext {
 
                     // Force driver creation and ping, this is basically
                     // just connecting to the whole cluster.
-                    return this.clusterNodes.map(cn => this.ping(cn));
+                    // By resolving this as "Promise.all" we don't finish initializing
+                    // until all nodes have been contacted.
+                    return Promise.all(this.clusterNodes.map(cn => this.ping(cn)));
                 } else {
                     Sentry.captureException(err);
                     throw err;
@@ -166,6 +168,36 @@ export default class HalinContext {
         return deepReplace('password', '********', _.cloneDeep(pkg));
     }
 
+    getCurrentUser() {
+        return this.currentUser;
+    }
+
+    checkUser(driver) {
+        const q = 'call dbms.showCurrentUser()';
+        const session = driver.session();
+
+        return session.run(q, {})
+            .then(results => {
+                const rec = results.records[0];
+                this.currentUser = {
+                    username: rec.get('username'),
+                    roles: rec.get('roles'),
+                    flags: rec.get('flags'),
+                };
+                console.log('Current User', this.currentUser);
+            })
+            .catch(err => {
+                Sentry.captureException(err);
+                console.error('Failed to get user info');
+                this.currentUser = {
+                    username: 'UNKNOWN',
+                    roles: [],
+                    flags: [],
+                };
+            })
+            .finally(() => session.close());
+    }
+
     /**
      * Returns a promise that resolves to the HalinContext object completed,
      * or rejects.
@@ -185,7 +217,10 @@ export default class HalinContext {
                     this.base.driver = this.driverFor(uri);
 
                     console.log('HalinContext created', this);
-                    return this.checkForCluster(active);
+                    return Promise.all([
+                        this.checkUser(this.base.driver), 
+                        this.checkForCluster(active),
+                    ]);
                 })
                 .then(() => this)
         } catch (e) {

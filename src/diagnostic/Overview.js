@@ -65,26 +65,6 @@ class Overview extends Component {
             .finally(() => session.close());
     }
 
-    getAddress() {
-        const q = `
-            call dbms.listConfig() 
-            yield name, value 
-            where name='dbms.connectors.default_advertised_address' 
-            return value;
-        `;
-        const session = this.driver.session();
-        return session.run(q, {})
-            .then(results => {
-                const address = results.records[0].get('value');
-                this.setState({ address });
-            })
-            .catch(err => {
-                Sentry.captureException(err);
-                console.error('Failed to get node address', err);
-            })
-            .finally(() => session.close());
-    }
-
     getDBComponents() {
         const session = this.driver.session();
         return session.run('CALL dbms.components()', {})
@@ -108,7 +88,6 @@ class Overview extends Component {
         return Promise.all([
             this.getDBComponents(), 
             this.getClusterStatus(),
-            this.getAddress(),
             this.getUser(),
         ]);
     }
@@ -144,7 +123,7 @@ class Overview extends Component {
                                 </Grid.Column>
                                 <Grid.Column textAlign='left'>
                                     <ul>
-                                        <li>Database is running in mode {this.state.mode} on {this.state.address}</li>
+                                        <li>Database is running in mode {this.state.mode}</li>
                                         <li>Halin is running under user&nbsp;
                                             <strong>
                                                 {(_.get(this.state.user, 'username') || 'loading...')}
