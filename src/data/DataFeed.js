@@ -2,6 +2,7 @@ import Ring from 'ringjs';
 import { TimeEvent } from 'pondjs';
 import _ from 'lodash';
 import queryLibrary from './query-library';
+import * as Sentry from '@sentry/browser';
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 // Fun fact!  Infinity isn't a number, and so Number.isNaN should be true for
@@ -313,6 +314,7 @@ export default class DataFeed {
                 return this.listeners.map(listener => listener(this.state, this));
             })
             .catch(err => {
+                Sentry.captureException(err);
                 console.error('Failed to execute timeseries query', err);
                 if (this.onError) {
                     this.onError(err, this);

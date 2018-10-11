@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
+import * as Sentry from '@sentry/browser';
 
 /**
  * This is a controller for clusters.
@@ -18,9 +19,12 @@ const clusterOpSuccess = (node, results) => ({
     success: true, node, addr: node.getBoltAddress(), results
 });
 
-const clusterOpFailure = (node, err) => ({
-    success: false, node, addr: node.getBoltAddress(), err
-});
+const clusterOpFailure = (node, err) => {
+    if (err) { Sentry.captureException(err); }
+    return {
+        success: false, node, addr: node.getBoltAddress(), err
+    };
+};
 
 const packageClusterOpResults = results => {
     // Overall we're a success only if all underlying promises

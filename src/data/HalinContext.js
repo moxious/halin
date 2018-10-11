@@ -8,6 +8,7 @@ import moment from 'moment';
 import appPkg from '../package.json';
 import ClusterManager from './cluster/ClusterManager';
 import queryLibrary from '../data/query-library';
+import * as Sentry from '@sentry/browser';
 
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
@@ -125,6 +126,7 @@ export default class HalinContext {
                     // just connecting to the whole cluster.
                     return this.clusterNodes.map(cn => this.ping(cn));
                 } else {
+                    Sentry.captureException(err);
                     throw err;
                 }
             })

@@ -3,6 +3,7 @@ import * as PropTypes from 'prop-types';
 import { Button, Modal, Dropdown, Grid } from 'semantic-ui-react';
 import status from '../../status/index';
 import _ from 'lodash';
+import * as Sentry from '@sentry/browser';
 
 class AssignRoleModal extends Component {
     state = {
@@ -23,6 +24,7 @@ class AssignRoleModal extends Component {
 
         return session.run(q, params)
             .catch(err => {
+                Sentry.captureException(err);
                 this.setState({
                     pending: false,
                     message: null,

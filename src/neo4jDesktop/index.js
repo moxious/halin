@@ -1,6 +1,7 @@
 /**
  * Utilities around dealing with Neo4j Desktop
  */
+import * as Sentry from '@sentry/browser';
 
 /**
  * Given a project, return an array of its active graphs.
@@ -50,6 +51,7 @@ const getFirstActive = () => {
             return { project: activeProj, graph: activeGraph };
         })
         .catch(err => {
+            Sentry.captureException(err);
             console.error('Failed to inspect context:', err);
         })
 };

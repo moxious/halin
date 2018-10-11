@@ -6,6 +6,7 @@ import 'semantic-ui-css/semantic.min.css';
 import ClusterNode from '../data/ClusterNode';
 import _ from 'lodash';
 import './Overview.css';
+import * as Sentry from '@sentry/browser';
 
 class Overview extends Component {
     state = {
@@ -35,6 +36,7 @@ class Overview extends Component {
                 if (str.indexOf('no procedure') > -1) {
                     this.setState({ mode: 'SINGLE', clusterInfo: null });
                 } else {
+                    Sentry.captureException(err);
                     console.error('CLUSTER ERROR', err);    
                 }
             })            
@@ -57,6 +59,7 @@ class Overview extends Component {
                 this.setState({ user });
             })
             .catch(err => {
+                Sentry.captureException(err);
                 console.error('Failed to get user info', err);
             })
             .finally(() => session.close());
@@ -76,6 +79,7 @@ class Overview extends Component {
                 this.setState({ address });
             })
             .catch(err => {
+                Sentry.captureException(err);
                 console.error('Failed to get node address', err);
             })
             .finally(() => session.close());
@@ -94,6 +98,7 @@ class Overview extends Component {
                 });
             })
             .catch(err => {
+                Sentry.captureException(err);
                 console.error('Failed to get DB components', err);
             })
             .finally(() => session.close());

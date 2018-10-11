@@ -18,6 +18,7 @@
   "homepage": "http://halin.s3-website-us-east-1.amazonaws.com/",
   "private": false,
   "dependencies": {
+    "@sentry/browser": "^4.0.6",
     "bluebird": "^3.5.2",
     "graph-app-kit": "^0.7.0",
     "lodash": "^4.17.11",
