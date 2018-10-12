@@ -1,5 +1,13 @@
 # Halin Release Notes
 
+## 0.4.1
+
+- Support for Neo4j Community!  Albeit with some components disabled whose data is not available outside of Enterprise
+- Selectively disable certain components when user lacks the 'admin' role, rather than breaking badly
+- Sentry integration for tracking errors encountered
+- Fixed edge case bugs where certain kinds of JMX queries do not
+return any records in Neo4j Community
+
 ## 0.4.0
 
 - Introduced the concept of a cluster timeseries, showing one data element for all nodes
