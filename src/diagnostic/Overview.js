@@ -50,9 +50,15 @@ class Overview extends Component {
         return session.run(q, {})
             .then(results => {
                 const rec = results.records[0];
+                let roles = ['(none)'];
+                
+                // Community doesn't expose roles
+                try { roles = rec.get('roles'); }
+                catch (e) { ; }
+
                 const user = {
                     username: rec.get('username'),
-                    roles: rec.get('roles'),
+                    roles,
                     flags: rec.get('flags'),
                 };
 
