@@ -10,6 +10,7 @@ import uuid from 'uuid';
 import NodeLabel from '../NodeLabel';
 import Spinner from '../Spinner';
 import datautil from '../data/util';
+import * as Sentry from '@sentry/browser';
 
 const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
 
@@ -160,8 +161,20 @@ class CypherDataTable extends Component {
                     // Loop through all columns with accessors to populate their 
                     // data
                     this.state.displayColumns.filter(col => col.accessor).forEach(col => {
-                        const val = row.get(col.accessor);
-                        item[col.accessor] = neo4j.isInt(val) ? neo4j.integer.toNumber(val) : val;
+                        try {
+                            const val = row.get(col.accessor);
+                            item[col.accessor] = neo4j.isInt(val) ? neo4j.integer.toNumber(val) : val;
+                        } catch (e) {
+                            const str = `${e}`;
+                            if (str.indexOf('record has no field with key')) {
+                                // This is survivable; in community some queries don't
+                                // return all fields.
+                                console.warn(str);
+                                item[col.accessor] = null;
+                            } else {
+                                throw e;
+                            }
+                        }
                     });
 
                     return item;
@@ -177,6 +190,7 @@ class CypherDataTable extends Component {
             })
             .catch(err => {
                 console.error('CypherDataTable: error executing', this.query, this.parameters, err);
+                Sentry.captureException(err);
                 this.setState({ items: [] });
             })
             .finally(() => session.close());
