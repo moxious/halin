@@ -266,6 +266,9 @@ export default class DataFeed {
 
                 // Take the first result only.  This component only works with single-record queries.
                 const rec = results.records[0];
+                if (!rec) {
+                    throw new Error(`Query ${this.query} returned no valid records`);
+                }
 
                 // Record elapsed time for every sample
                 let data = { _sampleTime: elapsedMs };
