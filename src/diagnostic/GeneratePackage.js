@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import * as PropTypes from "prop-types";
 import { Button, Icon, Tab } from 'semantic-ui-react';
 import Spinner from '../Spinner';
 import uuid from 'uuid';
@@ -8,6 +7,7 @@ import moment from 'moment';
 import Advisor from './advisor/Advisor';
 import ConfigurationDiff from './ConfigurationDiff';
 import advisor from './advisor/index';
+import hoc from '../higherOrderComponents';
 
 class GeneratePackage extends Component {
     state = {
@@ -15,6 +15,7 @@ class GeneratePackage extends Component {
         message: null,
         error: null,
         loading: false,
+        userIsAdmin: false,
         headers: [
             { label: 'domain', key: 'domain' },
             { label: 'node', key: 'node' },
@@ -103,6 +104,14 @@ class GeneratePackage extends Component {
         return (<Tab menu={{ borderless: true, attached: false, tabular: false }} panes={panes} />);
     }
 
+    componentDidMount() {
+        if (window.halinContext.getCurrentUser().roles.indexOf('admin') === -1) {
+            return this.setState({ userIsAdmin: false });
+        }
+
+        return this.setState({ userIsAdmin: true });
+    }
+
     render() {
         let message = status.formatStatusMessage(this);
 
@@ -142,8 +151,4 @@ class GeneratePackage extends Component {
     }
 }
 
-GeneratePackage.contextTypes = {
-    driver: PropTypes.object,
-};
-
-export default GeneratePackage;
+export default hoc.enterpriseOnlyComponent(GeneratePackage);

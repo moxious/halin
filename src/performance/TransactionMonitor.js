@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import CypherTimeseries from '../timeseries/CypherTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/query-library';
+import hoc from '../higherOrderComponents';
 
 class TransactionMonitor extends Component {
     state = {
@@ -36,4 +37,4 @@ class TransactionMonitor extends Component {
     }
 }
 
-export default TransactionMonitor;
+export default hoc.enterpriseOnlyComponent(TransactionMonitor, 'Transaction Monitor');

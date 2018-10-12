@@ -6,6 +6,7 @@ import 'semantic-ui-css/semantic.min.css';
 import ClusterNode from '../data/ClusterNode';
 import _ from 'lodash';
 import './Overview.css';
+import * as Sentry from '@sentry/browser';
 
 class Overview extends Component {
     state = {
@@ -35,6 +36,7 @@ class Overview extends Component {
                 if (str.indexOf('no procedure') > -1) {
                     this.setState({ mode: 'SINGLE', clusterInfo: null });
                 } else {
+                    Sentry.captureException(err);
                     console.error('CLUSTER ERROR', err);    
                 }
             })            
@@ -48,35 +50,23 @@ class Overview extends Component {
         return session.run(q, {})
             .then(results => {
                 const rec = results.records[0];
+                let roles = ['(none)'];
+                
+                // Community doesn't expose roles
+                try { roles = rec.get('roles'); }
+                catch (e) { ; }
+
                 const user = {
                     username: rec.get('username'),
-                    roles: rec.get('roles'),
+                    roles,
                     flags: rec.get('flags'),
                 };
 
                 this.setState({ user });
             })
             .catch(err => {
+                Sentry.captureException(err);
                 console.error('Failed to get user info', err);
-            })
-            .finally(() => session.close());
-    }
-
-    getAddress() {
-        const q = `
-            call dbms.listConfig() 
-            yield name, value 
-            where name='dbms.connectors.default_advertised_address' 
-            return value;
-        `;
-        const session = this.driver.session();
-        return session.run(q, {})
-            .then(results => {
-                const address = results.records[0].get('value');
-                this.setState({ address });
-            })
-            .catch(err => {
-                console.error('Failed to get node address', err);
             })
             .finally(() => session.close());
     }
@@ -94,6 +84,7 @@ class Overview extends Component {
                 });
             })
             .catch(err => {
+                Sentry.captureException(err);
                 console.error('Failed to get DB components', err);
             })
             .finally(() => session.close());
@@ -103,7 +94,6 @@ class Overview extends Component {
         return Promise.all([
             this.getDBComponents(), 
             this.getClusterStatus(),
-            this.getAddress(),
             this.getUser(),
         ]);
     }
@@ -139,7 +129,7 @@ class Overview extends Component {
                                 </Grid.Column>
                                 <Grid.Column textAlign='left'>
                                     <ul>
-                                        <li>Database is running in mode {this.state.mode} on {this.state.address}</li>
+                                        <li>Database is running in mode {this.state.mode}</li>
                                         <li>Halin is running under user&nbsp;
                                             <strong>
                                                 {(_.get(this.state.user, 'username') || 'loading...')}

@@ -2,6 +2,7 @@ import Ring from 'ringjs';
 import { TimeEvent } from 'pondjs';
 import _ from 'lodash';
 import queryLibrary from './query-library';
+import * as Sentry from '@sentry/browser';
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 // Fun fact!  Infinity isn't a number, and so Number.isNaN should be true for
@@ -265,6 +266,9 @@ export default class DataFeed {
 
                 // Take the first result only.  This component only works with single-record queries.
                 const rec = results.records[0];
+                if (!rec) {
+                    throw new Error(`Query ${this.query} returned no valid records`);
+                }
 
                 // Record elapsed time for every sample
                 let data = { _sampleTime: elapsedMs };
@@ -313,6 +317,7 @@ export default class DataFeed {
                 return this.listeners.map(listener => listener(this.state, this));
             })
             .catch(err => {
+                Sentry.captureException(err);
                 console.error('Failed to execute timeseries query', err);
                 if (this.onError) {
                     this.onError(err, this);

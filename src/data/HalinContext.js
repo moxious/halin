@@ -8,6 +8,7 @@ import moment from 'moment';
 import appPkg from '../package.json';
 import ClusterManager from './cluster/ClusterManager';
 import queryLibrary from '../data/query-library';
+import * as Sentry from '@sentry/browser';
 
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
@@ -123,8 +124,11 @@ export default class HalinContext {
 
                     // Force driver creation and ping, this is basically
                     // just connecting to the whole cluster.
-                    return this.clusterNodes.map(cn => this.ping(cn));
+                    // By resolving this as "Promise.all" we don't finish initializing
+                    // until all nodes have been contacted.
+                    return Promise.all(this.clusterNodes.map(cn => this.ping(cn)));
                 } else {
+                    Sentry.captureException(err);
                     throw err;
                 }
             })
@@ -164,6 +168,68 @@ export default class HalinContext {
         return deepReplace('password', '********', _.cloneDeep(pkg));
     }
 
+    getCurrentUser() {
+        return this.currentUser;
+    }
+
+    checkComponents(driver) {
+        const q = 'call dbms.components()';
+        const session = driver.session();
+
+        return session.run(q, {})
+            .then(results => {
+                const rec = results.records[0];
+                this.dbms = {
+                    name: rec.get('name'),
+                    versions: rec.get('versions'),
+                    edition: rec.get('edition'),
+                };
+            })
+            .catch(err => {
+                Sentry.captureException(err);
+                console.error('Failed to get DBMS components');
+                this.dbms = {
+                    name: 'UNKNOWN',
+                    versions: [],
+                    edition: 'UNKNOWN',
+                };
+            });
+    }
+
+    checkUser(driver) {
+        const q = 'call dbms.showCurrentUser()';
+        const session = driver.session();
+
+        return session.run(q, {})
+            .then(results => {
+                const rec = results.records[0];
+
+                let roles = [];
+                try {
+                    // Community doesn't expose this field, and
+                    // it's an ignorable error
+                    roles = rec.get('roles');
+                } catch (e) { ; } 
+
+                this.currentUser = {
+                    username: rec.get('username'),
+                    roles,
+                    flags: rec.get('flags'),
+                };
+                console.log('Current User', this.currentUser);
+            })
+            .catch(err => {
+                Sentry.captureException(err);
+                console.error('Failed to get user info');
+                this.currentUser = {
+                    username: 'UNKNOWN',
+                    roles: [],
+                    flags: [],
+                };
+            })
+            .finally(() => session.close());
+    }
+
     /**
      * Returns a promise that resolves to the HalinContext object completed,
      * or rejects.
@@ -183,7 +249,11 @@ export default class HalinContext {
                     this.base.driver = this.driverFor(uri);
 
                     console.log('HalinContext created', this);
-                    return this.checkForCluster(active);
+                    return Promise.all([
+                        this.checkComponents(this.base.driver),
+                        this.checkUser(this.base.driver), 
+                        this.checkForCluster(active),
+                    ]);
                 })
                 .then(() => this)
         } catch (e) {

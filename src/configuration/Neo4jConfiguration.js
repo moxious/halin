@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import CypherDataTable from '../data/CypherDataTable';
-
+import hoc from '../higherOrderComponents';
 import 'react-table/react-table.css';
 import './Neo4jConfiguration.css';
 
@@ -74,4 +74,4 @@ class Neo4jConfiguration extends Component {
     }
 }
 
-export default Neo4jConfiguration;
+export default hoc.adminOnlyComponent(Neo4jConfiguration, 'Neo4j Configuration');
