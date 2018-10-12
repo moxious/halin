@@ -172,6 +172,30 @@ export default class HalinContext {
         return this.currentUser;
     }
 
+    checkComponents(driver) {
+        const q = 'call dbms.components()';
+        const session = driver.session();
+
+        return session.run(q, {})
+            .then(results => {
+                const rec = results.records[0];
+                this.dbms = {
+                    name: rec.get('name'),
+                    versions: rec.get('versions'),
+                    edition: rec.get('edition'),
+                };
+            })
+            .catch(err => {
+                Sentry.captureException(err);
+                console.error('Failed to get DBMS components');
+                this.dbms = {
+                    name: 'UNKNOWN',
+                    versions: [],
+                    edition: 'UNKNOWN',
+                };
+            });
+    }
+
     checkUser(driver) {
         const q = 'call dbms.showCurrentUser()';
         const session = driver.session();
@@ -179,9 +203,17 @@ export default class HalinContext {
         return session.run(q, {})
             .then(results => {
                 const rec = results.records[0];
+
+                let roles = [];
+                try {
+                    // Community doesn't expose this field, and
+                    // it's an ignorable error
+                    roles = rec.get('roles');
+                } catch (e) { ; } 
+
                 this.currentUser = {
                     username: rec.get('username'),
-                    roles: rec.get('roles'),
+                    roles,
                     flags: rec.get('flags'),
                 };
                 console.log('Current User', this.currentUser);
@@ -218,6 +250,7 @@ export default class HalinContext {
 
                     console.log('HalinContext created', this);
                     return Promise.all([
+                        this.checkComponents(this.base.driver),
                         this.checkUser(this.base.driver), 
                         this.checkForCluster(active),
                     ]);
