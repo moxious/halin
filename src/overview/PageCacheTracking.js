@@ -3,6 +3,7 @@ import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import { Button } from 'semantic-ui-react';
 import queryLibrary from '../data/query-library';
+import hoc from '../higherOrderComponents';
 import _ from 'lodash';
 
 class PageCacheTracking extends Component {
@@ -142,4 +143,4 @@ class PageCacheTracking extends Component {
     }
 }
 
-export default PageCacheTracking;
+export default hoc.enterpriseOnlyComponent(PageCacheTracking, 'Page Cache');

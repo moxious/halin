@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import * as PropTypes from 'prop-types';
 import CypherDataTable from '../data/CypherDataTable';
 import queryLibrary from '../data/query-library';
+import hoc from '../higherOrderComponents';
 
 class PageCache extends Component {
     state = {
@@ -39,8 +39,4 @@ class PageCache extends Component {
     }
 }
 
-PageCache.contextTypes = {
-    driver: PropTypes.object,
-};
-
-export default PageCache;
+export default hoc.enterpriseOnlyComponent(PageCache, 'Page Cache Statistics');

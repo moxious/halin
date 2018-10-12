@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import CypherDataTable from '../data/CypherDataTable';
-
+import hoc from '../higherOrderComponents';
 import 'react-table/react-table.css';
 import './Neo4jConfiguration.css';
 
@@ -62,20 +62,16 @@ class Neo4jConfiguration extends Component {
             <div className="Neo4jConfiguration" style={{ align: 'center', height: 800 }}>
                 <h3>Neo4j Configuration</h3>
 
-                { (window.halinContext.getCurrentUser().roles.indexOf('admin') > -1) ? 
                 <CypherDataTable
                     node={this.props.node}
                     driver={this.props.driver}
                     query={this.state.query}
                     displayColumns={this.state.displayColumns}
                     rate={this.state.rate}
-                    /> : 
-                <p>You must have administrative privileges to view configuration.  Your current login
-                    has roles {window.halinContext.getCurrentUser().roles.join(', ')}
-                </p> }
+                    />
             </div>            
         );
     }
 }
 
-export default Neo4jConfiguration;
+export default hoc.adminOnlyComponent(Neo4jConfiguration, 'Neo4j Configuration');

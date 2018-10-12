@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import * as PropTypes from "prop-types";
-import { Button, Icon, Tab, Message } from 'semantic-ui-react';
+import { Button, Icon, Tab } from 'semantic-ui-react';
 import Spinner from '../Spinner';
 import uuid from 'uuid';
 import status from '../status/index';
@@ -8,6 +7,7 @@ import moment from 'moment';
 import Advisor from './advisor/Advisor';
 import ConfigurationDiff from './ConfigurationDiff';
 import advisor from './advisor/index';
+import hoc from '../higherOrderComponents';
 
 class GeneratePackage extends Component {
     state = {
@@ -117,21 +117,11 @@ class GeneratePackage extends Component {
 
         return (
             <div className='GeneratePackage'>
-                <Button basic disabled={this.state.loading || !this.state.userIsAdmin}
+                <Button basic disabled={this.state.loading}
                         onClick={this.generatePackage}>
                     <Icon name='cogs'/>
                     Run Diagnostics!
                 </Button>
-
-                { !this.state.userIsAdmin ? 
-                    <Message warning icon>
-                        <Icon name='warning' />
-                        <Message.Content>
-                            Only users with role 'admin' may use this function.
-                        </Message.Content>
-                    </Message>              
-                  : ''
-                }
 
                 { this.state.diagnosticData ? (
                     <Button basic 
@@ -161,8 +151,4 @@ class GeneratePackage extends Component {
     }
 }
 
-GeneratePackage.contextTypes = {
-    driver: PropTypes.object,
-};
-
-export default GeneratePackage;
+export default hoc.enterpriseOnlyComponent(GeneratePackage);

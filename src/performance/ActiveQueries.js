@@ -1,7 +1,6 @@
 import React, { Component } from "react";
-import "semantic-ui-css/semantic.min.css";
-import * as PropTypes from "prop-types";
-
+import 'semantic-ui-css/semantic.min.css';
+import hoc from '../higherOrderComponents';
 import CypherDataTable from '../data/CypherDataTable';
 import 'react-table/react-table.css';
 
@@ -63,8 +62,4 @@ class ActiveQueries extends Component {
     }
 }
 
-ActiveQueries.contextTypes = {
-    driver: PropTypes.object,
-};
-
-export default ActiveQueries;
+export default hoc.enterpriseOnlyComponent(ActiveQueries, 'Active Queries');
