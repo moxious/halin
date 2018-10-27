@@ -227,7 +227,6 @@ export default {
             { Header: 'Arch', accessor: 'arch' },
             { Header: 'Processors', accessor: 'processors' },
         ],
-        windowWidth: 5000,
         rate: 1000,
     },
 
