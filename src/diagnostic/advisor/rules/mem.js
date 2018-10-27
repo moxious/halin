@@ -1,5 +1,27 @@
 import InspectionResult from '../InspectionResult';
 
+const memActuals = pkg => {
+    const findings = [];
+
+    pkg.halin.dataFeeds
+        .filter(df => (df.label === 'OS_MEMORY_STATS' && df.lastObservation))
+        .forEach(dataFeed => {
+            const addr = dataFeed.address;
+
+            const obs = dataFeed.lastObservation;
+            const freeRatio = obs.physFree / obs.physTotal;
+
+            if (!Number.isNaN(freeRation) && freeRatio <= 0.1) {
+                findings.push(new InspectionResult(InspectionResult.WARN,
+                    addr,
+                    'At time of measurement, your memory utilization was very high',
+                    'Consider looking at memory configuration for your system'));
+            }
+        });
+
+    return findings;
+}
+
 const memSettings = pkg => {
     const settings = [
         'dbms.memory.heap.initial_size',
@@ -36,5 +58,5 @@ const memSettings = pkg => {
 };
 
 export default [
-    memSettings,
+    memSettings, memActuals,
 ];
