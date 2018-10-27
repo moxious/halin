@@ -11,7 +11,7 @@ const memActuals = pkg => {
             const obs = dataFeed.lastObservation;
             const freeRatio = obs.physFree / obs.physTotal;
 
-            if (!Number.isNaN(freeRation) && freeRatio <= 0.1) {
+            if (!Number.isNaN(freeRatio) && freeRatio <= 0.1) {
                 findings.push(new InspectionResult(InspectionResult.WARN,
                     addr,
                     'At time of measurement, your memory utilization was very high',
