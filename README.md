@@ -16,6 +16,7 @@ Primary features:
 1. Clone the repo
 2. `yarn install`
 3. `yarn start`
+4. Navigate to `http://localhost:3000/`
 
 ### Running Stand Alone
 
@@ -42,6 +43,17 @@ your machine.  Even when you generate a diagnostic package, this is not shared. 
 does use a JS error reporting library called Sentry to help catch errors and improve the
 software, but nothing about your configuration is sent back to me.
 
+3. How does Halin work?
+
+Halin uses pure cypher/bolt connections to nodes in your cluster, and uses Neo4j's existing
+management interfaces and queries, including things like JMX, to obtain all statistics.
+
+4. Do I have to run Halin as an admin user?
+
+No, but some types of data (for example your configuration) are not available unless you
+are an administrator.  If you run halin with a low privileged user, some features may not
+be available or work as expected.
+
 ## Installing Halin
 
 **Neo4j Desktop minimum version 1.1.10 is required.**
@@ -60,16 +72,6 @@ you'll catch updates.
 ![Halin Screenshot: Performance](img/performance.png "Halin Screenshot")
 
 ![Halin Screenshot: Advisor](img/advisor.png "Halin Screenshot")
-
-## Commands
- 
-```
-# Install deps
-yarn install
-
-# Start app locally
-yarn start
-```
 
 ## Serve in Neo4j Desktop env
 To serve it as a graph application, read the docs for that in the Neo4j Desktop development pages.
