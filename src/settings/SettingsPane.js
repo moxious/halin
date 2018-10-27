@@ -6,8 +6,6 @@ export default class SettingsPane extends Component {
         // const style = {textAlign:'left'};
         return (
             <div className='SettingsPane'>
-                <h2>Halin Settings</h2>
-
                 <DataFeedStats />
             </div>
         )

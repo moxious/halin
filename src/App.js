@@ -13,9 +13,8 @@ import DatabasePane from './db/DatabasePane';
 import PermissionsPane from './configuration/PermissionsPane';
 import ClusterOverviewPane from './overview/ClusterOverviewPane';
 import ClusterNodeTabHeader from './ClusterNodeTabHeader';
-import { Tab, Button, Menu } from 'semantic-ui-react'
+import { Tab, Button } from 'semantic-ui-react'
 import DiagnosticPane from './diagnostic/DiagnosticPane';
-import SettingsPane from './settings/SettingsPane';
 import status from './status/index';
 import AppFooter from './AppFooter';
 import './App.css';
@@ -146,13 +145,8 @@ class Halin extends Component {
       render: () => this.paneWrapper(<ClusterOverviewPane />, 'primary'),
     };
 
-    const settingsPane = {
-      menuItem: { key: 'settings', icon: 'settings', content: 'Settings' },
-      render: () => this.paneWrapper(<SettingsPane />, 'primary'),
-    };
-
     return <Tab panes={[overviewPane].concat(nodePanes.concat([
-      userMgmtPane, diagnosticPane, settingsPane,
+      userMgmtPane, diagnosticPane,
     ]))} />;
   }
 

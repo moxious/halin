@@ -6,7 +6,7 @@ import NodeLabel from '../NodeLabel';
 import _ from 'lodash';
 
 export default class DataFeedStats extends Component {
-    state = { activeIndex: 0 };
+    state = { activeIndex: null };
 
     handleClick = (e, titleProps) => {
       const { index } = titleProps
