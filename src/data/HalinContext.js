@@ -47,6 +47,10 @@ export default class HalinContext {
         return this.mgr;
     }
 
+    getFeedsFor(clusterNode) {
+        return Object.values(this.dataFeeds).filter(df => df.node === clusterNode);
+    }
+
     getDataFeed(feedOptions) {
         const df = new DataFeed(feedOptions);
         const feed = this.dataFeeds[df.name];
