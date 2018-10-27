@@ -189,6 +189,7 @@ export default class DataFeed extends Metric {
             label: this.label,
             node: this.node,
             address: this.node.getBoltAddress(),
+            lastObservation: this.state && this.state.data ? this.state.data[0] : null,
             query: this.query,
             packets: packets.length,
             averageResponseTime: avg,
