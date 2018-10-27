@@ -29,6 +29,19 @@ Browse to http://localhost:3000/ and you're ready to go.
 7. Finally, inside of desktop you'll see a special tile labeled "Development App 9.9.9".  This will
 point to your running copy of Halin
 
+## FAQ
+
+1. Does it support Neo4j Enterprise or Community?
+
+Both.  But some features must be disabled for community (such as user management) because community does not support them.
+
+2. Does Halin capture any data about my database?
+
+Halin runs purely in your browser and does not share details of your database outside of
+your machine.  Even when you generate a diagnostic package, this is not shared.  Halin 
+does use a JS error reporting library called Sentry to help catch errors and improve the
+software, but nothing about your configuration is sent back to me.
+
 ## Installing Halin
 
 **Neo4j Desktop minimum version 1.1.10 is required.**
