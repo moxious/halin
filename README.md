@@ -54,7 +54,12 @@ No, but some types of data (for example your configuration) are not available un
 are an administrator.  If you run halin with a low privileged user, some features may not
 be available or work as expected.
 
-## Installing Halin
+5. Why is it called Halin?
+
+The application is named for [Rudolf Halin](https://en.wikipedia.org/wiki/Rudolf_Halin) an
+influential German graph theorist, who came up with (among many other things) [Halin graphs](https://en.wikipedia.org/wiki/Halin_graph).
+
+## Installing Halin in Neo4j Desktop
 
 **Neo4j Desktop minimum version 1.1.10 is required.**
 
