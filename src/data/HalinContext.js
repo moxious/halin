@@ -91,9 +91,21 @@ export default class HalinContext {
         Object.values(this.drivers).map(driver => driver.close());
     }
 
+    /**
+     * Returns true if the context is attached to a Neo4j Enterprise Edition server
+     * with more than one cluster node.
+     */
     isCluster() {
         // Must have more than one node
         return this.clusterNodes && this.clusterNodes.length > 1;
+    }
+
+    /**
+     * Returns true if the context is attached to a Neo4j Enterprise edition server,
+     * false otherwise.
+     */
+    isEnterprise() {
+        return this.dbms.edition === 'enterprise';
     }
 
     checkForCluster(activeDb) {
