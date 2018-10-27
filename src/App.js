@@ -12,7 +12,8 @@ import OSPane from './performance/OSPane';
 import DatabasePane from './db/DatabasePane';
 import PermissionsPane from './configuration/PermissionsPane';
 import ClusterOverviewPane from './overview/ClusterOverviewPane';
-import { Tab, Button } from 'semantic-ui-react'
+import ClusterNodeTabHeader from './ClusterNodeTabHeader';
+import { Tab, Button, Menu } from 'semantic-ui-react'
 import DiagnosticPane from './diagnostic/DiagnosticPane';
 import SettingsPane from './settings/SettingsPane';
 import status from './status/index';
@@ -98,8 +99,11 @@ class Halin extends Component {
   }
 
   renderCluster() {
-    const nodePanes = this.state.halin.clusterNodes.map(node => ({
-      menuItem: `${node.getLabel()} (${node.role})`,
+    const nodePanes = this.state.halin.clusterNodes.map((node, key) => ({
+      menuItem: {
+        key: `node-${key}`,
+        content: <ClusterNodeTabHeader key={key} node={node}/>,
+      },
       render: () =>
         this.paneWrapper(
           this.renderSingleNode(this.state.halin.driverFor(node.getBoltAddress()), node),
@@ -135,7 +139,10 @@ class Halin extends Component {
     };
 
     const overviewPane = {
-      menuItem: 'Overview',
+      menuItem: {
+        key: 'overview', 
+        content: 'Overview',
+      },
       render: () => this.paneWrapper(<ClusterOverviewPane />, 'primary'),
     };
 
