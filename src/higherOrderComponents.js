@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Icon, Message } from 'semantic-ui-react';
 
+const smallCentered = { maxWidth: 300, margin: 'auto' };
+
 const clusterOnlyComponent = (WrappedComponent, heading) => {
     return class extends Component {
         render() {
@@ -13,10 +15,10 @@ const clusterOnlyComponent = (WrappedComponent, heading) => {
             return (
                 <div className='ClusterOnly'>
                     { heading ? <h3>{heading}</h3> : '' }
-                    <Message warning icon>
+                    <Message warning icon style={smallCentered}>
                         <Icon name='warning' />
-                        <Message.Content>
-                            This function is only available for Neo4j Clusters
+                        <Message.Content >
+                            Only available for Neo4j Clusters
                         </Message.Content>
                     </Message>
                 </div>
@@ -42,7 +44,7 @@ const adminOnlyComponent = (WrappedComponent, heading) => {
             return (
                 <div className='AdminOnly'>
                     { heading ? <h3>{heading}</h3> : '' }
-                    <Message warning icon>
+                    <Message warning icon style={smallCentered}>
                         <Icon name='warning' />
                         <Message.Content>
                             Only users with role 'admin' may use this function.
@@ -65,10 +67,10 @@ const enterpriseOnlyComponent = (WrappedComponent, heading) => {
             return (
                 <div className='EnterpriseOnly'>
                     { heading ? <h3>{heading}</h3> : '' }
-                    <Message warning icon>
+                    <Message warning icon style={smallCentered}>
                         <Icon name='warning' />
                         <Message.Content>
-                            This function is only available in Neo4j Enterprise
+                            Only available in Neo4j Enterprise
                         </Message.Content>
                     </Message>
                 </div>
