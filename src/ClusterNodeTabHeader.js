@@ -44,6 +44,7 @@ export default class ClusterNodeTabHeader extends Component {
     popupContent = () => {
         return (
             <div className='PopupContent'>
+                <h4>Data</h4>
                 <p>{`${this.state.fresh} of ${this.state.total} fresh`}</p>
 
                 <p>When most/all feeds are fresh, this indicates responsiveness.  When performance
@@ -52,24 +53,37 @@ export default class ClusterNodeTabHeader extends Component {
         );
     };
 
-    render() {
+    statusIcon = () => {
         const node = this.props.node;
 
         const leader = `${node.role}`.toLowerCase() === 'leader';
-        const label = `${node.getLabel()} (${node.role})`;
+        const replica = `${node.role}`.toLowerCase() === 'read_replica';
+
+        let iconName;
+        if(leader) { iconName = 'star'; }
+        else if(replica) { iconName = 'copy'; }
+        else { iconName = 'circle'; }  // Follower
+
+        const color = this.colorFor(this.state.ratio);
+
+        return (
+            <Icon name={iconName} color={color} />
+        );
+    }
+
+    render() {
+        const node = this.props.node;
 
         return (
             <Menu.Item>
-                { leader ? <Icon name='star' color={this.colorFor(this.state.ratio)} /> : '' }
-
                 <Popup
                     key={node.getBoltAddress()}
-                    trigger={<Icon name='database' color={this.colorFor(this.state.ratio)} />}
-                    header='Data Feeds'
+                    trigger={this.statusIcon()} 
+                    header={node.role}
                     content={this.popupContent()}
                 />
                  
-                {label}
+                { node.getLabel() }
             </Menu.Item>
         );
     }
