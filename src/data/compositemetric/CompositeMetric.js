@@ -8,9 +8,16 @@ import Metric from '../Metric';
  * This is intended to be an abstract class.
  */
 export default class CompositeMetric extends Metric {
-    constructor(dataFeeds) {
+    constructor(name) {
+        this.name = name;
+        this.state = {};
+    }
+
+    setFeeds(dataFeeds) { 
         this.dataFeeds = dataFeeds;
     }
+
+    getFeeds() { return this.dataFeeds; }
 
     isFresh() {
         // The composite metric is fresh if all of its underlying feeds
