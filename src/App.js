@@ -54,11 +54,6 @@ class Halin extends Component {
         render: () => this.paneWrapper(
           <OSPane key={key} node={node} driver={driver} />),
       },
-      // {
-      //   menuItem: 'User Management',
-      //   render: () => this.paneWrapper(
-      //     <PermissionsPane key={key} node={node} driver={driver}/>),
-      // },
       {
         menuItem: 'Data',
         render: () => this.paneWrapper(
@@ -145,9 +140,16 @@ class Halin extends Component {
       render: () => this.paneWrapper(<ClusterOverviewPane />, 'primary'),
     };
 
-    return <Tab panes={[overviewPane].concat(nodePanes.concat([
-      userMgmtPane, diagnosticPane,
-    ]))} />;
+    const allPanesInOrder = [overviewPane].concat(nodePanes);
+
+    // The user management tab is only available in enterprise, unfortunately,
+    // because it relies on stored procedures that don't exist in community.
+    if (window.halinContext.isEnterprise()) {
+      allPanesInOrder.push(userMgmtPane);
+    }
+    allPanesInOrder.push(diagnosticPane);
+
+    return <Tab panes={allPanesInOrder} />;
   }
 
   renderSingleNode(driver = null, node = null) {
