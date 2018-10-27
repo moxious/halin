@@ -9,6 +9,8 @@ export default {
     PING: {
         query: 'RETURN true AS value',
         columns: [ { Header: 'Value', accessor: 'value' } ],
+        rate: 1000,
+        windowWidth: 10 * 1000,
     },
 
     JMX_PAGE_CACHE: {
@@ -44,6 +46,7 @@ export default {
             { Header: 'File Mappings', accessor: 'fileMappings', Cell: cdt.numField, show: false },
             { Header: 'File Unmappings', accessor: 'fileUnmappings', Cell: cdt.numField, show: false },
         ],
+        rate: 2000,
     },
 
     JMX_MEMORY_STATS: {
@@ -114,6 +117,24 @@ export default {
             { Header: 'Committed', accessor: 'committed' },
             { Header: 'Last Committed', accessor: 'lastCommittedId' },
         ],
+        rate: 2000,
+    },
+
+    OS_OPEN_FDS: {
+        query: `
+        CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
+        YIELD attributes 
+        WITH
+            attributes.OpenFileDescriptorCount.value as fdOpen,
+            attributes.MaxFileDescriptorCount.value as fdMax
+        RETURN 
+            fdOpen, fdMax
+        `,
+        columns: [
+            { Header: 'fdOpen', accessor: 'fdOpen' },
+            { Header: 'fdMax', accessor: 'fdMax' },
+        ],
+        rate: 2000,
     },
 
     OS_LOAD_STATS: {
@@ -169,6 +190,8 @@ export default {
             { Header: 'Arch', accessor: 'arch' },
             { Header: 'Processors', accessor: 'processors' },
         ],
+        windowWidth: 5000,
+        rate: 1000,
     },
 
     LIST_TRANSACTIONS: {

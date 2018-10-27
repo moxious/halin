@@ -281,15 +281,10 @@ export default class HalinContext {
         // Data feed keeps running so that we can deliver the data to the user,
         // but also have a feed of data to know if the cord is getting unplugged
         // as the app runs.
-        const pingFeed = this.getDataFeed({
+        const pingFeed = this.getDataFeed(_.merge({
             node: clusterNode,
             driver,
-            query: queryLibrary.PING.query,
-            params: {},
-            rate: 1000,
-            windowWidth: 10 * 1000,   // Keep last 10 pings
-            displayColumns: queryLibrary.PING.columns,
-        });
+        }, queryLibrary.PING));
 
         // Caller needs a promise.  The feed is already running, so 
         // We return a promise that resolves the next time the data feed

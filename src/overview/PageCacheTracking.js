@@ -9,9 +9,7 @@ import _ from 'lodash';
 class PageCacheTracking extends Component {
     state = {
         key: uuid.v4(),
-        rate: 2000,
         width: 400,
-        query: queryLibrary.JMX_PAGE_CACHE.query,
         displayProperty: 'usageRatio',
     };
 
@@ -56,18 +54,6 @@ class PageCacheTracking extends Component {
         const faultsPerSecond = faultsThisPeriod / elapsedTimeInSec;
         const flushesPerSecond = flushesThisPeriod / elapsedTimeInSec;
 
-        /*
-        if (addr.match(/node3/)) {
-            console.log({
-                ftp: faultsThisPeriod,
-                lo: this.nodeObservations[addr].last,
-                to: data.faults,
-                fps: faultsPerSecond,
-                elapsedTimeInSec,
-            });    
-        }
-        */
-
         // Set window values for next go-around.
         this.nodeObservations[addr].lastFaults = data.faults;
         this.nodeObservations[addr].lastFlushes = data.flushes;
@@ -83,13 +69,7 @@ class PageCacheTracking extends Component {
         const addr = node.getBoltAddress();
         const driver = halin.driverFor(addr);
 
-        const feed = halin.getDataFeed({
-            node,
-            driver,
-            query: this.state.query,
-            rate: this.state.rate,
-            displayColumns: queryLibrary.JMX_PAGE_CACHE.columns,
-        });
+        const feed = halin.getDataFeed(_.merge({ node, driver }, queryLibrary.JMX_PAGE_CACHE));
 
         feed.addAliases({ 
             faultsPerSecond: ClusterTimeseries.keyFor(addr, 'faultsPerSecond'),

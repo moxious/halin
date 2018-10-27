@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/query-library';
+import _ from 'lodash';
 
 class GCPauseTime extends Component {
     state = {
@@ -17,14 +18,7 @@ class GCPauseTime extends Component {
         const addr = node.getBoltAddress();
         const driver = halin.driverFor(addr);
 
-        const feed = halin.getDataFeed({
-            node,
-            driver,
-            query: this.state.query,
-            rate: this.state.rate,
-            displayColumns: queryLibrary.JMX_GARBAGE_COLLECTOR.columns,
-        });
-
+        const feed = halin.getDataFeed(_.merge({ node, driver }, queryLibrary.JMX_GARBAGE_COLLECTOR));
         return feed;
     };
 

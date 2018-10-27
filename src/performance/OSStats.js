@@ -10,25 +10,17 @@ import queryLibrary from '../data/query-library';
 export default class OSStats extends Component {
     state = {
         id: uuid.v4(),
-        rate: 1000,
         pieWidth: 300,
         pieHeight: 300,
-        query: queryLibrary.OS_MEMORY_STATS.query,
-        displayColumns: queryLibrary.OS_MEMORY_STATS.columns,
     }
 
     componentDidMount() {
         this.mounted = true;
 
-        this.feed = window.halinContext.getDataFeed({
+        this.feed = window.halinContext.getDataFeed(_.merge({
             node: this.props.node,
             driver: this.props.driver,
-            query: this.state.query,
-            rate: this.state.rate,
-            windowWidth: 5000,
-            displayColumns: this.state.displayColumns,
-            params: {},
-        });
+        }, queryLibrary.OS_MEMORY_STATS));
 
         const onDataListener = (newData, dataFeed) => {
             // Don't need any of the timeseries stuff, just one data packet.
