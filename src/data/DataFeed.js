@@ -3,6 +3,7 @@ import { TimeEvent } from 'pondjs';
 import _ from 'lodash';
 import queryLibrary from './query-library';
 import * as Sentry from '@sentry/browser';
+import Metric from './Metric';
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 // Fun fact!  Infinity isn't a number, and so Number.isNaN should be true for
@@ -31,8 +32,9 @@ const actualNumber = i => !Number.isNaN(i) && !(i === Infinity) && !(i === -Infi
  * DataFeeds may be started and stopped, and can have multiple listeners who get notified
  * when new data is available.
  */
-export default class DataFeed {
+export default class DataFeed extends Metric {
     constructor(props) {
+        super();
         this.node = props.node;
         this.driver = props.driver;
         this.query = props.query;
@@ -237,6 +239,15 @@ export default class DataFeed {
             .map(obs => maxObs(obs));
 
         return Math.max(...allMaxes);
+    }
+
+    isFresh() {
+        const lastDataPoint = this.state.lastDataArrived.getTime();
+        const now = new Date().getTime();
+        const elapsed = now - lastDataPoint;
+
+        // We are fresh if we've received data within 2x our window.
+        return (this.windowWidth * 2) > elapsed;
     }
 
     /**
