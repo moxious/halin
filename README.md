@@ -72,11 +72,13 @@ influential German graph theorist, who came up with (among many other things) [H
 That's it.  As Neo4j Desktop is installed, and as new versions of Halin are available,
 you'll catch updates.
 
-## Screenshot
+## Screenshots
 
-![Halin Screenshot: Performance](img/performance.png "Halin Screenshot")
+![Halin Screenshot: Overview](img/screenshots/halin-overview.png "Halin Screenshot")
 
-![Halin Screenshot: Advisor](img/advisor.png "Halin Screenshot")
+![Halin Screenshot: OS](img/screenshots/halin-os.png "Halin Screenshot")
+
+![Halin Screenshot: Diagnostics](img/screenshots/halin-diagnostics.png "Halin Screenshot")
 
 ## Serve in Neo4j Desktop env
 To serve it as a graph application, read the docs for that in the Neo4j Desktop development pages.
