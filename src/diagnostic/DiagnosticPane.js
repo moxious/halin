@@ -44,11 +44,12 @@ class DiagnosticPane extends Component {
                         </Grid.Column>
                     </Grid.Row> : '' }
 
+                    { window.halinContext.isCluster() ? 
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <ClusterEventLog />
                         </Grid.Column>
-                    </Grid.Row>
+                    </Grid.Row> : '' }
 
                     <Grid.Row columns={1}>
                         <Grid.Column>

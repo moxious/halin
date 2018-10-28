@@ -3,8 +3,9 @@ import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import _ from 'lodash';
 import moment from 'moment';
+import hoc from '../higherOrderComponents';
 
-export default class ClusterEventLog extends Component {
+class ClusterEventLog extends Component {
     state = {
         displayColumns: [
             { 
@@ -18,7 +19,7 @@ export default class ClusterEventLog extends Component {
             },
             { 
                 Header: 'Node',
-                Cell: e => e.address || 'Cluster-Wide',
+                accessor: 'address',
             },
         ],
     };
@@ -43,3 +44,5 @@ export default class ClusterEventLog extends Component {
         );
     }
 };
+
+export default hoc.clusterOnlyComponent(ClusterEventLog);
