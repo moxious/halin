@@ -126,6 +126,7 @@ export default class HalinContext {
             if (newRole !== clusterNode.role) {
                 const oldRole = clusterNode.role;
                 clusterNode.role = newRole;
+                
                 this.getClusterManager().addEvent({
                     date: new Date(),
                     message: `Role change from ${oldRole} to ${newRole}`,
