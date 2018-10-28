@@ -38,8 +38,26 @@ const packageClusterOpResults = results => {
 };
 
 export default class ClusterManager {
+    MAX_EVENTS = 100;
+
     constructor(halinCtx) {
         this.ctx = halinCtx;
+        this.eventLog = [];
+    }
+
+    addEvent(event) {
+        if (!event || !event.message || !event.date) {
+            throw new Error('ClusterManager events must have at least message, date');
+        }
+
+        this.eventLog.push(event);
+
+        // Truncate to last max set, to prevent it growing without bound.
+        this.eventLog = this.eventLog.slice(this.eventLog.length - this.MAX_EVENTS, this.eventLog.length);
+    }
+
+    getEventLog() {
+        return this.eventLog;
     }
 
     /**
@@ -82,7 +100,14 @@ export default class ClusterManager {
         return this.mapQueryAcrossCluster(
             'CALL dbms.security.createUser({username}, {password}, false)',
             { username, password }
-        );
+        )
+            .then(result => {
+                this.addEvent({
+                    date: new Date(),
+                    message: `Added user "${username}"`,
+                });
+                return result;
+            })
     } 
 
     deleteUser(user) {
@@ -94,7 +119,14 @@ export default class ClusterManager {
         return this.mapQueryAcrossCluster(
             'CALL dbms.security.deleteUser({username})',
             { username }
-        );
+        )
+            .then(result => {
+                this.addEvent({
+                    date: new Date(),
+                    message: `Deleted user "${username}"`,
+                });
+                return result;
+            })
     }
 
     addRole(role) {
@@ -103,7 +135,14 @@ export default class ClusterManager {
         return this.mapQueryAcrossCluster(
             'CALL dbms.security.createRole({role})',
             { role }
-        );
+        )
+            .then(result => {
+                this.addEvent({
+                    date: new Date(),
+                    message: `Created role "${role}"`,
+                });
+                return result;
+            });
     }
 
     deleteRole(role) {
@@ -112,7 +151,14 @@ export default class ClusterManager {
         return this.mapQueryAcrossCluster(
             'CALL dbms.security.deleteRole({role})',
             { role }
-        );
+        )
+            .then(result => {
+                this.addEvent({
+                    date: new Date(),
+                    message: `Deleted role "${role}"`,
+                });
+                return result;
+            });
     }
 
     /** Specific to a particular node */
@@ -164,7 +210,7 @@ export default class ClusterManager {
                 .then(r => {
                     console.log('gather roles made',r);
                     return r;
-                })
+                });
         };
 
         const determineDifferences = (rolesHere, node, driver, session) => {
@@ -233,6 +279,12 @@ export default class ClusterManager {
             return gatherRoles(node, driver, s)
                 .then(rolesHere => determineDifferences(rolesHere, node, driver, s))
                 .then(roleChanges => applyChanges(roleChanges, node, driver, s))
+                .then(() => {
+                    this.addEvent({
+                        date: new Date(),
+                        message: `Associated "${username}" to roles ${roles.map(r => `"${r}"`).join(', ')}`,
+                    });
+                })
                 .then(() => clusterOpSuccess(node))
                 .catch(err => clusterOpFailure(node, err))
                 .finally(() => s.close());
