@@ -47,6 +47,10 @@ export default class HalinContext {
         return this.mgr;
     }
 
+    getFeedsFor(clusterNode) {
+        return Object.values(this.dataFeeds).filter(df => df.node === clusterNode);
+    }
+
     getDataFeed(feedOptions) {
         const df = new DataFeed(feedOptions);
         const feed = this.dataFeeds[df.name];
@@ -87,9 +91,58 @@ export default class HalinContext {
         Object.values(this.drivers).map(driver => driver.close());
     }
 
+    /**
+     * Returns true if the context is attached to a Neo4j Enterprise Edition server
+     * with more than one cluster node.
+     */
     isCluster() {
         // Must have more than one node
         return this.clusterNodes && this.clusterNodes.length > 1;
+    }
+
+    /**
+     * Returns true if the context is attached to a Neo4j Enterprise edition server,
+     * false otherwise.
+     */
+    isEnterprise() {
+        return this.dbms.edition === 'enterprise';
+    }
+
+    /**
+     * Starts a slow data feed for the node's cluster role.  In this way, if the leader
+     * changes, we can detect it.
+     */
+    watchForClusterRoleChange(clusterNode) {
+        const roleFeed = this.getDataFeed(_.merge({
+            node: clusterNode,
+            driver: this.driverFor(clusterNode.getBoltAddress()),
+        }, queryLibrary.CLUSTER_ROLE));
+
+        const addr = clusterNode.getBoltAddress();
+        const onRoleData = (newData, dataFeed) => {
+            const newRole = newData.data[0].role;
+
+            // Something in cluster topology just changed...
+            if (newRole !== clusterNode.role) {
+                const oldRole = clusterNode.role;
+                clusterNode.role = newRole;
+                
+                this.getClusterManager().addEvent({
+                    date: new Date(),
+                    message: `Role change from ${oldRole} to ${newRole}`,
+                    address: clusterNode.getBoltAddress(),
+                });
+            }
+        };
+
+        const onError = (err, dataFeed) => {
+            Sentry.captureException(err);
+            console.error('HalinContext: failed to get cluster role for ', addr, err);
+        };
+
+        roleFeed.addListener(onRoleData);
+        roleFeed.onError = onError;
+        return roleFeed;
     }
 
     checkForCluster(activeDb) {
@@ -99,9 +152,7 @@ export default class HalinContext {
             .then(results => {
                 this.clusterNodes = results.records.map(rec => new ClusterNode(rec))
 
-                this.clusterNodes.forEach(node => {
-                    console.log(node.getAddress());
-                });
+                return this.clusterNodes.map(clusterNode => this.watchForClusterRoleChange(clusterNode));
             })
             .catch(err => {
                 const str = `${err}`;
@@ -121,16 +172,17 @@ export default class HalinContext {
                     rec.get = get;
 
                     this.clusterNodes = [new ClusterNode(rec)];
-
-                    // Force driver creation and ping, this is basically
-                    // just connecting to the whole cluster.
-                    // By resolving this as "Promise.all" we don't finish initializing
-                    // until all nodes have been contacted.
-                    return Promise.all(this.clusterNodes.map(cn => this.ping(cn)));
                 } else {
                     Sentry.captureException(err);
                     throw err;
                 }
+            })
+            .then(() => {
+                // Force driver creation and ping, this is basically
+                // just connecting to the whole cluster.
+                // By resolving this as "Promise.all" we don't finish initializing
+                // until all nodes have been contacted.
+                return Promise.all(this.clusterNodes.map(cn => this.ping(cn)));
             })
             .finally(() => session.close());
     }
@@ -277,15 +329,10 @@ export default class HalinContext {
         // Data feed keeps running so that we can deliver the data to the user,
         // but also have a feed of data to know if the cord is getting unplugged
         // as the app runs.
-        const pingFeed = this.getDataFeed({
+        const pingFeed = this.getDataFeed(_.merge({
             node: clusterNode,
             driver,
-            query: queryLibrary.PING.query,
-            params: {},
-            rate: 1000,
-            windowWidth: 10 * 1000,   // Keep last 10 pings
-            displayColumns: queryLibrary.PING.columns,
-        });
+        }, queryLibrary.PING));
 
         // Caller needs a promise.  The feed is already running, so 
         // We return a promise that resolves the next time the data feed

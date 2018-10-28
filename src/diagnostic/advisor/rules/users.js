@@ -16,6 +16,14 @@ const atLeastOneAdmin = pkg => {
                 InspectionResult.PASS, addr,
                 `Machine has admin users specified`
             ));
+
+            if (admins.length > 5) {
+                findings.push(new InspectionResult(
+                    InspectionResult.WARN, addr,
+                    `Machine has a large number (${admins.length}) of users with admin privileges`,
+                    'Periodically review permissions, and limit users to only the permissions they require'
+                ));
+            }
         }
     });
 

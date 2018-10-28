@@ -13,12 +13,22 @@ export default class Troubleshooting extends Component {
 
         if (str.indexOf('unauthorized') > -1) {
             suggestions = ['Double check your username and password and try again'];
-        } else if(str.indexOf('security constraints in your web browser')) {
+        } else if(str.indexOf('Failed to establish connection in') > -1) {
+            suggestions = [
+                `This error may mean that your database instance is under heavy load or is
+                not currently responsive`,
+            ];
+        } else if(str.indexOf('security constraints in your web browser') > -1) {
             suggestions = [`
                 This error often means that you have untrusted SSL certificates on your server.
                 Either install trusted certificates, or try again without encryption.`,
                 'If you are using Neo4j Desktop and running on your local machine, de-select encryption',
             ];
+        } else {
+            suggestions = [`
+                Unfortunately, no troubleshooting is available for this particular error. 
+                Consider checking the Neo4j community site for more information.
+            `];
         }
 
         return (

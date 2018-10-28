@@ -12,9 +12,9 @@ import OSPane from './performance/OSPane';
 import DatabasePane from './db/DatabasePane';
 import PermissionsPane from './configuration/PermissionsPane';
 import ClusterOverviewPane from './overview/ClusterOverviewPane';
+import ClusterNodeTabHeader from './ClusterNodeTabHeader';
 import { Tab, Button } from 'semantic-ui-react'
 import DiagnosticPane from './diagnostic/DiagnosticPane';
-import SettingsPane from './settings/SettingsPane';
 import status from './status/index';
 import AppFooter from './AppFooter';
 import './App.css';
@@ -54,11 +54,6 @@ class Halin extends Component {
         render: () => this.paneWrapper(
           <OSPane key={key} node={node} driver={driver} />),
       },
-      // {
-      //   menuItem: 'User Management',
-      //   render: () => this.paneWrapper(
-      //     <PermissionsPane key={key} node={node} driver={driver}/>),
-      // },
       {
         menuItem: 'Data',
         render: () => this.paneWrapper(
@@ -98,8 +93,11 @@ class Halin extends Component {
   }
 
   renderCluster() {
-    const nodePanes = this.state.halin.clusterNodes.map(node => ({
-      menuItem: `${node.getLabel()} (${node.role})`,
+    const nodePanes = this.state.halin.clusterNodes.map((node, key) => ({
+      menuItem: {
+        key: `node-${key}`,
+        content: <ClusterNodeTabHeader key={key} node={node}/>,
+      },
       render: () =>
         this.paneWrapper(
           this.renderSingleNode(this.state.halin.driverFor(node.getBoltAddress()), node),
@@ -107,7 +105,7 @@ class Halin extends Component {
     }));
 
     const userMgmtPane = {
-      menuItem: 'User Management',
+      menuItem: { key: 'User Management', content: 'User Management', icon: 'user' },
       render: () => {
         const node = this.state.halin.clusterNodes[0];
         const driver = this.state.halin.driverFor(node.getBoltAddress());
@@ -120,7 +118,7 @@ class Halin extends Component {
     };
 
     const diagnosticPane = {
-      menuItem: 'Diagnostics',
+      menuItem: { key: 'Diagnostics', content: 'Diagnostics', icon: 'cogs' },
       render: () => {
         const node = this.state.halin.clusterNodes[0];
         const driver = this.state.halin.driverFor(node.getBoltAddress());
@@ -135,18 +133,23 @@ class Halin extends Component {
     };
 
     const overviewPane = {
-      menuItem: 'Overview',
+      menuItem: {
+        key: 'overview', 
+        content: 'Overview',
+      },
       render: () => this.paneWrapper(<ClusterOverviewPane />, 'primary'),
     };
 
-    const settingsPane = {
-      menuItem: { key: 'settings', icon: 'settings', content: 'Settings' },
-      render: () => this.paneWrapper(<SettingsPane />, 'primary'),
-    };
+    const allPanesInOrder = [overviewPane].concat(nodePanes);
 
-    return <Tab panes={[overviewPane].concat(nodePanes.concat([
-      userMgmtPane, diagnosticPane, settingsPane,
-    ]))} />;
+    // The user management tab is only available in enterprise, unfortunately,
+    // because it relies on stored procedures that don't exist in community.
+    if (window.halinContext.isEnterprise()) {
+      allPanesInOrder.push(userMgmtPane);
+    }
+    allPanesInOrder.push(diagnosticPane);
+
+    return <Tab panes={allPanesInOrder} />;
   }
 
   renderSingleNode(driver = null, node = null) {

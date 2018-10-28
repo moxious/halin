@@ -1,25 +1,14 @@
 import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import { Button } from 'semantic-ui-react';
+import queryLibrary from '../data/query-library';
 import uuid from 'uuid';
+import _ from 'lodash';
 
 class OpenFileDescriptors extends Component {
     state = {
         key: uuid.v4(),
-        rate: 2000,
         width: 400,
-        query: `
-        CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
-        YIELD attributes 
-        WITH
-            attributes.OpenFileDescriptorCount.value as fdOpen,
-            attributes.MaxFileDescriptorCount.value as fdMax
-        RETURN 
-            fdOpen, fdMax`,
-        displayColumns: [
-            { Header: 'fdOpen', accessor: 'fdOpen' },
-            { Header: 'fdMax', accessor: 'fdMax' },
-        ],
         displayProperty: 'fdUsed',
     };
 
@@ -41,14 +30,7 @@ class OpenFileDescriptors extends Component {
         const addr = node.getBoltAddress();
         const driver = halin.driverFor(addr);
 
-        const feed = halin.getDataFeed({
-            node,
-            driver,
-            query: this.state.query,
-            rate: this.state.rate,
-            displayColumns: this.state.displayColumns,
-        });
-
+        const feed = halin.getDataFeed(_.merge({ node, driver }, queryLibrary.OS_OPEN_FDS));
         feed.addAliases({ 
             fdUsed: ClusterTimeseries.keyFor(addr, 'fdUsed'),
             fdOpen: ClusterTimeseries.keyFor(addr, 'fdOpen'),

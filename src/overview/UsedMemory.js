@@ -2,14 +2,12 @@ import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/query-library';
+import _ from 'lodash';
 
 class UsedMemory extends Component {
     state = {
         key: uuid.v4(),
-        rate: 2000,
         width: 400,
-        query: queryLibrary.OS_MEMORY_STATS.query,
-
         displayProperty: 'physUsed',
     };
 
@@ -28,13 +26,7 @@ class UsedMemory extends Component {
         const addr = node.getBoltAddress();
         const driver = halin.driverFor(addr);
 
-        const feed = halin.getDataFeed({
-            node,
-            driver,
-            query: this.state.query,
-            rate: this.state.rate,
-            displayColumns: queryLibrary.OS_MEMORY_STATS.columns,
-        });
+        const feed = halin.getDataFeed(_.merge({ node, driver }, queryLibrary.OS_MEMORY_STATS));
 
         feed.addAliases({ physUsed: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
         feed.addAugmentationFunction(this.augmentData(node));

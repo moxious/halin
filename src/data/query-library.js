@@ -9,6 +9,52 @@ export default {
     PING: {
         query: 'RETURN true AS value',
         columns: [ { Header: 'Value', accessor: 'value' } ],
+        rate: 1000,
+    },
+
+    CLUSTER_ROLE: {
+        query: 'CALL dbms.cluster.role()',
+        columns: [
+            { Header: 'Role', accessor: 'role' },
+        ],
+        rate: 5000,
+    },
+
+    JMX_STORE_SIZES: {
+        query: `
+            CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Store sizes') 
+            YIELD attributes 
+            WITH
+                attributes.CountStoreSize.value as countStore,
+                attributes.IndexStoreSize.value as indexStore,
+                attributes.LabelStoreSize.value as labelStore,
+                attributes.NodeStoreSize.value as nodeStore,
+                attributes.PropertyStoreSize.value as propStore, 
+                attributes.RelationshipStoreSize.value as relStore, 
+                attributes.SchemaStoreSize.value as schemaStore,
+                attributes.StringStoreSize.value as stringStore, 
+                attributes.TotalStoreSize.value as total, 
+                attributes.TransactionLogsSize.value as txLogs,                 
+                attributes.ArrayStoreSize.value as arrayStore
+            RETURN 
+                countStore, indexStore, labelStore,
+                schemaStore, txLogs,
+                stringStore, arrayStore, 
+                relStore, propStore, total, nodeStore;        
+        `,
+
+        columns: [
+            { Header: 'Total Disk', accessor: 'total' },
+            { Header: 'Nodes', accessor: 'nodeStore' },
+            { Header: 'Rels', accessor: 'relStore' },
+            { Header: 'Props', accessor: 'propStore' },
+            { Header: 'Index', accessor: 'indexStore' },
+            { Header: 'Schema', accessor: 'schemaStore' },
+            { Header: 'TXs', accessor: 'txLogs' },
+            { Header: 'Strings', accessor: 'stringStore' },
+            { Header: 'Arrays', accessor: 'arrayStore' },            
+        ],
+        rate: 1000,
     },
 
     JMX_PAGE_CACHE: {
@@ -44,6 +90,7 @@ export default {
             { Header: 'File Mappings', accessor: 'fileMappings', Cell: cdt.numField, show: false },
             { Header: 'File Unmappings', accessor: 'fileUnmappings', Cell: cdt.numField, show: false },
         ],
+        rate: 2000,
     },
 
     JMX_MEMORY_STATS: {
@@ -114,6 +161,24 @@ export default {
             { Header: 'Committed', accessor: 'committed' },
             { Header: 'Last Committed', accessor: 'lastCommittedId' },
         ],
+        rate: 2000,
+    },
+
+    OS_OPEN_FDS: {
+        query: `
+        CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
+        YIELD attributes 
+        WITH
+            attributes.OpenFileDescriptorCount.value as fdOpen,
+            attributes.MaxFileDescriptorCount.value as fdMax
+        RETURN 
+            fdOpen, fdMax
+        `,
+        columns: [
+            { Header: 'fdOpen', accessor: 'fdOpen' },
+            { Header: 'fdMax', accessor: 'fdMax' },
+        ],
+        rate: 2000,
     },
 
     OS_LOAD_STATS: {
@@ -169,6 +234,7 @@ export default {
             { Header: 'Arch', accessor: 'arch' },
             { Header: 'Processors', accessor: 'processors' },
         ],
+        rate: 1000,
     },
 
     LIST_TRANSACTIONS: {

@@ -3,6 +3,7 @@ import { TimeEvent } from 'pondjs';
 import _ from 'lodash';
 import queryLibrary from './query-library';
 import * as Sentry from '@sentry/browser';
+import Metric from './Metric';
 const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
 
 // Fun fact!  Infinity isn't a number, and so Number.isNaN should be true for
@@ -31,14 +32,15 @@ const actualNumber = i => !Number.isNaN(i) && !(i === Infinity) && !(i === -Infi
  * DataFeeds may be started and stopped, and can have multiple listeners who get notified
  * when new data is available.
  */
-export default class DataFeed {
+export default class DataFeed extends Metric {
     constructor(props) {
+        super();
         this.node = props.node;
         this.driver = props.driver;
         this.query = props.query;
         this.params = props.params || {};
         this.rate = props.rate || 1000;
-        this.displayColumns = props.displayColumns;
+        this.displayColumns = props.displayColumns || props.columns;
         
         // A list of aliases can be passed, allowing renaming of columns.
         this.aliases = props.alias ? [props.alias] : [];
@@ -68,7 +70,7 @@ export default class DataFeed {
 
         if (!this.node || !this.driver || !this.query || !this.displayColumns) {
             console.error(props);
-            throw new Error('Missing one of required props displayColumns, node, driver, query');
+            throw new Error('Missing one of required props displayColumns/columns, node, driver, query');
         }
 
         const qtag = this.query.replace(/\s*[\r\n]+\s*/g, ' ');
@@ -187,6 +189,7 @@ export default class DataFeed {
             label: this.label,
             node: this.node,
             address: this.node.getBoltAddress(),
+            lastObservation: this.state && this.state.data ? this.state.data[0] : null,
             query: this.query,
             packets: packets.length,
             averageResponseTime: avg,
@@ -237,6 +240,16 @@ export default class DataFeed {
             .map(obs => maxObs(obs));
 
         return Math.max(...allMaxes);
+    }
+
+    isFresh() {
+        const lastDataPoint = this.state.lastDataArrived.getTime();
+        const now = new Date().getTime();
+        const elapsed = now - lastDataPoint;
+
+        // We are fresh if we've received data within 2x our window, and there is no present
+        // error in data received.
+        return (this.windowWidth * 2) > elapsed && !this.state.error;
     }
 
     /**
@@ -312,12 +325,17 @@ export default class DataFeed {
                 this.state.data = [data];
                 this.state.time = t;
                 this.state.event = newEvents;
+                this.state.error = undefined;
 
                 // Let our user know we have something new.
                 return this.listeners.map(listener => listener(this.state, this));
             })
             .catch(err => {
                 Sentry.captureException(err);
+                
+                this.state.lastDataArrived = this.feedStartTime;
+                this.state.error = err;
+
                 console.error('Failed to execute timeseries query', err);
                 if (this.onError) {
                     this.onError(err, this);

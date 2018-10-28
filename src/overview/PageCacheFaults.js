@@ -2,13 +2,12 @@ import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/query-library';
+import _ from 'lodash';
 
 class PageCacheFaults extends Component {
     state = {
         key: uuid.v4(),
-        rate: 2000,
         width: 400,
-        query: queryLibrary.JMX_PAGE_CACHE.query,
         displayProperty: 'faultsPerSecond',
     };
 
@@ -48,18 +47,6 @@ class PageCacheFaults extends Component {
         const elapsedTimeInSec = (new Date().getTime() - this.nodeObservations[addr].pollStartTime) / 1000;
         const faultsPerSecond = faultsThisPeriod / elapsedTimeInSec;
 
-        /*
-        if (addr.match(/node3/)) {
-            console.log({
-                ftp: faultsThisPeriod,
-                lo: this.nodeObservations[addr].last,
-                to: data.faults,
-                fps: faultsPerSecond,
-                elapsedTimeInSec,
-            });    
-        }
-        */
-
         // Set window values for next go-around.
         this.nodeObservations[addr].last = data.faults;
         this.nodeObservations[addr].pollStartTime = new Date().getTime();
@@ -74,14 +61,7 @@ class PageCacheFaults extends Component {
         const addr = node.getBoltAddress();
         const driver = halin.driverFor(addr);
 
-        const feed = halin.getDataFeed({
-            node,
-            driver,
-            query: this.state.query,
-            rate: this.state.rate,
-            displayColumns: queryLibrary.JMX_PAGE_CACHE.columns,
-        });
-
+        const feed = halin.getDataFeed(_.merge({ node, driver }, queryLibrary.JMX_PAGE_CACHE));
         feed.addAliases({ faultsPerSecond: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
         feed.addAugmentationFunction(this.augmentData(node));
 

@@ -1,5 +1,14 @@
 # Halin Release Notes
 
+## 0.4.2
+
+- Certain cluster lifecycle events (like leader re-elections) can be detected and seen in
+the diagnostic tab
+- Status icons (green/yellow/red) on the top tab bar showing responsiveness of each cluster node
+- Better display/disabling for Neo4j Community, when components cannot be rendered. Some functions
+do not apply to enterprise.
+- Documentation and license on repo.
+
 ## 0.4.1
 
 - Support for Neo4j Community!  Albeit with some components disabled whose data is not available outside of Enterprise
