@@ -10,7 +10,14 @@ export default {
         query: 'RETURN true AS value',
         columns: [ { Header: 'Value', accessor: 'value' } ],
         rate: 1000,
-        windowWidth: 10 * 1000,
+    },
+
+    CLUSTER_ROLE: {
+        query: 'CALL dbms.cluster.role()',
+        columns: [
+            { Header: 'Role', accessor: 'role' },
+        ],
+        rate: 5000,
     },
 
     JMX_STORE_SIZES: {
