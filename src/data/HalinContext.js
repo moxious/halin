@@ -108,6 +108,42 @@ export default class HalinContext {
         return this.dbms.edition === 'enterprise';
     }
 
+    /**
+     * Starts a slow data feed for the node's cluster role.  In this way, if the leader
+     * changes, we can detect it.
+     */
+    watchForClusterRoleChange(clusterNode) {
+        const roleFeed = this.getDataFeed(_.merge({
+            node: clusterNode,
+            driver: this.driverFor(clusterNode.getBoltAddress()),
+        }, queryLibrary.CLUSTER_ROLE));
+
+        const addr = clusterNode.getBoltAddress();
+        const onRoleData = (newData, dataFeed) => {
+            const newRole = newData.data[0].role;
+
+            // Something in cluster topology just changed...
+            if (newRole !== clusterNode.role) {
+                const oldRole = clusterNode.role;
+                clusterNode.role = newRole;
+                this.getClusterManager().addEvent({
+                    date: new Date(),
+                    message: `Role change from ${oldRole} to ${newRole}`,
+                    address: clusterNode.getBoltAddress(),
+                });
+            }
+        };
+
+        const onError = (err, dataFeed) => {
+            Sentry.captureException(err);
+            console.error('HalinContext: failed to get cluster role for ', addr, err);
+        };
+
+        roleFeed.addListener(onRoleData);
+        roleFeed.onError = onError;
+        return roleFeed;
+    }
+
     checkForCluster(activeDb) {
         const session = this.base.driver.session();
         // console.log('activeDb', activeDb);
@@ -115,9 +151,7 @@ export default class HalinContext {
             .then(results => {
                 this.clusterNodes = results.records.map(rec => new ClusterNode(rec))
 
-                this.clusterNodes.forEach(node => {
-                    console.log(node.getAddress());
-                });
+                return this.clusterNodes.map(clusterNode => this.watchForClusterRoleChange(clusterNode));
             })
             .catch(err => {
                 const str = `${err}`;
@@ -137,16 +171,17 @@ export default class HalinContext {
                     rec.get = get;
 
                     this.clusterNodes = [new ClusterNode(rec)];
-
-                    // Force driver creation and ping, this is basically
-                    // just connecting to the whole cluster.
-                    // By resolving this as "Promise.all" we don't finish initializing
-                    // until all nodes have been contacted.
-                    return Promise.all(this.clusterNodes.map(cn => this.ping(cn)));
                 } else {
                     Sentry.captureException(err);
                     throw err;
                 }
+            })
+            .then(() => {
+                // Force driver creation and ping, this is basically
+                // just connecting to the whole cluster.
+                // By resolving this as "Promise.all" we don't finish initializing
+                // until all nodes have been contacted.
+                return Promise.all(this.clusterNodes.map(cn => this.ping(cn)));
             })
             .finally(() => session.close());
     }
