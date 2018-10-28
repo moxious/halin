@@ -105,7 +105,7 @@ class Halin extends Component {
     }));
 
     const userMgmtPane = {
-      menuItem: 'User Management',
+      menuItem: { key: 'User Management', content: 'User Management', icon: 'user' },
       render: () => {
         const node = this.state.halin.clusterNodes[0];
         const driver = this.state.halin.driverFor(node.getBoltAddress());
@@ -118,7 +118,7 @@ class Halin extends Component {
     };
 
     const diagnosticPane = {
-      menuItem: 'Diagnostics',
+      menuItem: { key: 'Diagnostics', content: 'Diagnostics', icon: 'cogs' },
       render: () => {
         const node = this.state.halin.clusterNodes[0];
         const driver = this.state.halin.driverFor(node.getBoltAddress());
