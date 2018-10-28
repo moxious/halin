@@ -4,6 +4,7 @@ import { Grid } from 'semantic-ui-react';
 import Overview from './Overview';
 import './DiagnosticPane.css';
 import GeneratePackage from './GeneratePackage';
+import ClusterEventLog from './ClusterEventLog';
 import Ping from './Ping';
 import uuid from 'uuid';
 
@@ -42,6 +43,12 @@ class DiagnosticPane extends Component {
                             />
                         </Grid.Column>
                     </Grid.Row> : '' }
+
+                    <Grid.Row columns={1}>
+                        <Grid.Column>
+                            <ClusterEventLog />
+                        </Grid.Column>
+                    </Grid.Row>
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
