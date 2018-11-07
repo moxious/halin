@@ -22,6 +22,14 @@ Primary features:
 
 Browse to http://localhost:3000/ and you're ready to go.
 
+### Running in Docker
+
+```
+docker run -d -p 127.0.0.1:3000:3000 --rm -t mdavidallen/halin:latest 
+```
+
+Open a browser to http://localhost:3000/
+
 ### Running as a GraphApp
 
 4. Inside of Neo4j Desktop, go to application settings, scroll all the way to the bottom, enable development mode
@@ -29,6 +37,14 @@ Browse to http://localhost:3000/ and you're ready to go.
 6. For development app root path, enter /absolute/path/to/halin where you cloned the repo
 7. Finally, inside of desktop you'll see a special tile labeled "Development App 9.9.9".  This will
 point to your running copy of Halin
+
+### Docker Support
+
+To build the container:
+
+```
+docker build -t halin:latest -f Dockerfile . 
+```
 
 ## FAQ
 

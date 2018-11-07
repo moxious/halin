@@ -5,15 +5,15 @@ FROM kkarczmarczyk/node-yarn:latest
 RUN mkdir /app
 WORKDIR /app
 
-ENV PATH /app/node_modules/.bin:$PATH
 ENV PORT 3000
 
 # install and cache app dependencies
-COPY package.json /app/package.json
+COPY . /app
+RUN npm config set registry https://neo.jfrog.io/neo/api/npm/npm/
 RUN yarn install
-RUN yarn install react-scripts@1.1.1 -g
-
 EXPOSE 3000
 
+ENV PATH /app/node_modules/.bin:$PATH
+
 # start app
-CMD ["yarn", "start"]
+CMD ["/usr/local/bin/yarn", "start"]
