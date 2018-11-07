@@ -23,6 +23,12 @@ export default class Troubleshooting extends Component {
             ],
         },
         {
+            detector: /active database/i,
+            suggestions: [
+                'Check to make sure you have activated a database in Neo4j Desktop before launching Halin',
+            ],
+        },
+        {
             detector: /./,
             suggestions: [`
             Unfortunately, no troubleshooting is available for this particular error. 

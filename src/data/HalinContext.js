@@ -290,6 +290,14 @@ export default class HalinContext {
         try {
             return nd.getFirstActive()
                 .then(active => {
+                    if (_.isNil(active)) {
+                        // In the web version, this will never happen because the
+                        // shim will fake an active DB.  In Neo4j Desktop this 
+                        // **will** happen if the user launches Halin without an 
+                        // activated database.
+                        throw new Error('In order to launch Halin, you must have an active database connection');
+                    }
+
                     // console.log('FIRST ACTIVE', active);
                     this.project = active.project;
                     this.graph = active.graph;
