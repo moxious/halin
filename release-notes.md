@@ -1,5 +1,15 @@
 # Halin Release Notes
 
+## 0.4.3
+
+- Added Docker support. Halin can be built and run inside of docker.
+- Fixed Neo4j Desktop bug that occurred when no database was active (#31)
+- Added several suggestions from Dave Shiposh; heap size checking, page cache size checking (#29, #28)
+- Disabled User Management tab when Neo4j cluster does not support native authentication (#27)
+- Improved freshness calculations for degrading connections
+- Improved connection troubleshooting
+- Key dependency updates
+
 ## 0.4.2
 
 - Certain cluster lifecycle events (like leader re-elections) can be detected and seen in
