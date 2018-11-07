@@ -12,6 +12,7 @@ export default class OSStats extends Component {
         id: uuid.v4(),
         pieWidth: 300,
         pieHeight: 300,
+        data: {},
     }
 
     componentDidMount() {
@@ -22,16 +23,19 @@ export default class OSStats extends Component {
             driver: this.props.driver,
         }, queryLibrary.OS_MEMORY_STATS));
 
-        const onDataListener = (newData, dataFeed) => {
-            // Don't need any of the timeseries stuff, just one data packet.
-            // console.log(newData.data[0]);
-
-            const data = _.cloneDeep(newData.data[0]);
-            if (this.mounted) {
+        const setMyStateFromDataFeed = newData => {
+            if (this.mounted && newData) {
+                const data = _.cloneDeep(newData.data[0]);
                 this.setState({ data });
             }
         };
 
+        // Data feed may be running from prior.  Eliminate render wait by grabbing its initial
+        // state.
+        setMyStateFromDataFeed(this.feed.currentState());
+
+        // Setup listener to do the same thing as new data arrives.
+        const onDataListener = (newData, dataFeed) => setMyStateFromDataFeed(newData);
         this.feed.addListener(onDataListener);
     }
 
