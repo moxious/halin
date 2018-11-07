@@ -32,6 +32,7 @@ export default class HalinContext {
             connectionTimeout: 10000,
             trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
         };
+        this.dbms = {};
         this.debug = true;
         this.mgr = new ClusterManager(this);
     }
@@ -106,6 +107,13 @@ export default class HalinContext {
      */
     isEnterprise() {
         return this.dbms.edition === 'enterprise';
+    }
+
+    /**
+     * Returns true if the context provides for native auth management, false otherwise.
+     */
+    supportsNativeAuth() {
+        return this.dbms.nativeAuth;
     }
 
     /**
@@ -198,7 +206,6 @@ export default class HalinContext {
 
             _.each(object, (val, key) => {
                 if (key === keyToClean) {
-                    console.log('found target key');
                     found = true;
                 } else if(_.isArray(val)) {
                     object[key] = val.map(v => deepReplace(keyToClean, newVal, v));
@@ -228,24 +235,49 @@ export default class HalinContext {
         const q = 'call dbms.components()';
         const session = driver.session();
 
-        return session.run(q, {})
+        const componentsPromise = session.run(q, {})
             .then(results => {
                 const rec = results.records[0];
-                this.dbms = {
-                    name: rec.get('name'),
-                    versions: rec.get('versions'),
-                    edition: rec.get('edition'),
-                };
+                this.dbms.name = rec.get('name')
+                this.dbms.versions = rec.get('versions');
+                this.dbms.edition = rec.get('edition');
             })
             .catch(err => {
                 Sentry.captureException(err);
                 console.error('Failed to get DBMS components');
-                this.dbms = {
-                    name: 'UNKNOWN',
-                    versions: [],
-                    edition: 'UNKNOWN',
-                };
+                this.dbms.name = 'UNKNOWN';
+                this.dbms.versions = [];
+                this.dbms.edition = 'UNKNOWN';
             });
+
+        // See issue #27 for what's going on here.  DB must support native auth
+        // in order for us to expose some features, such as user management.
+        const authQ = `
+            CALL dbms.listConfig() YIELD name, value 
+            WHERE name =~ 'dbms.security.auth_provider.*' 
+            RETURN value;`;
+        const authPromise = session.run(authQ, {})
+            .then(results => {
+                let nativeAuth = false;
+
+                results.records.forEach(rec => {
+                    const val = rec.get('value');
+                    const valAsStr = `${val}`; // Coerce ['foo','bar']=>'foo,bar' if present
+                    
+                    if (valAsStr.indexOf('native') > -1) {
+                        nativeAuth = true;
+                    }
+                });
+
+                this.dbms.nativeAuth = nativeAuth;
+            })
+            .catch(err => {
+                Sentry.captureException(err);
+                console.error('Failed to get DBMS auth implementation type');
+                this.dbms.nativeAuth = false;
+            });
+
+        return Promise.all([componentsPromise, authPromise]);
     }
 
     checkUser(driver) {
@@ -290,6 +322,14 @@ export default class HalinContext {
         try {
             return nd.getFirstActive()
                 .then(active => {
+                    if (_.isNil(active)) {
+                        // In the web version, this will never happen because the
+                        // shim will fake an active DB.  In Neo4j Desktop this 
+                        // **will** happen if the user launches Halin without an 
+                        // activated database.
+                        throw new Error('In order to launch Halin, you must have an active database connection');
+                    }
+
                     // console.log('FIRST ACTIVE', active);
                     this.project = active.project;
                     this.graph = active.graph;
