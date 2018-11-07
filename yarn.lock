@@ -3807,10 +3807,10 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.1.9:
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
   integrity sha1-Dovf5NHduIVNZOBOp8AOKgJuVlg=
 
-graph-app-kit@^0.7.0:
-  version "0.7.0"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/graph-app-kit/-/graph-app-kit-0.7.0.tgz#12a5e85041a735818f52fec7bc285829bafe0919"
-  integrity sha1-EqXoUEGnNYGPUv7HvChYKbr+CRk=
+graph-app-kit@^1.0.2:
+  version "1.0.2"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/graph-app-kit/-/graph-app-kit-1.0.2.tgz#be937a6fad2ff2c1781787490e0e62287aba4876"
+  integrity sha1-vpN6b60v8sF4F4dJDg5iKHq6SHY=
   dependencies:
     "@data-ui/radial-chart" "0.0.11"
     "@data-ui/theme" "0.0.9"

@@ -5,7 +5,7 @@
   "neo4jDesktop": {
     "apiVersion": "^1.2.0"
   },
-  "license": "apache-2.0",
+  "license": "Apache-2.0",
   "icons": [
     {
       "src": "./public/img/halin-icon.png",
@@ -21,7 +21,7 @@
   "dependencies": {
     "@sentry/browser": "^4.0.6",
     "bluebird": "^3.5.2",
-    "graph-app-kit": "^0.7.0",
+    "graph-app-kit": "^1.0.2",
     "lodash": "^4.17.11",
     "moment": "^2.22.2",
     "neo4j-driver": "^1.6.3",
