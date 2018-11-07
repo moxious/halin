@@ -206,7 +206,6 @@ export default class HalinContext {
 
             _.each(object, (val, key) => {
                 if (key === keyToClean) {
-                    console.log('found target key');
                     found = true;
                 } else if(_.isArray(val)) {
                     object[key] = val.map(v => deepReplace(keyToClean, newVal, v));
