@@ -52,6 +52,17 @@ const memSettings = pkg => {
                 addr, 
                 `Found configured memory settings.  Good!`));
         }
+
+        // Check for initial and max heap size, which should match.
+        const initial = node.configuration['dbms.memory.heap.initial_size'];
+        const max = node.configuration['dbms.memory.heap.max_size'];
+
+        // Ship's suggestion.  Thanks ship!
+        if (initial !== max) {
+            findings.push(new InspectionResult(InspectionResult.WARN, addr,
+                'Initial heap size and max heap size differ',
+                'For best performance, these values should match, to prevent rapid heap re-allocation'));
+        }
     });
 
     return findings;
