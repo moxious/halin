@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import * as Sentry from '@sentry/browser';
 import {
   GraphAppBase,
-  ConnectModal,
   CONNECTED
 } from 'graph-app-kit/components/GraphAppBase';
 import { Render } from 'graph-app-kit/components/Render';
@@ -144,7 +143,7 @@ class Halin extends Component {
 
     // The user management tab is only available in enterprise, unfortunately,
     // because it relies on stored procedures that don't exist in community.
-    if (window.halinContext.isEnterprise()) {
+    if (window.halinContext.isEnterprise() && window.halinContext.supportsNativeAuth()) {
       allPanesInOrder.push(userMgmtPane);
     }
     allPanesInOrder.push(diagnosticPane);
@@ -160,7 +159,7 @@ class Halin extends Component {
     const err = (this.state.error ? status.formatStatusMessage(this) : null);
 
     if (err) {
-      return (
+      return (        
         <div className='MainBodyError'>
           { err }
 
@@ -217,15 +216,9 @@ const App = () => {
         driverFactory={neo4j}
         integrationPoint={window.neo4jDesktopApi}
         render={({ connectionState, connectionDetails, setCredentials }) => {
-          return [
-            <ConnectModal
-              key="modal"
-              errorMsg={connectionDetails ? connectionDetails.message : ""}
-              onSubmit={setCredentials}
-              show={connectionState !== CONNECTED}
-            />,
+          return (
             <Halin key="app" connected={connectionState === CONNECTED} />
-          ];
+          );
         }}
       />
     );
