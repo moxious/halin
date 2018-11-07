@@ -243,13 +243,35 @@ export default class DataFeed extends Metric {
     }
 
     isFresh() {
-        const lastDataPoint = this.state.lastDataArrived.getTime();
+        // this.sampleStart is when we last asked for data.
+        // this.state.lastDataArrived is when we last got some.
+        const lastAskedForData = (this.sampleStart || new Date()).getTime();
+        const lastReceivedData = this.state.lastDataArrived.getTime();
         const now = new Date().getTime();
-        const elapsed = now - lastDataPoint;
+        
+        // Encountered errors mean we aren't fresh.
+        if (this.state.error) {
+            return false;
+        }
 
-        // We are fresh if we've received data within 2x our window, and there is no present
-        // error in data received.
-        return (this.windowWidth * 2) > elapsed && !this.state.error;
+        // How much time has gone by since we asked for data?
+        let elapsed = 0;
+        if (lastReceivedData >= lastAskedForData) {
+            // Haven't started polling yet for next go-around.
+            // So do it on the basis of last request experience.
+            elapsed = lastReceivedData - lastAskedForData;
+        } else {
+            // We have a pending request out.
+            elapsed = now - lastAskedForData;
+        }
+
+        // How long/extra we'll wait before we're not fresh.
+        const freshnessThreshold = this.windowWidth * 2;
+        if (elapsed > freshnessThreshold) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -264,6 +286,7 @@ export default class DataFeed extends Metric {
 
         const session = this.driver.session();
         const startTime = new Date().getTime();
+        this.sampleStart = new Date();
 
         return session.run(this.query, this.params)
             .then(results => {
