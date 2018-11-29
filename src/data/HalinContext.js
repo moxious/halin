@@ -483,15 +483,25 @@ export default class HalinContext {
                 results.records.map((rec, idx) => ({ idx, description: rec.get('description') })))
             .then(allConstraints => ({ constraints: allConstraints }));
 
+        const getOrNull = (rec, field) => {
+            try {
+                return rec.get(field);
+            } catch(e) { return null; }
+        };
+
+        // Signature differs between 3.4 and 3.5, particularly
+        // label field vs. tokenNames field.  getOrNull handles
+        // both cases.
         const indexes = session.run('CALL db.indexes()', {})
             .then(results =>
                 results.records.map((rec, idx) => ({
-                    description: rec.get('description'),
-                    label: rec.get('label'),
-                    properties: rec.get('properties'),
-                    state: rec.get('state'),
-                    type: rec.get('type'),
-                    provider: rec.get('provider'),
+                    description: getOrNull(rec, 'description'),
+                    label: getOrNull(rec, 'label'),
+                    tokenNames: getOrNull(rec, 'tokenNames'),
+                    properties: getOrNull(rec, 'properties'),
+                    state: getOrNull(rec, 'state'),
+                    type: getOrNull(rec, 'type'),
+                    provider: getOrNull(rec, 'provider'),
                 })))
             .then(allIndexes => ({ indexes: allIndexes }));
 
