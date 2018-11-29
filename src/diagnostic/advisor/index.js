@@ -24,9 +24,9 @@ import config from './rules/config';
 const dummy = diag => {
     return [
         new InspectionResult(InspectionResult.INFO, 'overall',
-            `You're running Halin ${diag.halin.version}, good for you!  You're already ahead of the game.`,
+            `You're running Halin ${diag.halin.version}, good for you!`,
             null,
-            'None. Good on you!'),
+            'You\'re already ahead of the game.'),
     ];
 }
 
