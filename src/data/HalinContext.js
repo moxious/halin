@@ -49,7 +49,7 @@ export default class HalinContext {
     }
 
     getFeedsFor(clusterNode) {
-        return Object.values(this.dataFeeds).filter(df => df.node === clusterNode);
+        return _.values(this.dataFeeds).filter(df => df.node === clusterNode);
     }
 
     getDataFeed(feedOptions) {
@@ -88,8 +88,8 @@ export default class HalinContext {
 
     shutdown() {
         console.log('Shutting down halin context');
-        Object.values(this.dataFeeds).map(df => df.stop);
-        Object.values(this.drivers).map(driver => driver.close());
+        _.values(this.dataFeeds).map(df => df.stop);
+        _.values(this.drivers).map(driver => driver.close());
     }
 
     /**
@@ -524,7 +524,7 @@ export default class HalinContext {
                 diagnosticsGenerated: moment.utc().toISOString(),
                 activeProject: this.cleanup(this.project),
                 activeGraph: this.cleanup(this.graph),
-                dataFeeds: Object.values(this.dataFeeds).map(df => df.stats()),
+                dataFeeds: _.values(this.dataFeeds).map(df => df.stats()),
                 ...appPkg,
             }
         };

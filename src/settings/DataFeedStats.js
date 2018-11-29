@@ -18,7 +18,7 @@ export default class DataFeedStats extends Component {
 
     dataFeedStats() {
         const halin = window.halinContext;
-        const feedStats = Object.values(halin.dataFeeds).map(feed => feed.stats());
+        const feedStats = _.values(halin.dataFeeds).map(feed => feed.stats());
 
         return _.sortBy(feedStats, ['address', 'label']);
     }

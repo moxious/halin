@@ -1,4 +1,5 @@
 import InspectionResult from '../InspectionResult';
+import _ from 'lodash';
 
 const atLeastOneAdmin = pkg => {
     const findings = [];
@@ -57,12 +58,12 @@ const userConsistency = pkg => {
     let allUnionUsers = new Set([]);
     let allUnionRoles = new Set([]);
 
-    Object.values(userSets).forEach(aSet => {
+    _.values(userSets).forEach(aSet => {
         const both = [...allUnionUsers].concat([...aSet]);
         allUnionUsers = new Set(both);
     });
     
-    Object.values(roleSets).forEach(aSet => {
+    _.values(roleSets).forEach(aSet => {
         const both = [...allUnionRoles].concat([...aSet]);
         allUnionRoles = new Set(both);
     });

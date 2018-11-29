@@ -230,7 +230,7 @@ export default class DataFeed extends Metric {
         if (!this.state.data || this.state.data.length === 0) { return 1; }
         
         const maxObs = obs => {
-            const vals = Object.values(obs).filter(actualNumber);
+            const vals = _.values(obs).filter(actualNumber);
             return Math.max(...vals);
         };
 
