@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import * as PropTypes from 'prop-types';
+import fields from '../data/fields';
 import CypherDataTable from '../data/CypherDataTable';
 import './Procedures.css';
 
@@ -25,7 +26,7 @@ class Procedures extends Component {
             {
                 Header: 'Roles',
                 accessor: 'roles',
-                Cell: CypherDataTable.jsonField,
+                Cell: fields.jsonField,
                 style: { whiteSpace: 'unset' },
                 show: false,
             },

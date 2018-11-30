@@ -9,22 +9,8 @@ import './CypherDataTable.css';
 import uuid from 'uuid';
 import NodeLabel from '../NodeLabel';
 import Spinner from '../Spinner';
-import datautil from '../data/util';
+import neo4j from '../driver';
 import * as Sentry from '@sentry/browser';
-
-const neo4j = require("neo4j-driver/lib/browser/neo4j-web.min.js").v1;
-
-const toInt = val => {
-    if (_.isNil(val)) { return 'n/a'; }
-    const num = parseInt(val, 10);
-    return num.toLocaleString();
-};
-
-const toFloat = val => {
-    if (_.isNil(val)) { return 'n/a'; }
-    const num = parseFloat(val, 10);
-    return num;
-};
 
 const convertMsToTime = (millis) => {
     if (_.isNil(millis)) { return 'n/a'; }
@@ -51,34 +37,6 @@ class CypherDataTable extends Component {
         refresh: null,
         displayColumns: null,
     };
-
-    static jsonField(item) {
-        return <div className='_jsonField'>{JSON.stringify(item.value)}</div>;
-    }
-
-    static numField(item) {
-        return <div className='_numberField'>{toInt(item.value)}</div>;
-    }
-
-    static dataSizeField(item) {
-        return <div className='_dataSizeField'>{datautil.humanDataSize(item.value, true)}</div>
-    }
-
-    static pctField(item) {
-        if (_.isNil(item.value)) {
-            return 'n/a %';
-        }
-
-        const num = toFloat(item.value);
-        const pct = num * 100;
-        const chopped = Math.round(pct * 100)/100;  // 2 decimal places
-        // console.log('RATIO ',item.value,'->',pct,'->',chopped);
-        return <div className='_pctField'>{chopped} %</div>;
-    }
-
-    static timeField(item) {
-        return <div className='_timeField'>{convertMsToTime(item.value)}</div>;
-    }
 
     constructor(props, context) {
         super(props, context);

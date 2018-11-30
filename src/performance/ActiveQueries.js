@@ -2,11 +2,12 @@ import React, { Component } from "react";
 import 'semantic-ui-css/semantic.min.css';
 import hoc from '../higherOrderComponents';
 import CypherDataTable from '../data/CypherDataTable';
+import fields from '../data/fields';
 import 'react-table/react-table.css';
 
-const jsonField = CypherDataTable.jsonField;
-const numField = CypherDataTable.numField;
-const timeField = CypherDataTable.timeField;
+const jsonField = fields.jsonField;
+const numField = fields.numField;
+const timeField = fields.timeField;
 
 class ActiveQueries extends Component {
     query = 'call dbms.listQueries()';

@@ -1,13 +1,7 @@
 import React, { Component } from "react";
 import 'semantic-ui-css/semantic.min.css';
 import queryLibrary from '../data/query-library';
-
-import CypherDataTable from '../data/CypherDataTable';
 import 'react-table/react-table.css';
-
-const jsonField = CypherDataTable.jsonField;
-const numField = CypherDataTable.numField;
-const timeField = CypherDataTable.timeField;
 
 class ActiveTransactions extends Component {
     query = 'call dbms.listTransactions()';
