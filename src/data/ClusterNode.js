@@ -18,7 +18,6 @@ export default class ClusterNode {
         if (this.boltAddress) {
             return this.boltAddress;
         }
-
         this.boltAddress = this.addresses.filter(addr => addr.indexOf('bolt') > -1)[0];
         return this.boltAddress;
     }

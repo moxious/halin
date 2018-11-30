@@ -9,8 +9,7 @@ import appPkg from '../package.json';
 import ClusterManager from './cluster/ClusterManager';
 import queryLibrary from '../data/query-library';
 import * as Sentry from '@sentry/browser';
-
-const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
+import neo4j from '../driver';
 
 /**
  * HalinContext is a controller object that keeps track of state and permits diagnostic
@@ -55,8 +54,8 @@ export default class HalinContext {
     getDataFeed(feedOptions) {
         const df = new DataFeed(feedOptions);
         const feed = this.dataFeeds[df.name];
-        if (feed) { 
-            return feed; 
+        if (feed) {
+            return feed;
         }
         this.dataFeeds[df.name] = df;
         // console.log('Halin starting new DataFeed: ', df.name.slice(0, 120) + '...');
@@ -134,7 +133,7 @@ export default class HalinContext {
             if (newRole !== clusterNode.role) {
                 const oldRole = clusterNode.role;
                 clusterNode.role = newRole;
-                
+
                 this.getClusterManager().addEvent({
                     date: new Date(),
                     message: `Role change from ${oldRole} to ${newRole}`,
@@ -207,10 +206,10 @@ export default class HalinContext {
             _.each(object, (val, key) => {
                 if (key === keyToClean) {
                     found = true;
-                } else if(_.isArray(val)) {
+                } else if (_.isArray(val)) {
                     object[key] = val.map(v => deepReplace(keyToClean, newVal, v));
                 } else if (_.isObject(val)) {
-                    
+
                     object[key] = deepReplace(keyToClean, newVal, val);
                 }
             });
@@ -263,7 +262,7 @@ export default class HalinContext {
                 results.records.forEach(rec => {
                     const val = rec.get('value');
                     const valAsStr = `${val}`; // Coerce ['foo','bar']=>'foo,bar' if present
-                    
+
                     if (valAsStr.indexOf('native') > -1) {
                         nativeAuth = true;
                     }
@@ -293,7 +292,7 @@ export default class HalinContext {
                     // Community doesn't expose this field, and
                     // it's an ignorable error
                     roles = rec.get('roles');
-                } catch (e) { ; } 
+                } catch (e) { ; }
 
                 this.currentUser = {
                     username: rec.get('username'),
@@ -314,14 +313,81 @@ export default class HalinContext {
             .finally(() => session.close());
     }
 
+    static getProjectFromEnvironment() {
+        return {
+            name: process.env.GRAPH_NAME || 'environment',
+            graphs: [
+                HalinContext.getGraphFromEnvironment(),
+            ],
+        };
+    }
+
+    static getGraphFromEnvironment() {
+        const encryption = process.env.ENCRYPTION_REQUIRED ? 'REQUIRED' : 'OPTIONAL';
+        const host = process.env.NEO4J_HOST || 'localhost';
+        const port = process.env.NEO4J_PORT || 7687;
+        const username = process.env.NEO4J_USERNAME || 'neo4j';
+        const password = process.env.NEO4J_PASSWORD || 'admin';
+
+        return {
+            name: process.env.GRAPH_NAME || 'environment',
+            status: process.env.GRAPH_STATUS || 'ACTIVE',
+            databaseStatus: process.env.DATABASE_STATUS || 'RUNNING',
+            databaseType: process.env.DATABASE_TYPE || 'neo4j',
+            id: process.env.DATABASE_UUID || uuid.v4(),
+            connection: {
+                configuration: {
+                    path: '.',
+                    protocols: {
+                        bolt: {
+                            host,
+                            port,
+                            username,
+                            password,
+                            enabled: true,
+                            tlsLevel: encryption,
+                        },
+                    },
+                },
+            },
+        };
+    }
+
     /**
      * Returns a promise that resolves to the HalinContext object completed,
      * or rejects.
+     * 
+     * There are three major code paths here:
+     * (1) Running in Neo4j desktop, use that API to figure what graph to 
+     * connect to.
+     * (2) Running in browser (not desktop) -- in which case we needed to
+     * fake the neo4j desktop API facade prior to this step
+     * (3) Running in terminal (and window object isn't even defined)
      */
     initialize() {
+        let inBrowser = true;
         try {
-            return nd.getFirstActive()
-                .then(active => {
+            // Will fail with ReferenceError if not in a browser.
+            const globalWindow = window;
+        } catch (e) {
+            inBrowser = false;
+        }
+
+        try {
+            let getGraphSpecificsPromise = null;
+
+            if (!inBrowser) {
+                // No need to fake a neo4jdesktop API.  Construct
+                // needed context directly from env vars.
+                getGraphSpecificsPromise = Promise.resolve({
+                    project: HalinContext.getProjectFromEnvironment(),
+                    graph: HalinContext.getGraphFromEnvironment(),
+                });
+            } else {
+                getGraphSpecificsPromise = nd.getFirstActive();
+            }
+
+            return getGraphSpecificsPromise.then(active => {
                     if (_.isNil(active)) {
                         // In the web version, this will never happen because the
                         // shim will fake an active DB.  In Neo4j Desktop this 
@@ -343,12 +409,13 @@ export default class HalinContext {
                     console.log('HalinContext created', this);
                     return Promise.all([
                         this.checkComponents(this.base.driver),
-                        this.checkUser(this.base.driver), 
+                        this.checkUser(this.base.driver),
                         this.checkForCluster(active),
                     ]);
                 })
                 .then(() => this)
         } catch (e) {
+            console.error(e);
             return Promise.reject(new Error('General Halin Context error', e));
         }
     }
@@ -380,7 +447,7 @@ export default class HalinContext {
         return new Promise((resolve, reject) => {
             const onPingData = (newData, dataFeed) => {
                 return resolve({
-                    clusterNode, 
+                    clusterNode,
                     elapsedMs: pingFeed.lastElapsedMs,
                     err: null,
                 });
@@ -486,7 +553,7 @@ export default class HalinContext {
         const getOrNull = (rec, field) => {
             try {
                 return rec.get(field);
-            } catch(e) { return null; }
+            } catch (e) { return null; }
         };
 
         // Signature differs between 3.4 and 3.5, particularly
@@ -546,7 +613,14 @@ export default class HalinContext {
      * @return Promise{Object} of Neo4j Desktop API diagnostics.
      */
     _neo4jDesktopDiagnostics() {
-        const api = window.neo4jDesktopApi;
+        let api = null;
+
+        try {
+            api = window.neo4jDesktopApi;
+        } catch (e) {
+            // ReferenceError on missing window.
+            api = null;
+        }
 
         if (!api) {
             return Promise.resolve({ neo4jDesktop: 'MISSING' });

@@ -23,8 +23,7 @@ import Neo4jDesktopStandIn from './neo4jDesktop/Neo4jDesktopStandIn';
 import uuid from 'uuid';
 import _ from 'lodash';
 import Troubleshooting from './neo4jDesktop/Troubleshooting';
-
-const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
+import neo4j from './driver';
 
 class Halin extends Component {
   state = {

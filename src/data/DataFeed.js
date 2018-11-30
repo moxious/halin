@@ -4,7 +4,7 @@ import _ from 'lodash';
 import queryLibrary from './query-library';
 import * as Sentry from '@sentry/browser';
 import Metric from './Metric';
-const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
+import neo4j from '../driver';
 
 // Fun fact!  Infinity isn't a number, and so Number.isNaN should be true for
 // infinity....but it isn't.  https://twitter.com/mdavidallen/status/1047472617115017216
@@ -210,7 +210,7 @@ export default class DataFeed extends Metric {
         if (!this.state.data || this.state.data.length === 0) { return 0; }
 
         const minObs = obs => {
-            const vals = Object.values(obs).filter(actualNumber);
+            const vals = _.values(obs).filter(actualNumber);
             return Math.min(...vals);
         };
 
