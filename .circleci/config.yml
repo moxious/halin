@@ -14,6 +14,7 @@ jobs:
           paths:
             - /caches/app.tar          
       - store_artifacts
+            path: /tmp/artifacts
   sample-run:
     docker:
       - image: neo4j:3.5.0
