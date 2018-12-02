@@ -7,6 +7,11 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
+      - restore_cache:
+          keys:
+            - v1-{{ .Branch }}
+          paths:
+            - /caches/app.tar      
       - run:
           name: Load Docker image layer cache
           command: |
@@ -31,28 +36,43 @@ jobs:
       - image: docker:17.05.0-ce-git
     steps:
       - run:
-        name: Neo4j 3.4.9 Enterprise
-        command: |
-          docker run -d --name neo4j-empty --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin -t neo4j:3.4.9-enterprise
+          name: Neo4j 3.4.9 Enterprise
+          command: |
+            docker run -d --name neo4j-empty --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin -t neo4j:3.4.9-enterprise
       - run:
-        name: Wait for live
-        command: sleep 10
+          name: Wait for live
+          command: sleep 10
       - run:
-        name: Run Halin
-        command: |
-          docker run \
-            --env NEO4J_URI=bolt://localhost \
-            --env NEO4J_USERNAME=neo4j \
-            --env NEO4J_PASSWORD=admin \
-            halin:latest
+          name: Run Halin
+          command: |
+            docker run \
+              --env NEO4J_URI=bolt://localhost \
+              --env NEO4J_USERNAME=neo4j \
+              --env NEO4J_PASSWORD=admin \
+              halin:latest
       - run:
-        name: Stop Neo4j
-        command: docker stop neo4j-empty
+          name: Stop Neo4j
+          command: docker stop neo4j-empty
+  deploy:
+    docker:
+      - image: docker:17.05.0-ce-git
+    steps:
+      - run:
+        name: Push application docker image
+      command: |
+        if [ "${CIRCLE_BRANCH}" == "master" ]; then
+          echo "Docker push" ;
+        else
+          echo "Not master branch, not pushing"
+        fi
 workflows:
   version: 2
-  build-and-test:
+  halin-integration-test:
     jobs:
       - build-container
       - sample-run:
           requires:
             - build-container
+      - deploy:
+          requires:
+            - sample-run
