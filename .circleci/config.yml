@@ -11,9 +11,9 @@ jobs:
           name: Start Neo4j 3.4.9 Enterprise
           command: |
             docker run -d --name neo4j-empty --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin -t neo4j:3.4.9-enterprise
-            docker ps
             sleep 20
-            docker exec neo4j-empty bin/cypher-shell -a localhost -u neo4j -p admin 'MATCH (n) RETURN count(n);'
+            docker ps
+            docker exec neo4j-empty bin/cypher-shell -a localhost -u neo4j -p admin 'MATCH (n) RETURN count(n);' | true
             curl http://localhost:7474 | true
             docker run \
               --env NEO4J_URI=bolt://neo4j-empty:7687 \
