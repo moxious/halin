@@ -1,5 +1,14 @@
 # Halin Release Notes
 
+## 0.5.0
+
+- Bugfixes to support Neo4j 3.5.0 (#38) community & enterprise.
+- Fixes browser compatibility issues for older browsers (#36)
+- Via `npm run gather` it is now possible to gather diagnostics non-interactively.
+- Fixed page cache advisor bug where certain memory values were mis-identified.
+- Improved diagnostic output to include kernel version number and native auth support information for each cluster node
+- Added diagnostic rule to detect version consistency amongst machines in a cluster.
+
 ## 0.4.3
 
 - Added Docker support. Halin can be built and run inside of docker.
