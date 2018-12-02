@@ -28,19 +28,12 @@ jobs:
             path: /tmp/artifacts
   sample-run:
     docker:
-      - image: neo4j:3.5.0
-      - image: neo4j:3.5.0-enterprise
-      - image: neo4j:3.4.9
-      - image: neo4j:3.4.9-enterprise
+      - image: docker:17.05.0-ce-git
     steps:
       - run:
         name: Neo4j 3.4.9 Enterprise
         command: |
-          docker run -d --name neo4j-empty --rm \
-            -p 127.0.0.1:7474:7474 \
-            -p 127.0.0.1:7687:7687 \
-            --env NEO4J_AUTH=neo4j/admin \
-            -t neo4j:3.4.9-enterprise
+          docker run -d --name neo4j-empty --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin -t neo4j:3.4.9-enterprise
       - run:
         name: Wait for live
         command: sleep 10
@@ -52,6 +45,9 @@ jobs:
             --env NEO4J_USERNAME=neo4j \
             --env NEO4J_PASSWORD=admin \
             halin:latest
+      - run:
+        name: Stop Neo4j
+        command: docker stop neo4j-empty
 workflows:
   version: 2
   build-and-test:
