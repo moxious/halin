@@ -4,21 +4,13 @@ jobs:
     machine: true
     steps:
       - checkout
+      - run:
+          name: Start Neo4j 3.4.9 Enterprise
+          command: |
+            docker run -d --name neo4j-empty --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin -t neo4j:3.4.9-enterprise
       - run: 
           name: Build Halin Docker Image
           command: docker build -t halin:latest -f Dockerfile .
-      - store_artifacts:
-            path: /tmp/artifacts
-  sample-run:
-    machine: true
-    steps:
-      - run:
-          name: Neo4j 3.4.9 Enterprise
-          command: |
-            docker run -d --name neo4j-empty --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin -t neo4j:3.4.9-enterprise
-      - run:
-          name: Wait for live
-          command: sleep 10
       - run:
           name: Run Halin
           command: |
@@ -26,30 +18,9 @@ jobs:
               --env NEO4J_URI=bolt://localhost \
               --env NEO4J_USERNAME=neo4j \
               --env NEO4J_PASSWORD=admin \
-              halin:latest
+              halin:latest      
       - run:
           name: Stop Neo4j
           command: docker stop neo4j-empty
-  deploy:
-    docker:
-      - image: docker:17.05.0-ce-git
-    steps:
-      - run:
-          name: Push application docker image
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "master" ]; then
-              echo "Docker push" ;
-            else
-              echo "Not master branch, not pushing"
-            fi
-workflows:
-  version: 2
-  halin-integration-test:
-    jobs:
-      - build-container
-      - sample-run:
-          requires:
-            - build-container
-      - deploy:
-          requires:
-            - sample-run
+      - store_artifacts:
+            path: /tmp/artifacts
