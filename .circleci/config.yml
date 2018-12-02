@@ -1,7 +1,6 @@
 version: 2
 jobs:
   build-container:
-    working_directory: /app
     machine: true
     steps:
       - checkout
