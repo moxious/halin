@@ -4,28 +4,19 @@ jobs:
     machine: true
     steps:
       - checkout
-      - run:
-          name: Start Neo4j 3.4.9 Enterprise
-          command: |
-            docker run -d --name neo4j-empty --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin -t neo4j:3.4.9-enterprise
       - run: 
           name: Build Halin Docker Image
           command: docker build -t halin:latest -f Dockerfile .
       - run:
-          name: Verify Neo4j is alive
+          name: Start Neo4j 3.4.9 Enterprise
           command: |
+            docker run -d --name neo4j-empty --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin -t neo4j:3.4.9-enterprise
             docker ps
-            docker exec neo4j-empty bin/cypher-shell -a localhost -u neo4j -p admin "MATCH (n) RETURN count(n);"
-      - run:
-          name: Run Halin
-          command: |
+            sleep 15
             docker run \
               --env NEO4J_URI=bolt://neo4j-empty:7687 \
               --env NEO4J_USERNAME=neo4j \
               --env NEO4J_PASSWORD=admin \
               halin:latest npm run gather
-      - run:
-          name: Stop Neo4j
-          command: docker stop neo4j-empty
       - store_artifacts:
             path: /tmp/artifacts
