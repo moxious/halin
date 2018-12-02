@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build-container:
+  build:
     machine: true
     steps:
       - checkout
