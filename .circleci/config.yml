@@ -58,13 +58,13 @@ jobs:
       - image: docker:17.05.0-ce-git
     steps:
       - run:
-        name: Push application docker image
-      command: |
-        if [ "${CIRCLE_BRANCH}" == "master" ]; then
-          echo "Docker push" ;
-        else
-          echo "Not master branch, not pushing"
-        fi
+          name: Push application docker image
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
+              echo "Docker push" ;
+            else
+              echo "Not master branch, not pushing"
+            fi
 workflows:
   version: 2
   halin-integration-test:
