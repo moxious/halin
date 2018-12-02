@@ -5,30 +5,13 @@ import * as PropTypes from "prop-types";
 import _ from 'lodash';
 import { Grid } from 'semantic-ui-react';
 import ColumnSelector from './ColumnSelector';
-import './CypherDataTable.css';
 import uuid from 'uuid';
 import NodeLabel from '../NodeLabel';
 import Spinner from '../Spinner';
 import neo4j from '../driver';
 import * as Sentry from '@sentry/browser';
 
-const convertMsToTime = (millis) => {
-    if (_.isNil(millis)) { return 'n/a'; }
-
-    let delim = " ";
-    let hours = Math.floor(millis / (1000 * 60 * 60) % 60);
-    let minutes = Math.floor(millis / (1000 * 60) % 60);
-    let seconds = Math.floor(millis / 1000 % 60);
-    const hoursStr = hours < 10 ? '0' + hours : hours;
-    const minutesStr = minutes < 10 ? '0' + minutes : minutes;
-    const secondsStr = seconds < 10 ? '0' + seconds : seconds;
-
-    let str = secondsStr + 's';
-    if (minutes > 0) { str = minutesStr + delim + str; }
-    if (hours > 0) { str = hoursStr + delim + str; }
-
-    return str;
-};
+import './CypherDataTable.css';
 
 class CypherDataTable extends Component {
     state = {

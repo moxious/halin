@@ -68,8 +68,8 @@ const userConsistency = pkg => {
         allUnionRoles = new Set(both);
     });
     
-    console.log('ALL UNION USERS', [...allUnionUsers]);
-    console.log('ALL UNION ROLES', [...allUnionRoles]);
+    // console.log('ALL UNION USERS', [...allUnionUsers]);
+    // console.log('ALL UNION ROLES', [...allUnionRoles]);
     // Now, look through each cluster node and determine whether
     // a paricular node is falling short of the total set.
     const addrs = Object.keys(userSets);
