@@ -42,7 +42,7 @@ const pageCacheSizing = pkg => {
         let pageCacheInBytes = 0;
         
         // Stupid reverse math from Xmb, Xgb -> number of bytes.
-        const match = pageCache.match(/\s*(\d+)(gb?|mb|tb)?\s*$/i);
+        const match = pageCache.match(/\s*(\d+)(gb?|mb?|tb)?\s*$/i);
         
         if (match) {
             const base = match[1];
@@ -63,7 +63,7 @@ const pageCacheSizing = pkg => {
             const multiplier = multipliers[sizing] || 1;
             pageCacheInBytes = base * multiplier;
         } else {
-            console.log('PC bailout; size is weird');
+            console.log('PC bailout; size is weird', pageCache);
             findings.push(new InspectionResult(InspectionResult.WARN, addr, 
                 `Cannot determine data sizing of page cache setting ${pageCache}; check your configuration`));
             return;
