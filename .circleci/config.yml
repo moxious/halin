@@ -50,8 +50,9 @@ workflows:
   version: 2
   build-and-test:
     jobs:
-      - build-container
+      - build-container:
+        type: approval
       - sample-run:
-        requires:
-          - build-container
+          requires:
+            - build-container
       - hello
