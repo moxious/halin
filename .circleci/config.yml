@@ -4,6 +4,9 @@ jobs:
     machine: true
     steps:
       - checkout
+      - run:
+          name: Make Artifacts Dir
+          command: mkdir -p /tmp/artifacts
       - run: 
           name: Build Halin Docker Image
           command: docker build -t halin:latest -f Dockerfile .
@@ -14,11 +17,11 @@ jobs:
             sleep 20
             docker ps
             # docker exec neo4j-empty bin/cypher-shell -a localhost -u neo4j -p admin 'MATCH (n) RETURN count(n);' | true
-            curl http://localhost:7474 | true
+            curl http://localhost:7474
             docker run \
               --env NEO4J_URI=bolt://neo4j-empty:7687 \
               --env NEO4J_USERNAME=neo4j \
               --env NEO4J_PASSWORD=admin \
-              halin:latest npm run gather
+              halin:latest npm run gather > /tmp/artifacts/halin-output.txt
       - store_artifacts:
             path: /tmp/artifacts
