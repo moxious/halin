@@ -10,16 +10,28 @@ const gatherDiagnosticsAndQuit = (halin) => {
             console.log(JSON.stringify(data, null, 2));
             return halin.shutdown();
         })
-        .then(() => process.exit(0));
+        .then(() => process.exit(0))
+        .catch(err => {
+            console.error('Failed to gather diagnostics');
+            console.error(err);
+            process.exit(1);
+        });
 };
 
 ctx.initialize()
     .then(ctx => {
-        console.log('Good:',ctx);
-
-        setTimeout(() => gatherDiagnosticsAndQuit(ctx), 
-            process.env.WAIT_TIME || 5000);
+        if (!ctx.isEnterprise()) {
+            console.log(JSON.stringify(ctx.clusterNodes[0].asJSON(), null, 2));
+            console.error('Diagnostic packages can only be gathered for Neo4j Enterprise');
+            process.exit(1);
+        }
     })
+    .then(ctx =>
+        // It's useful to have some ticks and not gather immediately.
+        // This lets us gather some ping stats and other response time
+        // stats.
+        setTimeout(() => gatherDiagnosticsAndQuit(ctx), 
+            process.env.WAIT_TIME || 5000))
     .catch(err => {
         console.error('ZOMG',err);
     });
