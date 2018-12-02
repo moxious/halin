@@ -13,7 +13,9 @@ jobs:
           command: docker build -t halin:latest -f Dockerfile .
       - run:
           name: Verify Neo4j is alive
-          command: docker exec neo4j-empty bin/cypher-shell -a localhost -u neo4j -p admin "MATCH (n) RETURN count(n);"
+          command: |
+            docker ps
+            docker exec neo4j-empty bin/cypher-shell -a localhost -u neo4j -p admin "MATCH (n) RETURN count(n);"
       - run:
           name: Run Halin
           command: |
