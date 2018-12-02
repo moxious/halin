@@ -1,14 +1,28 @@
 version: 2
 jobs:
   build-container:
+    working_directory: /app
     docker:
-      - image: kkarczmarczyk/node-yarn:latest
+      - image: docker:17.05.0-ce-git    
     steps:
       - checkout
       - setup_remote_docker
+      - run:
+          name: Get Dependencies
+          command: npm install
+      - run:
+          name: Load Docker image layer cache
+          command: |
+            set +o pipefail
+            docker load -i /caches/app.tar | true          
       - run: 
           name: Build Halin Docker Image
           command: docker build -t halin:latest -f Dockerfile .
+      - run:
+          name: Save Docker image layer cache
+          command: |
+            mkdir -p /caches
+            docker save -o /caches/app.tar app          
       - save_cache:
           key: v1-{{ .Branch }}-{{ epoch }}
           paths:
