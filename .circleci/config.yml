@@ -51,7 +51,7 @@ workflows:
   build-and-test:
     jobs:
       - build-container
-      - sample-run
+      - sample-run:
         requires:
           - build-container
       - hello
