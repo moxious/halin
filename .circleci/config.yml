@@ -15,7 +15,7 @@ jobs:
           name: Run Halin
           command: |
             docker run \
-              --env NEO4J_URI=bolt://localhost \
+              --env NEO4J_URI=bolt://neo4j-empty:7687 \
               --env NEO4J_USERNAME=neo4j \
               --env NEO4J_PASSWORD=admin \
               halin:latest npm run gather

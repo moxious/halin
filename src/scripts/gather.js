@@ -18,6 +18,8 @@ const gatherDiagnosticsAndQuit = (halin) => {
         });
 };
 
+console.log(process.env);
+
 ctx.initialize()
     .then(ctx => {
         if (!ctx.isEnterprise()) {
@@ -33,5 +35,6 @@ ctx.initialize()
         setTimeout(() => gatherDiagnosticsAndQuit(ctx), 
             process.env.WAIT_TIME || 5000))
     .catch(err => {
-        console.error('ZOMG',err);
+        console.error('Fatal error',err);
+        process.exit(1);
     });
