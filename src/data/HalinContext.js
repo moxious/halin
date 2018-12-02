@@ -31,8 +31,7 @@ export default class HalinContext {
             connectionTimeout: 10000,
             trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
         };
-        this.dbms = {};
-        this.debug = true;
+        this.debug = false;
         this.mgr = new ClusterManager(this);
     }
 
@@ -105,14 +104,14 @@ export default class HalinContext {
      * false otherwise.
      */
     isEnterprise() {
-        return this.dbms.edition === 'enterprise';
+        return this.clusterNodes[0].isEnterprise();
     }
 
     /**
      * Returns true if the context provides for native auth management, false otherwise.
      */
     supportsNativeAuth() {
-        return this.dbms.nativeAuth;
+        return this.clusterNodes[0].supportsNativeAuth();
     }
 
     /**
@@ -184,13 +183,12 @@ export default class HalinContext {
                     throw err;
                 }
             })
-            .then(() => {
-                // Force driver creation and ping, this is basically
-                // just connecting to the whole cluster.
-                // By resolving this as "Promise.all" we don't finish initializing
-                // until all nodes have been contacted.
-                return Promise.all(this.clusterNodes.map(cn => this.ping(cn)));
-            })
+            .then(() => Promise.all(this.clusterNodes.map(cn => {
+                const driver = this.driverFor(cn.getBoltAddress());
+                return cn.checkComponents(driver);
+            })))
+            .then(() => 
+                Promise.all(this.clusterNodes.map(cn => this.ping(cn))))
             .finally(() => session.close());
     }
 
@@ -230,55 +228,6 @@ export default class HalinContext {
         return this.currentUser;
     }
 
-    checkComponents(driver) {
-        const q = 'call dbms.components()';
-        const session = driver.session();
-
-        const componentsPromise = session.run(q, {})
-            .then(results => {
-                const rec = results.records[0];
-                this.dbms.name = rec.get('name')
-                this.dbms.versions = rec.get('versions');
-                this.dbms.edition = rec.get('edition');
-            })
-            .catch(err => {
-                Sentry.captureException(err);
-                console.error('Failed to get DBMS components');
-                this.dbms.name = 'UNKNOWN';
-                this.dbms.versions = [];
-                this.dbms.edition = 'UNKNOWN';
-            });
-
-        // See issue #27 for what's going on here.  DB must support native auth
-        // in order for us to expose some features, such as user management.
-        const authQ = `
-            CALL dbms.listConfig() YIELD name, value 
-            WHERE name =~ 'dbms.security.auth_provider.*' 
-            RETURN value;`;
-        const authPromise = session.run(authQ, {})
-            .then(results => {
-                let nativeAuth = false;
-
-                results.records.forEach(rec => {
-                    const val = rec.get('value');
-                    const valAsStr = `${val}`; // Coerce ['foo','bar']=>'foo,bar' if present
-
-                    if (valAsStr.indexOf('native') > -1) {
-                        nativeAuth = true;
-                    }
-                });
-
-                this.dbms.nativeAuth = nativeAuth;
-            })
-            .catch(err => {
-                Sentry.captureException(err);
-                console.error('Failed to get DBMS auth implementation type');
-                this.dbms.nativeAuth = false;
-            });
-
-        return Promise.all([componentsPromise, authPromise]);
-    }
-
     checkUser(driver) {
         const q = 'call dbms.showCurrentUser()';
         const session = driver.session();
@@ -299,7 +248,8 @@ export default class HalinContext {
                     roles,
                     flags: rec.get('flags'),
                 };
-                console.log('Current User', this.currentUser);
+                
+                // console.log('Current User', this.currentUser);
             })
             .catch(err => {
                 Sentry.captureException(err);
@@ -368,6 +318,7 @@ export default class HalinContext {
         let inBrowser = true;
         try {
             // Will fail with ReferenceError if not in a browser.
+            // eslint-disable-next-line
             const globalWindow = window;
         } catch (e) {
             inBrowser = false;
@@ -406,9 +357,8 @@ export default class HalinContext {
                     const uri = `bolt://${this.base.host}:${this.base.port}`;
                     this.base.driver = this.driverFor(uri);
 
-                    console.log('HalinContext created', this);
+                    // console.log('HalinContext created', this);
                     return Promise.all([
-                        this.checkComponents(this.base.driver),
                         this.checkUser(this.base.driver),
                         this.checkForCluster(active),
                     ]);
@@ -469,13 +419,7 @@ export default class HalinContext {
      */
     _nodeDiagnostics(clusterNode) {
         const basics = {
-            basics: {
-                address: clusterNode.getBoltAddress(),
-                protocols: clusterNode.protocols(),
-                role: clusterNode.role,
-                database: clusterNode.database,
-                id: clusterNode.id,
-            },
+            basics: clusterNode.asJSON(),
         };
 
         const session = this.driverFor(clusterNode.getBoltAddress()).session();

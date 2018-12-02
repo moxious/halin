@@ -30,14 +30,13 @@ const clusterOnlyComponent = (WrappedComponent, heading) => {
 const adminOnlyComponent = (WrappedComponent, heading) => {
     return class extends Component {
         render() {
-            const dbms = window.halinContext.dbms;
             const roles = window.halinContext.getCurrentUser().roles;
 
             // In Neo4j community, there are no roles, effectively
             // everyone is an admin.  So while under community you
             // won't have role='admin', you will have permissions
             // to do stuff.  Weird.            
-            if (dbms.edition !== 'enterprise' || roles.indexOf('admin') > -1) {
+            if (!window.halinContext.isEnterprise() || roles.indexOf('admin') > -1) {
                 return <WrappedComponent {...this.props} />;
             }
 
@@ -59,8 +58,7 @@ const adminOnlyComponent = (WrappedComponent, heading) => {
 const enterpriseOnlyComponent = (WrappedComponent, heading) => {
     return class extends Component {
         render() {
-            const dbms = window.halinContext.dbms;
-            if (dbms.edition === 'enterprise') {
+            if (window.halinContext.isEnterprise()) {
                 return <WrappedComponent {...this.props} />;
             }
 
