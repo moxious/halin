@@ -1,8 +1,57 @@
 version: 2
 jobs:
-  build:
+  build-container:
+    docker:
+      - image: kkarczmarczyk/node-yarn:latest
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run: 
+          name: Build Halin Docker Image
+          command: docker build -t halin:latest -f Dockerfile .
+      - save_cache:
+          key: v1-{{ .Branch }}-{{ epoch }}
+          paths:
+            - /caches/app.tar          
+      - store_artifacts
+  sample-run:
+    docker:
+      - image: neo4j:3.5.0
+      - image: neo4j:3.5.0-enterprise
+      - image: neo4j:3.4.9
+      - image: neo4j:3.4.9-enterprise
+    steps:
+      - run:
+        name: Neo4j 3.4.9 Enterprise
+        command: |
+          docker run -d --name neo4j-empty --rm \
+            -p 127.0.0.1:7474:7474 \
+            -p 127.0.0.1:7687:7687 \
+            --env NEO4J_AUTH=neo4j/admin \
+            -t neo4j:3.4.9-enterprise
+      - run:
+        name: Wait for live
+        command: sleep 10
+      - run:
+        name: Run Halin
+        command: |
+          docker run \
+            --env NEO4J_URI=bolt://localhost \
+            --env NEO4J_USERNAME=neo4j \
+            --env NEO4J_PASSWORD=admin \
+            halin:latest
+  hello:
     docker: # use the docker executor type; machine and macos executors are also supported
       - image: circleci/node:4.8.2 # the primary container, where your job's commands are run
     steps:
       - checkout # check out the code in the project directory
       - run: echo "hello world" # run the `echo` command
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      - build-container
+      - sample-run
+        requires:
+          - build-container
+      - hello
