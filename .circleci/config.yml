@@ -13,7 +13,7 @@ jobs:
           key: v1-{{ .Branch }}-{{ epoch }}
           paths:
             - /caches/app.tar          
-      - store_artifacts
+      - store_artifacts:
             path: /tmp/artifacts
   sample-run:
     docker:
