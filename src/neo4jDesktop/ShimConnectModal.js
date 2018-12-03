@@ -5,11 +5,11 @@ import { Button, Form, Modal, Message, Checkbox } from "semantic-ui-react";
 import _ from 'lodash';
 
 let privateLocalCreds = {};
-try {
-    privateLocalCreds = require('./cluster-credentials.json');
-} catch (e) {
-    console.log('No pre-configured halin credentials were found, but that\'s OK', e);
-}
+// try {    
+//     privateLocalCreds = require('./cluster-credentials.json');
+// } catch (e) {
+//     console.log('No pre-configured halin credentials were found, but that\'s OK', e);
+// }
 
 class ConnectForm extends Component {
     state = {
