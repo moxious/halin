@@ -60,10 +60,10 @@ jobs:
       - run:
           name: Deploy to S3
           command: |
-            ENDPOINT=http://halin.s3-website-us-east-1.amazonaws.com
-            BUCKET=halin
-            BUILD=export BUILD=build-$CIRCLE_SHA1
-            s3cmd put --recursive -P dist/* s3://$BUCKET/$BUILD
+            export ENDPOINT=http://halin.s3-website-us-east-1.amazonaws.com
+            export BUCKET=halin
+            export BUILD=build-$CIRCLE_SHA1
+            s3cmd put --recursive -P dist/* s3://$BUCKET/$BUILD/
       - run:
           name: Deploy to Docker
           command: |
