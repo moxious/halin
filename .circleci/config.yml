@@ -71,8 +71,10 @@ jobs:
           command: |
             export ENDPOINT=http://halin.s3-website-us-east-1.amazonaws.com
             export BUCKET=halin
-            export BUILD=build-$CIRCLE_SHA1
+            export HALIN_VERSION=$(jq -r '.version' < package.json)
+            export BUILD=build-$HALIN_VERSION-$CIRCLE_SHA1
             s3cmd put --recursive -P dist/* s3://$BUCKET/$BUILD/
+            echo http://halin.s3-website-us-east-1.amazonaws.com/$BUILD/ > /tmp/artifacts/s3-deploy.txt
       - run:
           name: Deploy to Docker
           command: |
