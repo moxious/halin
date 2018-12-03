@@ -1,7 +1,6 @@
 import HalinContext from '../data/HalinContext';
 import yargs from 'yargs';
 
-console.log(yargs.argv);
 const ctx = new HalinContext();
 
 const gatherDiagnosticsAndQuit = (halin) => {
@@ -17,8 +16,6 @@ const gatherDiagnosticsAndQuit = (halin) => {
             process.exit(1);
         });
 };
-
-console.log(process.env);
 
 ctx.initialize()
     .then(ctx => {

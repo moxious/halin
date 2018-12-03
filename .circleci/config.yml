@@ -11,6 +11,7 @@ jobs:
           command: |
             mkdir -p /tmp/artifacts
             sudo npm install -g yarn
+            sudo apt-get update && sudo apt-get install -y s3cmd
       - run: 
           name: Build Halin Docker Image
           command: docker build -t mdavidallen/halin:latest -f Dockerfile .
@@ -50,22 +51,31 @@ jobs:
               --env NEO4J_URI=bolt://localhost:7687 \
               --env NEO4J_USERNAME=neo4j \
               --env NEO4J_PASSWORD=admin \
-              mdavidallen/halin:latest npm run gather | tee /tmp/artifacts/halin-output.txt
+              mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-output.txt
       - run:
-          name: Docker push
+          name: Deploy to S3
+          command: |
+            ENDPOINT=http://halin.s3-website-us-east-1.amazonaws.com
+            BUCKET=halin
+            BUILD=export BUILD=build-$CIRCLE_SHA1
+            npm run build
+            s3cmd put --recursive -P dist/* s3://$BUCKET/$BUILD
+      - run:
+          name: Deploy to Docker
           command: |
             export HALIN_VERSION=$(jq -r '.version' < package.json)
             export BUILD=build-$CIRCLE_SHA1
             echo "Build $BUILD"
-            echo "Halin version is $HALIN_VERSION"
+            echo "Halin version is $HALIN_VERSION"            
             if [ "${CIRCLE_BRANCH}" = "master" ]; then
               echo "Pushing docker image"
               docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
               docker push mdavidallen/halin:latest
 
-              export HALIN_VERSION=$(jq -r '.version' < package.json)
               docker tag mdavidallen/halin:latest mdavidallen/halin:$HALIN_VERSION
               docker push mdavidallen/halin:$HALIN_VERSION
+            else
+              echo "Not deploying; not master branch."
             fi
       - store_artifacts:
             path: /tmp/artifacts
