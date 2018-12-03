@@ -52,7 +52,7 @@ jobs:
       - run:
           name: Test Against Neo4j 3.5.0 Enterprise
           command: |
-            docker run -d --name neo4j-empty --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin --env=NEO4J_ACCEPT_LICENSE_AGREEMENT=yes -t neo4j:3.5.0-enterprise
+            docker run -d --name neo4j35 --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin --env=NEO4J_ACCEPT_LICENSE_AGREEMENT=yes -t neo4j:3.5.0-enterprise
             sleep 20
             docker ps
 
@@ -61,7 +61,7 @@ jobs:
             export NEO4J_PASSWORD=admin
 
             # Run gather against the temp docker image started.
-            docker run --network container:neo4j-empty \
+            docker run --network container:neo4j35 \
               --env NEO4J_URI=bolt://localhost:7687 \
               --env NEO4J_USERNAME=neo4j \
               --env NEO4J_PASSWORD=admin \
