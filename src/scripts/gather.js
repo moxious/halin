@@ -27,6 +27,7 @@ ctx.initialize()
             console.error('Diagnostic packages can only be gathered for Neo4j Enterprise');
             process.exit(1);
         }
+        return ctx;
     })
     .then(ctx =>
         // It's useful to have some ticks and not gather immediately.
