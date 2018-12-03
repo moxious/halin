@@ -33,8 +33,14 @@ jobs:
             sleep 20
             docker ps
             # docker exec neo4j-empty bin/cypher-shell -a localhost -u neo4j -p admin 'MATCH (n) RETURN count(n);' | true
-            curl http://localhost:7474
-            
+            while true; do 
+              if curl -s -I http://localhost:7474 | grep "200 OK"; then
+                echo "Neo4j up"
+                break
+              fi
+              echo "Waiting for neo4j to come up"
+              sleep 1 
+            done            
             export NEO4J_URI=bolt://localhost:7687
             export NEO4J_USER=neo4j
             export NEO4J_PASSWORD=admin
