@@ -5,8 +5,10 @@ jobs:
     steps:
       - checkout
       - run:
-          name: Make Artifacts Dir
-          command: mkdir -p /tmp/artifacts
+          name: Prep
+          command: |
+            mkdir -p /tmp/artifacts
+            npm install -g yarn
       - run: 
           name: Build Halin Docker Image
           command: docker build -t halin:latest -f Dockerfile .
