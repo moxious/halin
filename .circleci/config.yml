@@ -83,12 +83,11 @@ jobs:
             export HALIN_VERSION=$(jq -r '.version' < package.json)
             export BUILD=build-$CIRCLE_SHA1
             echo "Build $BUILD"
-            echo "Halin version is $HALIN_VERSION"            
+            echo "Halin version is $HALIN_VERSION"
+            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
             if [ "${CIRCLE_BRANCH}" = "master" ]; then
-              echo "Pushing docker image"
-              docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+              echo "Pushing docker image"              
               docker push mdavidallen/halin:latest
-
               docker tag mdavidallen/halin:latest mdavidallen/halin:$HALIN_VERSION
               docker push mdavidallen/halin:$HALIN_VERSION
             else
