@@ -1,16 +1,9 @@
 // Wrap/hide the complexity of whether to choose the web neo4j driver
 // or the regular one.
-let driverObj;
+import neo4j from 'neo4j-driver';
+// As of Neo4j driver 1.7, no longer need to separately import
+// the minified web driver.
+// let driverObj;
+// driverObj = neo4j.v1;
 
-try {
-    if (window) {
-        driverObj = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
-    } else { 
-        driverObj = require('neo4j-driver').v1;
-    }
-} catch (e) {
-    // ReferenceError if window isn't defined.
-    driverObj = require('neo4j-driver').v1;
-}
-
-export default driverObj;
+export default neo4j;
