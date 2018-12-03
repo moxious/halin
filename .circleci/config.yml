@@ -1,7 +1,8 @@
 version: 2
 jobs:
   build:
-    image: circleci/node:8-browsers-legacy
+    docker:
+      image: circleci/node:8-browsers-legacy
     steps:
       - checkout
       - run:
