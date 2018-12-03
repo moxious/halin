@@ -21,7 +21,9 @@ jobs:
             - yarn-packages-{{ checksum "yarn.lock" }}
       - run:
           name: Install Dependencies
-          command: yarn install
+          command: |
+            npm config set registry https://neo.jfrog.io/neo/api/npm/npm/
+            yarn install
       - run:
           name: Build JS
           command: npm run build
