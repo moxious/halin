@@ -36,11 +36,13 @@
     "react-table": "^6.8.6",
     "react-timeseries-charts": "^0.15.3",
     "ringjs": "^0.0.1",
+    "source-map-explorer": "^1.6.0",
     "uri-parser": "^1.0.1",
     "uuid": "^3.3.2",
     "yargs": "^12.0.2"
   },
   "scripts": {
+    "analyze": "source-map-explorer dist/static/js/main.*",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "gather": "./node_modules/.bin/babel-node --presets @babel/env,@babel/react --plugins @babel/plugin-proposal-class-properties src/scripts/gather.js",

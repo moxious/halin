@@ -22,6 +22,9 @@ jobs:
       - run:
           name: Install Dependencies
           command: yarn install
+      - run:
+          name: Build JS
+          command: npm run build
       - save_cache:
           name: Save Yarn Package Cache
           key: yarn-packages-{{ checksum "yarn.lock" }}
@@ -58,7 +61,6 @@ jobs:
             ENDPOINT=http://halin.s3-website-us-east-1.amazonaws.com
             BUCKET=halin
             BUILD=export BUILD=build-$CIRCLE_SHA1
-            npm run build
             s3cmd put --recursive -P dist/* s3://$BUCKET/$BUILD
       - run:
           name: Deploy to Docker
@@ -79,3 +81,5 @@ jobs:
             fi
       - store_artifacts:
             path: /tmp/artifacts
+      - store_artifacts:
+            path: /home/circleci/.npm
