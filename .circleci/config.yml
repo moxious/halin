@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    machine: true
+    image: circleci/node:8-browsers-legacy
     steps:
       - checkout
       - run:
