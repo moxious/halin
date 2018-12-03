@@ -42,12 +42,12 @@
     "yargs": "^12.0.2"
   },
   "scripts": {
-    "analyze": "source-map-explorer dist/static/js/main.*",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "analyze": "./node_modules/.bin/source-map-explorer dist/static/js/main.*",
+    "start": "./node_modules/.bin/react-scripts start",
+    "build": "./node_modules/.bin/react-scripts build",
     "gather": "./node_modules/.bin/babel-node --presets @babel/env,@babel/react --plugins @babel/plugin-proposal-class-properties src/scripts/gather.js",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
+    "test": "./node_modules/.bin/react-scripts test --env=jsdom",
+    "eject": "./node_modules/.bin/react-scripts eject",
     "postbuild": "rm -rf dist && mv build dist",
     "prepublishOnly": "npm run build"
   },
