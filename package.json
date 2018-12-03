@@ -24,7 +24,7 @@
     "graph-app-kit": "^1.0.2",
     "lodash": "^4.17.11",
     "moment": "^2.22.2",
-    "neo4j-driver": "^1.6.3",
+    "neo4j-driver": "^1.7.2",
     "pondjs": "^0.8.9",
     "prop-types": "^15.6.0",
     "react": "^16.0.0",

@@ -6930,9 +6930,9 @@ negotiator@0.6.1:
   integrity sha1-KzJxhOiZIQEXeyhWP7XnECrNDKk=
 
 neo4j-driver@^1.6.3:
-  version "1.7.1"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/neo4j-driver/-/neo4j-driver-1.7.1.tgz#f21571d18e632ff03be7e84c06b38e1bc66fb111"
-  integrity sha1-8hVx0Y5jL/A75+hMBrOOG8ZvsRE=
+  version "1.7.2"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/neo4j-driver/-/neo4j-driver-1.7.2.tgz#c72a6dfa6bd2106b00a42794dc52a82b227b48e0"
+  integrity sha1-xypt+mvSEGsApCeU3FKoKyJ7SOA=
   dependencies:
     babel-runtime "^6.26.0"
     text-encoding "^0.6.4"
