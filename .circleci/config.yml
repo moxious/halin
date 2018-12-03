@@ -53,8 +53,10 @@ jobs:
               mdavidallen/halin:latest npm run gather | tee /tmp/artifacts/halin-output.txt
       - run:
           name: Docker push
-          command |
+          command: |
             export HALIN_VERSION=$(jq -r '.version' < package.json)
+            export BUILD=build-$CIRCLE_SHA1
+            echo "Build $BUILD"
             echo "Halin version is $HALIN_VERSION"
             if [ "${CIRCLE_BRANCH}" = "master" ]; then
               echo "Pushing docker image"
