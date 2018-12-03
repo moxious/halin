@@ -8,6 +8,7 @@
 - Fixed page cache advisor bug where certain memory values were mis-identified.
 - Improved diagnostic output to include kernel version number and native auth support information for each cluster node
 - Added diagnostic rule to detect version consistency amongst machines in a cluster.
+- Added the basics of a CircleCI build system
 
 ## 0.4.3
 
