@@ -33,23 +33,23 @@ jobs:
             sleep 20
             docker ps
             # docker exec neo4j-empty bin/cypher-shell -a localhost -u neo4j -p admin 'MATCH (n) RETURN count(n);' | true
-            while true; do 
-              if curl -s -I http://localhost:7474 | grep "200 OK"; then
-                echo "Neo4j up"
-                break
-              fi
-              echo "Waiting for neo4j to come up"
-              sleep 1 
-            done            
+            #while true; do 
+            #  if curl -s -I http://localhost:7474 | grep "200 OK"; then
+            #    echo "Neo4j up"
+            #    break
+            #  fi
+            #  echo "Waiting for neo4j to come up"
+            #  sleep 1 
+            #done
             export NEO4J_URI=bolt://localhost:7687
             export NEO4J_USER=neo4j
             export NEO4J_PASSWORD=admin
-            yarn run gather
+            # yarn run gather
 
-            # docker run \
-            #  --env NEO4J_URI=bolt://neo4j-empty:7687 \
-            #  --env NEO4J_USERNAME=neo4j \
-            #  --env NEO4J_PASSWORD=admin \
-            #  halin:latest npm run gather | tee /tmp/artifacts/halin-output.txt
+            docker run \
+              --env NEO4J_URI=bolt://localhost:7687 \
+              --env NEO4J_USERNAME=neo4j \
+              --env NEO4J_PASSWORD=admin \
+              halin:latest npm run gather | tee /tmp/artifacts/halin-output.txt
       - store_artifacts:
             path: /tmp/artifacts
