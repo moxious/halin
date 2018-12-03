@@ -1,16 +1,15 @@
 version: 2
 jobs:
   build:
-    #docker:
-    #  - image: circleci/node:8-browsers-legacy
-    machine: true 
+    docker:
+      - image: circleci/node:8-browsers-legacy
     steps:
       - checkout
+      - setup_remote_docker      
       - run:
           name: Prep
           command: |
             mkdir -p /tmp/artifacts
-            sudo npm install -g npm@8
             sudo npm install -g yarn
       - run: 
           name: Build Halin Docker Image
