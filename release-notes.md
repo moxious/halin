@@ -1,5 +1,9 @@
 # Halin Release Notes
 
+## 0.5.1
+
+- Hotfix release for deploy errors
+
 ## 0.5.0
 
 - Bugfixes to support Neo4j 3.5.0 (#38) community & enterprise.

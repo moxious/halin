@@ -24,9 +24,6 @@ jobs:
           command: |
             npm config set registry https://neo.jfrog.io/neo/api/npm/npm/
             yarn install
-      - run:
-          name: Build JS
-          command: npm run build
       - save_cache:
           name: Save Yarn Package Cache
           key: yarn-packages-{{ checksum "yarn.lock" }}
@@ -75,6 +72,8 @@ jobs:
             export BUCKET=halin
             export HALIN_VERSION=$(jq -r '.version' < package.json)
             export BUILD=build-$HALIN_VERSION-$CIRCLE_SHA1
+            yarn install
+            npm run build
             s3cmd put --recursive -P dist/* s3://$BUCKET/$BUILD/
             echo http://halin.s3-website-us-east-1.amazonaws.com/$BUILD/ > /tmp/artifacts/s3-deploy.txt
       - run:
@@ -82,7 +81,8 @@ jobs:
           command: |
             if [ "${CIRCLE_BRANCH}" = "master" ]; then
               export BUCKET=halin
-              s3cmd put --recursive -P dist/* s3://$BUCKET/
+              npm run build
+              s3cmd put --recursive -P dist/* s3://$BUCKET
               echo http://halin.s3-website-us-east-1.amazonaws.com/ > /tmp/artifacts/s3-deploy-production.txt
             else
               echo "Not master, nothing to do"
