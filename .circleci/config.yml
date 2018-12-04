@@ -78,8 +78,8 @@ jobs:
             s3cmd put --recursive -P dist/* s3://$BUCKET/$BUILD/
             echo http://halin.s3-website-us-east-1.amazonaws.com/$BUILD/ > /tmp/artifacts/s3-deploy.txt
       - run:
-        name: Deploy to S3 (Production)
-        command: |
+          name: Deploy to S3 (Production)
+          command: |
             if [ "${CIRCLE_BRANCH}" = "master" ]; then
               export BUCKET=halin
               s3cmd put --recursive -P dist/* s3://$BUCKET/
