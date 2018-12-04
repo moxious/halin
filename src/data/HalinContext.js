@@ -9,8 +9,7 @@ import appPkg from '../package.json';
 import ClusterManager from './cluster/ClusterManager';
 import queryLibrary from '../data/query-library';
 import * as Sentry from '@sentry/browser';
-
-const neo4j = require('neo4j-driver/lib/browser/neo4j-web.min.js').v1;
+import neo4j from '../driver';
 
 /**
  * HalinContext is a controller object that keeps track of state and permits diagnostic
@@ -32,8 +31,7 @@ export default class HalinContext {
             connectionTimeout: 10000,
             trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
         };
-        this.dbms = {};
-        this.debug = true;
+        this.debug = false;
         this.mgr = new ClusterManager(this);
     }
 
@@ -49,14 +47,14 @@ export default class HalinContext {
     }
 
     getFeedsFor(clusterNode) {
-        return Object.values(this.dataFeeds).filter(df => df.node === clusterNode);
+        return _.values(this.dataFeeds).filter(df => df.node === clusterNode);
     }
 
     getDataFeed(feedOptions) {
         const df = new DataFeed(feedOptions);
         const feed = this.dataFeeds[df.name];
-        if (feed) { 
-            return feed; 
+        if (feed) {
+            return feed;
         }
         this.dataFeeds[df.name] = df;
         // console.log('Halin starting new DataFeed: ', df.name.slice(0, 120) + '...');
@@ -88,8 +86,8 @@ export default class HalinContext {
 
     shutdown() {
         console.log('Shutting down halin context');
-        Object.values(this.dataFeeds).map(df => df.stop);
-        Object.values(this.drivers).map(driver => driver.close());
+        _.values(this.dataFeeds).map(df => df.stop);
+        _.values(this.drivers).map(driver => driver.close());
     }
 
     /**
@@ -106,14 +104,14 @@ export default class HalinContext {
      * false otherwise.
      */
     isEnterprise() {
-        return this.dbms.edition === 'enterprise';
+        return this.clusterNodes[0].isEnterprise();
     }
 
     /**
      * Returns true if the context provides for native auth management, false otherwise.
      */
     supportsNativeAuth() {
-        return this.dbms.nativeAuth;
+        return this.clusterNodes[0].supportsNativeAuth();
     }
 
     /**
@@ -134,7 +132,7 @@ export default class HalinContext {
             if (newRole !== clusterNode.role) {
                 const oldRole = clusterNode.role;
                 clusterNode.role = newRole;
-                
+
                 this.getClusterManager().addEvent({
                     date: new Date(),
                     message: `Role change from ${oldRole} to ${newRole}`,
@@ -185,13 +183,12 @@ export default class HalinContext {
                     throw err;
                 }
             })
-            .then(() => {
-                // Force driver creation and ping, this is basically
-                // just connecting to the whole cluster.
-                // By resolving this as "Promise.all" we don't finish initializing
-                // until all nodes have been contacted.
-                return Promise.all(this.clusterNodes.map(cn => this.ping(cn)));
-            })
+            .then(() => Promise.all(this.clusterNodes.map(cn => {
+                const driver = this.driverFor(cn.getBoltAddress());
+                return cn.checkComponents(driver);
+            })))
+            .then(() => 
+                Promise.all(this.clusterNodes.map(cn => this.ping(cn))))
             .finally(() => session.close());
     }
 
@@ -207,10 +204,10 @@ export default class HalinContext {
             _.each(object, (val, key) => {
                 if (key === keyToClean) {
                     found = true;
-                } else if(_.isArray(val)) {
+                } else if (_.isArray(val)) {
                     object[key] = val.map(v => deepReplace(keyToClean, newVal, v));
                 } else if (_.isObject(val)) {
-                    
+
                     object[key] = deepReplace(keyToClean, newVal, val);
                 }
             });
@@ -231,55 +228,6 @@ export default class HalinContext {
         return this.currentUser;
     }
 
-    checkComponents(driver) {
-        const q = 'call dbms.components()';
-        const session = driver.session();
-
-        const componentsPromise = session.run(q, {})
-            .then(results => {
-                const rec = results.records[0];
-                this.dbms.name = rec.get('name')
-                this.dbms.versions = rec.get('versions');
-                this.dbms.edition = rec.get('edition');
-            })
-            .catch(err => {
-                Sentry.captureException(err);
-                console.error('Failed to get DBMS components');
-                this.dbms.name = 'UNKNOWN';
-                this.dbms.versions = [];
-                this.dbms.edition = 'UNKNOWN';
-            });
-
-        // See issue #27 for what's going on here.  DB must support native auth
-        // in order for us to expose some features, such as user management.
-        const authQ = `
-            CALL dbms.listConfig() YIELD name, value 
-            WHERE name =~ 'dbms.security.auth_provider.*' 
-            RETURN value;`;
-        const authPromise = session.run(authQ, {})
-            .then(results => {
-                let nativeAuth = false;
-
-                results.records.forEach(rec => {
-                    const val = rec.get('value');
-                    const valAsStr = `${val}`; // Coerce ['foo','bar']=>'foo,bar' if present
-                    
-                    if (valAsStr.indexOf('native') > -1) {
-                        nativeAuth = true;
-                    }
-                });
-
-                this.dbms.nativeAuth = nativeAuth;
-            })
-            .catch(err => {
-                Sentry.captureException(err);
-                console.error('Failed to get DBMS auth implementation type');
-                this.dbms.nativeAuth = false;
-            });
-
-        return Promise.all([componentsPromise, authPromise]);
-    }
-
     checkUser(driver) {
         const q = 'call dbms.showCurrentUser()';
         const session = driver.session();
@@ -293,14 +241,15 @@ export default class HalinContext {
                     // Community doesn't expose this field, and
                     // it's an ignorable error
                     roles = rec.get('roles');
-                } catch (e) { ; } 
+                } catch (e) { ; }
 
                 this.currentUser = {
                     username: rec.get('username'),
                     roles,
                     flags: rec.get('flags'),
                 };
-                console.log('Current User', this.currentUser);
+                
+                // console.log('Current User', this.currentUser);
             })
             .catch(err => {
                 Sentry.captureException(err);
@@ -314,14 +263,82 @@ export default class HalinContext {
             .finally(() => session.close());
     }
 
+    static getProjectFromEnvironment() {
+        return {
+            name: process.env.GRAPH_NAME || 'environment',
+            graphs: [
+                HalinContext.getGraphFromEnvironment(),
+            ],
+        };
+    }
+
+    static getGraphFromEnvironment() {
+        const encryption = process.env.ENCRYPTION_REQUIRED ? 'REQUIRED' : 'OPTIONAL';
+        const host = process.env.NEO4J_HOST || 'localhost';
+        const port = process.env.NEO4J_PORT || 7687;
+        const username = process.env.NEO4J_USERNAME || 'neo4j';
+        const password = process.env.NEO4J_PASSWORD || 'admin';
+
+        return {
+            name: process.env.GRAPH_NAME || 'environment',
+            status: process.env.GRAPH_STATUS || 'ACTIVE',
+            databaseStatus: process.env.DATABASE_STATUS || 'RUNNING',
+            databaseType: process.env.DATABASE_TYPE || 'neo4j',
+            id: process.env.DATABASE_UUID || uuid.v4(),
+            connection: {
+                configuration: {
+                    path: '.',
+                    protocols: {
+                        bolt: {
+                            host,
+                            port,
+                            username,
+                            password,
+                            enabled: true,
+                            tlsLevel: encryption,
+                        },
+                    },
+                },
+            },
+        };
+    }
+
     /**
      * Returns a promise that resolves to the HalinContext object completed,
      * or rejects.
+     * 
+     * There are three major code paths here:
+     * (1) Running in Neo4j desktop, use that API to figure what graph to 
+     * connect to.
+     * (2) Running in browser (not desktop) -- in which case we needed to
+     * fake the neo4j desktop API facade prior to this step
+     * (3) Running in terminal (and window object isn't even defined)
      */
     initialize() {
+        let inBrowser = true;
         try {
-            return nd.getFirstActive()
-                .then(active => {
+            // Will fail with ReferenceError if not in a browser.
+            // eslint-disable-next-line
+            const globalWindow = window;
+        } catch (e) {
+            inBrowser = false;
+        }
+
+        try {
+            let getGraphSpecificsPromise = null;
+
+            if (!inBrowser) {
+                // No need to fake a neo4jdesktop API.  Construct
+                // needed context directly from env vars.
+                getGraphSpecificsPromise = Promise.resolve({
+                    project: HalinContext.getProjectFromEnvironment(),
+                    graph: HalinContext.getGraphFromEnvironment(),
+                });
+            } else {
+                getGraphSpecificsPromise = nd.getFirstActive();
+            }
+
+            return getGraphSpecificsPromise.then(active => {
                     if (_.isNil(active)) {
                         // In the web version, this will never happen because the
                         // shim will fake an active DB.  In Neo4j Desktop this 
@@ -340,15 +357,15 @@ export default class HalinContext {
                     const uri = `bolt://${this.base.host}:${this.base.port}`;
                     this.base.driver = this.driverFor(uri);
 
-                    console.log('HalinContext created', this);
+                    // console.log('HalinContext created', this);
                     return Promise.all([
-                        this.checkComponents(this.base.driver),
-                        this.checkUser(this.base.driver), 
+                        this.checkUser(this.base.driver),
                         this.checkForCluster(active),
                     ]);
                 })
                 .then(() => this)
         } catch (e) {
+            console.error(e);
             return Promise.reject(new Error('General Halin Context error', e));
         }
     }
@@ -380,7 +397,7 @@ export default class HalinContext {
         return new Promise((resolve, reject) => {
             const onPingData = (newData, dataFeed) => {
                 return resolve({
-                    clusterNode, 
+                    clusterNode,
                     elapsedMs: pingFeed.lastElapsedMs,
                     err: null,
                 });
@@ -402,13 +419,7 @@ export default class HalinContext {
      */
     _nodeDiagnostics(clusterNode) {
         const basics = {
-            basics: {
-                address: clusterNode.getBoltAddress(),
-                protocols: clusterNode.protocols(),
-                role: clusterNode.role,
-                database: clusterNode.database,
-                id: clusterNode.id,
-            },
+            basics: clusterNode.asJSON(),
         };
 
         const session = this.driverFor(clusterNode.getBoltAddress()).session();
@@ -483,15 +494,25 @@ export default class HalinContext {
                 results.records.map((rec, idx) => ({ idx, description: rec.get('description') })))
             .then(allConstraints => ({ constraints: allConstraints }));
 
+        const getOrNull = (rec, field) => {
+            try {
+                return rec.get(field);
+            } catch (e) { return null; }
+        };
+
+        // Signature differs between 3.4 and 3.5, particularly
+        // label field vs. tokenNames field.  getOrNull handles
+        // both cases.
         const indexes = session.run('CALL db.indexes()', {})
             .then(results =>
                 results.records.map((rec, idx) => ({
-                    description: rec.get('description'),
-                    label: rec.get('label'),
-                    properties: rec.get('properties'),
-                    state: rec.get('state'),
-                    type: rec.get('type'),
-                    provider: rec.get('provider'),
+                    description: getOrNull(rec, 'description'),
+                    label: getOrNull(rec, 'label'),
+                    tokenNames: getOrNull(rec, 'tokenNames'),
+                    properties: getOrNull(rec, 'properties'),
+                    state: getOrNull(rec, 'state'),
+                    type: getOrNull(rec, 'type'),
+                    provider: getOrNull(rec, 'provider'),
                 })))
             .then(allIndexes => ({ indexes: allIndexes }));
 
@@ -524,7 +545,7 @@ export default class HalinContext {
                 diagnosticsGenerated: moment.utc().toISOString(),
                 activeProject: this.cleanup(this.project),
                 activeGraph: this.cleanup(this.graph),
-                dataFeeds: Object.values(this.dataFeeds).map(df => df.stats()),
+                dataFeeds: _.values(this.dataFeeds).map(df => df.stats()),
                 ...appPkg,
             }
         };
@@ -536,7 +557,14 @@ export default class HalinContext {
      * @return Promise{Object} of Neo4j Desktop API diagnostics.
      */
     _neo4jDesktopDiagnostics() {
-        const api = window.neo4jDesktopApi;
+        let api = null;
+
+        try {
+            api = window.neo4jDesktopApi;
+        } catch (e) {
+            // ReferenceError on missing window.
+            api = null;
+        }
 
         if (!api) {
             return Promise.resolve({ neo4jDesktop: 'MISSING' });

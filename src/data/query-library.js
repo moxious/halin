@@ -1,5 +1,5 @@
-import CypherDataTable from './CypherDataTable';
-const cdt = CypherDataTable;
+import fields from './fields';
+const cdt = fields;
 
 /**
  * A collection of queries that other components can refer to.  By using the same

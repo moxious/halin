@@ -1,4 +1,5 @@
 import InspectionResult from '../InspectionResult';
+import _ from 'lodash';
 
 const atLeastOneAdmin = pkg => {
     const findings = [];
@@ -57,18 +58,18 @@ const userConsistency = pkg => {
     let allUnionUsers = new Set([]);
     let allUnionRoles = new Set([]);
 
-    Object.values(userSets).forEach(aSet => {
+    _.values(userSets).forEach(aSet => {
         const both = [...allUnionUsers].concat([...aSet]);
         allUnionUsers = new Set(both);
     });
     
-    Object.values(roleSets).forEach(aSet => {
+    _.values(roleSets).forEach(aSet => {
         const both = [...allUnionRoles].concat([...aSet]);
         allUnionRoles = new Set(both);
     });
     
-    console.log('ALL UNION USERS', [...allUnionUsers]);
-    console.log('ALL UNION ROLES', [...allUnionRoles]);
+    // console.log('ALL UNION USERS', [...allUnionUsers]);
+    // console.log('ALL UNION ROLES', [...allUnionRoles]);
     // Now, look through each cluster node and determine whether
     // a paricular node is falling short of the total set.
     const addrs = Object.keys(userSets);

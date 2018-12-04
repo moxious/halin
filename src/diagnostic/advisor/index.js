@@ -20,13 +20,14 @@ import network from './rules/network';
 import indexAndConstraint from './rules/index-and-constraint';
 import users from './rules/users';
 import config from './rules/config';
+import versions from './rules/versions';
 
 const dummy = diag => {
     return [
         new InspectionResult(InspectionResult.INFO, 'overall',
-            `You're running Halin ${diag.halin.version}, good for you!  You're already ahead of the game.`,
+            `You're running Halin ${diag.halin.version}, good for you!`,
             null,
-            'None. Good on you!'),
+            'You\'re already ahead of the game.'),
     ];
 }
 
@@ -41,6 +42,7 @@ const rules = [
     ...indexAndConstraint,
     ...users,
     ...config,
+    ...versions,
 ];
 
 /**
@@ -56,7 +58,10 @@ const generateRecommendations = diagPackage => {
     // Rule functions take a diagnostic package and produce an array of zero
     // or more InspectionResult objects.
     const allResults = _.flatten(rules.map(rule => rule(diagPackage)));
-    return allResults;
+
+    // In case any rule returned a falsy value, toss it out, otherwise
+    // the UI components which call us choke on bad data.
+    return allResults.filter(x => x);
 };
 
 export default {

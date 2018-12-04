@@ -87,8 +87,6 @@ export default class Advisor extends Component {
 
     getMachines() {
         if (!this.props.data) { return []; }
-        console.log(this.props.data);
-
         const allAddrs = this.props.data.map(inspResult => inspResult.addr);
         return _.uniq(allAddrs).sort();
     }

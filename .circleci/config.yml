@@ -1,0 +1,111 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/node:8-browsers-legacy
+    steps:
+      - checkout
+      - setup_remote_docker      
+      - run:
+          name: Prep
+          command: |
+            mkdir -p /tmp/artifacts
+            sudo npm install -g yarn
+            sudo apt-get update && sudo apt-get install -y s3cmd
+      - run: 
+          name: Build Halin Docker Image
+          command: docker build -t mdavidallen/halin:latest -f Dockerfile .
+      - restore_cache:
+          name: Restore Yarn Package Cache
+          keys:
+            - yarn-packages-{{ checksum "yarn.lock" }}
+      - run:
+          name: Install Dependencies
+          command: |
+            npm config set registry https://neo.jfrog.io/neo/api/npm/npm/
+            yarn install
+      - run:
+          name: Build JS
+          command: npm run build
+      - save_cache:
+          name: Save Yarn Package Cache
+          key: yarn-packages-{{ checksum "yarn.lock" }}
+          paths:
+            - ~/.cache/yarn          
+      - run:
+          name: Test Against Neo4j 3.4.9 Enterprise
+          command: |
+            docker run -d --name neo4j349 --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin --env=NEO4J_ACCEPT_LICENSE_AGREEMENT=yes -t neo4j:3.4.9-enterprise
+            sleep 20
+            docker ps
+
+            export NEO4J_URI=bolt://localhost:7687
+            export NEO4J_USER=neo4j
+            export NEO4J_PASSWORD=admin
+
+            # Run gather against the temp docker image started.
+            docker run --network container:neo4j349 \
+              --env NEO4J_URI=bolt://localhost:7687 \
+              --env NEO4J_USERNAME=neo4j \
+              --env NEO4J_PASSWORD=admin \
+              mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-3.4.9.txt
+            docker stop neo4j349
+      - run:
+          name: Test Against Neo4j 3.5.0 Enterprise
+          command: |
+            docker run -d --name neo4j350 --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin --env=NEO4J_ACCEPT_LICENSE_AGREEMENT=yes -t neo4j:3.5.0-enterprise
+            sleep 20
+            docker ps
+
+            export NEO4J_URI=bolt://localhost:7687
+            export NEO4J_USER=neo4j
+            export NEO4J_PASSWORD=admin
+
+            # Run gather against the temp docker image started.
+            docker run --network container:neo4j350 \
+              --env NEO4J_URI=bolt://localhost:7687 \
+              --env NEO4J_USERNAME=neo4j \
+              --env NEO4J_PASSWORD=admin \
+              mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-3.5.0.txt
+            docker stop neo4j350
+      - run:
+          name: Deploy branch build to S3
+          command: |
+            export ENDPOINT=http://halin.s3-website-us-east-1.amazonaws.com
+            export BUCKET=halin
+            export HALIN_VERSION=$(jq -r '.version' < package.json)
+            export BUILD=build-$HALIN_VERSION-$CIRCLE_SHA1
+            s3cmd put --recursive -P dist/* s3://$BUCKET/$BUILD/
+            echo http://halin.s3-website-us-east-1.amazonaws.com/$BUILD/ > /tmp/artifacts/s3-deploy.txt
+      - run:
+          name: Deploy to S3 (Production)
+          command: |
+            if [ "${CIRCLE_BRANCH}" = "master" ]; then
+              export BUCKET=halin
+              s3cmd put --recursive -P dist/* s3://$BUCKET/
+              echo http://halin.s3-website-us-east-1.amazonaws.com/ > /tmp/artifacts/s3-deploy-production.txt
+            else
+              echo "Not master, nothing to do"
+            fi
+      - run:
+          name: Deploy to Docker
+          command: |
+            export HALIN_VERSION=$(jq -r '.version' < package.json)
+            export BUILD=build-$CIRCLE_SHA1
+            echo "Build $BUILD"
+            echo "Halin version is $HALIN_VERSION"
+            docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+            if [ "${CIRCLE_BRANCH}" = "master" ]; then
+              echo "Pushing docker image"              
+              docker push mdavidallen/halin:latest
+              docker tag mdavidallen/halin:latest mdavidallen/halin:$HALIN_VERSION
+              docker push mdavidallen/halin:$HALIN_VERSION
+            else
+              echo "Not deploying; not master branch."
+            fi
+      - store_artifacts:
+            path: /tmp/artifacts
+      - store_artifacts:
+            path: /home/circleci/.npm
+      - store_artifacts:
+            path: dist/

@@ -1,7 +1,7 @@
 {
   "name": "halin",
   "description": "Halin helps you monitor and improve your Neo4j graph",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "neo4jDesktop": {
     "apiVersion": "^1.2.0"
   },
@@ -24,7 +24,7 @@
     "graph-app-kit": "^1.0.2",
     "lodash": "^4.17.11",
     "moment": "^2.22.2",
-    "neo4j-driver": "^1.6.3",
+    "neo4j-driver": "^1.7.2",
     "pondjs": "^0.8.9",
     "prop-types": "^15.6.0",
     "react": "^16.0.0",
@@ -36,15 +36,27 @@
     "react-table": "^6.8.6",
     "react-timeseries-charts": "^0.15.3",
     "ringjs": "^0.0.1",
+    "source-map-explorer": "^1.6.0",
     "uri-parser": "^1.0.1",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "yargs": "^12.0.2"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject",
+    "analyze": "./node_modules/.bin/source-map-explorer dist/static/js/main.*",
+    "start": "./node_modules/.bin/react-scripts start",
+    "build": "./node_modules/.bin/react-scripts build",
+    "gather": "./node_modules/.bin/babel-node --presets @babel/env,@babel/react --plugins @babel/plugin-proposal-class-properties src/scripts/gather.js",
+    "test": "./node_modules/.bin/react-scripts test --env=jsdom",
+    "eject": "./node_modules/.bin/react-scripts eject",
     "postbuild": "rm -rf dist && mv build dist",
     "prepublishOnly": "npm run build"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.1.5",
+    "@babel/core": "^7.1.5",
+    "@babel/node": "^7.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/preset-env": "^7.1.6",
+    "@babel/preset-react": "^7.0.0"
   }
 }
