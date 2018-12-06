@@ -6,9 +6,7 @@ import * as Sentry from '@sentry/browser';
 import Metric from './Metric';
 import neo4j from '../driver';
 
-// Fun fact!  Infinity isn't a number, and so Number.isNaN should be true for
-// infinity....but it isn't.  https://twitter.com/mdavidallen/status/1047472617115017216
-const actualNumber = i => !Number.isNaN(i) && !(i === Infinity) && !(i === -Infinity);
+const actualNumber = i => !_.isNaN(i) && !(i === Infinity) && !(i === -Infinity);
 
 /**
  * DataFeed is an abstraction that polls a cypher query
