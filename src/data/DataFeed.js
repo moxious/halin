@@ -1,5 +1,5 @@
 import Ring from 'ringjs';
-import { TimeEvent } from 'pondjs';
+import { TimeEvent, TimeRange } from 'pondjs';
 import _ from 'lodash';
 import queryLibrary from './query-library';
 import * as Sentry from '@sentry/browser';
@@ -12,7 +12,9 @@ const actualNumber = i => !_.isNaN(i) && !(i === Infinity) && !(i === -Infinity)
  * DataFeed is an abstraction that polls a cypher query
  * against a driver in a configurable way, and can happen
  * in the background independent of a component being 
- * mounted or not mounted.
+ * mounted or not mounted.  It accumulates data in a sliding window through time.
+ * 
+ * DataFeed relies a lot on pond.js v0.8.*, docs here: https://esnet-pondjs.appspot.com/#/
  * 
  * Data feeds must have a query, and must have a set of displayColumns of the form
  * [ { Header: 'foo', accessor: 'bar' }, ... ].
@@ -157,6 +159,23 @@ export default class DataFeed extends Metric {
      */
     isRunning() {
         return this.feedStartTime !== null;
+    }
+
+    /**
+     * Remember that DataFeeds are sliding windows, they don't accumulate data forever.  This sliding
+     * window is (this.windowWidth) milliseconds wide *at maximum*.
+     * @returns {TimeRange} corresponding to the moments of the first and last data points observed.
+     */
+    getTimeRange() {
+        const timeEvents = this.state.events.toArray();
+        const first = timeEvents[0];
+        const last = timeEvents[timeEvents.length - 1];
+
+        if (first && last) {
+            return new TimeRange(first.timestamp(), last.timestamp());
+        }
+
+        return null;
     }
 
     getDataPackets() {

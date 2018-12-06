@@ -11,6 +11,7 @@ import {
 import uuid from 'uuid';
 import Spinner from '../Spinner';
 import datautil from '../data/util';
+import timewindow from './timewindow';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import NodeLabel from '../NodeLabel';
@@ -242,7 +243,8 @@ class CypherTimeseries extends Component {
     };
     
     handleTimeRangeChange = timeRange => {
-        this.setState({ timeRange });
+        if (!this.mounted) { return; }
+        timewindow.setTimeWindow(timeRange);
     };
     
     handleTrackerChanged = (t, scale) => {
@@ -270,6 +272,11 @@ class CypherTimeseries extends Component {
                 </Grid.Column>
             </Grid.Row>
         );
+    }
+
+    // Return the time range that the UI view should show.
+    displayTimeRange() {
+        return timewindow.displayTimeRange(this.state.timeRange);
     }
 
     renderChartMetadata() {
@@ -355,7 +362,7 @@ class CypherTimeseries extends Component {
                                 trackerPosition={this.state.tracker}
                                 onTrackerChanged={this.handleTrackerChanged}
                                 onTimeRangeChanged={this.handleTimeRangeChange}
-                                timeRange={this.state.timeRange}>
+                                timeRange={this.displayTimeRange()}>
                                 <ChartRow height="150">
                                     <YAxis id="y" 
                                         min={this.getChartMin()} 
