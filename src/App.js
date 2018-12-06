@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import * as Sentry from '@sentry/browser';
+import appPkg from '../package.json';
 import {
   GraphAppBase,
   CONNECTED
@@ -196,7 +197,8 @@ const App = () => {
   Sentry.init({
     dsn: 'https://82705ec41177415dbf13621167480fd8@sentry.io/1297023',
     maxBreadcrumbs: 50,
-    debug: true,
+    debug: false,
+    release: appPkg.version,
   });
   
   // If this global is defined, we're running in desktop.  If it isn't, then we need

@@ -398,7 +398,8 @@ export default class HalinContext {
             const onPingData = (newData, dataFeed) => {
                 return resolve({
                     clusterNode,
-                    elapsedMs: pingFeed.lastElapsedMs,
+                    elapsedMs: _.get(newData, 'data[0]_sampleTime'),
+                    newData,
                     err: null,
                 });
             };

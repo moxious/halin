@@ -11,6 +11,7 @@ import uuid from 'uuid';
 import Spinner from '../Spinner';
 import queryLibrary from '../data/query-library';
 import datautil from '../data/util';
+import timewindow from './timewindow';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 
@@ -115,6 +116,25 @@ class ClusterTimeseries extends Component {
             // On next incremental, reset the vertical axis.
             resetY: true,
         });
+    }
+
+    handleTimeRangeChange = timeRange => {
+        if (!this.mounted) { return; }
+        timewindow.setTimeWindow(timeRange);
+        this.setState({ timeRange });
+    };
+    
+    handleTrackerChanged = (t, scale) => {
+        this.setState({
+            tracker: t,
+            trackerEvent: t && this.dataSeries.at(this.dataSeries[this.nodes[0]].bisect(t)),
+            trackerX: t && scale(t)
+        });
+    };
+
+    // Return the time range that the UI view should show.
+    displayTimeRange() {
+        return timewindow.displayTimeRange(_.get(_.get(this.state, this.nodes[0]), 'timeRange'));
     }
 
     componentDidMount() {
@@ -299,13 +319,14 @@ class ClusterTimeseries extends Component {
     };
 
     handleTimeRangeChange = timeRange => {
-        this.setState({ timeRange });
+        if (!this.mounted) { return; }
+        timewindow.setTimeWindow(timeRange);
     };
 
     handleTrackerChanged = (t, scale) => {
         this.setState({
             tracker: t,
-            trackerEvent: t && this.dataSeries.at(this.dataSeries.bisect(t)),
+            trackerEvent: t && this.dataSeries[this.nodes[0]].at(this.dataSeries[this.nodes[0]].bisect(t)),
             trackerX: t && scale(t)
         });
     };
@@ -361,9 +382,6 @@ class ClusterTimeseries extends Component {
             });
         }
 
-        // Pick any time range, they should all be the same.
-        const timeRange = hasData ? this.state[this.nodes[0]].timeRange : null;
-
         return (this.mounted && hasData) ? (
             <div className="CypherTimeseries">
                 <Grid>
@@ -386,7 +404,12 @@ class ClusterTimeseries extends Component {
                                 showGrid={this.showGrid}
                                 showGridPosition={this.showGridPosition}
                                 width={this.width}
-                                timeRange={timeRange}>
+                                enablePanZoom={true}
+                                trackerPosition={this.state.tracker}
+                                onTrackerChanged={this.handleTrackerChanged}
+                                onTimeRangeChanged={this.handleTimeRangeChange}
+                                timeRange={this.displayTimeRange()}>
+
                                 <ChartRow height="150">
                                     <YAxis id="y"
                                         min={this.getChartMin()}

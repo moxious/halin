@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import 'semantic-ui-css/semantic.min.css';
+import { Popup } from 'semantic-ui-react'
 import hoc from '../higherOrderComponents';
 import CypherDataTable from '../data/CypherDataTable';
 import fields from '../data/fields';
@@ -15,7 +16,13 @@ class ActiveQueries extends Component {
         queries: null,
         columns: [
             { Header: 'ID', accessor: 'queryId' },
-            { Header: 'Query', accessor: 'query', style: { whiteSpace: 'unset', textAlign: 'left' } },
+            { 
+                Header: 'Query', 
+                accessor: 'query',
+                Cell: row => 
+                    <Popup trigger={<span>{row.value}</span>} content={row.value}/>,
+                style: { textAlign: 'left' } 
+            },
             { Header: 'User', accessor: 'username' },
             { Header: 'Metadata', accessor: 'metaData', show: false, Cell: jsonField },
             { Header: 'Parameters', accessor: 'parameters', show: false, Cell: jsonField },

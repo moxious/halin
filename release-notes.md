@@ -1,5 +1,9 @@
 # Halin Release Notes
 
+## 0.5.2
+
+- Bugfixes: #40, #41, #42, #44
+
 ## 0.5.1
 
 - Hotfix release for deploy errors
