@@ -4,8 +4,6 @@ import DataFeed from '../data/DataFeed';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import uuid from 'uuid';
-import moment from 'moment';
-import appPkg from '../package.json';
 import ClusterManager from './cluster/ClusterManager';
 import queryLibrary from '../data/query-library';
 import * as Sentry from '@sentry/browser';
