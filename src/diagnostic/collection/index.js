@@ -22,17 +22,23 @@ const getOrNull = (rec, field) => {
     } catch (e) { return null; }
 };
 
+// Admittedly a bit nasty, this code detects whether what we're looking at is really a neo4j driver
+// int object, which is a special object designed to overcome the range differences between Neo4j numbers
+// and what JS can support.
+const isNeo4jInt = o =>
+    o && _.isObject(o) && !_.isNil(o.high) && !_.isNil(o.low) && _.keys(o).length === 2;
+
+const handleNeo4jInt = val => {
+    if (!isNeo4jInt(val)) { return val; }
+    return neo4j.integer.inSafeRange(val) ? val.toNumber() : neo4j.integer.toString(val);
+};
+
 /**
  * Take a diagnostic package and return a cleaned up version of the same, removing
  * sensitive data that shouldn't go out.
  * This function intentionally modifies its argument.
  */
 const cleanup = pkg => {
-    // Admittedly a bit nasty, this code detects whether what we're looking at is really a neo4j driver
-    // int object, which is a special object designed to overcome the range differences between Neo4j numbers
-    // and what JS can support.
-    const isNeo4jInt = o =>
-        o && _.isObject(o) && !_.isNil(o.high) && !_.isNil(o.low) && _.keys(o).length === 2;
 
     const deepReplace = (keyToClean, newVal, object, path) => {
         let found = false;
@@ -41,9 +47,9 @@ const cleanup = pkg => {
             if (key === keyToClean) {
                 found = true;
             } else if (_.isArray(val)) {
-                object[key] = val.map((v, i)=> deepReplace(keyToClean, newVal, v, `${path}[${i}]`));
+                object[key] = val.map((v, i) => deepReplace(keyToClean, newVal, v, `${path}[${i}]`));
             } else if (isNeo4jInt(val)) {
-                object[key] = neo4j.integer.inSafeRange(val) ? val.toNumber() : neo4j.integer.toString(val);
+                object[key] = handleNeo4jInt(val);
             } else if (_.isObject(val)) {
                 object[key] = deepReplace(keyToClean, newVal, val, `${path}.${key}`);
             }
@@ -70,98 +76,109 @@ const nodeDiagnostics = (halin, clusterNode) => {
         basics: clusterNode.asJSON(),
     };
 
+    const withSession = f => {
+        const s = halin.driverFor(clusterNode.getBoltAddress()).session();
+        return f(s).finally(() => s.close);
+    };
+
     const session = halin.driverFor(clusterNode.getBoltAddress()).session();
 
     // Query must return 'value'
     const noFailCheck = (domain, query, key) =>
-        session.run(query, {})
-            .then(results => results.records[0].get('value'))
-            .catch(err => err)  // Convert errors into the value.
-            .then(value => {
-                const obj = {};
-                obj[domain] = {};
-                obj[domain][key] = value;
-                return obj;
-            });
+        withSession(s => 
+            s.run(query, {})
+                .then(results => results.records.length === 0 ? null : results.records[0].get('value'))
+                .catch(err => `${err}`) // stringify on purpose, don't need full stacktrace
+                .then(value => {                
+                    const obj = {};
+                    obj[domain] = {};
+                    obj[domain][key] = handleNeo4jInt(value);
+                    return obj;
+                }));
 
     // Format all JMX data into records.
     // Put the whole thing into an object keyed on jmx.
-    const genJMX = session.run("CALL dbms.queryJmx('*:*')", {})
-        .then(results =>
-            results.records.map(rec => ({
-                name: rec.get('name'),
-                attributes: rec.get('attributes'),
-            })))
-        .then(array => ({ JMX: cleanup(array) }))
+    const genJMX = withSession(s =>
+        s.run("CALL dbms.queryJmx('*:*')", {})
+            .then(results =>
+                results.records.map(rec => ({
+                    name: rec.get('name'),
+                    attributes: rec.get('attributes'),
+                })))
+            .then(array => ({ JMX: cleanup(array) })));
 
-    const users = session.run('CALL dbms.security.listUsers()', {})
-        .then(results =>
-            results.records.map(rec => ({
-                username: rec.get('username'),
-                flags: rec.get('flags'),
-                roles: getOrNull(rec, 'roles'), // This field doesn't exist in community.
-            })))
-        .then(allUsers => ({ users: allUsers }));
+    const users = withSession(s => 
+        s.run('CALL dbms.security.listUsers()', {})
+            .then(results =>
+                results.records.map(rec => ({
+                    username: rec.get('username'),
+                    flags: rec.get('flags'),
+                    roles: getOrNull(rec, 'roles'), // This field doesn't exist in community.
+                })))
+            .then(allUsers => ({ users: allUsers })));
 
     // This op is enterprise only.
-    const roles = halin.isEnterprise() ? session.run('CALL dbms.security.listRoles()', {})
+    const roles = halin.isEnterprise() ? withSession(s => s.run('CALL dbms.security.listRoles()', {})
         .then(results =>
             results.records.map(rec => ({
                 role: rec.get('role'),
                 users: rec.get('users'),
             })))
-        .then(allRoles => ({ roles: allRoles })) : Promise.resolve({});
+        .then(allRoles => ({ roles: allRoles }))) : Promise.resolve({});
 
     // Format node config into records.
-    const genConfig = session.run('CALL dbms.listConfig()', {})
-        .then(results => {
-            const configMap = {};
-            results.records.forEach(rec => {
-                const key = rec.get('name');
-                const value = rec.get('value');
+    const genConfig = withSession(s => 
+        s.run('CALL dbms.listConfig()', {})
+            .then(results => {
+                const configMap = {};
+                results.records.forEach(rec => {
+                    const key = rec.get('name');
+                    const value = rec.get('value');
 
-                // Configs can have duplicate keys!
-                // which sucks.  but we need to detect that.
-                // If a second value is found, push it on to an array.
-                if (configMap.hasOwnProperty(key)) {
-                    const presentValue = configMap[key];
-                    if (_.isArray(presentValue)) {
-                        presentValue.push(value);
+                    // Configs can have duplicate keys!
+                    // which sucks.  but we need to detect that.
+                    // If a second value is found, push it on to an array.
+                    if (configMap.hasOwnProperty(key)) {
+                        const presentValue = configMap[key];
+                        if (_.isArray(presentValue)) {
+                            presentValue.push(value);
+                        } else {
+                            configMap[key] = [presentValue, value];
+                        }
                     } else {
-                        configMap[key] = [presentValue, value];
+                        if (neo4j.isInt(value)) {
+                            configMap[key] = neo4j.integer.inSafeRange(value) ? value.toNumber() : neo4j.integer.toString(value);
+                        } else {
+                            configMap[key] = value;
+                        }
                     }
-                } else {
-                    if (neo4j.isInt(value)) {
-                        configMap[key] = neo4j.integer.inSafeRange(value) ? value.toNumber() : neo4j.integer.toString(value);
-                    } else {
-                        configMap[key] = value;
-                    }
-                }
-            });
-            return configMap;
-        })
-        .then(allConfig => ({ configuration: allConfig }));
+                });
+                return configMap;
+            })
+            .then(allConfig => ({ configuration: allConfig })));
 
-    const constraints = session.run('CALL db.constraints()', {})
-        .then(results =>
-            results.records.map((rec, idx) => ({ idx, description: rec.get('description') })))
-        .then(allConstraints => ({ constraints: allConstraints }));
+    const constraints = withSession(s => 
+        s.run('CALL db.constraints()', {})
+            .then(results =>
+                results.records.map((rec, idx) => ({ idx, description: rec.get('description') })))
+            .then(allConstraints => ({ constraints: allConstraints })));
 
     // Signature differs between 3.4 and 3.5, particularly
     // label field vs. tokenNames field.  getOrNull handles
     // both cases.
-    const indexes = session.run('CALL db.indexes()', {})
-        .then(results =>
-            results.records.map((rec, idx) => ({
-                description: getOrNull(rec, 'description'),
-                label: getOrNull(rec, 'label'),
-                tokenNames: getOrNull(rec, 'tokenNames'),
-                properties: getOrNull(rec, 'properties'),
-                state: getOrNull(rec, 'state'),
-                type: getOrNull(rec, 'type'),
-                provider: getOrNull(rec, 'provider'),
-            })))
-        .then(allIndexes => ({ indexes: allIndexes }));
+    const indexes = withSession(s => 
+        s.run('CALL db.indexes()', {})
+            .then(results =>
+                results.records.map((rec, idx) => ({
+                    description: getOrNull(rec, 'description'),
+                    label: getOrNull(rec, 'label'),
+                    tokenNames: getOrNull(rec, 'tokenNames'),
+                    properties: getOrNull(rec, 'properties'),
+                    state: getOrNull(rec, 'state'),
+                    type: getOrNull(rec, 'type'),
+                    provider: getOrNull(rec, 'provider'),
+                })))
+            .then(allIndexes => ({ indexes: allIndexes })));
 
     const otherPromises = [
         noFailCheck('apoc', 'RETURN apoc.version() as value', 'version'),
