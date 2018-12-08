@@ -23,11 +23,6 @@ class DiagnosticPane extends Component {
                         </Grid.Column>
                     </Grid.Row>
 
-                    {/* 
-                      * Diagnostic functionality only applies for enterprise installs, because of
-                      * the stored procedures they rely on.
-                      */}
-                    { window.halinContext.isEnterprise() ? 
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <h3>Run Diagnostics</h3> 
@@ -42,7 +37,7 @@ class DiagnosticPane extends Component {
                                 driver={this.props.driver}
                             />
                         </Grid.Column>
-                    </Grid.Row> : '' }
+                    </Grid.Row>
 
                     { window.halinContext.isCluster() ? 
                     <Grid.Row columns={1}>

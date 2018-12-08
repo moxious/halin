@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Icon, Tab } from 'semantic-ui-react';
+import { Button, Icon, Tab, Checkbox } from 'semantic-ui-react';
 import Spinner from '../Spinner';
 import uuid from 'uuid';
 import status from '../status/index';
@@ -7,7 +7,7 @@ import moment from 'moment';
 import Advisor from './advisor/Advisor';
 import ConfigurationDiff from './ConfigurationDiff';
 import advisor from './advisor/index';
-import hoc from '../higherOrderComponents';
+import collection from './collection/index';
 
 class GeneratePackage extends Component {
     state = {
@@ -16,6 +16,7 @@ class GeneratePackage extends Component {
         error: null,
         loading: false,
         userIsAdmin: false,
+        upload: false,
         headers: [
             { label: 'domain', key: 'domain' },
             { label: 'node', key: 'node' },
@@ -46,7 +47,7 @@ class GeneratePackage extends Component {
         };
 
         try {
-            return window.halinContext.runDiagnostics()
+            return collection.runDiagnostics(window.halinContext)
                 .then(data => {
                     this.setState({
                         loading: false,
@@ -55,6 +56,10 @@ class GeneratePackage extends Component {
                         message: null,
                         error: null,
                     });
+
+                    if (this.state.upload) {
+                        return this.uploadDiagnostics();
+                    }
                 })
                 .catch(err => fail(err));
         } catch (err) {
@@ -112,11 +117,45 @@ class GeneratePackage extends Component {
         return this.setState({ userIsAdmin: true });
     }
 
+    toggleUpload(event, data) {
+        console.log(event, data);
+        this.setState({
+            upload: data.checked,
+        });
+    }
+
+    /*
+    uploadDiagnostics(pkg) {
+        return fetch('TBD', {
+            method: 'POST',
+            mode: 'no-cors',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8',                
+            },
+            body: JSON.stringify(pkg),
+        })
+            .then(resp => {
+                console.log('Upload response',resp);
+            })
+            .catch(err => {
+                console.error('Failed to upload', err);
+            });
+    }
+    */
+
     render() {
         let message = status.formatStatusMessage(this);
 
         return (
             <div className='GeneratePackage'>
+                {/* <Checkbox 
+                    checked={this.state.upload}
+                    onClick={(event, data) => this.toggleUpload(event, data)}
+                    label={{ children: 'Help improve Halin by sharing data with Neo4j' }}
+                    >
+                </Checkbox> */}
+
                 <Button basic disabled={this.state.loading}
                         onClick={this.generatePackage}>
                     <Icon name='cogs'/>
@@ -151,4 +190,4 @@ class GeneratePackage extends Component {
     }
 }
 
-export default hoc.enterpriseOnlyComponent(GeneratePackage);
+export default GeneratePackage;

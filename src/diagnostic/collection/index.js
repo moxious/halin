@@ -1,11 +1,25 @@
+/**
+ * This module is responsible for collecting diagnostics from a HalinContext.
+ * It exports a single function which returns a complete diagnostic package given a HalinContext object.
+ */
 import _ from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment';
 import appPkg from '../../../package.json';
 
 /**
- * This module is responsible for collecting diagnostics from a HalinContext.
+ * Convenience function.  Different versions of Neo4j (community/enterprise) have different response
+ * types depending on the stored procedure.  To get around failures to access a certain field which
+ * may not exist in a certain edition, this is used to replace them with nulls.
+ * @param {Object} rec driver response record
+ * @param {*} field name of field
+ * @returns {Object} the value of the field or null if it does not exist.
  */
+const getOrNull = (rec, field) => {
+    try {
+        return rec.get(field);
+    } catch (e) { return null; }
+};
 
 /**
  * Take a diagnostic package and return a cleaned up version of the same, removing
@@ -37,8 +51,7 @@ const cleanup = pkg => {
     };
 
     return deepReplace('password', '********', _.cloneDeep(pkg));
-}
-
+};
 
 /**
  * @param clusterNode{ClusterNode} 
@@ -78,17 +91,18 @@ const nodeDiagnostics = (halin, clusterNode) => {
             results.records.map(rec => ({
                 username: rec.get('username'),
                 flags: rec.get('flags'),
-                roles: rec.get('roles'),
+                roles: getOrNull(rec, 'roles'), // This field doesn't exist in community.
             })))
         .then(allUsers => ({ users: allUsers }));
 
-    const roles = session.run('CALL dbms.security.listRoles()', {})
+    // This op is enterprise only.
+    const roles = halin.isEnterprise() ? session.run('CALL dbms.security.listRoles()', {})
         .then(results =>
             results.records.map(rec => ({
                 role: rec.get('role'),
                 users: rec.get('users'),
             })))
-        .then(allRoles => ({ roles: allRoles }));
+        .then(allRoles => ({ roles: allRoles })) : Promise.resolve({});
 
     // Format node config into records.
     const genConfig = session.run('CALL dbms.listConfig()', {})
@@ -121,12 +135,6 @@ const nodeDiagnostics = (halin, clusterNode) => {
             results.records.map((rec, idx) => ({ idx, description: rec.get('description') })))
         .then(allConstraints => ({ constraints: allConstraints }));
 
-    const getOrNull = (rec, field) => {
-        try {
-            return rec.get(field);
-        } catch (e) { return null; }
-    };
-
     // Signature differs between 3.4 and 3.5, particularly
     // label field vs. tokenNames field.  getOrNull handles
     // both cases.
@@ -155,8 +163,7 @@ const nodeDiagnostics = (halin, clusterNode) => {
         .then(arrayOfDiagnosticObjects =>
             _.merge(basics, ...arrayOfDiagnosticObjects))
         .finally(() => session.close());
-}
-
+};
 
 /**
  * @param {HalinContext} the context running
@@ -165,6 +172,12 @@ const nodeDiagnostics = (halin, clusterNode) => {
 const halinDiagnostics = halinContext => {
     const halin = {
         halin: {
+            cluster: halinContext.isCluster(),
+            enterprise: halinContext.isEnterprise(),
+            nativeAuth: halinContext.supportsNativeAuth(),
+            pollRate: halinContext.getPollRate(),
+            user: halinContext.getCurrentUser(),
+            debug: _.get(halinContext, 'debug') || false,
             drivers: Object.keys(halinContext.drivers).map(uri => ({
                 node: uri,
                 _config: _.get(halinContext.drivers[uri], '_config') || null,
@@ -177,7 +190,7 @@ const halinDiagnostics = halinContext => {
     };
 
     return Promise.resolve(halin);
-}
+};
 
 /**
  * @return Promise{Object} of Neo4j Desktop API diagnostics.

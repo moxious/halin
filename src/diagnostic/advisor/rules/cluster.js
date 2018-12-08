@@ -1,6 +1,7 @@
 import InspectionResult from '../InspectionResult';
+import metarule from './metarule';
 
-const clusterSize = pkg => {
+const clusterSize = metarule.clusterOnlyRule(pkg => {
     const findings = [];
 
     if (pkg.nodes.length % 2 === 0) {
@@ -9,10 +10,16 @@ const clusterSize = pkg => {
             `You have an even number of cluster nodes (${pkg.nodes.length})`,
             null,
             'Consider using an odd number of nodes to better balance'));
+    } else {
+        findings.push(new InspectionResult(InspectionResult.PASS, 
+            'overall',
+            `You have an odd number of cluster nodes (${pkg.nodes.length})`,
+            null,
+            'N/A'));
     }
 
     return findings;
-};
+});
 
 export default [
     clusterSize,

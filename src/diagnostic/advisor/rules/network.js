@@ -1,4 +1,5 @@
 import InspectionResult from '../InspectionResult';
+import metarule from './metarule';
 
 const ports = pkg => {
     const findings = [];
@@ -68,7 +69,7 @@ const netAddrs = pkg => {
     return findings;
 };
 
-const backup = pkg => {
+const backup = metarule.enterpriseOnlyRule(pkg => {
     const findings = [];
 
     const isBackupEnabled = node => {
@@ -102,7 +103,7 @@ const backup = pkg => {
     });
 
     return findings;
-};
+});
 
 export default [
     netAddrs, ports, backup,
