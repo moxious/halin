@@ -1,10 +1,10 @@
 import HalinContext from '../data/HalinContext';
-import yargs from 'yargs';
+import collection from '../diagnostic/collection/index';
 
 const ctx = new HalinContext();
 
-const gatherDiagnosticsAndQuit = (halin) => {
-    return halin.runDiagnostics()
+const gatherDiagnosticsAndQuit = halin => {
+    return collection.runDiagnostics(halin)
         .then(data => {
             console.log(JSON.stringify(data, null, 2));
             return halin.shutdown();
