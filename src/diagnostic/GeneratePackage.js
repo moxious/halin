@@ -97,14 +97,27 @@ class GeneratePackage extends Component {
                         />
                     </Tab.Pane>,
             },
-            { 
+        ];
+
+        if (window.halinContext.isCluster()) {
+            panes.push({ 
                 menuItem: 'Configuration Diff', 
                 render: () => 
                     <Tab.Pane>
                         <ConfigurationDiff data={this.state.diagnosticData} />
                     </Tab.Pane> 
-            },
-        ];
+            });
+        }
+
+        panes.push({
+            menuItem: 'Package Viewer',
+            render: () =>
+                <Tab.Pane>
+                    <div className='PackageViewer' style={{textAlign:'left'}}>
+                        <pre>{JSON.stringify(this.state.diagnosticData.halin, null, 2)}</pre>
+                    </div>
+                </Tab.Pane>
+        })
 
         return (<Tab menu={{ borderless: true, attached: false, tabular: false }} panes={panes} />);
     }
