@@ -39,7 +39,6 @@ const handleNeo4jInt = val => {
  * This function intentionally modifies its argument.
  */
 const cleanup = pkg => {
-
     const deepReplace = (keyToClean, newVal, object, path) => {
         if (isNeo4jInt(object)) {
             return handleNeo4jInt(object);
@@ -211,6 +210,7 @@ const halinDiagnostics = halinContext => {
             pollRate: halinContext.getPollRate(),
             user: halinContext.getCurrentUser(),
             debug: _.get(halinContext, 'debug') || false,
+            eventLog: halinContext.getClusterManager().getEventLog(),
             drivers: Object.keys(halinContext.drivers).map(uri => ({
                 node: uri,
                 _config: _.get(halinContext.drivers[uri], '_config') || null,
