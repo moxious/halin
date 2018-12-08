@@ -18,14 +18,6 @@ const gatherDiagnosticsAndQuit = halin => {
 };
 
 ctx.initialize()
-    .then(ctx => {
-        if (!ctx.isEnterprise()) {
-            console.log(JSON.stringify(ctx.clusterNodes[0].asJSON(), null, 2));
-            console.error('Diagnostic packages can only be gathered for Neo4j Enterprise');
-            process.exit(1);
-        }
-        return ctx;
-    })
     .then(ctx =>
         // It's useful to have some ticks and not gather immediately.
         // This lets us gather some ping stats and other response time
