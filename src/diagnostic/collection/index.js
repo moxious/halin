@@ -6,6 +6,7 @@ import _ from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment';
 import appPkg from '../../../package.json';
+import neo4j from '../../driver/index';
 
 /**
  * Convenience function.  Different versions of Neo4j (community/enterprise) have different response
@@ -27,17 +28,24 @@ const getOrNull = (rec, field) => {
  * This function intentionally modifies its argument.
  */
 const cleanup = pkg => {
-    const deepReplace = (keyToClean, newVal, object) => {
+    // Admittedly a bit nasty, this code detects whether what we're looking at is really a neo4j driver
+    // int object, which is a special object designed to overcome the range differences between Neo4j numbers
+    // and what JS can support.
+    const isNeo4jInt = o =>
+        o && _.isObject(o) && !_.isNil(o.high) && !_.isNil(o.low) && _.keys(o).length === 2;
+
+    const deepReplace = (keyToClean, newVal, object, path) => {
         let found = false;
 
         _.each(object, (val, key) => {
             if (key === keyToClean) {
                 found = true;
             } else if (_.isArray(val)) {
-                object[key] = val.map(v => deepReplace(keyToClean, newVal, v));
+                object[key] = val.map((v, i)=> deepReplace(keyToClean, newVal, v, `${path}[${i}]`));
+            } else if (isNeo4jInt(val)) {
+                object[key] = neo4j.integer.inSafeRange(val) ? val.toNumber() : neo4j.integer.toString(val);
             } else if (_.isObject(val)) {
-
-                object[key] = deepReplace(keyToClean, newVal, val);
+                object[key] = deepReplace(keyToClean, newVal, val, `${path}.${key}`);
             }
         });
 
@@ -50,7 +58,7 @@ const cleanup = pkg => {
         return object;
     };
 
-    return deepReplace('password', '********', _.cloneDeep(pkg));
+    return deepReplace('password', '********', _.cloneDeep(pkg), '');
 };
 
 /**
@@ -84,7 +92,7 @@ const nodeDiagnostics = (halin, clusterNode) => {
                 name: rec.get('name'),
                 attributes: rec.get('attributes'),
             })))
-        .then(array => ({ JMX: array }))
+        .then(array => ({ JMX: cleanup(array) }))
 
     const users = session.run('CALL dbms.security.listUsers()', {})
         .then(results =>
@@ -123,7 +131,11 @@ const nodeDiagnostics = (halin, clusterNode) => {
                         configMap[key] = [presentValue, value];
                     }
                 } else {
-                    configMap[key] = value;
+                    if (neo4j.isInt(value)) {
+                        configMap[key] = neo4j.integer.inSafeRange(value) ? value.toNumber() : neo4j.integer.toString(value);
+                    } else {
+                        configMap[key] = value;
+                    }
                 }
             });
             return configMap;
