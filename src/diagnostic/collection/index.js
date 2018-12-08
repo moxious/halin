@@ -41,6 +41,10 @@ const handleNeo4jInt = val => {
 const cleanup = pkg => {
 
     const deepReplace = (keyToClean, newVal, object, path) => {
+        if (isNeo4jInt(object)) {
+            return handleNeo4jInt(object);
+        }
+
         let found = false;
 
         _.each(object, (val, key) => {
