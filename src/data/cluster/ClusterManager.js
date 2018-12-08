@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
 import * as Sentry from '@sentry/browser';
+import moment from 'moment';
+import uuid from 'uuid';
 
 /**
  * This is a controller for clusters.
@@ -46,11 +48,16 @@ export default class ClusterManager {
     }
 
     addEvent(event) {
-        if (!event || !event.message || !event.date) {
-            throw new Error('ClusterManager events must have at least message, date');
+        if (!event.message || !event.type) {
+            throw new Error('ClusterManager events must have at least message, type');
         }
 
-        this.eventLog.push(event);
+        // Don't modify caller's argument.
+        const data = _.cloneDeep(event);
+        _.set(data, 'date', moment.utc().toISOString());
+        _.set(data, 'payload', event.payload || null);
+        _.set(data, 'id', uuid.v4());
+        this.eventLog.push(data);
 
         // Truncate to last max set, to prevent it growing without bound.
         this.eventLog = this.eventLog.slice(this.eventLog.length - this.MAX_EVENTS, this.eventLog.length);
@@ -103,8 +110,9 @@ export default class ClusterManager {
         )
             .then(result => {
                 this.addEvent({
-                    date: new Date(),
+                    type: 'adduser',
                     message: `Added user "${username}"`,
+                    payload: username,
                 });
                 return result;
             })
@@ -122,8 +130,9 @@ export default class ClusterManager {
         )
             .then(result => {
                 this.addEvent({
-                    date: new Date(),
+                    type: 'deleteuser',
                     message: `Deleted user "${username}"`,
+                    payload: username,
                 });
                 return result;
             })
@@ -138,8 +147,9 @@ export default class ClusterManager {
         )
             .then(result => {
                 this.addEvent({
-                    date: new Date(),
+                    type: 'addrole',
                     message: `Created role "${role}"`,
+                    payload: role,
                 });
                 return result;
             });
@@ -154,8 +164,9 @@ export default class ClusterManager {
         )
             .then(result => {
                 this.addEvent({
-                    date: new Date(),
+                    type: 'deleterole',
                     message: `Deleted role "${role}"`,
+                    payload: role,
                 });
                 return result;
             });
@@ -281,8 +292,9 @@ export default class ClusterManager {
                 .then(roleChanges => applyChanges(roleChanges, node, driver, s))
                 .then(() => {
                     this.addEvent({
-                        date: new Date(),
+                        type: 'roleassoc',
                         message: `Associated "${username}" to roles ${roles.map(r => `"${r}"`).join(', ')}`,
+                        payload: { username, roles },
                     });
                 })
                 .then(() => clusterOpSuccess(node))
