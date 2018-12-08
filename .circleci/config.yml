@@ -66,6 +66,24 @@ jobs:
               mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-3.5.0.txt
             docker stop neo4j350
       - run:
+          name: Test Against Neo4j 3.5.0 Community
+          command: |
+            docker run -d --name neo4j350community --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin --env=NEO4J_ACCEPT_LICENSE_AGREEMENT=yes -t neo4j:3.5.0
+            sleep 20
+            docker ps
+
+            export NEO4J_URI=bolt://localhost:7687
+            export NEO4J_USER=neo4j
+            export NEO4J_PASSWORD=admin
+
+            # Run gather against the temp docker image started.
+            docker run --network container:neo4j350community \
+              --env NEO4J_URI=bolt://localhost:7687 \
+              --env NEO4J_USERNAME=neo4j \
+              --env NEO4J_PASSWORD=admin \
+              mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-3.5.0-community.txt
+            docker stop neo4j350community
+      - run:
           name: Deploy to S3 (Production)
           command: |
             if [ "${CIRCLE_BRANCH}" = "master" ]; then
