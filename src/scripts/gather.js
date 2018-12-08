@@ -6,7 +6,7 @@ const ctx = new HalinContext();
 const gatherDiagnosticsAndQuit = halin => {
     return collection.runDiagnostics(halin)
         .then(data => {
-            console.log(JSON.stringify(data, null, 2));
+            console.log(JSON.stringify(data));
             return halin.shutdown();
         })
         .then(() => process.exit(0))
