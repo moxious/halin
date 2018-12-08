@@ -39,9 +39,9 @@ const packageClusterOpResults = results => {
     return { success, results };
 };
 
-export default class ClusterManager {
-    MAX_EVENTS = 100;
+const MAX_EVENTS = 200;
 
+export default class ClusterManager {
     constructor(halinCtx) {
         this.ctx = halinCtx;
         this.eventLog = [];
@@ -60,7 +60,7 @@ export default class ClusterManager {
         this.eventLog.push(data);
 
         // Truncate to last max set, to prevent it growing without bound.
-        this.eventLog = this.eventLog.slice(this.eventLog.length - this.MAX_EVENTS, this.eventLog.length);
+        this.eventLog = this.eventLog.slice(this.eventLog.length - MAX_EVENTS, this.eventLog.length);
     }
 
     getEventLog() {

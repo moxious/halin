@@ -141,9 +141,7 @@ class Halin extends Component {
 
     const allPanesInOrder = [overviewPane].concat(nodePanes);
 
-    // The user management tab is only available in enterprise, unfortunately,
-    // because it relies on stored procedures that don't exist in community.
-    if (window.halinContext.isEnterprise() && window.halinContext.supportsNativeAuth()) {
+    if (window.halinContext.supportsNativeAuth()) {
       allPanesInOrder.push(userMgmtPane);
     }
     allPanesInOrder.push(diagnosticPane);

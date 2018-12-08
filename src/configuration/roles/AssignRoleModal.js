@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import * as PropTypes from 'prop-types';
 import { Button, Modal, Dropdown, Grid } from 'semantic-ui-react';
 import status from '../../status/index';
 import _ from 'lodash';
@@ -35,6 +34,14 @@ class AssignRoleModal extends Component {
     }
 
     loadUsers() {
+        const getOrDefault = (rec, field, defaultVal=null) => {
+            try {
+                return rec.get(field);
+            } catch (e) {
+                return defaultVal;
+            }
+        };
+
         return this.cypher('CALL dbms.security.listUsers()')
             .then(results => results.records)
             .then(records => {
@@ -44,7 +51,7 @@ class AssignRoleModal extends Component {
                     key: rec.get('username'),
                     value: rec.get('username'),
                     text: rec.get('username'),
-                    roles: rec.get('roles'),
+                    roles: getOrDefault(rec, 'roles', []),
                     username: rec.get('username'),
                 }));
                 this.setState({ users });
@@ -52,6 +59,11 @@ class AssignRoleModal extends Component {
     }
 
     loadRoles() {
+        if (!window.halinContext.isCommunity()) {
+            // Community doesn't have roles
+            return Promise.resolve([]);
+        }
+
         return this.cypher('CALL dbms.security.listRoles()')
             .then(results => results.records)
             .then(records => {
@@ -196,9 +208,5 @@ class AssignRoleModal extends Component {
         );
     }
 }
-
-AssignRoleModal.contextTypes = {
-    driver: PropTypes.object
-};
 
 export default AssignRoleModal;

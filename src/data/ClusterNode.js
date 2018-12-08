@@ -65,6 +65,10 @@ export default class ClusterNode {
     isEnterprise() {
         return this.dbms.edition === 'enterprise';
     }
+    
+    isCommunity() {
+        return !this.isEnterprise();
+    }
 
     /**
      * Returns true if the context provides for native auth management, false otherwise.
@@ -119,6 +123,17 @@ export default class ClusterNode {
                 this.dbms.nativeAuth = false;
             });
 
-        return Promise.all([componentsPromise, authPromise]);
+        return Promise.all([componentsPromise, authPromise])
+            .then(whatever => {
+                if (this.isCommunity()) {
+                    // #operability As a special exception, community will fail 
+                    // the test to determine if a node supports native auth -- but it
+                    // does.  It fails because community doesn't have the concept of
+                    // auth providers.
+                    this.dbms.nativeAuth = true;
+                }
+
+                return whatever;
+            })
     }
 }

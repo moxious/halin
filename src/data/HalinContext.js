@@ -103,6 +103,10 @@ export default class HalinContext {
         return this.clusterNodes[0].isEnterprise();
     }
 
+    isCommunity() {
+        return !this.isEnterprise();
+    }
+
     /**
      * Returns true if the context provides for native auth management, false otherwise.
      */

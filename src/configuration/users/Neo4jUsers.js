@@ -32,6 +32,7 @@ class Neo4jUsers extends Component {
         {
             Header: 'Roles',
             accessor: 'roles',
+            absentValue: [],
             Cell: ({ row }) => row.roles.map((role, idx) => (
                 <div className='role' key={idx}>
                     {role}{idx < row.roles.length - 1 ? ',' : ''}
@@ -170,6 +171,7 @@ class Neo4jUsers extends Component {
 
     render() {
         let message = status.formatStatusMessage(this);
+        const enterprise = window.halinContext.isEnterprise();
 
         return (
             <div className="Neo4jUsers">
@@ -181,20 +183,21 @@ class Neo4jUsers extends Component {
                             {message || 'Browse, filter, and delete users'}
                         </Grid.Column>
                         <Grid.Column>
-                            <Button basic onClick={e => this.openAssign()}>
-                                <i className="icon user"></i> Manage Roles
-                            </Button>
+                            { enterprise ? 
+                                <Button basic onClick={e => this.openAssign()}>
+                                    <i className="icon user"></i> Manage Roles
+                                </Button> : '' }
                             
                             <Button basic onClick={e => this.refresh()} icon="refresh"/>
                         </Grid.Column>
                     </Grid.Row>
 
-                    <AssignRoleModal key={this.key}
+                    { window.halinContext.isEnterprise() ? <AssignRoleModal key={this.key}
                         driver={this.props.driver}
                         node={this.props.node}
                         open={this.state.assignOpen}
                         onCancel={this.closeAssign}
-                        onConfirm={this.confirmRoleAssignment} />
+                        onConfirm={this.confirmRoleAssignment} /> : '' }
 
                     {/* <Confirm open={this.state.assignOpen} 
                     content='Not yet implemented.  Getting there!'

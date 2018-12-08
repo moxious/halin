@@ -6,6 +6,7 @@ import 'semantic-ui-css/semantic.min.css';
 import './NewRoleForm.css';
 import { Grid } from 'semantic-ui-react';
 import status from '../../status/index';
+import hoc from '../../higherOrderComponents';
 
 class NewRoleForm extends Component {
     state = {
@@ -124,4 +125,4 @@ NewRoleForm.contextTypes = {
     driver: PropTypes.object,
 };
 
-export default NewRoleForm;
+export default hoc.enterpriseOnlyComponent(NewRoleForm, 'Create Roles');

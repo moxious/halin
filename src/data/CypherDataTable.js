@@ -111,7 +111,7 @@ class CypherDataTable extends Component {
                                 // This is survivable; in community some queries don't
                                 // return all fields.
                                 console.warn(str);
-                                item[col.accessor] = null;
+                                item[col.accessor] = col.absentValue || null;
                             } else {
                                 throw e;
                             }

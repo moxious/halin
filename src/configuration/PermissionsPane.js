@@ -40,6 +40,12 @@ class PermissionsPane extends Component {
     }
 
     render() {
+        // Community doesn't have roles.  So based on this page's layout, the number
+        // of columns and components we need depends on if we're enterprise or not.
+        // The concept of applying roles to users doesn't work in Community.
+        const enterprise = window.halinContext.isEnterprise();
+        const columns = enterprise ? 2 : 1;
+
         return (
             <div className="PermissionsPane">
                 <Grid divided='vertically'>
@@ -53,7 +59,7 @@ class PermissionsPane extends Component {
                         : ''
                     }
 
-                    <Grid.Row columns={2}>
+                    <Grid.Row columns={columns}>
                         <Grid.Column>
                             <NewUserForm
                                 key={this.state.key}
@@ -61,16 +67,16 @@ class PermissionsPane extends Component {
                                 node={this.props.node}
                                 onUserCreate={username => this.event('user', username)} />
                         </Grid.Column>
-                        <Grid.Column>
+                        { enterprise ? <Grid.Column>
                             <NewRoleForm
                                 key={this.state.key}
                                 driver={this.props.driver}
                                 node={this.props.node}
                                 onRoleCreate={role => this.event('role', role)} />
-                        </Grid.Column>
+                        </Grid.Column> : '' }
                     </Grid.Row>
 
-                    <Grid.Row columns={2}>
+                    <Grid.Row columns={columns}>
                         <Grid.Column>
                             <Neo4jUsers
                                 key={this.state.key}
@@ -78,13 +84,13 @@ class PermissionsPane extends Component {
                                 node={this.props.node}
                                 refresh={this.state.childRefresh} />
                         </Grid.Column>
-                        <Grid.Column>
+                        { enterprise ? <Grid.Column>
                             <Neo4jRoles
                                 key={this.state.key}
                                 driver={this.props.driver}
                                 node={this.props.node}
                                 refresh={this.state.childRefresh} />
-                        </Grid.Column>
+                        </Grid.Column> : '' }
                     </Grid.Row>
 
                     <Grid.Row columns={1}>
