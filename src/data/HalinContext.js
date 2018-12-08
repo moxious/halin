@@ -19,8 +19,6 @@ import neo4j from '../driver';
  * The main app will attach it to the window object as a global.
  */
 export default class HalinContext {
-    domain = 'halin';
-
     constructor() {
         this.project = null;
         this.graph = null;
