@@ -10,7 +10,11 @@ class ClusterEventLog extends Component {
         displayColumns: [
             { 
                 Header: 'Date', 
-                Cell: e => moment(e.date).format(),
+                Cell: e => moment(e.date).toISOString(),
+            },
+            {
+                Header: 'Type',
+                accessor: 'type',
             },
             { 
                 Header: 'Message', 
@@ -18,8 +22,8 @@ class ClusterEventLog extends Component {
                 style: { whiteSpace: 'unset', textAlign: 'left' },
             },
             { 
-                Header: 'Node',
-                accessor: 'address',
+                Header: 'Machine',
+                Cell: e => e.address || 'all machines',
             },
         ],
     };
