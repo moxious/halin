@@ -1,5 +1,11 @@
 # Halin Release Notes
 
+## 0.6.0
+
+- Halin can now gather diagnostics and render advice about Neo4j Community
+- The user management pane now works for Neo4j Community (no longer just enterprise)
+- Improvements to the diagnostic data format, and better tracking of node performance.
+
 ## 0.5.2
 
 - Bugfixes: #40, #41, #42, #44
