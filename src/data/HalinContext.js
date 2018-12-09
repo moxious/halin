@@ -163,11 +163,15 @@ export default class HalinContext {
         // sentry.debug('activeDb', activeDb);
         return session.run('CALL dbms.cluster.overview()', {})
             .then(results => {
-                this.clusterNodes = results.records.map(rec => new ClusterNode(rec))
+                this.clusterNodes = results.records.map(rec => new ClusterNode(rec));
 
                 // Note that in the case of community or mode=SINGLE, because the cluster overview fails,
                 // this will never take place.  Watching for cluster role changes doesn't apply in those cases.
-                return this.clusterNodes.map(clusterNode => this.watchForClusterRoleChange(clusterNode));
+                return this.clusterNodes.map(clusterNode => {
+                    const driver = this.driverFor(clusterNode.getBoltAddress());
+                    clusterNode.setDriver(driver);
+                    return this.watchForClusterRoleChange(clusterNode);
+                });
             })
             .catch(err => {
                 const str = `${err}`;
@@ -187,16 +191,16 @@ export default class HalinContext {
                     const get = key => rec[key];
                     rec.get = get;
 
-                    this.clusterNodes = [new ClusterNode(rec)];
+                    const singleton = new ClusterNode(rec);
+                    const driver = this.driverFor(singleton.getBoltAddress());
+                    singleton.setDriver(driver);
+                    this.clusterNodes = [singleton];
                 } else {
                     sentry.reportError(err);
                     throw err;
                 }
             })
-            .then(() => Promise.all(this.clusterNodes.map(cn => {
-                const driver = this.driverFor(cn.getBoltAddress());
-                return cn.checkComponents(driver);
-            })))
+            .then(() => Promise.all(this.clusterNodes.map(cn => cn.checkComponents())))
             .then(() => 
                 Promise.all(this.clusterNodes.map(cn => this.ping(cn))))
             .finally(() => session.close());
