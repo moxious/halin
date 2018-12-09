@@ -84,6 +84,10 @@ export default class HalinContext {
         sentry.info('Shutting down halin context');
         _.values(this.dataFeeds).map(df => df.stop);
         _.values(this.drivers).map(driver => driver.close());
+        this.getClusterManager().addEvent({
+            type: 'halin',
+            message: 'Halin monitoring shut down',
+        });
     }
 
     /**
@@ -344,7 +348,13 @@ export default class HalinContext {
                         this.checkForCluster(active),
                     ]);
                 })
-                .then(() => this)
+                .then(() => {
+                    this.getClusterManager().addEvent({
+                        type: 'halin',
+                        message: 'Halin monitoring started',
+                    });
+                    return this;
+                })
         } catch (e) {
             sentry.reportError(e, 'General Halin Context Error');
             return Promise.reject(new Error('General Halin Context error', e));
