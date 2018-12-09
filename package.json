@@ -19,17 +19,18 @@
   "homepage": "http://halin.s3-website-us-east-1.amazonaws.com/",
   "private": false,
   "dependencies": {
-    "@sentry/browser": "^4.0.6",
-    "bluebird": "^3.5.2",
-    "graph-app-kit": "^1.0.2",
+    "@sentry/browser": "^4.4.1",
+    "bluebird": "^3.5.3",
+    "graph-app-kit": "^1.0.3",
     "lodash": "^4.17.11",
+    "mathjs": "^5.4.0",
     "moment": "^2.22.2",
     "neo4j-driver": "^1.7.2",
     "pondjs": "^0.8.9",
     "prop-types": "^15.6.0",
-    "react": "^16.0.0",
+    "react": "^16.6.3",
     "react-d3-components": "^0.9.1",
-    "react-dom": "^16.0.0",
+    "react-dom": "^16.6.3",
     "react-graph-vis": "^1.0.2",
     "react-scripts": "1.0.16",
     "react-sortable-tree": "^2.2.0",
@@ -39,7 +40,7 @@
     "source-map-explorer": "^1.6.0",
     "uri-parser": "^1.0.1",
     "uuid": "^3.3.2",
-    "yargs": "^12.0.2"
+    "yargs": "^12.0.5"
   },
   "scripts": {
     "analyze": "./node_modules/.bin/source-map-explorer dist/static/js/main.*",
@@ -52,11 +53,11 @@
     "prepublishOnly": "npm run build"
   },
   "devDependencies": {
-    "@babel/cli": "^7.1.5",
-    "@babel/core": "^7.1.5",
-    "@babel/node": "^7.0.0",
-    "@babel/plugin-proposal-class-properties": "^7.1.0",
-    "@babel/preset-env": "^7.1.6",
+    "@babel/cli": "^7.2.0",
+    "@babel/core": "^7.2.0",
+    "@babel/node": "^7.2.0",
+    "@babel/plugin-proposal-class-properties": "^7.2.1",
+    "@babel/preset-env": "^7.2.0",
     "@babel/preset-react": "^7.0.0"
   }
 }
