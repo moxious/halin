@@ -5,6 +5,7 @@ import queryLibrary from './query-library';
 import sentry from '../sentry/index';
 import Metric from './Metric';
 import neo4j from '../driver';
+import math from 'mathjs';
 
 const actualNumber = i => !_.isNaN(i) && !(i === Infinity) && !(i === -Infinity);
 
@@ -192,28 +193,20 @@ export default class DataFeed extends Metric {
         const packets = this.getDataPackets();
         
         const timings = packets.map(p => p._sampleTime);
-        const sum = timings.reduce((a, b) => a + b, 0);
-        const avg = sum / timings.length;
-
-        let values = _.cloneDeep(timings);
-        values.sort((a, b) => a - b);
-        let lowMiddle = Math.floor((values.length - 1) / 2);
-        let highMiddle = Math.ceil((values.length - 1) / 2);
-        let median = (values[lowMiddle] + values[highMiddle]) / 2;
-
+        console.log('timings',timings);
         return {
             name: this.name,
             label: this.label,
-            node: this.node,
             address: this.node.getBoltAddress(),
             lastObservation: this.state && this.state.data ? this.state.data[0] : null,
             query: this.query,
             packets: packets.length,
-            averageResponseTime: avg,
-            medianResponseTime: median,
-            bestResponseTime: Math.min(...timings),
-            worstResponseTime: Math.max(...timings),
-            timings,
+            stdev: math.std(...timings),
+            mean: math.mean(...timings),
+            median: math.median(...timings),
+            mode: math.mode(...timings),
+            min: math.min(...timings),
+            max: math.max(...timings),
             listeners: this.listeners.length,
             augFns: this.augmentFns.length,
             aliases: this.aliases.length,
@@ -301,11 +294,11 @@ export default class DataFeed extends Metric {
             this.feedStartTime = new Date();
         }
 
-        const session = this.driver.session();
+        // const session = this.driver.session();
         const startTime = new Date().getTime();
         this.sampleStart = new Date();
 
-        return session.run(this.query, this.params)
+        return this.node.run(this.query, this.params)
             .then(results => {
                 const elapsedMs = new Date().getTime() - startTime;
 
@@ -382,7 +375,6 @@ export default class DataFeed extends Metric {
 
                 // Back off and schedule next call to be 2x the normal window.
                 this.timeout = setTimeout(() => this.sampleData(), this.rate * 2);
-            })
-            .finally(() => session.close());
+            });
     }
 }
