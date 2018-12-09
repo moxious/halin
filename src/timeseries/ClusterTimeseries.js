@@ -12,6 +12,7 @@ import Spinner from '../Spinner';
 import queryLibrary from '../data/query-library';
 import datautil from '../data/util';
 import timewindow from './timewindow';
+import sentry from '../sentry/index';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 
@@ -213,7 +214,7 @@ class ClusterTimeseries extends Component {
         const computedMax = dataFeed.max(cols, this.props.debug) * 1.15;
 
         if (this.debug) {
-            console.log('computedMin/Max',computedMin,computedMax,'from',this.state.displayProperty);
+            sentry.debug('computedMin/Max',computedMin,computedMax,'from',this.state.displayProperty);
         }
 
         const maxObservedValue = computedMax; /*Math.max(
@@ -257,7 +258,7 @@ class ClusterTimeseries extends Component {
         const stateAddendum = {};
         stateAddendum[addr] = newState;
         if (this.props.debug) {
-            console.log('ClusterTimeseries state update', 
+            sentry.debug('ClusterTimeseries state update', 
                 stateAddendum, 'min=', computedMin, 'max=',computedMax);
         }
 
@@ -302,7 +303,7 @@ class ClusterTimeseries extends Component {
     }
 
     legendClick = data => {
-        console.log('Legend clicked', data);
+        sentry.fine('Legend clicked', data);
 
         const toggle = key => {
             const disabledNew = _.cloneDeep(this.state.disabled);

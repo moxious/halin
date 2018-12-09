@@ -39,14 +39,12 @@ class ClusterView extends Component {
             edges,
         };
         this.setState({ graph });
-        console.log(graph);
     }
 
     render() {
         const events = {
             select: function(event) {
                 var { nodes, edges } = event;
-                console.log('nodes',nodes,'edges',edges);
             }
         };
 

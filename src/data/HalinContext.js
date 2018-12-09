@@ -53,7 +53,7 @@ export default class HalinContext {
             return feed;
         }
         this.dataFeeds[df.name] = df;
-        // console.log('Halin starting new DataFeed: ', df.name.slice(0, 120) + '...');
+        // sentry.fine('Halin starting new DataFeed: ', df.name.slice(0, 120) + '...');
         df.start();
         return df;
     }
@@ -71,7 +71,7 @@ export default class HalinContext {
 
         const allOptions = _.merge({ encrypted }, this.driverOptions);
         if (this.debug) {
-            console.log('Driver connection', { addr, username, allOptions });
+            sentry.fine('Driver connection', { addr, username, allOptions });
         }
         const driver = neo4j.driver(addr,
             neo4j.auth.basic(username, password), allOptions);
@@ -81,7 +81,7 @@ export default class HalinContext {
     }
 
     shutdown() {
-        console.log('Shutting down halin context');
+        sentry.info('Shutting down halin context');
         _.values(this.dataFeeds).map(df => df.stop);
         _.values(this.drivers).map(driver => driver.close());
     }
@@ -160,7 +160,7 @@ export default class HalinContext {
      */
     checkForCluster(activeDb) {
         const session = this.base.driver.session();
-        // console.log('activeDb', activeDb);
+        // sentry.debug('activeDb', activeDb);
         return session.run('CALL dbms.cluster.overview()', {})
             .then(results => {
                 this.clusterNodes = results.records.map(rec => new ClusterNode(rec))
@@ -227,7 +227,7 @@ export default class HalinContext {
                     flags: rec.get('flags'),
                 };
                 
-                // console.log('Current User', this.currentUser);
+                // sentry.fine('Current User', this.currentUser);
             })
             .catch(err => {
                 sentry.reportError(err, 'Failed to get user info');
@@ -324,7 +324,7 @@ export default class HalinContext {
                         throw new Error('In order to launch Halin, you must have an active database connection');
                     }
 
-                    // console.log('FIRST ACTIVE', active);
+                    // sentry.fine('FIRST ACTIVE', active);
                     this.project = active.project;
                     this.graph = active.graph;
 
@@ -334,7 +334,7 @@ export default class HalinContext {
                     const uri = `bolt://${this.base.host}:${this.base.port}`;
                     this.base.driver = this.driverFor(uri);
 
-                    // console.log('HalinContext created', this);
+                    // sentry.fine('HalinContext created', this);
                     return Promise.all([
                         this.checkUser(this.base.driver),
                         this.checkForCluster(active),
@@ -342,7 +342,7 @@ export default class HalinContext {
                 })
                 .then(() => this)
         } catch (e) {
-            console.error(e);
+            sentry.reportError(e, 'General Halin Context Error');
             return Promise.reject(new Error('General Halin Context error', e));
         }
     }
@@ -382,7 +382,7 @@ export default class HalinContext {
             };
 
             const onError = (err, dataFeed) => {
-                console.error('HalinContext: failed to ping', addr, err);
+                sentry.error('HalinContext: failed to ping', addr, err);
                 reject(err, dataFeed);
             };
 

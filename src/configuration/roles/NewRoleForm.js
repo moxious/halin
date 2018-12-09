@@ -7,6 +7,7 @@ import './NewRoleForm.css';
 import { Grid } from 'semantic-ui-react';
 import status from '../../status/index';
 import hoc from '../../higherOrderComponents';
+import sentry from '../../sentry/index';
 
 class NewRoleForm extends Component {
     state = {
@@ -24,13 +25,13 @@ class NewRoleForm extends Component {
 
     createRole() {
         this.setState({ pending: true });
-        console.log('Creating role with driver ',this.driver);
+        sentry.info('Creating role with driver ', this.driver);
         
         const mgr = window.halinContext.getClusterManager();
 
         return mgr.addRole(this.state.role)
             .then(clusterOpRes => {
-                console.log('ClusterMgr result', clusterOpRes);
+                sentry.fine('ClusterMgr result', clusterOpRes);
                 const action = `Creating role ${this.state.role}`;
 
                 if (clusterOpRes.success) {
@@ -60,7 +61,7 @@ class NewRoleForm extends Component {
     }
 
     submit(event) {
-        console.log('submit', this.state);
+        sentry.fine('submit', this.state);
         event.preventDefault();
         this.createRole();
     }
@@ -68,7 +69,7 @@ class NewRoleForm extends Component {
     handleChange(field, event) {
         const mod = {};
         mod[field] = event.target.value;
-        // console.log(mod);
+        // sentry.debug(mod);
         this.setState(mod);
     }
 

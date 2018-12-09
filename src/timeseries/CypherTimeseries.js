@@ -12,7 +12,7 @@ import uuid from 'uuid';
 import Spinner from '../Spinner';
 import datautil from '../data/util';
 import timewindow from './timewindow';
-
+import sentry from '../sentry/index';
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import NodeLabel from '../NodeLabel';
 
@@ -221,7 +221,7 @@ class CypherTimeseries extends Component {
     }
 
     legendClick = data => {
-        console.log('Legend clicked',data);
+        sentry.debug('Legend clicked',data);
 
         // Find index and toggle its disabled state.
         let foundIdx;
@@ -239,7 +239,7 @@ class CypherTimeseries extends Component {
         };
 
         toggle(foundIdx);
-        // console.log('disabled',this.state.disabled);
+        // sentry.debug('disabled',this.state.disabled);
     };
     
     handleTimeRangeChange = timeRange => {

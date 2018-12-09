@@ -1,13 +1,15 @@
 import React, { Component } from 'react';
-import "semantic-ui-css/semantic.min.css";
 import './PermissionsPane.css';
 import { Grid, Message, Icon } from 'semantic-ui-react';
 import Neo4jUsers from './users/Neo4jUsers';
 import NewUserForm from './users/NewUserForm';
-
+import sentry from '../sentry/index';
 import Neo4jRoles from './roles/Neo4jRoles';
 import NewRoleForm from './roles/NewRoleForm';
 import uuid from 'uuid';
+
+import 'semantic-ui-css/semantic.min.css';
+
 
 class PermsWarning extends Component {
     render() {
@@ -33,7 +35,7 @@ class PermissionsPane extends Component {
     };
 
     event(name, data) {
-        console.log('Permissions Event', name, data);
+        sentry.info('Permissions Event', name, data);
         this.setState({
             childRefresh: this.state.childRefresh + 1,
         })

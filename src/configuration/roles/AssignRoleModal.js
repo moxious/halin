@@ -46,7 +46,7 @@ class AssignRoleModal extends Component {
         return this.cypher('CALL dbms.security.listUsers()')
             .then(results => results.records)
             .then(records => {
-                console.log('Got users ', records);
+                sentry.fine('Got users ', records);
                 // Convert to dropdown option format.
                 const users = records.map(rec => ({
                     key: rec.get('username'),
@@ -80,7 +80,7 @@ class AssignRoleModal extends Component {
     }
 
     cancel = () => {
-        console.log('Cancelled user assignment with state', this.state);
+        sentry.fine('Cancelled user assignment with state', this.state);
         this.setState({ open: false });
         return this.state.onCancel(this);
     };
@@ -138,7 +138,7 @@ class AssignRoleModal extends Component {
 
         this.setState({ activeUser: foundUser });
         
-        console.log('selected user ', allSelections.value);
+        sentry.fine('selected user ', allSelections.value);
     };
 
     formValid = () => this.state.activeUser;
@@ -150,7 +150,7 @@ class AssignRoleModal extends Component {
         activeUser.newRoles = newRoleSet;
 
         this.setState({ activeUser });
-        // console.log('selected role ', newRoleSet);
+        // sentry.fine('selected role ', newRoleSet);
     };
 
     render() {

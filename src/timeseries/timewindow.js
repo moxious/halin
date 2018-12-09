@@ -1,3 +1,5 @@
+import sentry from '../sentry/index';
+
 /**
  * This file is a miniature mix-in for timeseries components.  It allows storing a global user-selected
  * time window for examination, and encapsulates figuring out what time window to display based on 
@@ -30,7 +32,7 @@ const displayTimeRange = (scrollingRange) => {
     // Complex case: if the user asked to see a range that doesn't overlap at all with the data
     // that we have, then reset what they asked.
     if (userSelectedRange && scrollingRange && userSelectedRange.disjoint(scrollingRange)) {
-        console.log('User selected range ', 
+        sentry.debug('User selected range ', 
             userSelectedRange, 
             'does not overlap with scrolling range',
             scrollingRange, '...resetting');
@@ -40,7 +42,7 @@ const displayTimeRange = (scrollingRange) => {
         // For example, say you start your data feed at t1.  It lasts t1 - t5.  User selects t3 - t6.
         // They're overlapping, which should be ok, but if the range's start point is after now, there
         // can be no data and hence the selection is invalid.
-        console.log('User selected range is in the un-displayable future');
+        sentry.debug('User selected range is in the un-displayable future');
         setTimeWindow(null);
     }
 

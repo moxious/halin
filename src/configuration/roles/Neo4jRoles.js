@@ -3,6 +3,7 @@ import CypherDataTable from '../../data/CypherDataTable';
 import { Grid, Button, Confirm } from 'semantic-ui-react';
 import status from '../../status/index';
 import hoc from '../../higherOrderComponents';
+import sentry from '../../sentry/index';
 import './Neo4jRoles.css';
 
 class Neo4jRoles extends Component {
@@ -70,13 +71,13 @@ class Neo4jRoles extends Component {
     }
 
     deleteRole(row) {
-        console.log('DELETE ROLE', row);
+        sentry.info('DELETE ROLE', row);
 
         const mgr = window.halinContext.getClusterManager();
 
         return mgr.deleteRole(row.role)
             .then(clusterOpRes => {
-                console.log('ClusterMgr result', clusterOpRes);
+                sentry.fine('ClusterMgr result', clusterOpRes);
                 const action = `Deleting role ${row.role}`;
 
                 if (clusterOpRes.success) {

@@ -8,6 +8,7 @@ import Advisor from './advisor/Advisor';
 import ConfigurationDiff from './ConfigurationDiff';
 import advisor from './advisor/index';
 import collection from './collection/index';
+import sentry from '../sentry/index';
 
 class GeneratePackage extends Component {
     state = {
@@ -37,7 +38,7 @@ class GeneratePackage extends Component {
         });
 
         const fail = err => {
-            console.error(err);
+            sentry.error(err);
             this.setState({
                 diagnosticData: null,
                 dataGenerated: null,
@@ -66,7 +67,7 @@ class GeneratePackage extends Component {
             fail(err);
         }
 
-        console.log('Generating package');
+        sentry.info('Generating diagnostic package');
     };
 
     buildURI = data => {
@@ -131,7 +132,7 @@ class GeneratePackage extends Component {
     }
 
     toggleUpload(event, data) {
-        console.log(event, data);
+        sentry.fine(event, data);
         this.setState({
             upload: data.checked,
         });
@@ -149,10 +150,10 @@ class GeneratePackage extends Component {
             body: JSON.stringify(pkg),
         })
             .then(resp => {
-                console.log('Upload response',resp);
+                sentry.fine('Upload response',resp);
             })
             .catch(err => {
-                console.error('Failed to upload', err);
+                sentry.error('Failed to upload', err);
             });
     }
     */

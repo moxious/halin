@@ -81,7 +81,7 @@ class Halin extends Component {
 
       this.setState({ initPromise });
     } catch (e) {
-      console.error(e);
+      sentry.error(e);
     }
   }
 

@@ -1,6 +1,7 @@
 import InspectionResult from '../InspectionResult';
 import _ from 'lodash';
 import metarule from './metarule';
+import sentry from '../../../sentry/index';
 
 /**
  * Requiring at least one admin is fundamentally an enteprise only rule, because community 
@@ -51,7 +52,7 @@ const userConsistency = pkg => {
         const users = node.users.map(u => u.username);
         const roles = node.roles.map(r => r.role || []);
 
-        console.log(addr, users, roles);
+        sentry.fine(addr, users, roles);
 
         userSets[addr] = new Set(users);
         roleSets[addr] = new Set(roles);
@@ -73,8 +74,6 @@ const userConsistency = pkg => {
         allUnionRoles = new Set(both);
     });
     
-    // console.log('ALL UNION USERS', [...allUnionUsers]);
-    // console.log('ALL UNION ROLES', [...allUnionRoles]);
     // Now, look through each cluster node and determine whether
     // a paricular node is falling short of the total set.
     const addrs = Object.keys(userSets);

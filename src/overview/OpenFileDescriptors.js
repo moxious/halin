@@ -42,7 +42,6 @@ class OpenFileDescriptors extends Component {
     };
 
     toggleView = (val) => {
-        console.log('toggle',val);
         this.setState({ displayProperty: val });
     };
 

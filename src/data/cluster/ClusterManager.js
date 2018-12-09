@@ -174,13 +174,13 @@ export default class ClusterManager {
 
     /** Specific to a particular node */
     addNodeRole(driver, username, role, session) {
-        console.log('ADD ROLE', username, role);
+        sentry.info('ADD ROLE', { username, role });
         return session.run('call dbms.security.addRoleToUser({role}, {username})', { username, role });
     }
 
     /** Specific to a particular node */
     removeNodeRole(driver, username, role, session) {
-        console.log('REMOVE ROLE', username, role);
+        sentry.info('REMOVE ROLE', { username, role });
         return session.run('call dbms.security.removeRoleFromUser({role}, {username})', { username, role });
     }
 
@@ -190,7 +190,7 @@ export default class ClusterManager {
      * @returns {Promise} that resolves to a clusterOp result
      */
     associateUserToRoles(user, roles) {
-        console.log('CM associate',user,'to',roles);
+        sentry.info(`CM associate ${user} to ${roles}`);
         if (!_.isArray(roles)) { 
             throw new Error('roles must be an array');
         } if (!_.isObject(user) || !user.username) {
@@ -213,19 +213,19 @@ export default class ClusterManager {
             return session.run('CALL dbms.security.listRolesForUser({username})',
                 {username})
                 .then(results => {
-                    console.log('gather raw', results);
+                    sentry.fine('gather raw', results);
                     return results;
                 })
                 .then(results => 
                     results.records.map(r => r.get('value')))
                 .then(r => {
-                    console.log('gather roles made',r);
+                    sentry.fine('gather roles made',r);
                     return r;
                 });
         };
 
         const determineDifferences = (rolesHere, node, driver, session) => {
-            console.log("determine differences",rolesHere, roles);
+            sentry.fine('determine differences', rolesHere, roles);
             const oldRoles = new Set(rolesHere);
             const newRoles = new Set(roles);
             const toDelete = new Set(
@@ -239,9 +239,9 @@ export default class ClusterManager {
                 [...oldRoles].filter(x => newRoles.has(x))
             );
     
-            console.log('Determine differences',
+            sentry.fine('Determine differences',
                 'rolesHere=',rolesHere, 'newRoles=', newRoles);
-            console.log('Role modification: ', 
+            sentry.fine('Role modification: ', 
                 node.getBoltAddress(), 'adding', 
                 [...toAdd], 
                 'removing', [...toDelete], 
@@ -276,7 +276,7 @@ export default class ClusterManager {
                     return clusterOpSuccess(node, results);
                 })
                 .catch(err => {
-                    console.error('Cluster operation failure applying role changes', err);
+                    sentry.reportError(err, 'Cluster operation failure applying role changes');
                     return clusterOpFailure(node, err);
                 });
         };

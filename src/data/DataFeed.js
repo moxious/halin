@@ -46,7 +46,7 @@ export default class DataFeed extends Metric {
         this.aliases = props.alias ? [props.alias] : [];
 
         if (this.aliases.length > 0) {
-            console.warn('Warning: use addAliases() rather than passing in DataFeed constructor',
+            sentry.warn('Warning: use addAliases() rather than passing in DataFeed constructor',
                 this.aliases);
         }
 
@@ -69,7 +69,7 @@ export default class DataFeed extends Metric {
         this.listeners = props.onData ? [props.onData] : [];
 
         if (!this.node || !this.driver || !this.query || !this.displayColumns) {
-            console.error(props);
+            sentry.error(props);
             throw new Error('Missing one of required props displayColumns/columns, node, driver, query');
         }
 
@@ -313,7 +313,7 @@ export default class DataFeed extends Metric {
                     // It's a bad idea to run long-running queries with a short window.
                     // It puts too much load on the system and does a bad job updating the
                     // graphic.
-                    console.warn(`DataFeed: query took ${elapsedMs} against window of ${this.rate}`,
+                    sentry.warn(`DataFeed: query took ${elapsedMs} against window of ${this.rate}`,
                         this.name.slice(0, 150));
                 }
 
@@ -340,15 +340,15 @@ export default class DataFeed extends Metric {
 
                 // Apply aliases if specified.
                 this.aliases.forEach(aliasObj => {
-                    if (this.debug) { console.log('AliasObj',aliasObj); }
+                    if (this.debug) { sentry.fine('AliasObj',aliasObj); }
                     Object.keys(aliasObj).forEach(aliasKey => {
-                        if (this.debug) { console.log('Alias',aliasObj[aliasKey],aliasKey); }
+                        if (this.debug) { sentry.fine('Alias',aliasObj[aliasKey],aliasKey); }
                         data[aliasObj[aliasKey]] = data[aliasKey];
                     });
                 });
 
                 if (this.debug) {
-                    console.log('event', data);
+                    sentry.fine('event', data);
                 }
                 this.timeout = setTimeout(() => this.sampleData(), this.rate);
 

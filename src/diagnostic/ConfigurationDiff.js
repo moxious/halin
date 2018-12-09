@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import diffutil from '../data/diff/index';
 import ReactTable from 'react-table';
 import { Icon } from 'semantic-ui-react';
+import sentry from '../sentry/index';
 import _ from 'lodash';
 
 export default class ConfigurationDiff extends Component {
@@ -70,7 +71,7 @@ export default class ConfigurationDiff extends Component {
         });
 
         const diff = diffutil.configurationDiff(setOfSets);
-        console.log('DIFF', diff, displayColumns);
+        sentry.fine('DIFF', diff, displayColumns);
         this.setState({ diff, displayColumns });
     }
 

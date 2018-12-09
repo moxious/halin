@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../data/CypherDataTable';
-import * as PropTypes from 'prop-types';
 import { Button, Confirm, Grid } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import status from '../../status/index';
-import './Neo4jUsers.css';
 import AssignRoleModal from '../roles/AssignRoleModal';
 import uuid from 'uuid';
+import sentry from '../../sentry/index';
+import './Neo4jUsers.css';
 
 class Neo4jUsers extends Component {
     key = uuid.v4();
@@ -79,13 +79,13 @@ class Neo4jUsers extends Component {
     }
 
     deleteUser(row) {
-        console.log('DELETE USER ', row);
+        sentry.info('DELETE USER ', row);
 
         const mgr = window.halinContext.getClusterManager();
 
         return mgr.deleteUser(row)
             .then(clusterOpRes => {
-                console.log('ClusterMgr result', clusterOpRes);
+                sentry.info('ClusterMgr result', clusterOpRes);
                 const action = `Deleting user ${row.username}`;
 
                 if (clusterOpRes.success) {
@@ -119,7 +119,7 @@ class Neo4jUsers extends Component {
 
     confirmRoleAssignment = (component, clusterOpResult) => {
         this.refresh();
-        console.log('ClusterOpResult', clusterOpResult);
+        sentry.fine('ClusterOpResult', clusterOpResult);
         const action = `Assign roles`;
 
         if (clusterOpResult instanceof Error) {
@@ -229,9 +229,5 @@ class Neo4jUsers extends Component {
         );
     }
 }
-
-Neo4jUsers.contextTypes = {
-    driver: PropTypes.object,
-};
 
 export default Neo4jUsers;
