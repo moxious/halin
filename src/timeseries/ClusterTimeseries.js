@@ -149,7 +149,6 @@ class ClusterTimeseries extends Component {
 
         halin.clusterNodes.forEach(node => {
             const addr = node.getBoltAddress();
-            const driver = halin.driverFor(addr);
 
             this.streams[addr] = new Stream();
 
@@ -162,7 +161,6 @@ class ClusterTimeseries extends Component {
             } else {
                 feed = halin.getDataFeed({
                     node,
-                    driver,
                     query: this.props.query,
                     rate: this.props.rate,
                     windowWidth: this.props.timeWindowWidth,

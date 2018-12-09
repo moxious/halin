@@ -11,7 +11,7 @@ const actualNumber = i => !_.isNaN(i) && !(i === Infinity) && !(i === -Infinity)
 
 /**
  * DataFeed is an abstraction that polls a cypher query
- * against a driver in a configurable way, and can happen
+ * against a ClusterNode in a configurable way, and can happen
  * in the background independent of a component being 
  * mounted or not mounted.  It accumulates data in a sliding window through time.
  * 
@@ -37,7 +37,6 @@ export default class DataFeed extends Metric {
     constructor(props) {
         super();
         this.node = props.node;
-        this.driver = props.driver;
         this.query = props.query;
         this.params = props.params || {};
         this.rate = props.rate || 1000;
@@ -69,9 +68,9 @@ export default class DataFeed extends Metric {
 
         this.listeners = props.onData ? [props.onData] : [];
 
-        if (!this.node || !this.driver || !this.query || !this.displayColumns) {
+        if (!this.node || !this.query || !this.displayColumns) {
             sentry.error(props);
-            throw new Error('Missing one of required props displayColumns/columns, node, driver, query');
+            throw new Error('Missing one of required props displayColumns/columns, node, query');
         }
 
         const qtag = this.query.replace(/\s*[\r\n]+\s*/g, ' ');
@@ -210,6 +209,7 @@ export default class DataFeed extends Metric {
             listeners: this.listeners.length,
             augFns: this.augmentFns.length,
             aliases: this.aliases.length,
+            timings,
         };
     }
 
@@ -294,7 +294,6 @@ export default class DataFeed extends Metric {
             this.feedStartTime = new Date();
         }
 
-        // const session = this.driver.session();
         const startTime = new Date().getTime();
         this.sampleStart = new Date();
 

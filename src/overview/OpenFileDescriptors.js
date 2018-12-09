@@ -28,9 +28,8 @@ class OpenFileDescriptors extends Component {
         const halin = window.halinContext;
 
         const addr = node.getBoltAddress();
-        const driver = halin.driverFor(addr);
 
-        const feed = halin.getDataFeed(_.merge({ node, driver }, queryLibrary.OS_OPEN_FDS));
+        const feed = halin.getDataFeed(_.merge({ node }, queryLibrary.OS_OPEN_FDS));
         feed.addAliases({ 
             fdUsed: ClusterTimeseries.keyFor(addr, 'fdUsed'),
             fdOpen: ClusterTimeseries.keyFor(addr, 'fdOpen'),

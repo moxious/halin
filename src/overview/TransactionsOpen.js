@@ -32,14 +32,11 @@ class TransactionsOpen extends Component {
         const halin = window.halinContext;
 
         const addr = node.getBoltAddress();
-        const driver = halin.driverFor(addr);
-
         const allColumns = _.cloneDeep(queryLibrary.JMX_TRANSACTIONS.columns)
             .concat(_.cloneDeep(queryLibrary.JMX_TRANSACTIONS.legendOnlyColumns));
 
         const feed = halin.getDataFeed({
             node,
-            driver,
             query: this.state.query,
             rate: this.state.rate,
             displayColumns: allColumns,

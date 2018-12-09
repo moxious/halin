@@ -24,9 +24,7 @@ class UsedMemory extends Component {
         const halin = window.halinContext;
 
         const addr = node.getBoltAddress();
-        const driver = halin.driverFor(addr);
-
-        const feed = halin.getDataFeed(_.merge({ node, driver }, queryLibrary.OS_MEMORY_STATS));
+        const feed = halin.getDataFeed(_.merge({ node }, queryLibrary.OS_MEMORY_STATS));
 
         feed.addAliases({ physUsed: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
         feed.addAugmentationFunction(this.augmentData(node));
