@@ -60,7 +60,7 @@ class AssignRoleModal extends Component {
     }
 
     loadRoles() {
-        if (!window.halinContext.isCommunity()) {
+        if (window.halinContext.isCommunity()) {
             // Community doesn't have roles
             return Promise.resolve([]);
         }
