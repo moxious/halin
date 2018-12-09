@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import * as Sentry from '@sentry/browser';
-import appPkg from '../package.json';
+import sentry from './sentry/index';
 import {
   GraphAppBase,
   CONNECTED
@@ -72,8 +71,7 @@ class Halin extends Component {
 
       const initPromise = window.halinContext.initialize()
         .catch(err => {
-          Sentry.captureException(err);
-          console.error('Error initializing halin context', err);
+          sentry.reportError(err, 'Error initializing halin context');
           this.setState({ error: err });
           return window.halinContext;
         })
@@ -192,12 +190,7 @@ class Halin extends Component {
 }
 
 const App = () => {
-  Sentry.init({
-    dsn: 'https://82705ec41177415dbf13621167480fd8@sentry.io/1297023',
-    maxBreadcrumbs: 50,
-    debug: false,
-    release: appPkg.version,
-  });
+  sentry.init();
   
   // If this global is defined, we're running in desktop.  If it isn't, then we need
   // to use the shim object to convince the rest of the app we're in Desktop.

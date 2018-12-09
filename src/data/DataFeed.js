@@ -2,7 +2,7 @@ import Ring from 'ringjs';
 import { TimeEvent, TimeRange } from 'pondjs';
 import _ from 'lodash';
 import queryLibrary from './query-library';
-import * as Sentry from '@sentry/browser';
+import sentry from '../sentry/index';
 import Metric from './Metric';
 import neo4j from '../driver';
 
@@ -371,12 +371,11 @@ export default class DataFeed extends Metric {
                 return this.listeners.map(listener => listener(this.state, this));
             })
             .catch(err => {
-                Sentry.captureException(err);
+                sentry.reportError(err, 'Failed to execute timeseries query');
                 
                 this.state.lastDataArrived = this.feedStartTime;
                 this.state.error = err;
 
-                console.error('Failed to execute timeseries query', err);
                 if (this.onError) {
                     this.onError(err, this);
                 }

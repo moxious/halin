@@ -5,7 +5,7 @@ import NodeLabel from '../NodeLabel';
 import { Button, Icon, Table } from 'semantic-ui-react';
 import SignalMeter from '../data/SignalMeter';
 import datautil from '../data/util';
-import * as Sentry from '@sentry/browser';
+import sentry from '../sentry/index';
 
 export default class Ping extends Component {
     state = {
@@ -43,7 +43,7 @@ export default class Ping extends Component {
                 });
             })
             .catch(err => {
-                Sentry.captureException(err);
+                sentry.reportError(err);
                 this.setState({
                     error: status.message('Failed to ping Neo4j', `${err}`),
                 });

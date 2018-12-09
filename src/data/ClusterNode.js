@@ -1,5 +1,5 @@
 import Parser from 'uri-parser';
-import * as Sentry from '@sentry/browser';
+import sentry from '../sentry/index';
 
 /**
  * Abstraction that captures details and information about a node in a cluster.
@@ -89,8 +89,7 @@ export default class ClusterNode {
                 this.dbms.edition = rec.get('edition');
             })
             .catch(err => {
-                Sentry.captureException(err);
-                console.error('Failed to get DBMS components');
+                sentry.reportError(err, 'Failed to get DBMS components');
                 this.dbms.name = 'UNKNOWN';
                 this.dbms.versions = [];
                 this.dbms.edition = 'UNKNOWN';
@@ -118,8 +117,7 @@ export default class ClusterNode {
                 this.dbms.nativeAuth = nativeAuth;
             })
             .catch(err => {
-                Sentry.captureException(err);
-                console.error('Failed to get DBMS auth implementation type');
+                sentry.reportError(err, 'Failed to get DBMS auth implementation type');
                 this.dbms.nativeAuth = false;
             });
 

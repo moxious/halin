@@ -9,7 +9,7 @@ import uuid from 'uuid';
 import NodeLabel from '../NodeLabel';
 import Spinner from '../Spinner';
 import neo4j from '../driver';
-import * as Sentry from '@sentry/browser';
+import sentry from '../sentry/index';
 
 import './CypherDataTable.css';
 
@@ -130,8 +130,7 @@ class CypherDataTable extends Component {
                 }
             })
             .catch(err => {
-                console.error('CypherDataTable: error executing', this.query, this.parameters, err);
-                Sentry.captureException(err);
+                sentry.reportError(err, `CypherDataTable: error executing ${this.query}`);
                 this.setState({ items: [] });
             })
             .finally(() => session.close());

@@ -6,7 +6,7 @@ import Promise from 'bluebird';
 import uuid from 'uuid';
 import ClusterManager from './cluster/ClusterManager';
 import queryLibrary from '../data/query-library';
-import * as Sentry from '@sentry/browser';
+import sentry from '../sentry/index';
 import neo4j from '../driver';
 
 /**
@@ -145,16 +145,19 @@ export default class HalinContext {
             }
         };
 
-        const onError = (err, dataFeed) => {
-            Sentry.captureException(err);
-            console.error('HalinContext: failed to get cluster role for ', addr, err);
-        };
+        const onError = (err, dataFeed) => 
+            sentry.reportError(err, `HalinContext: failed to get cluster role for ${addr}`);
 
         roleFeed.addListener(onRoleData);
         roleFeed.onError = onError;
         return roleFeed;
     }
 
+    /**
+     * Check to see if the active database is a cluster.  In this context cluster means that it's Neo4j Enterprise
+     * and the dbms.cluster.* procedures are present (e.g. not mode=SINGLE).
+     * @param {Object} activeDb 
+     */
     checkForCluster(activeDb) {
         const session = this.base.driver.session();
         // console.log('activeDb', activeDb);
@@ -162,6 +165,8 @@ export default class HalinContext {
             .then(results => {
                 this.clusterNodes = results.records.map(rec => new ClusterNode(rec))
 
+                // Note that in the case of community or mode=SINGLE, because the cluster overview fails,
+                // this will never take place.  Watching for cluster role changes doesn't apply in those cases.
                 return this.clusterNodes.map(clusterNode => this.watchForClusterRoleChange(clusterNode));
             })
             .catch(err => {
@@ -169,6 +174,7 @@ export default class HalinContext {
                 if (str.indexOf('no procedure') > -1) {
                     // Halin will look at single node databases
                     // running in desktop as clusters of size 1.
+                    // #operability I wish Neo4j treated mode=SINGLE as a cluster of 1 and exposed dbms.cluster.*
                     const rec = {
                         id: uuid.v4(),
                         addresses: nd.getAddressesForGraph(activeDb.graph),
@@ -183,7 +189,7 @@ export default class HalinContext {
 
                     this.clusterNodes = [new ClusterNode(rec)];
                 } else {
-                    Sentry.captureException(err);
+                    sentry.reportError(err);
                     throw err;
                 }
             })
@@ -224,8 +230,7 @@ export default class HalinContext {
                 // console.log('Current User', this.currentUser);
             })
             .catch(err => {
-                Sentry.captureException(err);
-                console.error('Failed to get user info');
+                sentry.reportError(err, 'Failed to get user info');
                 this.currentUser = {
                     username: 'UNKNOWN',
                     roles: [],

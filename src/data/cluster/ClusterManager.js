@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
-import * as Sentry from '@sentry/browser';
+import sentry from '../../sentry/index';
 import moment from 'moment';
 import uuid from 'uuid';
 
@@ -22,7 +22,7 @@ const clusterOpSuccess = (node, results) => ({
 });
 
 const clusterOpFailure = (node, err) => {
-    if (err) { Sentry.captureException(err); }
+    if (err) { sentry.reportError(err); }
     return {
         success: false, node, addr: node.getBoltAddress(), err
     };
