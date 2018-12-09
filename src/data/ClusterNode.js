@@ -1,5 +1,9 @@
 import Parser from 'uri-parser';
 import sentry from '../sentry/index';
+import _ from 'lodash';
+import math from 'mathjs';
+
+const MAX_OBSERVATIONS = 500;
 
 /**
  * Abstraction that captures details and information about a node in a cluster.
@@ -14,6 +18,29 @@ export default class ClusterNode {
         this.role = record.get('role');
         this.database = record.get('database');
         this.dbms = {};
+        this.driver = null;
+        this.observations = [];
+        this.errors = {};
+    }
+
+    /**
+     * Set the default driver to use for the cluster node instance
+     */
+    setDriver(driver) {
+        this.driver = driver;
+    }
+
+    performance() {
+        return {
+            stdev: math.std(...this.observations),
+            mean: math.mean(...this.observations),
+            median: math.median(...this.observations),
+            mode: math.mode(...this.observations),
+            min: math.min(...this.observations),
+            max: math.max(...this.observations),
+            errors: this.errors,
+            observations: this.observations,
+        };
     }
 
     asJSON() {
@@ -25,6 +52,7 @@ export default class ClusterNode {
             id: this.id,
             label: this.getLabel(),
             dbms: this.dbms,
+            performance: this.performance(),
         };
     }
 
@@ -77,9 +105,13 @@ export default class ClusterNode {
         return this.dbms.nativeAuth;
     }
 
-    checkComponents(driver) {
+    checkComponents() {
+        if (!this.driver) {
+            throw new Error('ClusterNode has no driver');
+        }
+
         const q = 'call dbms.components()';
-        const session = driver.session();
+        const session = this.driver.session();
 
         const componentsPromise = session.run(q, {})
             .then(results => {
@@ -133,5 +165,53 @@ export default class ClusterNode {
 
                 return whatever;
             })
+    }
+
+    _txSuccess(time) {
+        this.observations.push(time);
+
+        // Truncate to last max set, to prevent it growing without bound.
+        if (this.observations.length > MAX_OBSERVATIONS) {
+            this.observations = this.observations.slice(this.observations.length - MAX_OBSERVATIONS, this.observations.length);
+        }
+    }
+
+    _txError(err) {
+        const str = `${err}`;
+        if (_.has(this.errors, str)) {
+            this.errors[str] = this.errors[str] + 1;
+        } else {
+            this.errors[str] = 1;
+        }
+
+        return this.errors[str];
+    }
+
+    /**
+     * This function behaves just like neo4j driver session.run, but manages
+     * session creation/closure for you, and gathers metrics about the run so
+     * that we can track the cluster node's responsiveness and performance over time.
+     * @param {String} query a cypher query
+     * @param {Object} params parameters to pass to the query.
+     */
+    run(query, params={}) {
+        if (!this.driver) { throw new Error('ClusterNode has no driver!'); }
+
+        const session = this.driver.session();
+
+        const start = new Date().getTime();        
+        return session.run(query, params)
+            .then(results => {
+                const elapsed = new Date().getTime() - start;
+                this._txSuccess(elapsed);
+                // Guarantee same result set to outer user.
+                return results;
+            })
+            .catch(err => {
+                this._txError(err);
+                // Guarantee same thrown response to outer user.
+                throw err;
+            })
+            .finally(() => session.close());  // Cleanup session.
     }
 }
