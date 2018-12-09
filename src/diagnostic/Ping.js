@@ -16,10 +16,16 @@ export default class Ping extends Component {
     };
 
     componentWillMount() {
+        this.mounted = true;
         this.ping();
     }
 
+    componentWillUnmount() {
+        this.mounted = false;
+    }
+
     ping() {
+        if (!this.mounted) { return false; }
         const ctx = window.halinContext;
 
         const promises = ctx.clusterNodes.map(node => ctx.ping(node));
@@ -36,17 +42,21 @@ export default class Ping extends Component {
 
         return Promise.all(promises)
             .then(pingResults => {
-                this.setState({
-                    pingResults,
-                    message: null,
-                    error: null,
-                });
+                if (this.mounted) {
+                    this.setState({
+                        pingResults,
+                        message: null,
+                        error: null,
+                    });
+                }
             })
             .catch(err => {
                 sentry.reportError(err);
-                this.setState({
-                    error: status.message('Failed to ping Neo4j', `${err}`),
-                });
+                if (this.mounted) {
+                    this.setState({
+                        error: status.message('Failed to ping Neo4j', `${err}`),
+                    });
+                }
             });
     }
 
