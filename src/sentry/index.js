@@ -19,6 +19,12 @@ const init = () => {
       });    
 };
 
+const info = (...args) => console.log('INFO', ...args);
+const warn = (...args) => console.error('WARN', ...args);
+const error = (...args) => console.error('ERROR', ...args);
+const fine = (...args) => console.log('FINE', ...args);
+const debug = (...args) => console.log('DEBUG', ...args);
+
 const reportError = (err, message=null) => {
     if (!initialized) { init(); }
 
@@ -31,4 +37,5 @@ const reportError = (err, message=null) => {
 
 export default {
     init, reportError,
-}
+    info, warn, error, fine, debug,
+};
