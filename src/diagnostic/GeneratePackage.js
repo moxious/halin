@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Icon, Tab, Checkbox } from 'semantic-ui-react';
+import { Button, Icon, Tab } from 'semantic-ui-react';
 import Spinner from '../Spinner';
 import uuid from 'uuid';
 import status from '../status/index';
