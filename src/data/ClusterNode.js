@@ -3,6 +3,7 @@ import sentry from '../sentry/index';
 import _ from 'lodash';
 import math from 'mathjs';
 import Ring from 'ringjs';
+import moment from 'moment';
 
 const MAX_OBSERVATIONS = 500;
 
@@ -32,7 +33,7 @@ export default class ClusterNode {
     }
 
     performance() {
-        const obs = this.observations.toArray();
+        const obs = this.observations.toArray().map(i => i.y);
         return {
             stdev: math.std(...obs),
             mean: math.mean(...obs),
@@ -57,6 +58,12 @@ export default class ClusterNode {
             performance: this.performance(),
         };
     }
+
+    /**
+     * Gets the raw query timing observations seen on this node.
+     * @returns {Ring} a ring of observation data points with x, y.
+     */
+    getObservations() { return this.observations; }
 
     getBoltAddress() {
         if (this.boltAddress) {
@@ -171,7 +178,7 @@ export default class ClusterNode {
 
     _txSuccess(time) {
         // It's a ring not an array, so it cannot grow without bound.
-        this.observations.push(time);
+        this.observations.push({ x: new Date(), y: time });
     }
 
     _txError(err) {
