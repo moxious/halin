@@ -192,7 +192,6 @@ export default class DataFeed extends Metric {
         const packets = this.getDataPackets();
         
         const timings = packets.map(p => p._sampleTime);
-        console.log('timings',timings);
         return {
             name: this.name,
             label: this.label,
