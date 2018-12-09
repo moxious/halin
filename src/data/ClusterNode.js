@@ -2,6 +2,7 @@ import Parser from 'uri-parser';
 import sentry from '../sentry/index';
 import _ from 'lodash';
 import math from 'mathjs';
+import Ring from 'ringjs';
 
 const MAX_OBSERVATIONS = 500;
 
@@ -19,7 +20,7 @@ export default class ClusterNode {
         this.database = record.get('database');
         this.dbms = {};
         this.driver = null;
-        this.observations = [];
+        this.observations = new Ring(MAX_OBSERVATIONS);
         this.errors = {};
     }
 
@@ -31,15 +32,16 @@ export default class ClusterNode {
     }
 
     performance() {
+        const obs = this.observations.toArray();
         return {
-            stdev: math.std(...this.observations),
-            mean: math.mean(...this.observations),
-            median: math.median(...this.observations),
-            mode: math.mode(...this.observations),
-            min: math.min(...this.observations),
-            max: math.max(...this.observations),
+            stdev: math.std(...obs),
+            mean: math.mean(...obs),
+            median: math.median(...obs),
+            mode: math.mode(...obs),
+            min: math.min(...obs),
+            max: math.max(...obs),
             errors: this.errors,
-            observations: this.observations,
+            observations: this.observations.toArray(),
         };
     }
 
@@ -168,12 +170,8 @@ export default class ClusterNode {
     }
 
     _txSuccess(time) {
+        // It's a ring not an array, so it cannot grow without bound.
         this.observations.push(time);
-
-        // Truncate to last max set, to prevent it growing without bound.
-        if (this.observations.length > MAX_OBSERVATIONS) {
-            this.observations = this.observations.slice(this.observations.length - MAX_OBSERVATIONS, this.observations.length);
-        }
     }
 
     _txError(err) {
