@@ -49,19 +49,19 @@ export default class DataFeedStats extends Component {
                                 <Label>
                                     Best
                                             <Label.Detail>
-                                        {datautil.roundToPlaces(stats.bestResponseTime, 2)}ms
+                                        {datautil.roundToPlaces(stats.min, 2)}ms
                                             </Label.Detail>
                                 </Label>
                                 <Label>
                                     Avg. Response Time
                                             <Label.Detail>
-                                        {datautil.roundToPlaces(stats.averageResponseTime, 2)}ms
+                                        {datautil.roundToPlaces(stats.mean, 2)}ms
                                             </Label.Detail>
                                 </Label>
                                 <Label>
                                     Worst
                                             <Label.Detail>
-                                        {datautil.roundToPlaces(stats.worstResponseTime, 2)}ms
+                                        {datautil.roundToPlaces(stats.max, 2)}ms
                                             </Label.Detail>
                                 </Label>
                             </Accordion.Title>
