@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Menu, Icon, Popup } from 'semantic-ui-react'
 import util from './data/util.js';
+import _ from 'lodash';
 
 export default class ClusterNodeTabHeader extends Component {
     state = {
@@ -88,6 +89,7 @@ export default class ClusterNodeTabHeader extends Component {
                     trigger={this.statusIcon()} 
                     header={node.role}
                     content={this.popupContent()}
+                    position='bottom left'
                 />
                  
                 { node.getLabel() }
