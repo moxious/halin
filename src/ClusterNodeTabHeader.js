@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Menu, Icon, Popup } from 'semantic-ui-react'
 import util from './data/util.js';
-import _ from 'lodash';
 
 export default class ClusterNodeTabHeader extends Component {
     state = {

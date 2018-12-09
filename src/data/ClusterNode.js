@@ -3,7 +3,6 @@ import sentry from '../sentry/index';
 import _ from 'lodash';
 import math from 'mathjs';
 import Ring from 'ringjs';
-import moment from 'moment';
 
 const MAX_OBSERVATIONS = 500;
 
