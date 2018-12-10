@@ -14,6 +14,9 @@ jobs:
             # Do not install s3cmd from apt-get, it's an out of date version.
             wget https://github.com/s3tools/s3cmd/releases/download/v2.0.2/s3cmd-2.0.2.tar.gz
             tar zxvf s3cmd-2.0.2.tar.gz
+
+            sudo pip install setuptools
+
             cd s3cmd-2.0.2 && sudo python setup.py install
             cd $HOME && s3cmd --version
       - run: 
