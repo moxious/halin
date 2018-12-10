@@ -52,6 +52,8 @@ jobs:
             cp package.branch /tmp/artifacts
             npm run build
             s3cmd put --recursive -P dist/* "s3://$BUCKET/$SUBDIR/"
+            # Thinking this is a bug in s3 that has to be overcome: https://stackoverflow.com/questions/53708938/s3cmd-flagging-css-with-wrong-mime-type
+            s3cmd modify "s3://$BUCKET/$SUBDIR/static/css/*.css" --mime-type="text/css"
             # Replace package file with the original
             cp package.orig package.json
             echo "$FINAL_URL" | tee /tmp/artifacts/s3-deploy-branch.txt
@@ -119,6 +121,8 @@ jobs:
               export BUCKET=halin
               npm run build
               s3cmd put --recursive -P dist/* s3://$BUCKET
+              # Thinking this is a bug in s3 that has to be overcome: https://stackoverflow.com/questions/53708938/s3cmd-flagging-css-with-wrong-mime-type
+              s3cmd modify "s3://$BUCKET/static/css/*.css" --mime-type="text/css"
               echo http://halin.s3-website-us-east-1.amazonaws.com/ > /tmp/artifacts/s3-deploy-production.txt
             else
               echo "Not master, nothing to do"
