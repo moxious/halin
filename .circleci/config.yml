@@ -51,7 +51,7 @@ jobs:
             cp package.branch package.json
             cp package.branch /tmp/artifacts
             npm run build
-            s3cmd put --guess-mime-type --recursive -P dist/* "s3://$BUCKET/$SUBDIR/"
+            s3cmd put --recursive -P dist/* "s3://$BUCKET/$SUBDIR/"
             # Replace package file with the original
             cp package.orig package.json
             echo "$FINAL_URL" > /tmp/artifacts/s3-deploy-branch.txt
