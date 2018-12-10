@@ -94,8 +94,9 @@ jobs:
             cp package.json package.orig
             # Have to monkeypatch the "homepage" field so that the react build will
             # work.
-            cat package.json | sed s,$BASE_URL,$FINAL_URI, > package.branch
+            cat package.json | sed s,$BASE_URL,$FINAL_URL, > package.branch
             cp package.branch package.json
+            cp package.branch /tmp/artifacts
             npm run build
             s3cmd put --guess-mime-type --recursive -P dist/* "s3://$BUCKET/$SUBDIR/"
             # Replace package file with the original
