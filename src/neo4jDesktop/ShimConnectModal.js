@@ -4,6 +4,7 @@ import { Render } from 'graph-app-kit/components/Render';
 import { Button, Form, Modal, Message, Checkbox } from "semantic-ui-react";
 import _ from 'lodash';
 import sentry from '../sentry/index';
+import Splash from './Splash';
 
 let privateLocalCreds = {};
 // try {    
@@ -47,6 +48,8 @@ class ConnectForm extends Component {
             <Modal size="tiny" closeOnEscape={false} closeOnDimmerClick={false} open={open} onClose={onClose}>
                 <Modal.Header>Connect to a graph</Modal.Header>
                 <Modal.Content>
+                    <Splash/>
+
                     <Form error={errorMsg ? true : false}>
                         <Form.Field required>
                             <label>Host</label>
