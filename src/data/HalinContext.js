@@ -4,11 +4,9 @@ import DataFeed from '../data/DataFeed';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import uuid from 'uuid';
-import moment from 'moment';
-import appPkg from '../package.json';
 import ClusterManager from './cluster/ClusterManager';
 import queryLibrary from '../data/query-library';
-import * as Sentry from '@sentry/browser';
+import sentry from '../sentry/index';
 import neo4j from '../driver';
 
 /**
@@ -19,8 +17,6 @@ import neo4j from '../driver';
  * The main app will attach it to the window object as a global.
  */
 export default class HalinContext {
-    domain = 'halin';
-
     constructor() {
         this.project = null;
         this.graph = null;
@@ -57,7 +53,7 @@ export default class HalinContext {
             return feed;
         }
         this.dataFeeds[df.name] = df;
-        // console.log('Halin starting new DataFeed: ', df.name.slice(0, 120) + '...');
+        // sentry.fine('Halin starting new DataFeed: ', df.name.slice(0, 120) + '...');
         df.start();
         return df;
     }
@@ -75,7 +71,7 @@ export default class HalinContext {
 
         const allOptions = _.merge({ encrypted }, this.driverOptions);
         if (this.debug) {
-            console.log('Driver connection', { addr, username, allOptions });
+            sentry.fine('Driver connection', { addr, username, allOptions });
         }
         const driver = neo4j.driver(addr,
             neo4j.auth.basic(username, password), allOptions);
@@ -85,9 +81,13 @@ export default class HalinContext {
     }
 
     shutdown() {
-        console.log('Shutting down halin context');
+        sentry.info('Shutting down halin context');
         _.values(this.dataFeeds).map(df => df.stop);
         _.values(this.drivers).map(driver => driver.close());
+        this.getClusterManager().addEvent({
+            type: 'halin',
+            message: 'Halin monitoring shut down',
+        });
     }
 
     /**
@@ -105,6 +105,10 @@ export default class HalinContext {
      */
     isEnterprise() {
         return this.clusterNodes[0].isEnterprise();
+    }
+
+    isCommunity() {
+        return !this.isEnterprise();
     }
 
     /**
@@ -134,37 +138,51 @@ export default class HalinContext {
                 clusterNode.role = newRole;
 
                 this.getClusterManager().addEvent({
-                    date: new Date(),
                     message: `Role change from ${oldRole} to ${newRole}`,
-                    address: clusterNode.getBoltAddress(),
+                    type: 'rolechange',
+                    payload: {
+                        old: oldRole,
+                        new: newRole,
+                        address: clusterNode.getBoltAddress(),
+                    },
                 });
             }
         };
 
-        const onError = (err, dataFeed) => {
-            Sentry.captureException(err);
-            console.error('HalinContext: failed to get cluster role for ', addr, err);
-        };
+        const onError = (err, dataFeed) => 
+            sentry.reportError(err, `HalinContext: failed to get cluster role for ${addr}`);
 
         roleFeed.addListener(onRoleData);
         roleFeed.onError = onError;
         return roleFeed;
     }
 
+    /**
+     * Check to see if the active database is a cluster.  In this context cluster means that it's Neo4j Enterprise
+     * and the dbms.cluster.* procedures are present (e.g. not mode=SINGLE).
+     * @param {Object} activeDb 
+     */
     checkForCluster(activeDb) {
         const session = this.base.driver.session();
-        // console.log('activeDb', activeDb);
+        // sentry.debug('activeDb', activeDb);
         return session.run('CALL dbms.cluster.overview()', {})
             .then(results => {
-                this.clusterNodes = results.records.map(rec => new ClusterNode(rec))
+                this.clusterNodes = results.records.map(rec => new ClusterNode(rec));
 
-                return this.clusterNodes.map(clusterNode => this.watchForClusterRoleChange(clusterNode));
+                // Note that in the case of community or mode=SINGLE, because the cluster overview fails,
+                // this will never take place.  Watching for cluster role changes doesn't apply in those cases.
+                return this.clusterNodes.map(clusterNode => {
+                    const driver = this.driverFor(clusterNode.getBoltAddress());
+                    clusterNode.setDriver(driver);
+                    return this.watchForClusterRoleChange(clusterNode);
+                });
             })
             .catch(err => {
                 const str = `${err}`;
                 if (str.indexOf('no procedure') > -1) {
                     // Halin will look at single node databases
                     // running in desktop as clusters of size 1.
+                    // #operability I wish Neo4j treated mode=SINGLE as a cluster of 1 and exposed dbms.cluster.*
                     const rec = {
                         id: uuid.v4(),
                         addresses: nd.getAddressesForGraph(activeDb.graph),
@@ -177,51 +195,19 @@ export default class HalinContext {
                     const get = key => rec[key];
                     rec.get = get;
 
-                    this.clusterNodes = [new ClusterNode(rec)];
+                    const singleton = new ClusterNode(rec);
+                    const driver = this.driverFor(singleton.getBoltAddress());
+                    singleton.setDriver(driver);
+                    this.clusterNodes = [singleton];
                 } else {
-                    Sentry.captureException(err);
+                    sentry.reportError(err);
                     throw err;
                 }
             })
-            .then(() => Promise.all(this.clusterNodes.map(cn => {
-                const driver = this.driverFor(cn.getBoltAddress());
-                return cn.checkComponents(driver);
-            })))
+            .then(() => Promise.all(this.clusterNodes.map(cn => cn.checkComponents())))
             .then(() => 
                 Promise.all(this.clusterNodes.map(cn => this.ping(cn))))
             .finally(() => session.close());
-    }
-
-    /**
-     * Take a diagnostic package and return a cleaned up version of the same, removing
-     * sensitive data that shouldn't go out.
-     * This function intentionally modifies its argument.
-     */
-    cleanup(pkg) {
-        const deepReplace = (keyToClean, newVal, object) => {
-            let found = false;
-
-            _.each(object, (val, key) => {
-                if (key === keyToClean) {
-                    found = true;
-                } else if (_.isArray(val)) {
-                    object[key] = val.map(v => deepReplace(keyToClean, newVal, v));
-                } else if (_.isObject(val)) {
-
-                    object[key] = deepReplace(keyToClean, newVal, val);
-                }
-            });
-
-            if (found) {
-                const copy = _.cloneDeep(object);
-                copy[keyToClean] = newVal;
-                return copy;
-            }
-
-            return object;
-        };
-
-        return deepReplace('password', '********', _.cloneDeep(pkg));
     }
 
     getCurrentUser() {
@@ -249,11 +235,10 @@ export default class HalinContext {
                     flags: rec.get('flags'),
                 };
                 
-                // console.log('Current User', this.currentUser);
+                // sentry.fine('Current User', this.currentUser);
             })
             .catch(err => {
-                Sentry.captureException(err);
-                console.error('Failed to get user info');
+                sentry.reportError(err, 'Failed to get user info');
                 this.currentUser = {
                     username: 'UNKNOWN',
                     roles: [],
@@ -347,7 +332,7 @@ export default class HalinContext {
                         throw new Error('In order to launch Halin, you must have an active database connection');
                     }
 
-                    // console.log('FIRST ACTIVE', active);
+                    // sentry.fine('FIRST ACTIVE', active);
                     this.project = active.project;
                     this.graph = active.graph;
 
@@ -357,15 +342,21 @@ export default class HalinContext {
                     const uri = `bolt://${this.base.host}:${this.base.port}`;
                     this.base.driver = this.driverFor(uri);
 
-                    // console.log('HalinContext created', this);
+                    // sentry.fine('HalinContext created', this);
                     return Promise.all([
                         this.checkUser(this.base.driver),
                         this.checkForCluster(active),
                     ]);
                 })
-                .then(() => this)
+                .then(() => {
+                    this.getClusterManager().addEvent({
+                        type: 'halin',
+                        message: 'Halin monitoring started',
+                    });
+                    return this;
+                })
         } catch (e) {
-            console.error(e);
+            sentry.reportError(e, 'General Halin Context Error');
             return Promise.reject(new Error('General Halin Context error', e));
         }
     }
@@ -405,194 +396,12 @@ export default class HalinContext {
             };
 
             const onError = (err, dataFeed) => {
-                console.error('HalinContext: failed to ping', addr, err);
+                sentry.error('HalinContext: failed to ping', addr, err);
                 reject(err, dataFeed);
             };
 
             pingFeed.addListener(onPingData);
             pingFeed.onError = onError;
         });
-    }
-
-    /**
-     * @param clusterNode{ClusterNode} 
-     * @return Promise{Object} of diagnostic information about that node.
-     */
-    _nodeDiagnostics(clusterNode) {
-        const basics = {
-            basics: clusterNode.asJSON(),
-        };
-
-        const session = this.driverFor(clusterNode.getBoltAddress()).session();
-
-        // Query must return 'value'
-        const noFailCheck = (domain, query, key) =>
-            session.run(query, {})
-                .then(results => results.records[0].get('value'))
-                .catch(err => err)  // Convert errors into the value.
-                .then(value => {
-                    const obj = {};
-                    obj[domain] = {};
-                    obj[domain][key] = value;
-                    return obj;
-                });
-
-        // Format all JMX data into records.
-        // Put the whole thing into an object keyed on jmx.
-        const genJMX = session.run("CALL dbms.queryJmx('*:*')", {})
-            .then(results =>
-                results.records.map(rec => ({
-                    name: rec.get('name'),
-                    attributes: rec.get('attributes'),
-                })))
-            .then(array => ({ JMX: array }))
-
-        const users = session.run('CALL dbms.security.listUsers()', {})
-            .then(results =>
-                results.records.map(rec => ({
-                    username: rec.get('username'),
-                    flags: rec.get('flags'),
-                    roles: rec.get('roles'),
-                })))
-            .then(allUsers => ({ users: allUsers }));
-
-        const roles = session.run('CALL dbms.security.listRoles()', {})
-            .then(results =>
-                results.records.map(rec => ({
-                    role: rec.get('role'),
-                    users: rec.get('users'),
-                })))
-            .then(allRoles => ({ roles: allRoles }));
-
-        // Format node config into records.
-        const genConfig = session.run('CALL dbms.listConfig()', {})
-            .then(results => {
-                const configMap = {};
-                results.records.forEach(rec => {
-                    const key = rec.get('name');
-                    const value = rec.get('value');
-
-                    // Configs can have duplicate keys!
-                    // which sucks.  but we need to detect that.
-                    // If a second value is found, push it on to an array.
-                    if (configMap.hasOwnProperty(key)) {
-                        const presentValue = configMap[key];
-                        if (_.isArray(presentValue)) {
-                            presentValue.push(value);
-                        } else {
-                            configMap[key] = [presentValue, value];
-                        }
-                    } else {
-                        configMap[key] = value;
-                    }
-                });
-                return configMap;
-            })
-            .then(allConfig => ({ configuration: allConfig }));
-
-        const constraints = session.run('CALL db.constraints()', {})
-            .then(results =>
-                results.records.map((rec, idx) => ({ idx, description: rec.get('description') })))
-            .then(allConstraints => ({ constraints: allConstraints }));
-
-        const getOrNull = (rec, field) => {
-            try {
-                return rec.get(field);
-            } catch (e) { return null; }
-        };
-
-        // Signature differs between 3.4 and 3.5, particularly
-        // label field vs. tokenNames field.  getOrNull handles
-        // both cases.
-        const indexes = session.run('CALL db.indexes()', {})
-            .then(results =>
-                results.records.map((rec, idx) => ({
-                    description: getOrNull(rec, 'description'),
-                    label: getOrNull(rec, 'label'),
-                    tokenNames: getOrNull(rec, 'tokenNames'),
-                    properties: getOrNull(rec, 'properties'),
-                    state: getOrNull(rec, 'state'),
-                    type: getOrNull(rec, 'type'),
-                    provider: getOrNull(rec, 'provider'),
-                })))
-            .then(allIndexes => ({ indexes: allIndexes }));
-
-        const otherPromises = [
-            noFailCheck('apoc', 'RETURN apoc.version() as value', 'version'),
-            noFailCheck('nodes', 'MATCH (n) RETURN count(n) as value', 'count'),
-            noFailCheck('schema', 'call db.labels() yield label return collect(label) as value', 'labels'),
-            noFailCheck('algo', 'RETURN algo.version() as value', 'version'),
-        ];
-
-        return Promise.all([
-            users, roles, indexes, constraints, genJMX, genConfig, ...otherPromises])
-            .then(arrayOfDiagnosticObjects =>
-                _.merge(basics, ...arrayOfDiagnosticObjects))
-            .finally(() => session.close());
-    }
-
-    /**
-     * @return Promise{Object} of halin diagnostics.
-     */
-    _halinDiagnostics() {
-        const halin = {
-            halin: {
-                drivers: Object.keys(this.drivers).map(uri => ({
-                    domain: `${this.domain}-driver`,
-                    node: uri,
-                    key: 'encrypted',
-                    value: _.get(this.drivers[uri]._config, 'encrypted'),
-                })),
-                diagnosticsGenerated: moment.utc().toISOString(),
-                activeProject: this.cleanup(this.project),
-                activeGraph: this.cleanup(this.graph),
-                dataFeeds: _.values(this.dataFeeds).map(df => df.stats()),
-                ...appPkg,
-            }
-        };
-
-        return Promise.resolve(halin);
-    }
-
-    /**
-     * @return Promise{Object} of Neo4j Desktop API diagnostics.
-     */
-    _neo4jDesktopDiagnostics() {
-        let api = null;
-
-        try {
-            api = window.neo4jDesktopApi;
-        } catch (e) {
-            // ReferenceError on missing window.
-            api = null;
-        }
-
-        if (!api) {
-            return Promise.resolve({ neo4jDesktop: 'MISSING' });
-        }
-
-        return api.getContext()
-            .then(context => ({
-                neo4jDesktop: this.cleanup(_.cloneDeep(context)),
-            }));
-    }
-
-    /**
-     * Run all diagnostics available to halin
-     * @return Promise{Object} a large, heavyweight diagnostic object suitable for
-     * analysis or shipping to the user.
-     */
-    runDiagnostics() {
-        const allNodeDiags = Promise.all(this.clusterNodes.map(clusterNode => this._nodeDiagnostics(clusterNode)))
-            .then(nodeDiagnostics => ({ nodes: nodeDiagnostics }));
-
-        const halinDiags = this._halinDiagnostics();
-
-        const neo4jDesktopDiags = this._neo4jDesktopDiagnostics();
-
-        // Each object resolves to a diagnostic object with 1 key, and sub properties.
-        // All diagnostics are just a merge of those objects.
-        return Promise.all([halinDiags, allNodeDiags, neo4jDesktopDiags])
-            .then(arrayOfObjects => _.merge(...arrayOfObjects))
     }
 }

@@ -7,7 +7,8 @@ import moment from 'moment';
 import Advisor from './advisor/Advisor';
 import ConfigurationDiff from './ConfigurationDiff';
 import advisor from './advisor/index';
-import hoc from '../higherOrderComponents';
+import collection from './collection/index';
+import sentry from '../sentry/index';
 
 class GeneratePackage extends Component {
     state = {
@@ -16,6 +17,7 @@ class GeneratePackage extends Component {
         error: null,
         loading: false,
         userIsAdmin: false,
+        upload: false,
         headers: [
             { label: 'domain', key: 'domain' },
             { label: 'node', key: 'node' },
@@ -36,7 +38,7 @@ class GeneratePackage extends Component {
         });
 
         const fail = err => {
-            console.error(err);
+            sentry.error(err);
             this.setState({
                 diagnosticData: null,
                 dataGenerated: null,
@@ -46,7 +48,7 @@ class GeneratePackage extends Component {
         };
 
         try {
-            return window.halinContext.runDiagnostics()
+            return collection.runDiagnostics(window.halinContext)
                 .then(data => {
                     this.setState({
                         loading: false,
@@ -55,13 +57,17 @@ class GeneratePackage extends Component {
                         message: null,
                         error: null,
                     });
+
+                    if (this.state.upload) {
+                        return this.uploadDiagnostics();
+                    }
                 })
                 .catch(err => fail(err));
         } catch (err) {
             fail(err);
         }
 
-        console.log('Generating package');
+        sentry.info('Generating diagnostic package');
     };
 
     buildURI = data => {
@@ -92,14 +98,27 @@ class GeneratePackage extends Component {
                         />
                     </Tab.Pane>,
             },
-            { 
+        ];
+
+        if (window.halinContext.isCluster()) {
+            panes.push({ 
                 menuItem: 'Configuration Diff', 
                 render: () => 
                     <Tab.Pane>
                         <ConfigurationDiff data={this.state.diagnosticData} />
                     </Tab.Pane> 
-            },
-        ];
+            });
+        }
+
+        panes.push({
+            menuItem: 'Package Viewer',
+            render: () =>
+                <Tab.Pane>
+                    <div className='PackageViewer' style={{textAlign:'left'}}>
+                        <pre>{JSON.stringify(this.state.diagnosticData.halin, null, 2)}</pre>
+                    </div>
+                </Tab.Pane>
+        })
 
         return (<Tab menu={{ borderless: true, attached: false, tabular: false }} panes={panes} />);
     }
@@ -112,11 +131,45 @@ class GeneratePackage extends Component {
         return this.setState({ userIsAdmin: true });
     }
 
+    toggleUpload(event, data) {
+        sentry.fine(event, data);
+        this.setState({
+            upload: data.checked,
+        });
+    }
+
+    /*
+    uploadDiagnostics(pkg) {
+        return fetch('TBD', {
+            method: 'POST',
+            mode: 'no-cors',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/json; charset=utf-8',                
+            },
+            body: JSON.stringify(pkg),
+        })
+            .then(resp => {
+                sentry.fine('Upload response',resp);
+            })
+            .catch(err => {
+                sentry.error('Failed to upload', err);
+            });
+    }
+    */
+
     render() {
         let message = status.formatStatusMessage(this);
 
         return (
             <div className='GeneratePackage'>
+                {/* <Checkbox 
+                    checked={this.state.upload}
+                    onClick={(event, data) => this.toggleUpload(event, data)}
+                    label={{ children: 'Help improve Halin by sharing data with Neo4j' }}
+                    >
+                </Checkbox> */}
+
                 <Button basic disabled={this.state.loading}
                         onClick={this.generatePackage}>
                     <Icon name='cogs'/>
@@ -151,4 +204,4 @@ class GeneratePackage extends Component {
     }
 }
 
-export default hoc.enterpriseOnlyComponent(GeneratePackage);
+export default GeneratePackage;

@@ -12,7 +12,7 @@ import uuid from 'uuid';
 import Spinner from '../Spinner';
 import datautil from '../data/util';
 import timewindow from './timewindow';
-
+import sentry from '../sentry/index';
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import NodeLabel from '../NodeLabel';
 
@@ -176,7 +176,7 @@ class CypherTimeseries extends Component {
             //     newState.timeRange = timeRange;
             // }
 
-            this.setState(newState);
+            if (this.mounted) { this.setState(newState); }
             if(this.props.onUpdate) {
                 this.props.onUpdate(newState);   
             }
@@ -186,6 +186,7 @@ class CypherTimeseries extends Component {
     }
 
     getChartMin() {
+        if (!this.mounted) { return 0; }
         let min;
 
         if (_.isFunction(this.min)) {        
@@ -198,6 +199,7 @@ class CypherTimeseries extends Component {
     }
 
     getChartMax() {
+        if (!this.mounted) { return 100; } 
         let max;
         if (_.isFunction(this.max)) {
             max = this.max(this.state.data[0]);
@@ -221,7 +223,7 @@ class CypherTimeseries extends Component {
     }
 
     legendClick = data => {
-        console.log('Legend clicked',data);
+        sentry.debug('Legend clicked',data);
 
         // Find index and toggle its disabled state.
         let foundIdx;
@@ -235,11 +237,11 @@ class CypherTimeseries extends Component {
         const toggle = idx => {
             const disabledNew = _.cloneDeep(this.state.disabled);
             disabledNew[idx] = !this.state.disabled[idx];
-            this.setState({ disabled: disabledNew });
+            if (this.mounted) { this.setState({ disabled: disabledNew }); }
         };
 
         toggle(foundIdx);
-        // console.log('disabled',this.state.disabled);
+        // sentry.debug('disabled',this.state.disabled);
     };
     
     handleTimeRangeChange = timeRange => {
@@ -248,11 +250,13 @@ class CypherTimeseries extends Component {
     };
     
     handleTrackerChanged = (t, scale) => {
-        this.setState({
-            tracker: t,
-            trackerEvent: t && this.dataSeries.at(this.dataSeries.bisect(t)),
-            trackerX: t && scale(t)
-        });
+        if (this.mounted) {
+            this.setState({
+                tracker: t,
+                trackerEvent: t && this.dataSeries.at(this.dataSeries.bisect(t)),
+                trackerX: t && scale(t)
+            });
+        }
     };
 
     renderLegendOnlyColumns() {

@@ -1,31 +1,24 @@
 import HalinContext from '../data/HalinContext';
-import yargs from 'yargs';
+import collection from '../diagnostic/collection/index';
+import sentry from '../sentry/index';
 
 const ctx = new HalinContext();
 
-const gatherDiagnosticsAndQuit = (halin) => {
-    return halin.runDiagnostics()
+const gatherDiagnosticsAndQuit = halin => {
+    return collection.runDiagnostics(halin)
         .then(data => {
-            console.log(JSON.stringify(data, null, 2));
+            // Regular console, **not** sentry because we want the data raw dumped.
+            console.log(JSON.stringify(data));
             return halin.shutdown();
         })
         .then(() => process.exit(0))
         .catch(err => {
-            console.error('Failed to gather diagnostics');
-            console.error(err);
+            sentry.error('Failed to gather diagnostics', err);
             process.exit(1);
         });
 };
 
 ctx.initialize()
-    .then(ctx => {
-        if (!ctx.isEnterprise()) {
-            console.log(JSON.stringify(ctx.clusterNodes[0].asJSON(), null, 2));
-            console.error('Diagnostic packages can only be gathered for Neo4j Enterprise');
-            process.exit(1);
-        }
-        return ctx;
-    })
     .then(ctx =>
         // It's useful to have some ticks and not gather immediately.
         // This lets us gather some ping stats and other response time
@@ -33,6 +26,6 @@ ctx.initialize()
         setTimeout(() => gatherDiagnosticsAndQuit(ctx), 
             process.env.WAIT_TIME || 5000))
     .catch(err => {
-        console.error('Fatal error',err);
+        sentry.error('Fatal error',err);
         process.exit(1);
     });

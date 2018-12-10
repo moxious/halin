@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import sentry from '../sentry/index';
 
 export default class TreeItem {
     constructor(title, subtitle, value) {
@@ -33,8 +34,7 @@ export default class TreeItem {
             activeNode.children = _.sortBy(activeNode.children, 'title');
             return tree;
         } catch (e) {
-            console.error('Failed to unflatten', entry);
-            console.error(e);
+            sentry.error('Failed to unflatten', entry, e);
             throw e;
         }
     }

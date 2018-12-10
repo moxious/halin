@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import { Button, Form } from 'semantic-ui-react';
 import "semantic-ui-css/semantic.min.css";
-import * as PropTypes from "prop-types";
 import 'semantic-ui-css/semantic.min.css';
-import './NewUserForm.css';
 import { Grid } from 'semantic-ui-react';
 import status from '../../status/index';
+import sentry from '../../sentry/index';
+import './NewUserForm.css';
+
 
 class NewUserForm extends Component {
     state = {
@@ -35,7 +36,7 @@ class NewUserForm extends Component {
 
         return mgr.addUser(user)
             .then(clusterOpRes => {
-                console.log('ClusterMgr result', clusterOpRes);
+                sentry.info('ClusterMgr result', clusterOpRes);
                 const action = `Creating user ${user.username}`;
 
                 if (clusterOpRes.success) {
@@ -65,7 +66,7 @@ class NewUserForm extends Component {
     }
 
     submit(event) {
-        console.log('submit',this.state);
+        sentry.fine('submit',this.state);
         event.preventDefault();
         this.createUser();
     }
@@ -133,9 +134,5 @@ class NewUserForm extends Component {
         )
     }
 }
-
-NewUserForm.contextTypes = {
-    driver: PropTypes.object,
-};
 
 export default NewUserForm;

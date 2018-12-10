@@ -5,10 +5,6 @@ import { Button, Modal, Header } from 'semantic-ui-react'
 import SettingsPane from './settings/SettingsPane';
 
 export default class AppFooter extends Component {
-    settings = () => {
-        console.log('Foo');
-    };
-
     render() {
         return (
             <div className='AppFooter'>

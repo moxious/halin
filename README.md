@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/moxious/halin.svg?style=svg)](https://circleci.com/gh/moxious/halin)
+
 ## Halin Neo4j Monitoring
 
 Halin is a Graph App for monitoring your Neo4j instance, or cluster.  It works with both
@@ -9,7 +11,8 @@ Causal Clusters.
 Primary features:
 1. Basic performance monitoring (system load, memory usage)
 2. Advisor and Diagnostics:  Checks your Neo4j configuration and finds problems, makes suggestions on how to improve.
-3. User & Role Management: allows you to administer users & roles across any number of machines.
+3. Works with both Neo4j Enterprise and Neo4j Community
+4. User & Role Management: allows you to administer users & roles across any number of machines.
 
 ## Running Halin in Development Mode
 
@@ -30,6 +33,12 @@ docker run -d -p 127.0.0.1:3000:3000 --rm -t mdavidallen/halin:latest
 
 Open a browser to http://localhost:3000/
 
+If you'd like to build the Halin docker container from source:
+
+```
+docker build -t halin:latest -f Dockerfile .
+```
+
 ### Running as a GraphApp
 
 4. Inside of Neo4j Desktop, go to application settings, scroll all the way to the bottom, enable development mode
@@ -38,19 +47,11 @@ Open a browser to http://localhost:3000/
 7. Finally, inside of desktop you'll see a special tile labeled "Development App 9.9.9".  This will
 point to your running copy of Halin
 
-### Docker Support
-
-To build the container:
-
-```
-docker build -t halin:latest -f Dockerfile . 
-```
-
 ## FAQ
 
 1. Does it support Neo4j Enterprise or Community?
 
-Both.  But some features must be disabled for community (such as user management) because community does not support them.
+Both.  Some features must be disabled for community (such as user management) because community does not support them.  For a comparison of features between Neo4j Enterprise and Community, [see this link](https://neo4j.com/subscriptions/#editions)
 
 2. Does Halin capture any data about my database?
 
@@ -62,7 +63,10 @@ software, but nothing about your configuration is sent back to me.
 3. How does Halin work?
 
 Halin uses pure cypher/bolt connections to nodes in your cluster, and uses Neo4j's existing
-management interfaces and queries, including things like JMX, to obtain all statistics.
+management interfaces and queries, including things like JMX, to obtain all statistics.  The upside
+of this approach is that it will work on any Neo4j instance with zero modification or configuration.
+The downside is that there are certain aspects of debugging (like getting remote log files) that Halin
+cannot yet access because this would require server-side SSH access.
 
 4. Do I have to run Halin as an admin user?
 

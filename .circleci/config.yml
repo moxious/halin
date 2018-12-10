@@ -9,12 +9,20 @@ jobs:
       - run:
           name: Prep
           command: |
+            # I should maybe be using a different docker image in Circle rather than
+            # doing all of this junk, but works for me.  :)
             mkdir -p /tmp/artifacts
             sudo npm install -g yarn
-            sudo apt-get update && sudo apt-get install -y s3cmd
-      - run: 
-          name: Build Halin Docker Image
-          command: docker build -t mdavidallen/halin:latest -f Dockerfile .
+            # Do not install s3cmd from apt-get, it's an out of date version.
+            wget https://github.com/s3tools/s3cmd/releases/download/v2.0.2/s3cmd-2.0.2.tar.gz
+            tar zxvf s3cmd-2.0.2.tar.gz
+
+            curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+            sudo python get-pip.py
+            sudo pip install setuptools
+            
+            cd s3cmd-2.0.2 && sudo python setup.py install
+            cd $HOME && s3cmd --version
       - restore_cache:
           name: Restore Yarn Package Cache
           keys:
@@ -28,7 +36,34 @@ jobs:
           name: Save Yarn Package Cache
           key: yarn-packages-{{ checksum "yarn.lock" }}
           paths:
-            - ~/.cache/yarn          
+            - ~/.cache/yarn
+      - run: 
+          name: Deploy to S3 (Build Branch)
+          command: |
+            if [ "${CIRCLE_BRANCH}" = "master" ]; then
+              echo "Skipping branch build; master will be deployed"
+            else
+              export SUBDIR="${CIRCLE_BRANCH}-${CIRCLE_SHA1}"
+              export BUCKET=halin
+              export BASE_URL=http://halin.s3-website-us-east-1.amazonaws.com/
+              export FINAL_URL="$BASE_URL$SUBDIR/"
+              cp package.json package.orig
+              # Have to monkeypatch the "homepage" field so that the react build will
+              # work.
+              cat package.json | sed s,$BASE_URL,$FINAL_URL, > package.branch
+              cp package.branch package.json
+              cp package.branch /tmp/artifacts/package.branch.json
+              npm run build
+              s3cmd put --recursive -P dist/* "s3://$BUCKET/$SUBDIR/"
+              # Thinking this is a bug in s3 that has to be overcome: https://stackoverflow.com/questions/53708938/s3cmd-flagging-css-with-wrong-mime-type
+              s3cmd modify "s3://$BUCKET/$SUBDIR/static/css/*.css" --mime-type="text/css"
+              # Replace package file with the original
+              cp package.orig package.json
+              echo "$FINAL_URL" | tee /tmp/artifacts/s3-deploy-branch.txt
+            fi
+      - run: 
+          name: Build Halin Docker Image
+          command: docker build -t mdavidallen/halin:latest -f Dockerfile .
       - run:
           name: Test Against Neo4j 3.4.9 Enterprise
           command: |
@@ -46,6 +81,7 @@ jobs:
               --env NEO4J_USERNAME=neo4j \
               --env NEO4J_PASSWORD=admin \
               mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-3.4.9.txt
+            docker logs neo4j349 > /tmp/artifacts/neo4j349.log
             docker stop neo4j349
       - run:
           name: Test Against Neo4j 3.5.0 Enterprise
@@ -64,14 +100,37 @@ jobs:
               --env NEO4J_USERNAME=neo4j \
               --env NEO4J_PASSWORD=admin \
               mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-3.5.0.txt
+            docker logs neo4j350 > /tmp/artifacts/neo4j350.log
             docker stop neo4j350
+      - run:
+          name: Test Against Neo4j 3.5.0 Community
+          command: |
+            docker run -d --name neo4j350community --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin --env=NEO4J_ACCEPT_LICENSE_AGREEMENT=yes -t neo4j:3.5.0
+            sleep 20
+            docker ps
+
+            export NEO4J_URI=bolt://localhost:7687
+            export NEO4J_USER=neo4j
+            export NEO4J_PASSWORD=admin
+
+            # Run gather against the temp docker image started.
+            docker run --network container:neo4j350community \
+              --env NEO4J_URI=bolt://localhost:7687 \
+              --env NEO4J_USERNAME=neo4j \
+              --env NEO4J_PASSWORD=admin \
+              mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-3.5.0-community.txt
+            docker logs neo4j350community > /tmp/artifacts/neo4j350community.log
+            docker stop neo4j350community
       - run:
           name: Deploy to S3 (Production)
           command: |
             if [ "${CIRCLE_BRANCH}" = "master" ]; then
               export BUCKET=halin
+              cp package.json /tmp/artifacts/package.dist.json
               npm run build
               s3cmd put --recursive -P dist/* s3://$BUCKET
+              # Thinking this is a bug in s3 that has to be overcome: https://stackoverflow.com/questions/53708938/s3cmd-flagging-css-with-wrong-mime-type
+              s3cmd modify "s3://$BUCKET/static/css/*.css" --mime-type="text/css"
               echo http://halin.s3-website-us-east-1.amazonaws.com/ > /tmp/artifacts/s3-deploy-production.txt
             else
               echo "Not master, nothing to do"

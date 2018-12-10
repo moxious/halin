@@ -67,9 +67,7 @@ class PageCacheTracking extends Component {
         const halin = window.halinContext;
 
         const addr = node.getBoltAddress();
-        const driver = halin.driverFor(addr);
-
-        const feed = halin.getDataFeed(_.merge({ node, driver }, queryLibrary.JMX_PAGE_CACHE));
+        const feed = halin.getDataFeed(_.merge({ node }, queryLibrary.JMX_PAGE_CACHE));
 
         feed.addAliases({ 
             faultsPerSecond: ClusterTimeseries.keyFor(addr, 'faultsPerSecond'),
@@ -83,7 +81,6 @@ class PageCacheTracking extends Component {
     };
 
     toggleView = (val) => {
-        console.log('toggle',val);
         this.setState({ displayProperty: val });
     };
 

@@ -3,12 +3,14 @@ import * as PropTypes from 'prop-types';
 import { Render } from 'graph-app-kit/components/Render';
 import { Button, Form, Modal, Message, Checkbox } from "semantic-ui-react";
 import _ from 'lodash';
+import sentry from '../sentry/index';
+import Splash from './Splash';
 
 let privateLocalCreds = {};
 // try {    
 //     privateLocalCreds = require('./cluster-credentials.json');
 // } catch (e) {
-//     console.log('No pre-configured halin credentials were found, but that\'s OK', e);
+//     sentry.fine('No pre-configured halin credentials were found, but that\'s OK', e);
 // }
 
 class ConnectForm extends Component {
@@ -35,6 +37,10 @@ class ConnectForm extends Component {
 
     onSubmit = () => this.props.onSubmit(this.state);
 
+    componentWillMount() {
+        sentry.fine('ShimConnectModal: running outside of Neo4j Desktop');
+    }
+
     render() {
         const { open, errorMsg, onClose } = this.props;
         const { username, password, host, port, encrypted } = this.state;
@@ -42,6 +48,8 @@ class ConnectForm extends Component {
             <Modal size="tiny" closeOnEscape={false} closeOnDimmerClick={false} open={open} onClose={onClose}>
                 <Modal.Header>Connect to a graph</Modal.Header>
                 <Modal.Content>
+                    <Splash/>
+
                     <Form error={errorMsg ? true : false}>
                         <Form.Field required>
                             <label>Host</label>

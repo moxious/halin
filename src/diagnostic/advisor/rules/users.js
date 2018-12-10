@@ -1,7 +1,13 @@
 import InspectionResult from '../InspectionResult';
 import _ from 'lodash';
+import metarule from './metarule';
+import sentry from '../../../sentry/index';
 
-const atLeastOneAdmin = pkg => {
+/**
+ * Requiring at least one admin is fundamentally an enteprise only rule, because community 
+ * doesn't have roles.
+ */
+const atLeastOneAdmin = metarule.enterpriseOnlyRule(pkg => {
     const findings = [];
     pkg.nodes.forEach(node => {
         const addr = node.basics.address;
@@ -29,7 +35,7 @@ const atLeastOneAdmin = pkg => {
     });
 
     return findings;
-};
+});
 
 const userConsistency = pkg => {
     if(pkg.nodes.length === 1) {
@@ -44,9 +50,9 @@ const userConsistency = pkg => {
     pkg.nodes.forEach(node => {
         const addr = node.basics.address;
         const users = node.users.map(u => u.username);
-        const roles = node.roles.map(r => r.role);
+        const roles = node.roles.map(r => r.role || []);
 
-        console.log(addr, users, roles);
+        sentry.fine(addr, users, roles);
 
         userSets[addr] = new Set(users);
         roleSets[addr] = new Set(roles);
@@ -68,8 +74,6 @@ const userConsistency = pkg => {
         allUnionRoles = new Set(both);
     });
     
-    // console.log('ALL UNION USERS', [...allUnionUsers]);
-    // console.log('ALL UNION ROLES', [...allUnionRoles]);
     // Now, look through each cluster node and determine whether
     // a paricular node is falling short of the total set.
     const addrs = Object.keys(userSets);

@@ -57,9 +57,8 @@ class PageCacheFlushes extends Component {
         const halin = window.halinContext;
 
         const addr = node.getBoltAddress();
-        const driver = halin.driverFor(addr);
 
-        const feed = halin.getDataFeed(_.merge({ node, driver }, queryLibrary.JMX_PAGE_CACHE));
+        const feed = halin.getDataFeed(_.merge({ node }, queryLibrary.JMX_PAGE_CACHE));
         feed.addAliases({ flushesPerSecond: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
         feed.addAugmentationFunction(this.augmentData(node));
         // feed.debug = true;

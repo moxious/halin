@@ -14,11 +14,7 @@ class GCPauseTime extends Component {
 
     dataFeedMaker = node => {
         const halin = window.halinContext;
-
-        const addr = node.getBoltAddress();
-        const driver = halin.driverFor(addr);
-
-        const feed = halin.getDataFeed(_.merge({ node, driver }, queryLibrary.JMX_GARBAGE_COLLECTOR));
+        const feed = halin.getDataFeed(_.merge({ node }, queryLibrary.JMX_GARBAGE_COLLECTOR));
         return feed;
     };
 

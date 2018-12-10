@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
-import * as Sentry from '@sentry/browser';
+import sentry from '../../sentry/index';
+import moment from 'moment';
+import uuid from 'uuid';
+import Ring from 'ringjs';
 
 /**
  * This is a controller for clusters.
@@ -16,13 +19,13 @@ import * as Sentry from '@sentry/browser';
  * add a user, and so on.
  */
 const clusterOpSuccess = (node, results) => ({
-    success: true, node, addr: node.getBoltAddress(), results
+    success: true, node, addr: node.getBoltAddress(), results,
 });
 
 const clusterOpFailure = (node, err) => {
-    if (err) { Sentry.captureException(err); }
+    if (err) { sentry.reportError(err); }
     return {
-        success: false, node, addr: node.getBoltAddress(), err
+        success: false, node, addr: node.getBoltAddress(), err,
     };
 };
 
@@ -37,27 +40,29 @@ const packageClusterOpResults = results => {
     return { success, results };
 };
 
-export default class ClusterManager {
-    MAX_EVENTS = 100;
+const MAX_EVENTS = 200;
 
+export default class ClusterManager {
     constructor(halinCtx) {
         this.ctx = halinCtx;
-        this.eventLog = [];
+        this.eventLog = new Ring(MAX_EVENTS);
     }
 
     addEvent(event) {
-        if (!event || !event.message || !event.date) {
-            throw new Error('ClusterManager events must have at least message, date');
+        if (!event.message || !event.type) {
+            throw new Error('ClusterManager events must have at least message, type');
         }
 
-        this.eventLog.push(event);
-
-        // Truncate to last max set, to prevent it growing without bound.
-        this.eventLog = this.eventLog.slice(this.eventLog.length - this.MAX_EVENTS, this.eventLog.length);
+        // Don't modify caller's argument.
+        const data = _.cloneDeep(event);
+        _.set(data, 'date', moment.utc().toISOString());
+        _.set(data, 'payload', event.payload || null);
+        _.set(data, 'id', uuid.v4());
+        this.eventLog.push(data);
     }
 
     getEventLog() {
-        return this.eventLog;
+        return this.eventLog.toArray();
     }
 
     /**
@@ -73,18 +78,12 @@ export default class ClusterManager {
      */
     mapQueryAcrossCluster(query, params) {
         const promises = this.ctx.clusterNodes.map(node => {
-            const addr = node.getBoltAddress();
-            const driver = this.ctx.driverFor(addr);
-
-            const session = driver.session();
-
             // Guarantee that promise resolves.
             // it resolves to an object that indicates success
             // or failure.
-            return session.run(query, params)
+            return node.run(query, params)
                 .then(results => clusterOpSuccess(node, results))
-                .catch(err => clusterOpFailure(node, err))
-                .finally(() => session.close());
+                .catch(err => clusterOpFailure(node, err));
         });
 
         return Promise.all(promises)
@@ -103,8 +102,9 @@ export default class ClusterManager {
         )
             .then(result => {
                 this.addEvent({
-                    date: new Date(),
+                    type: 'adduser',
                     message: `Added user "${username}"`,
+                    payload: username,
                 });
                 return result;
             })
@@ -122,8 +122,9 @@ export default class ClusterManager {
         )
             .then(result => {
                 this.addEvent({
-                    date: new Date(),
+                    type: 'deleteuser',
                     message: `Deleted user "${username}"`,
+                    payload: username,
                 });
                 return result;
             })
@@ -138,8 +139,9 @@ export default class ClusterManager {
         )
             .then(result => {
                 this.addEvent({
-                    date: new Date(),
+                    type: 'addrole',
                     message: `Created role "${role}"`,
+                    payload: role,
                 });
                 return result;
             });
@@ -154,23 +156,24 @@ export default class ClusterManager {
         )
             .then(result => {
                 this.addEvent({
-                    date: new Date(),
+                    type: 'deleterole',
                     message: `Deleted role "${role}"`,
+                    payload: role,
                 });
                 return result;
             });
     }
 
     /** Specific to a particular node */
-    addNodeRole(driver, username, role, session) {
-        console.log('ADD ROLE', username, role);
-        return session.run('call dbms.security.addRoleToUser({role}, {username})', { username, role });
+    addNodeRole(node, username, role) {
+        sentry.info('ADD ROLE', { username, role });
+        return node.run('call dbms.security.addRoleToUser({role}, {username})', { username, role });
     }
 
     /** Specific to a particular node */
-    removeNodeRole(driver, username, role, session) {
-        console.log('REMOVE ROLE', username, role);
-        return session.run('call dbms.security.removeRoleFromUser({role}, {username})', { username, role });
+    removeNodeRole(node, username, role) {
+        sentry.info('REMOVE ROLE', { username, role });
+        return node.run('call dbms.security.removeRoleFromUser({role}, {username})', { username, role });
     }
 
     /**
@@ -179,7 +182,7 @@ export default class ClusterManager {
      * @returns {Promise} that resolves to a clusterOp result
      */
     associateUserToRoles(user, roles) {
-        console.log('CM associate',user,'to',roles);
+        sentry.info(`CM associate ${user} to ${roles}`);
         if (!_.isArray(roles)) { 
             throw new Error('roles must be an array');
         } if (!_.isObject(user) || !user.username) {
@@ -198,23 +201,23 @@ export default class ClusterManager {
         //   (a) user doesn't exist on that node
         //   (b) role doesn't exist on that node
         //   (c) Underlying association query fails.
-        const gatherRoles = (node, driver, session) => {
-            return session.run('CALL dbms.security.listRolesForUser({username})',
+        const gatherRoles = (node) => {
+            return node.run('CALL dbms.security.listRolesForUser({username})',
                 {username})
                 .then(results => {
-                    console.log('gather raw', results);
+                    sentry.fine('gather raw', results);
                     return results;
                 })
                 .then(results => 
                     results.records.map(r => r.get('value')))
                 .then(r => {
-                    console.log('gather roles made',r);
+                    sentry.fine('gather roles made',r);
                     return r;
                 });
         };
 
-        const determineDifferences = (rolesHere, node, driver, session) => {
-            console.log("determine differences",rolesHere, roles);
+        const determineDifferences = (rolesHere, node) => {
+            sentry.fine('determine differences', rolesHere, roles);
             const oldRoles = new Set(rolesHere);
             const newRoles = new Set(roles);
             const toDelete = new Set(
@@ -228,9 +231,9 @@ export default class ClusterManager {
                 [...oldRoles].filter(x => newRoles.has(x))
             );
     
-            console.log('Determine differences',
+            sentry.fine('Determine differences',
                 'rolesHere=',rolesHere, 'newRoles=', newRoles);
-            console.log('Role modification: ', 
+            sentry.fine('Role modification: ', 
                 node.getBoltAddress(), 'adding', 
                 [...toAdd], 
                 'removing', [...toDelete], 
@@ -242,11 +245,11 @@ export default class ClusterManager {
             };
         };
 
-        const applyChanges = (roleChanges, node, driver, session) => {
+        const applyChanges = (roleChanges, node) => {
             const { toAdd, toDelete } = roleChanges;
 
-            const addPromises = [...toAdd].map(role => this.addNodeRole(driver, username, role, session));
-            const delPromises = [...toDelete].map(role => this.removeNodeRole(driver, username, role, session));
+            const addPromises = [...toAdd].map(role => this.addNodeRole(node, username, role));
+            const delPromises = [...toDelete].map(role => this.removeNodeRole(node, username, role));
 
             const allRolePromises = 
                 addPromises.concat(delPromises);
@@ -265,29 +268,24 @@ export default class ClusterManager {
                     return clusterOpSuccess(node, results);
                 })
                 .catch(err => {
-                    console.error('Cluster operation failure applying role changes', err);
+                    sentry.reportError(err, 'Cluster operation failure applying role changes');
                     return clusterOpFailure(node, err);
                 });
         };
 
         const allPromises = this.ctx.clusterNodes.map(node => {
-            const addr = node.getBoltAddress();
-            const driver = this.ctx.driverFor(addr);
-
-            const s = driver.session();
-
-            return gatherRoles(node, driver, s)
-                .then(rolesHere => determineDifferences(rolesHere, node, driver, s))
-                .then(roleChanges => applyChanges(roleChanges, node, driver, s))
+            return gatherRoles(node)
+                .then(rolesHere => determineDifferences(rolesHere, node))
+                .then(roleChanges => applyChanges(roleChanges, node))
                 .then(() => {
                     this.addEvent({
-                        date: new Date(),
+                        type: 'roleassoc',
                         message: `Associated "${username}" to roles ${roles.map(r => `"${r}"`).join(', ')}`,
+                        payload: { username, roles },
                     });
                 })
                 .then(() => clusterOpSuccess(node))
-                .catch(err => clusterOpFailure(node, err))
-                .finally(() => s.close());
+                .catch(err => clusterOpFailure(node, err));
         });
 
         return Promise.all(allPromises)

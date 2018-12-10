@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../data/CypherDataTable';
-import * as PropTypes from 'prop-types';
 import { Button, Confirm, Grid } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import status from '../../status/index';
-import './Neo4jUsers.css';
 import AssignRoleModal from '../roles/AssignRoleModal';
 import uuid from 'uuid';
+import sentry from '../../sentry/index';
+import './Neo4jUsers.css';
 
 class Neo4jUsers extends Component {
     key = uuid.v4();
@@ -32,6 +32,7 @@ class Neo4jUsers extends Component {
         {
             Header: 'Roles',
             accessor: 'roles',
+            absentValue: [],
             Cell: ({ row }) => row.roles.map((role, idx) => (
                 <div className='role' key={idx}>
                     {role}{idx < row.roles.length - 1 ? ',' : ''}
@@ -78,13 +79,13 @@ class Neo4jUsers extends Component {
     }
 
     deleteUser(row) {
-        console.log('DELETE USER ', row);
+        sentry.info('DELETE USER ', row);
 
         const mgr = window.halinContext.getClusterManager();
 
         return mgr.deleteUser(row)
             .then(clusterOpRes => {
-                console.log('ClusterMgr result', clusterOpRes);
+                sentry.info('ClusterMgr result', clusterOpRes);
                 const action = `Deleting user ${row.username}`;
 
                 if (clusterOpRes.success) {
@@ -118,7 +119,7 @@ class Neo4jUsers extends Component {
 
     confirmRoleAssignment = (component, clusterOpResult) => {
         this.refresh();
-        console.log('ClusterOpResult', clusterOpResult);
+        sentry.fine('ClusterOpResult', clusterOpResult);
         const action = `Assign roles`;
 
         if (clusterOpResult instanceof Error) {
@@ -170,6 +171,7 @@ class Neo4jUsers extends Component {
 
     render() {
         let message = status.formatStatusMessage(this);
+        const enterprise = window.halinContext.isEnterprise();
 
         return (
             <div className="Neo4jUsers">
@@ -181,20 +183,21 @@ class Neo4jUsers extends Component {
                             {message || 'Browse, filter, and delete users'}
                         </Grid.Column>
                         <Grid.Column>
-                            <Button basic onClick={e => this.openAssign()}>
-                                <i className="icon user"></i> Manage Roles
-                            </Button>
+                            { enterprise ? 
+                                <Button basic onClick={e => this.openAssign()}>
+                                    <i className="icon user"></i> Manage Roles
+                                </Button> : '' }
                             
                             <Button basic onClick={e => this.refresh()} icon="refresh"/>
                         </Grid.Column>
                     </Grid.Row>
 
-                    <AssignRoleModal key={this.key}
+                    { window.halinContext.isEnterprise() ? <AssignRoleModal key={this.key}
                         driver={this.props.driver}
                         node={this.props.node}
                         open={this.state.assignOpen}
                         onCancel={this.closeAssign}
-                        onConfirm={this.confirmRoleAssignment} />
+                        onConfirm={this.confirmRoleAssignment} /> : '' }
 
                     {/* <Confirm open={this.state.assignOpen} 
                     content='Not yet implemented.  Getting there!'
@@ -226,9 +229,5 @@ class Neo4jUsers extends Component {
         );
     }
 }
-
-Neo4jUsers.contextTypes = {
-    driver: PropTypes.object,
-};
 
 export default Neo4jUsers;

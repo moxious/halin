@@ -18,7 +18,10 @@ export default class DataFeedStats extends Component {
 
     dataFeedStats() {
         const halin = window.halinContext;
-        const feedStats = _.values(halin.dataFeeds).map(feed => feed.stats());
+        const feedStats = _.values(halin.dataFeeds).map(feed => {
+            // Add a node field so the renderer can figure out where these came from.
+            return _.merge({ node: feed.node }, feed.stats());
+        });
 
         return _.sortBy(feedStats, ['address', 'label']);
     }
@@ -49,19 +52,19 @@ export default class DataFeedStats extends Component {
                                 <Label>
                                     Best
                                             <Label.Detail>
-                                        {datautil.roundToPlaces(stats.bestResponseTime, 2)}ms
+                                        {datautil.roundToPlaces(stats.min, 2)}ms
                                             </Label.Detail>
                                 </Label>
                                 <Label>
                                     Avg. Response Time
                                             <Label.Detail>
-                                        {datautil.roundToPlaces(stats.averageResponseTime, 2)}ms
+                                        {datautil.roundToPlaces(stats.mean, 2)}ms
                                             </Label.Detail>
                                 </Label>
                                 <Label>
                                     Worst
                                             <Label.Detail>
-                                        {datautil.roundToPlaces(stats.worstResponseTime, 2)}ms
+                                        {datautil.roundToPlaces(stats.max, 2)}ms
                                             </Label.Detail>
                                 </Label>
                             </Accordion.Title>

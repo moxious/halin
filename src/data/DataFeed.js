@@ -2,15 +2,16 @@ import Ring from 'ringjs';
 import { TimeEvent, TimeRange } from 'pondjs';
 import _ from 'lodash';
 import queryLibrary from './query-library';
-import * as Sentry from '@sentry/browser';
+import sentry from '../sentry/index';
 import Metric from './Metric';
 import neo4j from '../driver';
+import math from 'mathjs';
 
 const actualNumber = i => !_.isNaN(i) && !(i === Infinity) && !(i === -Infinity);
 
 /**
  * DataFeed is an abstraction that polls a cypher query
- * against a driver in a configurable way, and can happen
+ * against a ClusterNode in a configurable way, and can happen
  * in the background independent of a component being 
  * mounted or not mounted.  It accumulates data in a sliding window through time.
  * 
@@ -36,7 +37,6 @@ export default class DataFeed extends Metric {
     constructor(props) {
         super();
         this.node = props.node;
-        this.driver = props.driver;
         this.query = props.query;
         this.params = props.params || {};
         this.rate = props.rate || 1000;
@@ -46,7 +46,7 @@ export default class DataFeed extends Metric {
         this.aliases = props.alias ? [props.alias] : [];
 
         if (this.aliases.length > 0) {
-            console.warn('Warning: use addAliases() rather than passing in DataFeed constructor',
+            sentry.warn('Warning: use addAliases() rather than passing in DataFeed constructor',
                 this.aliases);
         }
 
@@ -68,9 +68,9 @@ export default class DataFeed extends Metric {
 
         this.listeners = props.onData ? [props.onData] : [];
 
-        if (!this.node || !this.driver || !this.query || !this.displayColumns) {
-            console.error(props);
-            throw new Error('Missing one of required props displayColumns/columns, node, driver, query');
+        if (!this.node || !this.query || !this.displayColumns) {
+            sentry.error(props);
+            throw new Error('Missing one of required props displayColumns/columns, node, query');
         }
 
         const qtag = this.query.replace(/\s*[\r\n]+\s*/g, ' ');
@@ -192,31 +192,23 @@ export default class DataFeed extends Metric {
         const packets = this.getDataPackets();
         
         const timings = packets.map(p => p._sampleTime);
-        const sum = timings.reduce((a, b) => a + b, 0);
-        const avg = sum / timings.length;
-
-        let values = _.cloneDeep(timings);
-        values.sort((a, b) => a - b);
-        let lowMiddle = Math.floor((values.length - 1) / 2);
-        let highMiddle = Math.ceil((values.length - 1) / 2);
-        let median = (values[lowMiddle] + values[highMiddle]) / 2;
-
         return {
             name: this.name,
             label: this.label,
-            node: this.node,
             address: this.node.getBoltAddress(),
             lastObservation: this.state && this.state.data ? this.state.data[0] : null,
             query: this.query,
             packets: packets.length,
-            averageResponseTime: avg,
-            medianResponseTime: median,
-            bestResponseTime: Math.min(...timings),
-            worstResponseTime: Math.max(...timings),
-            timings,
+            stdev: math.std(...timings),
+            mean: math.mean(...timings),
+            median: math.median(...timings),
+            mode: math.mode(...timings),
+            min: math.min(...timings),
+            max: math.max(...timings),
             listeners: this.listeners.length,
             augFns: this.augmentFns.length,
             aliases: this.aliases.length,
+            timings,
         };
     }
 
@@ -301,11 +293,10 @@ export default class DataFeed extends Metric {
             this.feedStartTime = new Date();
         }
 
-        const session = this.driver.session();
         const startTime = new Date().getTime();
         this.sampleStart = new Date();
 
-        return session.run(this.query, this.params)
+        return this.node.run(this.query, this.params)
             .then(results => {
                 const elapsedMs = new Date().getTime() - startTime;
 
@@ -313,7 +304,7 @@ export default class DataFeed extends Metric {
                     // It's a bad idea to run long-running queries with a short window.
                     // It puts too much load on the system and does a bad job updating the
                     // graphic.
-                    console.warn(`DataFeed: query took ${elapsedMs} against window of ${this.rate}`,
+                    sentry.warn(`DataFeed: query took ${elapsedMs} against window of ${this.rate}`,
                         this.name.slice(0, 150));
                 }
 
@@ -340,15 +331,15 @@ export default class DataFeed extends Metric {
 
                 // Apply aliases if specified.
                 this.aliases.forEach(aliasObj => {
-                    if (this.debug) { console.log('AliasObj',aliasObj); }
+                    if (this.debug) { sentry.fine('AliasObj',aliasObj); }
                     Object.keys(aliasObj).forEach(aliasKey => {
-                        if (this.debug) { console.log('Alias',aliasObj[aliasKey],aliasKey); }
+                        if (this.debug) { sentry.fine('Alias',aliasObj[aliasKey],aliasKey); }
                         data[aliasObj[aliasKey]] = data[aliasKey];
                     });
                 });
 
                 if (this.debug) {
-                    console.log('event', data);
+                    sentry.fine('event', data);
                 }
                 this.timeout = setTimeout(() => this.sampleData(), this.rate);
 
@@ -371,19 +362,17 @@ export default class DataFeed extends Metric {
                 return this.listeners.map(listener => listener(this.state, this));
             })
             .catch(err => {
-                Sentry.captureException(err);
+                sentry.reportError(err, 'Failed to execute timeseries query');
                 
                 this.state.lastDataArrived = this.feedStartTime;
                 this.state.error = err;
 
-                console.error('Failed to execute timeseries query', err);
                 if (this.onError) {
                     this.onError(err, this);
                 }
 
                 // Back off and schedule next call to be 2x the normal window.
                 this.timeout = setTimeout(() => this.sampleData(), this.rate * 2);
-            })
-            .finally(() => session.close());
+            });
     }
 }

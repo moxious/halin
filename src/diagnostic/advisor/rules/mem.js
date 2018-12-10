@@ -1,6 +1,7 @@
 import InspectionResult from '../InspectionResult';
 import _ from 'lodash';
 import neo4j from '../../../driver';
+import sentry from '../../../sentry/index';
 
 const memActuals = pkg => {
     const findings = [];
@@ -31,7 +32,7 @@ const pageCacheSizing = pkg => {
         const pageCache = node.configuration['dbms.memory.pagecache.size'];
 
         if (!pageCache) {
-            console.log('PC bailout; no PC');
+            sentry.fine('PC bailout; no PC');
             findings.push(new InspectionResult(InspectionResult.WARN, addr, 
                 'Because page cache is not set, we cannot evaluate appropriateness of your memory settings',
                 null, 
@@ -63,7 +64,7 @@ const pageCacheSizing = pkg => {
             const multiplier = multipliers[sizing] || 1;
             pageCacheInBytes = base * multiplier;
         } else {
-            console.log('PC bailout; size is weird', pageCache);
+            sentry.fine('PC bailout; size is weird', pageCache);
             findings.push(new InspectionResult(InspectionResult.WARN, addr, 
                 `Cannot determine data sizing of page cache setting ${pageCache}; check your configuration`));
             return;
@@ -72,7 +73,7 @@ const pageCacheSizing = pkg => {
         const storeSizes = node.JMX.filter(entry => entry.name === 'org.neo4j:instance=kernel#0,name=Store sizes')[0];
 
         if (!storeSizes) {
-            console.log('PC bailout; no store sizes');
+            sentry.fine('PC bailout; no store sizes');
             findings.push(new InspectionResult(InspectionResult.WARN, addr,
                 'Unknown store sizes; cannot compute appropriateness of memory/page cache settings'));
             return;
@@ -94,7 +95,7 @@ const pageCacheSizing = pkg => {
                 // Don't want to count txlogs because they get very big, and people don't put them in page cache.
                 bytesOnDisk = neo4j.integer.toNumber(totStoreSize) - txSize;                
             } catch (e) {
-                console.error('Failed to evaluate disk size', e);
+                sentry.error('Failed to evaluate disk size', e);
                 return;
             }
 

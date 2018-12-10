@@ -9,7 +9,7 @@ import uuid from 'uuid';
 import NodeLabel from '../NodeLabel';
 import Spinner from '../Spinner';
 import neo4j from '../driver';
-import * as Sentry from '@sentry/browser';
+import sentry from '../sentry/index';
 
 import './CypherDataTable.css';
 
@@ -84,7 +84,7 @@ class CypherDataTable extends Component {
         const refresh = this.state.refresh;
         if (refresh !== props.refresh) {
             this.setState({ refresh: props.refresh });
-            console.log('CypherDataTable: refreshing on parent prop change');
+            sentry.fine('CypherDataTable: refreshing on parent prop change');
             // Cancel the next polling cycle and start a fresh one to update.
             this.cancelPoll();
             this.sampleData();
@@ -110,8 +110,10 @@ class CypherDataTable extends Component {
                             if (str.indexOf('record has no field with key')) {
                                 // This is survivable; in community some queries don't
                                 // return all fields.
-                                console.warn(str);
-                                item[col.accessor] = null;
+                                if (!col.absentValue) { 
+                                    sentry.warn(str);
+                                }
+                                item[col.accessor] = col.absentValue || null;
                             } else {
                                 throw e;
                             }
@@ -130,15 +132,14 @@ class CypherDataTable extends Component {
                 }
             })
             .catch(err => {
-                console.error('CypherDataTable: error executing', this.query, this.parameters, err);
-                Sentry.captureException(err);
+                sentry.reportError(err, `CypherDataTable: error executing ${this.query}`);
                 this.setState({ items: [] });
             })
             .finally(() => session.close());
     }
 
     updateColumns = (cols) => {
-        console.log('Showing', cols);
+        sentry.fine('Showing', cols);
 
         const newColumns = _.cloneDeep(this.state.displayColumns);
         newColumns.forEach(thisCol => {
@@ -149,7 +150,7 @@ class CypherDataTable extends Component {
             }
         });
 
-        console.log('New display columns', newColumns);
+        sentry.fine('New display columns', newColumns);
         return this.setState({ displayColumns: newColumns });
     };
 

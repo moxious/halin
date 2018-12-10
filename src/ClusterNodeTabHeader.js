@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Menu, Icon, Popup } from 'semantic-ui-react'
+import util from './data/util.js';
 
 export default class ClusterNodeTabHeader extends Component {
     state = {
@@ -7,6 +8,7 @@ export default class ClusterNodeTabHeader extends Component {
         total: 1,
         fresh: 1,
         notFresh: 0,
+        performance: { observations: [] },
     };
 
     sampleFeeds() {
@@ -22,6 +24,7 @@ export default class ClusterNodeTabHeader extends Component {
             total,
             fresh,
             notFresh,
+            performance: this.props.node.performance(),
         });
     }
 
@@ -46,6 +49,10 @@ export default class ClusterNodeTabHeader extends Component {
             <div className='PopupContent'>
                 <h4>Data</h4>
                 <p>{`${this.state.fresh} of ${this.state.total} fresh`}</p>
+
+                <p>{this.state.performance.observations.length} observations; mean response time 
+                &nbsp;{util.roundToPlaces(this.state.performance.mean,0)}ms with a standard deviation of 
+                &nbsp;{util.roundToPlaces(this.state.performance.stdev,0)}ms</p>
 
                 <p>When most/all feeds are fresh, this indicates responsiveness.  When performance
                 degrades, data feeds slow, stop, or error.</p>
@@ -81,6 +88,7 @@ export default class ClusterNodeTabHeader extends Component {
                     trigger={this.statusIcon()} 
                     header={node.role}
                     content={this.popupContent()}
+                    position='bottom left'
                 />
                  
                 { node.getLabel() }

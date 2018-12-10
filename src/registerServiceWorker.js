@@ -7,6 +7,7 @@
 
 // To learn more about the benefits of this model, read https://goo.gl/KwvDNy.
 // This link also includes instructions on opting out of this behavior.
+import sentry from './sentry/index';
 
 const isLocalhost = Boolean(
   window.location.hostname === 'localhost' ||
@@ -56,20 +57,18 @@ function registerValidSW(swUrl) {
               // the fresh content will have been added to the cache.
               // It's the perfect time to display a "New content is
               // available; please refresh." message in your web app.
-              console.log('New content is available; please refresh.');
+              sentry.info('New content is available; please refresh.');
             } else {
               // At this point, everything has been precached.
               // It's the perfect time to display a
               // "Content is cached for offline use." message.
-              console.log('Content is cached for offline use.');
+              sentry.info('Content is cached for offline use.');
             }
           }
         };
       };
     })
-    .catch(error => {
-      console.error('Error during service worker registration:', error);
-    });
+    .catch(error => sentry.error('Error during service worker registration:', error));
 }
 
 function checkValidServiceWorker(swUrl) {
@@ -93,7 +92,7 @@ function checkValidServiceWorker(swUrl) {
       }
     })
     .catch(() => {
-      console.log(
+      sentry.info(
         'No internet connection found. App is running in offline mode.'
       );
     });

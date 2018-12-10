@@ -127,8 +127,8 @@ const sos = {
 };
 
 // Sample use:
-// console.log(sos);
-// console.log(JSON.stringify(configurationDiff(sos), null, 2));
+// sentry.info(sos);
+// sentry.info(JSON.stringify(configurationDiff(sos), null, 2));
 */
 
 export default {
