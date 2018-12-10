@@ -12,6 +12,7 @@ jobs:
             mkdir -p /tmp/artifacts
             sudo npm install -g yarn
             sudo apt-get update && sudo apt-get install -y s3cmd
+            s3cmd --version
       - run: 
           name: Build Halin Docker Image
           command: docker build -t mdavidallen/halin:latest -f Dockerfile .
@@ -83,6 +84,23 @@ jobs:
               --env NEO4J_PASSWORD=admin \
               mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-3.5.0-community.txt
             docker stop neo4j350community
+      - run: 
+          name: Deploy to S3 (Build Branch)
+          command: |
+            export SUBDIR="${CIRCLE_BRANCH}-${CIRCLE_SHA1}"
+            export BUCKET=halin
+            export BASE_URL=http://halin.s3-website-us-east-1.amazonaws.com/
+            export FINAL_URL="$BASE_URL$SUBDIR/"
+            cp package.json package.orig
+            # Have to monkeypatch the "homepage" field so that the react build will
+            # work.
+            cat package.json | sed s,$BASE_URL,$FINAL_URI, > package.branch
+            cp package.branch package.json
+            npm run build
+            s3cmd put --guess-mime-type --recursive -P dist/* "s3://$BUCKET/$SUBDIR/"
+            # Replace package file with the original
+            cp package.orig package.json
+            echo "$FINAL_URL" > /tmp/artifacts/s3-deploy-branch.txt
       - run:
           name: Deploy to S3 (Production)
           command: |
