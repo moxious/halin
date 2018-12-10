@@ -40,23 +40,27 @@ jobs:
       - run: 
           name: Deploy to S3 (Build Branch)
           command: |
-            export SUBDIR="${CIRCLE_BRANCH}-${CIRCLE_SHA1}"
-            export BUCKET=halin
-            export BASE_URL=http://halin.s3-website-us-east-1.amazonaws.com/
-            export FINAL_URL="$BASE_URL$SUBDIR/"
-            cp package.json package.orig
-            # Have to monkeypatch the "homepage" field so that the react build will
-            # work.
-            cat package.json | sed s,$BASE_URL,$FINAL_URL, > package.branch
-            cp package.branch package.json
-            cp package.branch /tmp/artifacts
-            npm run build
-            s3cmd put --recursive -P dist/* "s3://$BUCKET/$SUBDIR/"
-            # Thinking this is a bug in s3 that has to be overcome: https://stackoverflow.com/questions/53708938/s3cmd-flagging-css-with-wrong-mime-type
-            s3cmd modify "s3://$BUCKET/$SUBDIR/static/css/*.css" --mime-type="text/css"
-            # Replace package file with the original
-            cp package.orig package.json
-            echo "$FINAL_URL" | tee /tmp/artifacts/s3-deploy-branch.txt
+            if [ "${CIRCLE_BRANCH}" = "master" ]; then
+              echo "Skipping branch build; master will be deployed"
+            else
+              export SUBDIR="${CIRCLE_BRANCH}-${CIRCLE_SHA1}"
+              export BUCKET=halin
+              export BASE_URL=http://halin.s3-website-us-east-1.amazonaws.com/
+              export FINAL_URL="$BASE_URL$SUBDIR/"
+              cp package.json package.orig
+              # Have to monkeypatch the "homepage" field so that the react build will
+              # work.
+              cat package.json | sed s,$BASE_URL,$FINAL_URL, > package.branch
+              cp package.branch package.json
+              cp package.branch /tmp/artifacts/package.branch.json
+              npm run build
+              s3cmd put --recursive -P dist/* "s3://$BUCKET/$SUBDIR/"
+              # Thinking this is a bug in s3 that has to be overcome: https://stackoverflow.com/questions/53708938/s3cmd-flagging-css-with-wrong-mime-type
+              s3cmd modify "s3://$BUCKET/$SUBDIR/static/css/*.css" --mime-type="text/css"
+              # Replace package file with the original
+              cp package.orig package.json
+              echo "$FINAL_URL" | tee /tmp/artifacts/s3-deploy-branch.txt
+            fi
       - run: 
           name: Build Halin Docker Image
           command: docker build -t mdavidallen/halin:latest -f Dockerfile .
@@ -77,6 +81,7 @@ jobs:
               --env NEO4J_USERNAME=neo4j \
               --env NEO4J_PASSWORD=admin \
               mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-3.4.9.txt
+            docker logs neo4j349 > /tmp/artifacts/neo4j349.log
             docker stop neo4j349
       - run:
           name: Test Against Neo4j 3.5.0 Enterprise
@@ -95,6 +100,7 @@ jobs:
               --env NEO4J_USERNAME=neo4j \
               --env NEO4J_PASSWORD=admin \
               mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-3.5.0.txt
+            docker logs neo4j350 > /tmp/artifacts/neo4j350.log
             docker stop neo4j350
       - run:
           name: Test Against Neo4j 3.5.0 Community
@@ -113,12 +119,14 @@ jobs:
               --env NEO4J_USERNAME=neo4j \
               --env NEO4J_PASSWORD=admin \
               mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-3.5.0-community.txt
+            docker logs neo4j350community > /tmp/artifacts/neo4j350community.log
             docker stop neo4j350community
       - run:
           name: Deploy to S3 (Production)
           command: |
             if [ "${CIRCLE_BRANCH}" = "master" ]; then
               export BUCKET=halin
+              cp package.json /tmp/artifacts/package.dist.json
               npm run build
               s3cmd put --recursive -P dist/* s3://$BUCKET
               # Thinking this is a bug in s3 that has to be overcome: https://stackoverflow.com/questions/53708938/s3cmd-flagging-css-with-wrong-mime-type
