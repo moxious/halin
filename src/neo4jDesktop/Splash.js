@@ -1,12 +1,6 @@
 import React, { Component } from "react";
 import { Image } from 'semantic-ui-react';
 
-const style = {
-    display: 'block',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-};
-
 export default class Splash extends Component {
     render() {        
         return (
