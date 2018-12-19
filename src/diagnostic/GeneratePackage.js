@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Icon, Tab } from 'semantic-ui-react';
+import { Button, Icon, Tab, Checkbox, Message } from 'semantic-ui-react';
 import Spinner from '../Spinner';
 import uuid from 'uuid';
 import status from '../status/index';
@@ -10,6 +10,8 @@ import advisor from './advisor/index';
 import collection from './collection/index';
 import sentry from '../sentry/index';
 
+const UPLOAD_DIAGNOSTICS_BY_DEFAULT = false;
+
 class GeneratePackage extends Component {
     state = {
         key: uuid.v4(),
@@ -17,7 +19,7 @@ class GeneratePackage extends Component {
         error: null,
         loading: false,
         userIsAdmin: false,
-        upload: false,
+        upload: UPLOAD_DIAGNOSTICS_BY_DEFAULT,
         headers: [
             { label: 'domain', key: 'domain' },
             { label: 'node', key: 'node' },
@@ -59,7 +61,7 @@ class GeneratePackage extends Component {
                     });
 
                     if (this.state.upload) {
-                        return this.uploadDiagnostics();
+                        return this.uploadDiagnostics(data);
                     }
                 })
                 .catch(err => fail(err));
@@ -132,43 +134,50 @@ class GeneratePackage extends Component {
     }
 
     toggleUpload(event, data) {
-        sentry.fine(event, data);
+        // sentry.fine(event, data);
         this.setState({
             upload: data.checked,
         });
     }
 
-    /*
     uploadDiagnostics(pkg) {
-        return fetch('TBD', {
-            method: 'POST',
+        const url = 'https://7rqhwbwwcg.execute-api.us-east-1.amazonaws.com/default/reporter-dev-report';
+        return fetch(url, {
+            method: 'post',
             mode: 'no-cors',
             cache: 'no-cache',
             headers: {
-                'Content-Type': 'application/json; charset=utf-8',                
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',                
             },
             body: JSON.stringify(pkg),
         })
-            .then(resp => {
-                sentry.fine('Upload response',resp);
-            })
-            .catch(err => {
-                sentry.error('Failed to upload', err);
-            });
+            .then(resp => sentry.fine('Reported diagnostic package', resp))
+            .catch(err => sentry.error('Failed to upload', err));
     }
-    */
 
     render() {
         let message = status.formatStatusMessage(this);
 
         return (
             <div className='GeneratePackage'>
-                {/* <Checkbox 
-                    checked={this.state.upload}
-                    onClick={(event, data) => this.toggleUpload(event, data)}
-                    label={{ children: 'Help improve Halin by sharing data with Neo4j' }}
-                    >
-                </Checkbox> */}
+                <Message info>
+                    <p>This function runs a suite of tests and can provide advice on how
+                        to improve your configuration.</p>
+                            
+                    <p>A file will be generated with all
+                        diagnostics, which you can send to Neo4j to help 
+                        troubleshoot issues.</p>
+
+                    <div>
+                        <Checkbox 
+                            checked={this.state.upload}
+                            onClick={(event, data) => this.toggleUpload(event, data)}
+                            label={{ children: 'Help improve Halin by sharing diagnostics with Neo4j' }}
+                            >
+                        </Checkbox>
+                    </div>
+                </Message>
 
                 <Button basic disabled={this.state.loading}
                         onClick={this.generatePackage}>

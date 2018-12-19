@@ -27,10 +27,6 @@ class DiagnosticPane extends Component {
                         <Grid.Column>
                             <h3>Run Diagnostics</h3> 
                             
-                            <p>This function runs a suite of tests and can provide advice on how
-                               to improve your configuration.  A file will be generated with all
-                               diagnostics, which you can send to Neo4j to help troubleshoot issues.</p>
-
                             <GeneratePackage 
                                 key={this.state.key} 
                                 node={this.props.node} 
