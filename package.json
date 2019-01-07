@@ -16,7 +16,7 @@
     "type": "git",
     "url": "https://github.com/moxious/halin.git"
   },
-  "homepage": "http://halin.s3-website-us-east-1.amazonaws.com/",
+  "homepage": "http://halin.graphapp.io/",
   "private": false,
   "dependencies": {
     "@sentry/browser": "^4.4.1",
