@@ -9,6 +9,7 @@ import ConfigurationDiff from './ConfigurationDiff';
 import advisor from './advisor/index';
 import collection from './collection/index';
 import sentry from '../sentry/index';
+import hoc from '../higherOrderComponents';
 
 const UPLOAD_DIAGNOSTICS_BY_DEFAULT = false;
 
@@ -161,23 +162,18 @@ class GeneratePackage extends Component {
 
         return (
             <div className='GeneratePackage'>
-                <Message info>
-                    <p>This function runs a suite of tests and can provide advice on how
-                        to improve your configuration.</p>
-                            
-                    <p>A file will be generated with all
-                        diagnostics, which you can send to Neo4j to help 
-                        troubleshoot issues.</p>
-
-                    <div>
-                        <Checkbox 
-                            checked={this.state.upload}
-                            onClick={(event, data) => this.toggleUpload(event, data)}
-                            label={{ children: 'Help improve Halin by sharing diagnostics with Neo4j' }}
-                            >
-                        </Checkbox>
-                    </div>
-                </Message>
+                <div style={{ marginBottom: '15px' }}>
+                    <Message compact success>
+                        <div>
+                            <Checkbox 
+                                checked={this.state.upload}
+                                onClick={(event, data) => this.toggleUpload(event, data)}
+                                label={{ children: 'Help improve Halin by sharing diagnostics with Neo4j' }}
+                                >
+                            </Checkbox>
+                        </div>
+                    </Message>
+                </div>
 
                 <Button basic disabled={this.state.loading}
                         onClick={this.generatePackage}>
@@ -213,4 +209,4 @@ class GeneratePackage extends Component {
     }
 }
 
-export default GeneratePackage;
+export default hoc.adminOnlyComponent(GeneratePackage);
