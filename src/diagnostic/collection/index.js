@@ -110,7 +110,7 @@ const nodeDiagnostics = (halin, clusterNode) => {
                 })))
             .then(array => ({ JMX: cleanup(array) })));
 
-    const users = withSession(s => 
+    const users = halin.supportsAuth() ? withSession(s => 
         s.run('CALL dbms.security.listUsers()', {})
             .then(results =>
                 results.records.map(rec => ({
@@ -118,16 +118,16 @@ const nodeDiagnostics = (halin, clusterNode) => {
                     flags: rec.get('flags'),
                     roles: getOrNull(rec, 'roles'), // This field doesn't exist in community.
                 })))
-            .then(allUsers => ({ users: allUsers })));
+            .then(allUsers => ({ users: allUsers }))) : Promise.resolve({ users: [] });
 
     // This op is enterprise only.
-    const roles = halin.isEnterprise() ? withSession(s => s.run('CALL dbms.security.listRoles()', {})
+    const roles = (halin.isEnterprise() && halin.supportsAuth()) ? withSession(s => s.run('CALL dbms.security.listRoles()', {})
         .then(results =>
             results.records.map(rec => ({
                 role: rec.get('role'),
                 users: rec.get('users'),
             })))
-        .then(allRoles => ({ roles: allRoles }))) : Promise.resolve({});
+        .then(allRoles => ({ roles: allRoles }))) : Promise.resolve({ roles: [] });
 
     // Format node config into records.
     const genConfig = withSession(s => 
