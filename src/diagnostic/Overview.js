@@ -43,6 +43,18 @@ class Overview extends Component {
     }
 
     getUser() {
+        if (!window.halinContext.supportsAuth()) {
+            // You can't get current user information when auth isn't supported
+            // So just set the user to a dummy neo4j instance.
+            const user = {
+                username: '(none)',
+                roles: [],
+                flags: [],
+            };
+            this.setState({ user });
+            return Promise.resolve(true);
+        }
+
         const q = 'call dbms.showCurrentUser()';
 
         const session = this.driver.session();
@@ -63,7 +75,6 @@ class Overview extends Component {
 
                 this.setState({ user });
             })
-            .catch(err => sentry.reportError(err, 'Failed to get user info'))
             .finally(() => session.close());
     }
 
