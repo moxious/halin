@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import 'semantic-ui-css/semantic.min.css';
-import { Grid } from 'semantic-ui-react';
+import { Grid, Icon, Popup } from 'semantic-ui-react';
 import Overview from './Overview';
 import './DiagnosticPane.css';
 import GeneratePackage from './GeneratePackage';
@@ -25,7 +25,19 @@ class DiagnosticPane extends Component {
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <h3>Run Diagnostics</h3> 
+                            <h3>Run Diagnostics 
+                                <Popup trigger={<Icon name='info circle'/>}>
+                                    <Popup.Header>Halin Diagnostics</Popup.Header>
+                                    <Popup.Content>
+                                        <p>This function runs a suite of tests and can provide advice on how
+                                        to improve your configuration.</p>
+                            
+                                        <p>A file will be generated with all
+                                            diagnostics, which you can send to Neo4j to help 
+                                            troubleshoot issues.</p>                                        
+                                    </Popup.Content>                            
+                                </Popup>
+                            </h3> 
                             
                             <GeneratePackage 
                                 key={this.state.key} 
