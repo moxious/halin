@@ -113,6 +113,13 @@ export default class ClusterNode {
         return this.dbms.nativeAuth;
     }
 
+    /**
+     * Returns true if auth is enabled on this node.
+     */
+    supportsAuth() {
+        return this.dbms.authEnabled === 'true';
+    }
+
     checkComponents() {
         if (!this.driver) {
             throw new Error('ClusterNode has no driver');
@@ -161,7 +168,26 @@ export default class ClusterNode {
                 this.dbms.nativeAuth = false;
             });
 
-        return Promise.all([componentsPromise, authPromise])
+        const authEnabledQ = `
+            CALL dbms.listConfig() YIELD name, value
+            WHERE name =~ 'dbms.security.auth_enabled'
+            RETURN value;
+        `;
+        const authEnabledPromise = session.run(authEnabledQ, {})
+            .then(results => {
+                let authEnabled = true;
+                results.records.forEach(rec => {
+                    const val = rec.get('value');
+                    authEnabled = `${val}`;
+                });
+                this.dbms.authEnabled = authEnabled;
+            })
+            .catch(err => {
+                sentry.reportError(err, 'Failed to check auth enabled status');
+                this.dbms.authEnabled = true;
+            });
+
+        return Promise.all([componentsPromise, authPromise, authEnabledPromise])
             .then(whatever => {
                 if (this.isCommunity()) {
                     // #operability As a special exception, community will fail 
@@ -172,7 +198,7 @@ export default class ClusterNode {
                 }
 
                 return whatever;
-            })
+            });
     }
 
     _txSuccess(time) {

@@ -119,6 +119,13 @@ export default class HalinContext {
     }
 
     /**
+     * Returns true if the context supports authorization overall.
+     */
+    supportsAuth() {
+        return this.clusterNodes[0].supportsAuth();
+    }
+
+    /**
      * Starts a slow data feed for the node's cluster role.  In this way, if the leader
      * changes, we can detect it.
      */
@@ -238,12 +245,24 @@ export default class HalinContext {
                 // sentry.fine('Current User', this.currentUser);
             })
             .catch(err => {
-                sentry.reportError(err, 'Failed to get user info');
-                this.currentUser = {
-                    username: 'UNKNOWN',
-                    roles: [],
-                    flags: [],
-                };
+                const errMsg = `${err}`;
+                if (errMsg.indexOf('no procedure with the name') > -1) {
+                    // This occurs when dbms.security.auth_enabled=false and neo4j
+                    // does not even expose auth-related procedures.  But it isn't
+                    // an error.
+                    this.currentUser = {
+                        username: 'neo4j',
+                        roles: [],
+                        flags: [],
+                    };
+                } else {
+                    sentry.reportError(err, 'Failed to get user info');
+                    this.currentUser = {
+                        username: 'UNKNOWN',
+                        roles: [],
+                        flags: [],
+                    };
+                }
             })
             .finally(() => session.close());
     }
