@@ -8,6 +8,8 @@ import ClusterManager from './cluster/ClusterManager';
 import queryLibrary from '../data/query-library';
 import sentry from '../sentry/index';
 import neo4j from '../driver';
+import neo4jErrors from '../driver/errors';
+import errors from '../driver/errors';
 
 /**
  * HalinContext is a controller object that keeps track of state and permits diagnostic
@@ -185,8 +187,7 @@ export default class HalinContext {
                 });
             })
             .catch(err => {
-                const str = `${err}`;
-                if (str.indexOf('no procedure') > -1) {
+                if (errors.noProcedure(err)) {
                     // Halin will look at single node databases
                     // running in desktop as clusters of size 1.
                     // #operability I wish Neo4j treated mode=SINGLE as a cluster of 1 and exposed dbms.cluster.*
@@ -245,8 +246,7 @@ export default class HalinContext {
                 // sentry.fine('Current User', this.currentUser);
             })
             .catch(err => {
-                const errMsg = `${err}`;
-                if (errMsg.indexOf('no procedure with the name') > -1) {
+                if (neo4jErrors.noProcedure(err)) {
                     // This occurs when dbms.security.auth_enabled=false and neo4j
                     // does not even expose auth-related procedures.  But it isn't
                     // an error.

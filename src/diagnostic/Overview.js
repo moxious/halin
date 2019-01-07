@@ -7,6 +7,7 @@ import ClusterNode from '../data/ClusterNode';
 import _ from 'lodash';
 import './Overview.css';
 import sentry from '../sentry/index';
+import neo4jErrors from '../driver/errors';
 
 class Overview extends Component {
     state = {
@@ -32,8 +33,7 @@ class Overview extends Component {
                 this.setState({ mode: 'CLUSTER', topology: clusterNodes });
             })
             .catch(err => {
-                const str = `${err}`;
-                if (str.indexOf('no procedure') > -1) {
+                if (neo4jErrors.noProcedure(err)) {
                     this.setState({ mode: 'SINGLE', clusterInfo: null });
                 } else {
                     sentry.reportError(err, 'CLUSTER ERROR');

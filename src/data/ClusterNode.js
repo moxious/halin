@@ -1,5 +1,6 @@
 import Parser from 'uri-parser';
 import sentry from '../sentry/index';
+import neo4jErrors from '../driver/errors';
 import _ from 'lodash';
 import math from 'mathjs';
 import Ring from 'ringjs';
@@ -164,6 +165,13 @@ export default class ClusterNode {
                 this.dbms.nativeAuth = nativeAuth;
             })
             .catch(err => {
+                if (neo4jErrors.permissionDenied(err)) {
+                    // Read only user can't do this, so we can't tell whether native
+                    // auth is supported.  So disable functionality which requires this.
+                    this.dbms.nativeAuth = false;
+                    return;    
+                }
+
                 sentry.reportError(err, 'Failed to get DBMS auth implementation type');
                 this.dbms.nativeAuth = false;
             });

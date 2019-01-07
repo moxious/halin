@@ -141,7 +141,7 @@ class GeneratePackage extends Component {
     }
 
     uploadDiagnostics(pkg) {
-        const url = 'https://7rqhwbwwcg.execute-api.us-east-1.amazonaws.com/default/reporter-dev-report';
+        const url = 'https://api.halin.graphapp.io/reporter-dev-report/';
         return fetch(url, {
             method: 'post',
             mode: 'no-cors',
