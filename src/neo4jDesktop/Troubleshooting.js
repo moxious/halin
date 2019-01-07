@@ -1,21 +1,22 @@
 import React, { Component } from 'react';
 import { Message } from 'semantic-ui-react';
+import neo4jErrors from '../driver/errors';
 
 export default class Troubleshooting extends Component {
     issuesAndResolutions = [
         {
-            detector: /unauthorized/i, 
+            detector: neo4jErrors.unauthorized,
             suggestions: ['Double check your username and password and try again'],
         },
         {
-            detector: /failed to establish connection in/i,
-            suggestions: [`This error may mean that your database instance is under heavy load or is
+            detector: neo4jErrors.failedToEstablishConnection,
+            suggestions: [`This error can mean that your database instance is under heavy load or is
             not currently responsive`],
         },
         {
-            detector: /security constraints in your web browser/i,
+            detector: neo4jErrors.browserSecurityConstraints,
             suggestions: [
-                `This error often means that you have untrusted SSL certificates on your server.
+                `This error can mean that you have untrusted SSL certificates on your server.
                 Either install trusted certificates, or try again without encryption.`,
                 'This error can also mean that you have provided an incorrect DNS name or address for the database',
                 'If you are using Neo4j Desktop and running on your local machine, de-select encryption.',            
@@ -23,13 +24,13 @@ export default class Troubleshooting extends Component {
             ],
         },
         {
-            detector: /active database/i,
+            detector: neo4jErrors.noActiveDatabase,
             suggestions: [
                 'Check to make sure you have activated a database in Neo4j Desktop before launching Halin',
             ],
         },
         {
-            detector: /./,
+            detector: err => `${err}`.match(/./),
             suggestions: [`
             Unfortunately, no troubleshooting is available for this particular error. 
             Consider checking the Neo4j community site for more information.`],
@@ -42,13 +43,12 @@ export default class Troubleshooting extends Component {
     }
 
     render() {
-        const str = `${this.props.error}`;
         let suggestions = ['No suggestions available'];
 
         for (let i=0; i<this.issuesAndResolutions.length; i++) {
             const option = this.issuesAndResolutions[i];
 
-            if (str.match(option.detector)) {
+            if (option.detector(this.props.error)) {
                 suggestions = option.suggestions;
                 break;
             }
