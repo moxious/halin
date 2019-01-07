@@ -137,7 +137,7 @@ export default class ClusterNode {
                 this.dbms.edition = rec.get('edition');
             })
             .catch(err => {
-                sentry.reportError(err, 'Failed to get DBMS components');
+                sentry.reportError(err, 'Failed to get DBMS components; this can be because user is not admin');
                 this.dbms.name = 'UNKNOWN';
                 this.dbms.versions = [];
                 this.dbms.edition = 'UNKNOWN';
@@ -191,6 +191,11 @@ export default class ClusterNode {
                 this.dbms.authEnabled = authEnabled;
             })
             .catch(err => {
+                if (neo4jErrors.permissionDenied(err)) {
+                    this.dbms.authEnabled = false;
+                    return;
+                }
+
                 sentry.reportError(err, 'Failed to check auth enabled status');
                 this.dbms.authEnabled = true;
             });
