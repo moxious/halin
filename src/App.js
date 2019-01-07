@@ -14,6 +14,7 @@ import ClusterOverviewPane from './overview/ClusterOverviewPane';
 import ClusterNodeTabHeader from './ClusterNodeTabHeader';
 import { Tab, Button } from 'semantic-ui-react'
 import DiagnosticPane from './diagnostic/DiagnosticPane';
+import Spinner from './Spinner';
 import status from './status/index';
 import AppFooter from './AppFooter';
 import './App.css';
@@ -175,7 +176,17 @@ class Halin extends Component {
       )
     }
 
-    return (!this.state.halin ? 'Loading...' : (
+    if (!this.state.halin) {
+      return (
+        <div className='App' key='app' style={{ marginTop: '50px' }}>
+          <h2>Initializing Halin...</h2>
+
+          <Spinner/>
+        </div>
+      );
+    }
+
+    return (
       <div className="App" key="app">
         <Render if={this.props.connected}>
           <div className='MainBody'>
@@ -185,7 +196,7 @@ class Halin extends Component {
 
         <AppFooter />
       </div>
-    ));
+    );
   }
 }
 
