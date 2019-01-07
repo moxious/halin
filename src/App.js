@@ -139,7 +139,7 @@ class Halin extends Component {
 
     const allPanesInOrder = [overviewPane].concat(nodePanes);
 
-    if (window.halinContext.supportsNativeAuth()) {
+    if (window.halinContext.supportsAuth() && window.halinContext.supportsNativeAuth()) {
       allPanesInOrder.push(userMgmtPane);
     }
     allPanesInOrder.push(diagnosticPane);
