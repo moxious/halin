@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
+import fields from '../data/fields';
 import CypherDataTable from '../data/CypherDataTable';
-
-const cdt = CypherDataTable; // alias for shorthand
 
 class StoreFiles extends Component {
     state = {
@@ -22,14 +21,14 @@ class StoreFiles extends Component {
                 relStore, propStore, total, nodeStore;        
         `,
         displayColumns: [
-            { Header: 'Total', accessor: 'total', Cell: cdt.dataSizeField },
-            { Header: 'Nodes', accessor: 'nodeStore', Cell: cdt.dataSizeField },
-            { Header: 'Relationships', accessor: 'relStore', Cell: cdt.dataSizeField },
-            { Header: 'Properties', accessor: 'propStore', Cell: cdt.dataSizeField },
+            { Header: 'Total', accessor: 'total', Cell: fields.dataSizeField },
+            { Header: 'Nodes', accessor: 'nodeStore', Cell: fields.dataSizeField },
+            { Header: 'Relationships', accessor: 'relStore', Cell: fields.dataSizeField },
+            { Header: 'Properties', accessor: 'propStore', Cell: fields.dataSizeField },
 
-            { Header: 'Logical Log', accessor: 'logicalLog', Cell: cdt.dataSizeField, show: false },
-            { Header: 'Strings', accessor: 'stringStore', Cell: cdt.dataSizeField, show: false },
-            { Header: 'Arrays', accessor: 'arrayStore', Cell: cdt.dataSizeField, show: false },
+            { Header: 'Logical Log', accessor: 'logicalLog', Cell: fields.dataSizeField, show: false },
+            { Header: 'Strings', accessor: 'stringStore', Cell: fields.dataSizeField, show: false },
+            { Header: 'Arrays', accessor: 'arrayStore', Cell: fields.dataSizeField, show: false },
         ],
     };
 
