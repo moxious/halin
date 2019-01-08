@@ -149,10 +149,10 @@ export default class HalinContext {
                 this.getClusterManager().addEvent({
                     message: `Role change from ${oldRole} to ${newRole}`,
                     type: 'rolechange',
+                    address: clusterNode.getBoltAddress(),
                     payload: {
                         old: oldRole,
                         new: newRole,
-                        address: clusterNode.getBoltAddress(),
                     },
                 });
             }
