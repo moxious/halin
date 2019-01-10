@@ -6,7 +6,7 @@ Halin is a Graph App for monitoring your Neo4j instance, or cluster.  It works w
 single instance graphs (like those you create in Desktop) and also remote connections to 
 Causal Clusters.
 
-**[Click here to run Halin!](http://halin.s3-website-us-east-1.amazonaws.com/)**
+**[Click here to run Halin!](https://halin.graphapp.io/)**
 
 Primary features:
 1. Basic performance monitoring (system load, memory usage)

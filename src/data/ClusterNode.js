@@ -1,5 +1,6 @@
 import Parser from 'uri-parser';
 import sentry from '../sentry/index';
+import neo4jErrors from '../driver/errors';
 import _ from 'lodash';
 import math from 'mathjs';
 import Ring from 'ringjs';
@@ -113,6 +114,13 @@ export default class ClusterNode {
         return this.dbms.nativeAuth;
     }
 
+    /**
+     * Returns true if auth is enabled on this node.
+     */
+    supportsAuth() {
+        return this.dbms.authEnabled === 'true';
+    }
+
     checkComponents() {
         if (!this.driver) {
             throw new Error('ClusterNode has no driver');
@@ -129,7 +137,7 @@ export default class ClusterNode {
                 this.dbms.edition = rec.get('edition');
             })
             .catch(err => {
-                sentry.reportError(err, 'Failed to get DBMS components');
+                sentry.reportError(err, 'Failed to get DBMS components; this can be because user is not admin');
                 this.dbms.name = 'UNKNOWN';
                 this.dbms.versions = [];
                 this.dbms.edition = 'UNKNOWN';
@@ -157,11 +165,42 @@ export default class ClusterNode {
                 this.dbms.nativeAuth = nativeAuth;
             })
             .catch(err => {
+                if (neo4jErrors.permissionDenied(err)) {
+                    // Read only user can't do this, so we can't tell whether native
+                    // auth is supported.  So disable functionality which requires this.
+                    this.dbms.nativeAuth = false;
+                    return;    
+                }
+
                 sentry.reportError(err, 'Failed to get DBMS auth implementation type');
                 this.dbms.nativeAuth = false;
             });
 
-        return Promise.all([componentsPromise, authPromise])
+        const authEnabledQ = `
+            CALL dbms.listConfig() YIELD name, value
+            WHERE name =~ 'dbms.security.auth_enabled'
+            RETURN value;
+        `;
+        const authEnabledPromise = session.run(authEnabledQ, {})
+            .then(results => {
+                let authEnabled = true;
+                results.records.forEach(rec => {
+                    const val = rec.get('value');
+                    authEnabled = `${val}`;
+                });
+                this.dbms.authEnabled = authEnabled;
+            })
+            .catch(err => {
+                if (neo4jErrors.permissionDenied(err)) {
+                    this.dbms.authEnabled = false;
+                    return;
+                }
+
+                sentry.reportError(err, 'Failed to check auth enabled status');
+                this.dbms.authEnabled = true;
+            });
+
+        return Promise.all([componentsPromise, authPromise, authEnabledPromise])
             .then(whatever => {
                 if (this.isCommunity()) {
                     // #operability As a special exception, community will fail 
@@ -172,7 +211,7 @@ export default class ClusterNode {
                 }
 
                 return whatever;
-            })
+            });
     }
 
     _txSuccess(time) {

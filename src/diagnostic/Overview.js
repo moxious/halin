@@ -7,6 +7,7 @@ import ClusterNode from '../data/ClusterNode';
 import _ from 'lodash';
 import './Overview.css';
 import sentry from '../sentry/index';
+import neo4jErrors from '../driver/errors';
 
 class Overview extends Component {
     state = {
@@ -32,8 +33,7 @@ class Overview extends Component {
                 this.setState({ mode: 'CLUSTER', topology: clusterNodes });
             })
             .catch(err => {
-                const str = `${err}`;
-                if (str.indexOf('no procedure') > -1) {
+                if (neo4jErrors.noProcedure(err)) {
                     this.setState({ mode: 'SINGLE', clusterInfo: null });
                 } else {
                     sentry.reportError(err, 'CLUSTER ERROR');
@@ -43,6 +43,18 @@ class Overview extends Component {
     }
 
     getUser() {
+        if (!window.halinContext.supportsAuth()) {
+            // You can't get current user information when auth isn't supported
+            // So just set the user to a dummy neo4j instance.
+            const user = {
+                username: '(none)',
+                roles: [],
+                flags: [],
+            };
+            this.setState({ user });
+            return Promise.resolve(true);
+        }
+
         const q = 'call dbms.showCurrentUser()';
 
         const session = this.driver.session();
@@ -63,7 +75,6 @@ class Overview extends Component {
 
                 this.setState({ user });
             })
-            .catch(err => sentry.reportError(err, 'Failed to get user info'))
             .finally(() => session.close());
     }
 

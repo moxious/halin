@@ -1,5 +1,14 @@
 # Halin Release Notes
 
+## 0.7.0
+
+- (Optional opt-in) you may report diagnostic information to help improve Halin & Neo4j
+- Centralize driver error handling
+- Fixes #51, #48 - Halin errors on dbms.security.auth_enabled=false
+- Fixes #49 - Halin errors in some cases when a non-admin user is used for login
+- Fixes data display issues in the store file sizes component to make them human readable
+- Fixes bug where address of machine involved in role changes did not update properly
+
 ## 0.6.0
 
 - Halin can now gather diagnostics and render advice about Neo4j Community

@@ -1,6 +1,6 @@
 #!/bin/bash
 ENDPOINT=http://halin.s3-website-us-east-1.amazonaws.com
-BUCKET=halin
+BUCKET=halin.graphapp.io
 
 # Publish to the jfrog.io repo where Neo4j Desktop finds it.
 #npm publish

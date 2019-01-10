@@ -8,6 +8,8 @@ import ClusterManager from './cluster/ClusterManager';
 import queryLibrary from '../data/query-library';
 import sentry from '../sentry/index';
 import neo4j from '../driver';
+import neo4jErrors from '../driver/errors';
+import errors from '../driver/errors';
 
 /**
  * HalinContext is a controller object that keeps track of state and permits diagnostic
@@ -119,6 +121,13 @@ export default class HalinContext {
     }
 
     /**
+     * Returns true if the context supports authorization overall.
+     */
+    supportsAuth() {
+        return this.clusterNodes[0].supportsAuth();
+    }
+
+    /**
      * Starts a slow data feed for the node's cluster role.  In this way, if the leader
      * changes, we can detect it.
      */
@@ -140,10 +149,10 @@ export default class HalinContext {
                 this.getClusterManager().addEvent({
                     message: `Role change from ${oldRole} to ${newRole}`,
                     type: 'rolechange',
+                    address: clusterNode.getBoltAddress(),
                     payload: {
                         old: oldRole,
                         new: newRole,
-                        address: clusterNode.getBoltAddress(),
                     },
                 });
             }
@@ -178,8 +187,7 @@ export default class HalinContext {
                 });
             })
             .catch(err => {
-                const str = `${err}`;
-                if (str.indexOf('no procedure') > -1) {
+                if (errors.noProcedure(err)) {
                     // Halin will look at single node databases
                     // running in desktop as clusters of size 1.
                     // #operability I wish Neo4j treated mode=SINGLE as a cluster of 1 and exposed dbms.cluster.*
@@ -238,12 +246,23 @@ export default class HalinContext {
                 // sentry.fine('Current User', this.currentUser);
             })
             .catch(err => {
-                sentry.reportError(err, 'Failed to get user info');
-                this.currentUser = {
-                    username: 'UNKNOWN',
-                    roles: [],
-                    flags: [],
-                };
+                if (neo4jErrors.noProcedure(err)) {
+                    // This occurs when dbms.security.auth_enabled=false and neo4j
+                    // does not even expose auth-related procedures.  But it isn't
+                    // an error.
+                    this.currentUser = {
+                        username: 'neo4j',
+                        roles: [],
+                        flags: [],
+                    };
+                } else {
+                    sentry.reportError(err, 'Failed to get user info');
+                    this.currentUser = {
+                        username: 'UNKNOWN',
+                        roles: [],
+                        flags: [],
+                    };
+                }
             })
             .finally(() => session.close());
     }
