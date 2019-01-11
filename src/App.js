@@ -8,7 +8,7 @@ import { Render } from 'graph-app-kit/components/Render';
 import Neo4jConfiguration from './configuration/Neo4jConfiguration';
 import PerformancePane from './performance/PerformancePane';
 import OSPane from './performance/OSPane';
-import DatabasePane from './db/DatabasePane';
+import PluginPane from './db/PluginPane';
 import PermissionsPane from './configuration/PermissionsPane';
 import ClusterOverviewPane from './overview/ClusterOverviewPane';
 import ClusterNodeTabHeader from './ClusterNodeTabHeader';
@@ -54,9 +54,9 @@ class Halin extends Component {
           <OSPane key={key} node={node} driver={driver} />),
       },
       {
-        menuItem: 'Data',
+        menuItem: 'Plugins',
         render: () => this.paneWrapper(
-          <DatabasePane key={key} node={node} driver={driver} />),
+          <PluginPane key={key} node={node} driver={driver} />),
       },
     ]),
   };

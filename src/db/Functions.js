@@ -4,6 +4,9 @@ import fields from '../data/fields';
 import CypherDataTable from '../data/CypherDataTable';
 import './Functions.css';
 
+/**
+ * @deprecated by the CypherSurface component
+ */
 class Functions extends Component {
     state = {
         query: 'CALL dbms.functions()',

@@ -121,6 +121,26 @@ export default class ClusterNode {
         return this.dbms.authEnabled === 'true';
     }
 
+    getCypherSurface() {
+        const session = this.driver.session();
+
+        const extractRecordsWithType = (results, t) => results.records.map(rec => ({
+            name: rec.get('name'),
+            signature: rec.get('signature'),
+            description: rec.get('description'),
+            roles: rec.get('roles'),
+            type: t,
+        }));
+
+        const functionsPromise = session.run('CALL dbms.functions()', {})
+            .then(results => extractRecordsWithType(results, 'function'));
+        const procsPromise = session.run('CALL dbms.procedures()', {})
+            .then(results => extractRecordsWithType(results, 'procedure'));
+
+        return Promise.all([functionsPromise, procsPromise])
+            .then(results => _.flatten(results));
+    }
+
     checkComponents() {
         if (!this.driver) {
             throw new Error('ClusterNode has no driver');

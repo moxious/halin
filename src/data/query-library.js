@@ -21,6 +21,8 @@ export default {
     },
 
     JMX_STORE_SIZES: {
+        // otherStore is a calculated value that catches all other files which may
+        // be in the store directory which don't belong to Neo4j.
         query: `
             CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Store sizes') 
             YIELD attributes 
@@ -36,11 +38,18 @@ export default {
                 attributes.TotalStoreSize.value as total, 
                 attributes.TransactionLogsSize.value as txLogs,                 
                 attributes.ArrayStoreSize.value as arrayStore
+            WITH countStore, indexStore, labelStore, nodeStore, 
+                propStore, relStore, schemaStore, stringStore, total,
+                txLogs, arrayStore, 
+                (total - (countStore + indexStore + labelStore + nodeStore + 
+                    propStore + relStore + schemaStore + stringStore + 
+                    txLogs + arrayStore)) as otherStore
             RETURN 
                 countStore, indexStore, labelStore,
                 schemaStore, txLogs,
                 stringStore, arrayStore, 
-                relStore, propStore, total, nodeStore;        
+                relStore, propStore, total, nodeStore,
+                otherStore;        
         `,
 
         columns: [
@@ -52,7 +61,8 @@ export default {
             { Header: 'Schema', accessor: 'schemaStore' },
             { Header: 'TXs', accessor: 'txLogs' },
             { Header: 'Strings', accessor: 'stringStore' },
-            { Header: 'Arrays', accessor: 'arrayStore' },            
+            { Header: 'Arrays', accessor: 'arrayStore' },
+            { Header: 'Other', accessor: 'otherStore' },
         ],
         rate: 1000,
     },
