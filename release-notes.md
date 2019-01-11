@@ -1,5 +1,13 @@
 # Halin Release Notes
 
+## 0.7.1
+
+- Fixes #55; removes DBcount component and institutes a new plugins / CypherSurface 
+component to consolidate view of functions and procedures
+- Fixes #54; adds an "Other" column to store file size tracking, to indicate when
+users have extraneous files in their graph.db folders that are taking up space. Thanks
+to @dfgitn4j for the suggestion.
+
 ## 0.7.0
 
 - (Optional opt-in) you may report diagnostic information to help improve Halin & Neo4j
