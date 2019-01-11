@@ -4,6 +4,9 @@ import fields from '../data/fields';
 import CypherDataTable from '../data/CypherDataTable';
 import './Procedures.css';
 
+/**
+ * @deprecated by the CypherSurface component
+ */
 class Procedures extends Component {
     state = {
         query: 'CALL dbms.procedures()',
