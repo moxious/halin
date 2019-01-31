@@ -64,8 +64,6 @@ export default class ClusterNodeTabHeader extends Component {
     isReadReplica = () => `${this.props.node.role}`.toLowerCase() === 'read_replica';
 
     statusIcon = () => {
-        const node = this.props.node;
-
         let iconName;
         if(this.isLeader()) { iconName = 'star'; }
         else if(this.isReadReplica()) { iconName = 'copy'; }
