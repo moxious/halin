@@ -29,6 +29,13 @@ class ConnectForm extends Component {
         }
     };
 
+    formValid = () => (
+        !this.formHasErrors() && 
+        this.state.username && 
+        this.state.password && 
+        this.state.host && 
+        this.state.port);
+
     formHasErrors = () => !_.isNil(
         this.state.errors.host || this.state.errors.port || this.state.errors.username ||
         this.state.errors.password || this.state.errors.encrypted);
@@ -37,7 +44,7 @@ class ConnectForm extends Component {
         const { name, value } = data;
 
         const errors = _.cloneDeep(this.state.errors);
-        if (name === 'host' && value && value.match(/[\/:\#\?\&\@]/)) {
+        if (name === 'host' && value && value.match(/[/:#?&@]/)) {
             errors.host = 'Host can only contain an IP address or hostname, no scheme (http) or port';
         } else {
             // Clear error if one used to be present.
@@ -159,7 +166,7 @@ class ConnectForm extends Component {
                 </Modal.Content>
                 <Modal.Actions>
                     <Button
-                        disabled={this.formHasErrors()}
+                        disabled={!this.formValid()}
                         onClick={this.onSubmit}
                         positive
                         icon="right arrow"
