@@ -20,19 +20,57 @@ class ConnectForm extends Component {
         host: privateLocalCreds.host || process.env.NEO4J_URI || 'localhost',
         port: privateLocalCreds.port || 7687,
         encrypted: _.isNil(privateLocalCreds.encrypted) ? false : privateLocalCreds.encrypted,
+        errors: {
+            host: null,
+            port: null,
+            username: null,
+            password: null,
+            encrypted: null,
+        }
     };
 
-    inputUpdated = (_, data) => {
+    formHasErrors = () => !_.isNil(
+        this.state.errors.host || this.state.errors.port || this.state.errors.username ||
+        this.state.errors.password || this.state.errors.encrypted);
+
+    inputUpdated = (meh, data) => {
         const { name, value } = data;
+
+        const errors = _.cloneDeep(this.state.errors);
+        if (name === 'host' && value && value.match(/[\/:\#\?\&\@]/)) {
+            errors.host = 'Host can only contain an IP address or hostname, no scheme (http) or port';
+        } else {
+            // Clear error if one used to be present.
+            errors.host = null;
+        }
+
+        if (name === 'port' && value && value.match(/[^0-9]/)) {
+            errors.port = 'Port must be a number, for example 7687 for Bolt'
+        } else {
+            errors.port = null;
+        }
+
+        if (name === 'password' && !value) {
+            errors.password = 'You must specify a password';
+        } else {
+            errors.password = null;
+        }
+
+        if (name === 'username' && !value) {
+            errors.username = 'You must specify a username';
+        } else {
+            errors.username = null;
+        }
 
         if (name === 'encrypted') {
             // Checkbox passed through checked property, not value.
             return this.setState({
                 [name]: data.checked,
+                errors,
             });
         }
 
-        this.setState({ [name]: value });
+        this.setState({ [name]: value, errors });
     };
 
     onSubmit = () => this.props.onSubmit(this.state);
@@ -59,6 +97,10 @@ class ConnectForm extends Component {
                                 onChange={this.inputUpdated}
                                 placeholder="Host"
                             />
+
+                            <Message 
+                                visible={!_.isNil(this.state.errors.host)} 
+                                warning>{this.state.errors.host}</Message>
                         </Form.Field>
 
                         <Form.Field required>
@@ -69,6 +111,9 @@ class ConnectForm extends Component {
                                 onChange={this.inputUpdated}
                                 placeholder="Port"
                             />
+                            <Message 
+                                visible={!_.isNil(this.state.errors.port)} 
+                                warning>{this.state.errors.port}</Message>
                         </Form.Field>
 
                         <Form.Field required>
@@ -79,6 +124,9 @@ class ConnectForm extends Component {
                                 onChange={this.inputUpdated}
                                 placeholder="Username"
                             />
+                            <Message 
+                                visible={!_.isNil(this.state.errors.username)} 
+                                warning>{this.state.errors.username}</Message>
                         </Form.Field>
 
                         <Form.Field required>
@@ -90,6 +138,9 @@ class ConnectForm extends Component {
                                 type="password"
                                 placeholder="Password"
                             />
+                            <Message 
+                                visible={!_.isNil(this.state.errors.password)} 
+                                warning>{this.state.errors.password}</Message>
                         </Form.Field>
 
                         <Form.Field>
@@ -108,6 +159,7 @@ class ConnectForm extends Component {
                 </Modal.Content>
                 <Modal.Actions>
                     <Button
+                        disabled={this.formHasErrors()}
                         onClick={this.onSubmit}
                         positive
                         icon="right arrow"
