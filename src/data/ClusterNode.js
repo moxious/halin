@@ -17,7 +17,7 @@ export default class ClusterNode {
     constructor(record) {
         this.id = record.get('id');
         this.addresses = record.get('addresses');
-        this.role = record.get('role');
+        this.role = (record.get('role') || '').trim();
         this.database = record.get('database');
         this.dbms = {};
         this.driver = null;

@@ -16,6 +16,8 @@ import sentry from '../sentry/index';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 
+const LEADER_COLOR = '#000000';
+
 const DEFAULT_PALETTE = [
     '#f68b24', 'steelblue', '#619F3A', '#dfecd7', '#e14594', '#7045af', '#2b3595',
 ];
@@ -297,6 +299,10 @@ class ClusterTimeseries extends Component {
             return 'transparent';
         }
 
+        if (window.halinContext.clusterNodes[idx].role === 'LEADER') {
+            return LEADER_COLOR;
+        }
+
         return this.palette[idx % this.palette.length];
     }
 
@@ -392,7 +398,9 @@ class ClusterTimeseries extends Component {
                                 categories={this.nodes.map((addr, idx) => ({
                                     key: ClusterTimeseries.keyFor(addr, this.state.displayProperty),
                                     label: window.halinContext.clusterNodes[idx].getLabel(),
-                                    style: { fill: this.chooseColor(idx) },
+                                    style: { 
+                                        fill: this.chooseColor(idx),
+                                    },
                                 }))}
                             />
                         </Grid.Column>

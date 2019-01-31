@@ -60,15 +60,15 @@ export default class ClusterNodeTabHeader extends Component {
         );
     };
 
+    isLeader = () => `${this.props.node.role}`.toLowerCase() === 'leader';
+    isReadReplica = () => `${this.props.node.role}`.toLowerCase() === 'read_replica';
+
     statusIcon = () => {
         const node = this.props.node;
 
-        const leader = `${node.role}`.toLowerCase() === 'leader';
-        const replica = `${node.role}`.toLowerCase() === 'read_replica';
-
         let iconName;
-        if(leader) { iconName = 'star'; }
-        else if(replica) { iconName = 'copy'; }
+        if(this.isLeader()) { iconName = 'star'; }
+        else if(this.isReadReplica()) { iconName = 'copy'; }
         else { iconName = 'circle'; }  // Follower
 
         const color = this.colorFor(this.state.ratio);
@@ -91,7 +91,9 @@ export default class ClusterNodeTabHeader extends Component {
                     position='bottom left'
                 />
                  
-                { node.getLabel() }
+                <span style={{
+                    fontWeight: this.isLeader() ? 'bold' : 'normal',
+                }}>{ node.getLabel() }</span>
             </Menu.Item>
         );
     }
