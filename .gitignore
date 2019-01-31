@@ -25,3 +25,4 @@ chrome-user-data
 dist
 grafana
 cluster-credentials.json
+reports
