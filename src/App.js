@@ -9,6 +9,7 @@ import Neo4jConfiguration from './configuration/Neo4jConfiguration';
 import PerformancePane from './performance/PerformancePane';
 import OSPane from './performance/OSPane';
 import PluginPane from './db/PluginPane';
+import LogsPane from './db/LogsPane';
 import PermissionsPane from './configuration/PermissionsPane';
 import ClusterOverviewPane from './overview/ClusterOverviewPane';
 import ClusterNodeTabHeader from './ClusterNodeTabHeader';
@@ -58,6 +59,11 @@ class Halin extends Component {
         render: () => this.paneWrapper(
           <PluginPane key={key} node={node} driver={driver} />),
       },
+      {
+        menuItem: 'Logs',
+        render: () => this.paneWrapper(
+          <LogsPane key={key} node={node} driver={driver} />),
+      }
     ]),
   };
 
