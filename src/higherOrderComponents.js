@@ -55,6 +55,29 @@ const adminOnlyComponent = (WrappedComponent, heading) => {
     };
 };
 
+const apocOnlyComponent = (WrappedComponent, heading) => {
+    return class extends Component {
+        render() {
+            if (window.halinContext.supportsAPOC()) {
+                return <WrappedComponent {...this.props} />;
+            }
+
+            return (
+                <div className='APOCOnly'>
+                    { heading ? <h3>{heading}</h3> : '' }
+                    <Message warning icon style={smallCentered}>
+                        <Icon name='warning' />
+                        <Message.Content>
+                            This feature is only available for databases
+                            that have APOC installed.
+                        </Message.Content>
+                    </Message>
+                </div>
+            )
+        }
+    }
+};
+
 const enterpriseOnlyComponent = (WrappedComponent, heading) => {
     return class extends Component {
         render() {
@@ -81,4 +104,5 @@ export default {
     adminOnlyComponent,
     enterpriseOnlyComponent,
     clusterOnlyComponent,
+    apocOnlyComponent,
 };

@@ -113,6 +113,10 @@ export default class HalinContext {
         return !this.isEnterprise();
     }
 
+    supportsAPOC() {
+        return this.clusterNodes[0].supportsAPOC();
+    }
+
     /**
      * Returns true if the context provides for native auth management, false otherwise.
      */

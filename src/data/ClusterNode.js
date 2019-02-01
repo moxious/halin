@@ -107,6 +107,10 @@ export default class ClusterNode {
         return !this.isEnterprise();
     }
 
+    supportsAPOC() {
+        return this.dbms.apoc;
+    }
+
     /**
      * Returns true if the context provides for native auth management, false otherwise.
      */
@@ -220,7 +224,26 @@ export default class ClusterNode {
                 this.dbms.authEnabled = true;
             });
 
-        return Promise.all([componentsPromise, authPromise, authEnabledPromise])
+        const apocProbePromise = session.run('RETURN apoc.version()', {})
+            .then(results => {
+                this.dbms.apoc = true;
+            })
+            .catch(err => {
+                const str = `${err}`;
+
+                // Either way APOC isn't present, but only log the error if it's exotic.
+                // If it errors with unknown function, that's how you know APOC isn't installed.
+                if (str.indexOf('Unknown function') === -1) {
+                    sentry.reportError('APOC probe failed', err);
+                }
+                this.dbms.apoc = false;
+            });
+
+        return Promise.all([
+            componentsPromise, 
+            authPromise,
+            apocProbePromise,
+            authEnabledPromise])
             .then(whatever => {
                 if (this.isCommunity()) {
                     // #operability As a special exception, community will fail 
