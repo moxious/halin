@@ -1,7 +1,7 @@
 {
   "name": "halin",
   "description": "Halin helps you monitor and improve your Neo4j graph",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "neo4jDesktop": {
     "apiVersion": "^1.2.0"
   },
