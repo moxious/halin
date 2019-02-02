@@ -1,3 +1,12 @@
+/**
+ * Higher order components are wrappers we put around other components, in order to express
+ * their dependencies / requirements.  For example, some components only work with Neo4j
+ * Enterprise, and rather than putting this check in every component, we provide a HOC to
+ * wrap something that requires Enterprise.
+ * 
+ * Generally halin is using these things to express feature requirements the database must
+ * have in order for a certain component to work.
+ */
 import React, { Component } from 'react';
 import { Icon, Message } from 'semantic-ui-react';
 
@@ -55,6 +64,32 @@ const adminOnlyComponent = (WrappedComponent, heading) => {
     };
 };
 
+const csvMetricsComponent = (WrappedComponent,  heading) => {
+    return class extends Component {
+        render() {
+            if (this.props.node && this.props.node.csvMetricsEnabled()) {
+                return <WrappedComponent {...this.props} />;
+            }
+
+            return (
+                <div className='CSVMetricsOnly'>
+                    { heading ? <h3>{heading}</h3> : '' }
+                    <Message warning icon style={smallCentered}>
+                        <Icon name='warning' />
+                        <Message.Content>
+                            This feature is only available for databases
+                            that have CSV metrics enabled.   See the
+                            <a href='https://neo4j.com/docs/operations-manual/current/monitoring/metrics/expose/#metrics-csv'>
+                            operations manual section on exposing metrics</a>
+                            to configure this for your database.
+                        </Message.Content>
+                    </Message>
+                </div>
+            )
+        }
+    }
+};
+
 const apocOnlyComponent = (WrappedComponent, heading) => {
     return class extends Component {
         render() {
@@ -105,4 +140,5 @@ export default {
     enterpriseOnlyComponent,
     clusterOnlyComponent,
     apocOnlyComponent,
+    csvMetricsComponent,
 };
