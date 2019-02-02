@@ -25,6 +25,7 @@ class LogViewer extends Component {
                     whiteSpace: 'unset', 
                     textAlign: 'left',
                     fontFamily: 'monospace',
+                    fontSize: '0.8em',
                 } 
             },
         ],
@@ -35,14 +36,24 @@ class LogViewer extends Component {
         console.log(this);
 
         let query = `
-            CALL apoc.file.stream("logs/${this.props.file}") 
+            CALL apoc.file.stream("logs/${this.props.file}", { last: $n }) 
             YIELD lineNo, line 
             RETURN lineNo, line
             ORDER BY lineNo DESC LIMIT $limit
         `;
 
+        if (!this.state.partial) {
+            query = `
+            CALL apoc.file.stream("logs/${this.props.file}") 
+            YIELD lineNo, line 
+            RETURN lineNo, line
+            ORDER BY lineNo DESC LIMIT $limit            
+            `;
+        }
+
         const params = {
-            limit: this.state.partial ? Math.min(this.state.lastN, MAX_ROWS) : MAX_ROWS,
+            n: parseInt(this.state.lastN),
+            limit: MAX_ROWS,
         };
         
         console.log('sending params', params, 'because of', this.state);
@@ -110,7 +121,7 @@ class LogViewer extends Component {
                     <Button icon labelPosition='left' 
                         onClick={() => this.load()} 
                         disabled={!_.isNil(this.state.loadOp)}>
-                        <Icon name='download'/>
+                        <Icon name='feed'/>
                         Load
                     </Button>
                 </Form>
@@ -159,6 +170,10 @@ class LogsPane extends Component {
                 menuItem: 'debug.log', 
                 render: () => this.viewerFor('debug.log'),
             },
+            {
+                menuItem: 'security.log',
+                render: () => this.viewerFor('security.log'),
+            }
         ];
 
         return (
