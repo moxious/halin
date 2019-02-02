@@ -4,6 +4,7 @@ import neo4jErrors from '../driver/errors';
 import _ from 'lodash';
 import math from 'mathjs';
 import Ring from 'ringjs';
+import queryLibrary from '../data/query-library';
 
 const MAX_OBSERVATIONS = 500;
 
@@ -112,6 +113,14 @@ export default class ClusterNode {
     }
 
     /**
+     * If true, this cluster node has CSV metrics enabled which, with APOC, we can 
+     * access.
+     */
+    csvMetricsEnabled() {
+        return this.dbms.csvMetricsEnabled;
+    }
+
+    /**
      * Returns true if the context provides for native auth management, false otherwise.
      */
     supportsNativeAuth() {
@@ -143,6 +152,38 @@ export default class ClusterNode {
 
         return Promise.all([functionsPromise, procsPromise])
             .then(results => _.flatten(results));
+    }
+
+    /**
+     * Gets a list of metrics that the node has available, as per:
+     * https://neo4j.com/docs/operations-manual/current/monitoring/metrics/expose/#metrics-csv
+     * 
+     * Guaranteed this promise won't fail, but it may return [] if the node doesn't support
+     * metrics.
+     * 
+     * @return Promise that resolves to an array of objects.
+     */
+    getAvailableMetrics() {
+        if (!_.isNil(this.metrics)) {
+            return this.metrics;
+        }
+
+        return this.run(queryLibrary.LIST_METRICS.query, {})
+            .then(results =>
+                results.records.map(r => ({
+                    name: r.get('name'),
+                    lastUpdated: r.get('lastUpdated'),
+                    path: r.get('path'),
+                })))
+            .then(metrics => {
+                this.metrics = metrics;
+                return metrics;
+            })
+            .catch(err => {
+                this.metrics = [];
+                sentry.reportError('Failed to list metrics', err);
+            })
+            .then(() => this.metrics);
     }
 
     checkComponents() {
@@ -224,6 +265,24 @@ export default class ClusterNode {
                 this.dbms.authEnabled = true;
             });
 
+        const csvMetricsProbePromise = session.run(`
+            CALL dbms.listConfig() 
+            YIELD name, value 
+            WHERE name='metrics.csv.enabled' 
+            return value;`, {})
+                .then(results => {
+                    const row = results.records[0];
+                    if (row && row.get('value') === 'true') {
+                        this.dbms.csvMetricsEnabled = true;
+                    } else {
+                        sentry.fine('CSV metrics not enabled', row);
+                    }
+                })
+                .catch(err => {
+                    sentry.fine('Error on CSV metrics enabled probe', err);
+                    this.dbms.csvMetricsEnabled = false;
+                });
+
         const apocProbePromise = session.run('RETURN apoc.version()', {})
             .then(results => {
                 this.dbms.apoc = true;
@@ -243,6 +302,7 @@ export default class ClusterNode {
             componentsPromise, 
             authPromise,
             apocProbePromise,
+            csvMetricsProbePromise,
             authEnabledPromise])
             .then(whatever => {
                 if (this.isCommunity()) {
