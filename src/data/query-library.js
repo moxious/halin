@@ -271,5 +271,35 @@ export default {
             { Header: 'PageHits', accessor: 'pageHits', Cell: cdt.numField },
             { Header: 'PageFaults', accessor: 'pageFaults', Cell: cdt.numField },
         ],
+    },
+
+    LIST_METRICS: {
+        query: `
+            CALL apoc.metrics.list() YIELD name, lastUpdated, path
+            RETURN name, lastUpdated, path
+            ORDER BY lastUpdated ASC;
+        `,
+        columns: [
+            { Header: 'Name', accessor: 'name' },
+            { Header: 'Last Updated', accessor: 'lastUpdated' },
+            { Header: 'Path', accessor: 'path', show: false },
+        ],
+    },
+
+    GET_METRIC: {
+        query: `
+            CALL apoc.metrics.get($metric)
+            YIELD t, value
+            RETURN t, value
+            ORDER BY t DESC LIMIT $last
+        `,
+        columns: [
+            // { Header: 'Timestamp', accessor: 't' },
+            { Header: 'Value', accessor: 'value' },
+        ],
+        parameters: { 
+            last: 'Count of most recent items to fetch from the file',
+            metric: 'Name of the metric to fetch'
+        },
     }
 };
