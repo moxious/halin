@@ -1,5 +1,9 @@
 # Halin Release Notes
 
+## 0.7.2, 0.7.3
+
+- Fixes an issue identified where incorrect roles were reported
+
 ## 0.7.1
 
 - Fixes #55; removes DBcount component and institutes a new plugins / CypherSurface 
