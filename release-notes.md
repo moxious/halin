@@ -1,6 +1,6 @@
 # Halin Release Notes
 
-## 0.7.2
+## 0.7.2, 0.7.3
 
 - Fixes an issue identified where incorrect roles were reported
 
