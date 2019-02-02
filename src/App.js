@@ -10,6 +10,7 @@ import PerformancePane from './performance/PerformancePane';
 import OSPane from './performance/OSPane';
 import PluginPane from './db/PluginPane';
 import LogsPane from './db/LogsPane';
+import MetricsPane from './db/metrics/MetricsPane';
 import PermissionsPane from './configuration/PermissionsPane';
 import ClusterOverviewPane from './overview/ClusterOverviewPane';
 import ClusterNodeTabHeader from './ClusterNodeTabHeader';
@@ -58,6 +59,12 @@ class Halin extends Component {
         menuItem: 'Plugins',
         render: () => this.paneWrapper(
           <PluginPane key={key} node={node} driver={driver} />),
+      },
+      {
+        menuItem: 'Metrics',
+        render: () => this.paneWrapper(
+          <MetricsPane key={key} node={node} driver={driver} />
+        ),
       },
       {
         menuItem: 'Logs',
