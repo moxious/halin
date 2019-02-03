@@ -6,16 +6,10 @@ import _ from 'lodash';
 import Spinner from '../../Spinner';
 import sentry from '../../sentry';
 import queryLibrary from '../../data/query-library';
-import { Grid, Breadcrumb, Dropdown, Message } from 'semantic-ui-react';
-import { styler, Charts, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
-import timewindow from '../../timeseries/timewindow';
+import { Grid, Dropdown, Message } from 'semantic-ui-react';
 import unflatten from 'unflatten';
-import Ring from 'ringjs';
-import {
-    TimeSeries,
-    TimeRange,
-    TimeEvent,
-} from 'pondjs';
+import MetricsChart from './MetricsChart';
+import MetricDescription from './MetricDescription';
 
 const RECORDS = 100;
 const MAX_AGE = 2 * 1000;
@@ -27,6 +21,7 @@ class MetricsPane extends Component {
         activeMetric: null,
         menu: {},
         observations: RECORDS,
+        dateFormat: 'MMMM Do YYYY, h:mm:ss a',
     };
 
     componentDidMount() {
@@ -34,7 +29,9 @@ class MetricsPane extends Component {
             .then(metrics => {
                 // Convert to the format that the dropdown menu wants.
                 const metricOptions = _.sortBy(_.uniqBy(metrics.map(m => ({
-                    key: m.name, text: m.name, value: m.name,
+                    key: m.name, 
+                    text: m.name, 
+                    value: m.name,
                 })), 'key'), 'key');
 
                 const flatMap = {};
@@ -117,22 +114,12 @@ class MetricsPane extends Component {
                             </Message>
                         </Grid.Column>
                         <Grid.Column width={8}>
-                            {this.content()}
+                            { this.content() }
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>
             </div>
         )
-    }
-
-    getChartMin() {
-        const data = this.state[this.state.activeMetric];
-        return Math.min(...data.map(d => d.value));
-    }
-
-    getChartMax() {
-        const data = this.state[this.state.activeMetric];
-        return Math.max(...data.map(d => d.value));
     }
 
     getChartStart() {
@@ -147,13 +134,14 @@ class MetricsPane extends Component {
         return arr[arr.length - 1].t.getTime();
     }
 
-    displayTimeRange() {
-        const data = this.state[this.state.activeMetric];
-        const timings = data.map(v => v.t.getTime());
-        const startTime = Math.min(...timings);
-        const endTime = Math.max(...timings);
-
-        return timewindow.displayTimeRange(new TimeRange(new Date(startTime), new Date(endTime)));
+    describeDateRange() {
+        return (
+            <p>
+                <strong>{moment.utc(this.getChartStart()).format(this.state.dateFormat)}</strong>
+                &nbsp;-&nbsp;
+                <strong>{moment.utc(this.getChartEnd()).format(this.state.dateFormat)}</strong>
+            </p>
+        );
     }
 
     content() {
@@ -165,92 +153,19 @@ class MetricsPane extends Component {
             return <Spinner active='true' />
         }
 
-        console.log('metric juice', this.state.activeMetric, this.state);
-        const displayColumns = [
-            { Header: this.state.activeMetric, accessor: 'value' },
-        ];
-
-        const style = styler(displayColumns.map((col, idx) => ({
-            key: col.accessor,
-            color: '#000000',
-            width: 3,
-        })));
-
-        const rawObservations = this.state[this.state.activeMetric];
-        const ring = new Ring(rawObservations.length);
-        this.dataSeries = new TimeSeries({
-            name: 'Data Series',
-            events: rawObservations.map(v => new TimeEvent(v.t, v.value)),
-        });
-
-        const dateFormat = 'MMMM Do YYYY, h:mm:ss a';
-        const crumbs = this.state.activeMetric.split(/\./);
-
         return (
             <div className='content' style={{ paddingTop: '15px', paddingBottom: '15px' }}>
                 <Grid>
                     <Grid.Row columns={1}>
-                        <Breadcrumb size='large'>
-                            {
-                                crumbs.map((piece, idx) => 
-                                    <span key={'bc-'+idx}>
-                                        <Breadcrumb.Section active={idx === crumbs.length - 1}>{piece}</Breadcrumb.Section>
-                                        { idx < crumbs.length - 1 ? <Breadcrumb.Divider icon='right chevron'/> : '' }
-                                    </span>)
-                            }
-                        </Breadcrumb>
+                        <MetricDescription metric={this.state.activeMetric} />
                     </Grid.Row>
 
                     <Grid.Row columns={1}>
-                        <Grid.Column>
-                            {/* <Legend type="swatch"
-                                style={style}
-                                categories={displayColumns.map((col, idx) => ({
-                                    key: col.accessor,
-                                    label: col.Header || col.accessor,
-                                    style: { fill: '#000000' },
-                                }))}
-                            /> */}
-
-                            {
-                                <p>
-                                    <strong>{moment.utc(this.getChartStart()).format(dateFormat)}</strong>
-                                    &nbsp;-&nbsp;
-                                    <strong>{moment.utc(this.getChartEnd()).format(dateFormat)}</strong>
-                                </p>
-                            }
-                        </Grid.Column>
+                        <Grid.Column>{ this.describeDateRange() }</Grid.Column>
                     </Grid.Row>
+
                     <Grid.Row columns={1}>
-                        <ChartContainer
-                            showGrid={true}
-                            showGridPosition='under'
-                            // width='100%'
-                            enablePanZoom={false}
-                            timeAxisAngledLabels={true}
-                            timeAxisHeight={65}
-                            timeRange={this.displayTimeRange()}>
-                            <ChartRow height="150">
-                                <YAxis id="y"
-                                    min={this.getChartMin()}
-                                    max={this.getChartMax()}
-                                    width="70"
-                                    showGrid={true}
-                                    type="linear" />
-                                <Charts>
-                                    {
-                                        displayColumns.map((col, idx) =>
-                                            <LineChart key={`ct-${idx}`}
-                                                axis="y"
-                                                style={style}
-                                                columns={[col.accessor]}
-                                                series={this.dataSeries}
-                                            />
-                                        )
-                                    }
-                                </Charts>
-                            </ChartRow>
-                        </ChartContainer>
+                        <MetricsChart metric={this.state.activeMetric} data={this.state[this.state.activeMetric]} />
                     </Grid.Row>
                 </Grid>
             </div>
@@ -258,4 +173,7 @@ class MetricsPane extends Component {
     }
 }
 
-export default hoc.apocOnlyComponent(hoc.csvMetricsComponent(MetricsPane));
+export default hoc.apocOnlyComponent(
+    hoc.csvMetricsComponent(
+        MetricsPane));
+        
