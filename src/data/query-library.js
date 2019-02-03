@@ -13,6 +13,10 @@ export default {
     },
 
     CLUSTER_ROLE: {
+        dependency: {
+            type: 'deploy',
+            name: 'cluster',
+        },
         query: 'CALL dbms.cluster.role()',
         columns: [
             { Header: 'Role', accessor: 'role' },
@@ -274,6 +278,10 @@ export default {
     },
 
     LIST_METRICS: {
+        dependency: {
+            type: 'procedure',
+            name: 'apoc.metrics.list',
+        },
         query: `
             CALL apoc.metrics.list() YIELD name, lastUpdated, path
             RETURN name, lastUpdated, path
@@ -287,6 +295,10 @@ export default {
     },
 
     GET_METRIC: {
+        dependency: {
+            type: 'procedure',
+            name: 'apoc.metrics.get',
+        },
         query: `
             CALL apoc.metrics.get($metric)
             YIELD t, value
