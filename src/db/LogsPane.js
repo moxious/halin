@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import uuid from 'uuid';
 import hoc from '../higherOrderComponents';
 import _ from 'lodash';
-import { Tab, Button, Icon, Form, Radio, Input } from 'semantic-ui-react';
+import { Tab, Button, Icon, Form, Radio } from 'semantic-ui-react';
 import Spinner from '../Spinner';
 import ReactTable from 'react-table';
 import neo4j from 'neo4j-driver';
@@ -44,19 +44,17 @@ class LogViewer extends Component {
 
         if (!this.state.partial) {
             query = `
-            CALL apoc.file.stream("logs/${this.props.file}") 
-            YIELD lineNo, line 
-            RETURN lineNo, line
-            ORDER BY lineNo DESC LIMIT $limit            
+                CALL apoc.file.stream("logs/${this.props.file}") 
+                YIELD lineNo, line 
+                RETURN lineNo, line
+                ORDER BY lineNo DESC LIMIT $limit            
             `;
         }
 
-        const params = {
-            n: parseInt(this.state.lastN),
-            limit: MAX_ROWS,
-        };
-        
-        console.log('sending params', params, 'because of', this.state);
+        let n = parseInt(this.state.lastN, 10);
+        if (Number.isNaN(n)) { n = 20; }
+
+        const params = { n, limit: MAX_ROWS };
         const promise = this.props.node.run(query, params)
             .then(results => {
                 console.log('data came back');
@@ -153,11 +151,12 @@ class LogsPane extends Component {
     };
     
     viewerFor(file) {
-        console.log('LogsPane', this.props);
-        return <LogViewer key={file}
-            node={this.props.node}
-            driver={this.props.driver}
-            file={file} />
+        return (
+            <LogViewer key={file}
+                node={this.props.node}
+                driver={this.props.driver}
+                file={file} />
+        );
     }
 
     render() {
