@@ -15,7 +15,7 @@ export default class AppFooter extends Component {
                 <Modal 
                     trigger={<Button icon='settings'/>}>
                     <Header>Halin Internal Settings</Header>
-                    <Modal.Content>
+                    <Modal.Content scrolling>
                         <SettingsPane/>
                     </Modal.Content>
                 </Modal>
