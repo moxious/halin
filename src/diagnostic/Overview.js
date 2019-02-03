@@ -9,6 +9,11 @@ import './Overview.css';
 import sentry from '../sentry/index';
 import neo4jErrors from '../driver/errors';
 
+/**
+ * @deprecated
+ * This doesn't add much value but won't be removed yet.  Many aspects of this component
+ * can be pre-loaded by HalinContext and put in the settings menu.
+ */
 class Overview extends Component {
     state = {
         name: null,
