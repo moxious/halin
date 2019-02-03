@@ -38,7 +38,6 @@ class MetricsPane extends Component {
                 metricOptions.forEach(mo => flatMap[mo.key] = mo.key);
 
                 const menu = unflatten(flatMap);
-                console.log('Unflattened', this.menu);
 
                 // Sorted and unique options
                 this.setState({ metrics: metricOptions, menu });
@@ -46,9 +45,6 @@ class MetricsPane extends Component {
     }
 
     selectMetric = (event, data) => {
-        console.log('event', event);
-        console.log(data.value);
-
         const promise = this.getMetric(data.value);
         this.setState({
             activeMetric: data.value,
@@ -89,7 +85,6 @@ class MetricsPane extends Component {
             .then(data => {
                 this.loading = false;
                 this.setState({ [metric]: data });
-                console.log('OBSERVATIONS', data.length);
                 return data;
             });
     }
@@ -176,4 +171,3 @@ class MetricsPane extends Component {
 export default hoc.apocOnlyComponent(
     hoc.csvMetricsComponent(
         MetricsPane));
-        
