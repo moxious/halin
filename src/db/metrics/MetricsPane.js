@@ -92,30 +92,6 @@ class MetricsPane extends Component {
     }
 
     render() {
-        if (!_.isNil(this.state.metrics) && this.state.metrics.length === 0) {
-            return (
-                <Message warning>
-                    <Message.Header>Additional Configuration Needed</Message.Header>
-                    <Message.Content>
-                        <p>In order to view metrics in Halin, some additional configuration of your Neo4j
-                           instance is necessary.
-                        </p>
-
-                        <ul style={{textAlign: 'left'}}>
-                            <li>Ensure that your Neo4j instance <a href='https://neo4j.com/docs/operations-manual/current/monitoring/metrics/expose/#metrics-csv'>exposes CSV metrics</a>. 
-                            This is on by default in many versions of Neo4j.</li>
-                            <li>Ensure that you have <a href='https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases'>APOC installed</a>  
-                            <strong>and that it is a recent version</strong> higher than 3.5.01 for Neo4j 3.5, or 3.4.0.4 for Neo4j 3.4</li>
-                            <li>Ensure that your {code('neo4j.conf')} includes {code('apoc.import.file.enabled=true')}, which
-                            will permit access to the metrics.
-                            </li>
-                        </ul>
-
-                    </Message.Content>
-                </Message>            
-            );
-        }
-
         return (
             <div className='MetricsPane'>
                 <Grid>
@@ -213,7 +189,7 @@ const notSupported = () => {
                 <ul style={{textAlign: 'left'}}>
                     <li>Ensure that your Neo4j instance <a href='https://neo4j.com/docs/operations-manual/current/monitoring/metrics/expose/#metrics-csv'>exposes CSV metrics</a>. 
                     This is on by default in many versions of Neo4j.</li>
-                    <li>Ensure that you have <a href='https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases'>APOC installed</a>  
+                    <li>Ensure that you have <a href='https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases'>APOC installed</a>&nbsp;
                     <strong>and that it is a recent version</strong> higher than 3.5.01 for Neo4j 3.5, or 3.4.0.4 for Neo4j 3.4</li>
                     <li>Ensure that your {code('neo4j.conf')} includes {code('apoc.import.file.enabled=true')}, which
                     will permit access to the metrics.
