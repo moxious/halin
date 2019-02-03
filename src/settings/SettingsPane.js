@@ -29,12 +29,14 @@ class DetectedSettings extends Component {
                         <Icon name='user circle' color='green' />
                         { ctx.getCurrentUser().username } Current User with roles { ctx.getCurrentUser().roles }
                     </List.Item>
-                    <List.Item>{ this.lineItem(ctx.supportsAPOC(), 'Supports APOC') }</List.Item>
-                    <List.Item>{ this.lineItem(ctx.isCluster(), 'Clustered Deployment') }</List.Item>
                     <List.Item>{ this.lineItem(ctx.isEnterprise(), 'Enterprise Edition') }</List.Item>
                     <List.Item>{ this.lineItem(ctx.isCommunity(), 'Community Edition') }</List.Item>
                     <List.Item>{ this.lineItem(ctx.supportsAuth(), 'Supports authorization') }</List.Item>
                     <List.Item>{ this.lineItem(ctx.supportsNativeAuth(), 'Native Authorization') }</List.Item>
+                    <List.Item>{ this.lineItem(ctx.supportsAPOC(), 'Supports APOC') }</List.Item>
+                    <List.Item>{ this.lineItem(ctx.supportsFileStreaming(), 'Supports File Streaming') }</List.Item>
+                    <List.Item>{ this.lineItem(ctx.supportsMetrics(), 'Supports Metrics') }</List.Item>
+                    <List.Item>{ this.lineItem(ctx.isCluster(), 'Clustered Deployment') }</List.Item>
                 </List>
             </div>
         );

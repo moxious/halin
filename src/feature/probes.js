@@ -34,6 +34,23 @@ export default {
         return componentsPromise;
     },
 
+    hasFileStreaming: node => {
+        const prom = node.run(`
+            CALL dbms.procedures() 
+            YIELD name 
+            WHERE name="apoc.file.stream" 
+            RETURN count(name) as n
+        `, {})
+            .then(results => {
+                return results.rows[0].get('n').toNumber() > 0;
+            })
+            .catch(err => {
+                sentry.reportError('Failed to probe for file streaming procedures', err);
+                return false;
+            });
+        return prom;
+    },
+
     /**
      * @returns true if APOC is present, false otherwise.
      */
@@ -163,6 +180,13 @@ export default {
                     path: r.get('path'),
                 })))
             .catch(err => {
+                const str = `${err}`;
+                if (str.indexOf('no procedure') > -1 && str.indexOf('apoc.metrics.list') > -1) {
+                    // This is an ignoreable error that just means the user has an older APOC installed.
+                    // They may have metrics enabled but we can't get to them, so we'll say there are none.
+                    return [];
+                }
+
                 sentry.reportError('Failed to list metrics', err);
                 return [];
             });

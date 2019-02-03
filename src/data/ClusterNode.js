@@ -114,6 +114,10 @@ export default class ClusterNode {
         return this.dbms.apoc;
     }
 
+    supportsFileStreaming() {
+        return this.dbms.fileStreaming;
+    }
+
     /**
      * If true, this cluster node has CSV metrics enabled which, with APOC, we can 
      * access.
@@ -195,6 +199,8 @@ export default class ClusterNode {
                 .then(result => { this.dbms.csvMetricsEnabled = result; }),
             featureProbes.hasAPOC(this)
                 .then(result => { this.dbms.apoc = result; }),
+            featureProbes.hasFileStreaming(this)
+                .then(result => { this.dbms.fileStreaming = result; }),
             featureProbes.getAvailableMetrics(this)
                 .then(metrics => { this.metrics = metrics; }),
         ];

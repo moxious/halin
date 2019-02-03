@@ -117,6 +117,14 @@ export default class HalinContext {
         return this.clusterNodes[0].supportsAPOC();
     }
 
+    supportsFileStreaming() {
+        return this.clusterNodes[0].supportsFileStreaming();
+    }
+
+    supportsMetrics() {
+        return this.clusterNodes[0].metrics && this.clusterNodes[0].metrics.length > 0;
+    }
+
     /**
      * Returns true if the context provides for native auth management, false otherwise.
      */
