@@ -8,6 +8,27 @@ import neo4jErrors from '../driver/errors';
  * They all take a node as an argument and return true/false or a small piece of data.
  */
 export default {
+    getNameVersionsEdition: node => {
+        const componentsPromise = node.run('CALL dbms.components()', {})
+            .then(results => {
+                const rec = results.records[0];
+                return {
+                    name: rec.get('name'),
+                    versions: rec.get('versions'),
+                    edition: rec.get('edition'),
+                };
+            })
+            .catch(err => {
+                sentry.reportError(err, 'Failed to get DBMS components; this can be because user is not admin');
+                return {
+                    name: 'UNKNOWN',
+                    versions: [],
+                    edition: 'UNKNOWN',
+                };
+            });
+        return componentsPromise;
+    },
+
     hasAPOC: node => {
         const apocProbePromise = node.run('RETURN apoc.version()', {})
             .then(results => {

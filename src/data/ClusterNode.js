@@ -103,7 +103,7 @@ export default class ClusterNode {
     isEnterprise() {
         return this.dbms.edition === 'enterprise';
     }
-    
+
     isCommunity() {
         return !this.isEnterprise();
     }
@@ -191,33 +191,20 @@ export default class ClusterNode {
             throw new Error('ClusterNode has no driver');
         }
 
-        const q = 'call dbms.components()';
-        const session = this.driver.session();
-
-        const componentsPromise = session.run(q, {})
-            .then(results => {
-                const rec = results.records[0];
-                this.dbms.name = rec.get('name')
-                this.dbms.versions = rec.get('versions');
-                this.dbms.edition = rec.get('edition');
-            })
-            .catch(err => {
-                sentry.reportError(err, 'Failed to get DBMS components; this can be because user is not admin');
-                this.dbms.name = 'UNKNOWN';
-                this.dbms.versions = [];
-                this.dbms.edition = 'UNKNOWN';
-            });
-
-        const allProbes = [componentsPromise];
-
-        allProbes.push(featureProbes.supportsNativeAuth(this)
-            .then(result => { this.dbms.nativeAuth = result; }));
-        allProbes.push(featureProbes.authEnabled(this)
-            .then(result => { this.dbms.authEnabled = result; }));
-        allProbes.push(featureProbes.csvMetricsEnabled(this)
-            .then(result => { this.dbms.csvMetricsEnabled = result; }));
-        allProbes.push(featureProbes.hasAPOC(this)
-            .then(result => { this.dbms.apoc = result; }));
+        // Probes get individual pieces of information then assign them into our structure,
+        // so we can drive feature request functions for outside callers.
+        const allProbes = [
+            featureProbes.getNameVersionsEdition(this)
+                .then(result => { this.dbms = _.merge(_.cloneDeep(this.dbms), result); }),
+            featureProbes.supportsNativeAuth(this)
+                .then(result => { this.dbms.nativeAuth = result; }),
+            featureProbes.authEnabled(this)
+                .then(result => { this.dbms.authEnabled = result; }),
+            featureProbes.csvMetricsEnabled(this)
+                .then(result => { this.dbms.csvMetricsEnabled = result; }),
+            featureProbes.hasAPOC(this)
+                .then(result => { this.dbms.apoc = result; }),
+        ];
 
         return Promise.all(allProbes)
             .then(whatever => {
@@ -229,7 +216,6 @@ export default class ClusterNode {
                     this.dbms.nativeAuth = true;
                 }
 
-                session.close();
                 return whatever;
             });
     }
@@ -257,12 +243,12 @@ export default class ClusterNode {
      * @param {String} query a cypher query
      * @param {Object} params parameters to pass to the query.
      */
-    run(query, params={}) {
+    run(query, params = {}) {
         if (!this.driver) { throw new Error('ClusterNode has no driver!'); }
 
         const session = this.driver.session();
 
-        const start = new Date().getTime();        
+        const start = new Date().getTime();
         return session.run(query, params)
             .then(results => {
                 const elapsed = new Date().getTime() - start;
