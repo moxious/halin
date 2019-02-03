@@ -102,3 +102,33 @@ you'll catch updates.
 
 ## Serve in Neo4j Desktop env
 To serve it as a graph application, read the docs for that in the Neo4j Desktop development pages.
+
+## Design Notes
+
+This is a short overview of how Halin is put together, with hopes that it's useful for those
+hacking on it or wanting to extend it.
+
+The HalinContext class is a global and gets attached to the window object.  It always has an
+array of ClusterNode instances.  Halin treats single-node databases as a cluster with only one
+member.
+
+Both the HalinContext object and the ClusterNodes that it has have the concept of feature
+probes; when Halin starts up it gathers basic information about which sorts of features are supported by the database, which version, enterprise vs. community, and so on.  In this way,
+the UI can be adapted to a different layout depending on what the DB exposes and its version.
+
+Higher order components are provided which allow other components to express their
+requirements.  For example, in order to display metrics, those metrics have to be enabled server side.  In order to administer users, you have to be using enterprise, and so on.
+
+Each of the components then expresses requirements by wrapping themselves in a higher order 
+component, or none, if they work anywhere.
+
+Neo4j driver management is done centrally.  Components are discouraged from creating drivers
+or even using them. By using the ClusterNode object to run queries, we get to centrally manage
+all of that and also track performance and errors.
+
+Sentry is used throughout for error detection and reporting.
+
+Most of the actual display components are quite straightforward; the most complex bits of Halin
+are in dealing with how different the product surface for Neo4j is depending on the version
+and available features that are exposed.
+
