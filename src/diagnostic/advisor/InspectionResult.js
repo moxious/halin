@@ -21,7 +21,7 @@ export default class InspectionResult {
     isPass() { return this.level === InspectionResult.PASS; }
     isWarning() { return this.level === InspectionResult.WARN; }
     isInfo() { return this.level === InspectionResult.INFO; }
-}
+};
 
 InspectionResult.WARN = 'warning';
 InspectionResult.PASS = 'pass';
