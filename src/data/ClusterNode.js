@@ -147,7 +147,7 @@ export default class ClusterNode {
             name: rec.get('name'),
             signature: rec.get('signature'),
             description: rec.get('description'),
-            roles: rec.get('roles'),
+            roles: rec.has('roles') ? rec.get('roles') : [],
             type: t,
         }));
 

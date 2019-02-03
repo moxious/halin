@@ -242,16 +242,10 @@ export default class HalinContext {
             .then(results => {
                 const rec = results.records[0];
 
-                let roles = [];
-                try {
-                    // Community doesn't expose this field, and
-                    // it's an ignorable error
-                    roles = rec.get('roles');
-                } catch (e) { ; }
-
                 this.currentUser = {
                     username: rec.get('username'),
-                    roles,
+                    // Community doesn't have roles.
+                    roles: rec.has('roles') ? rec.get('roles') : [],
                     flags: rec.get('flags'),
                 };
                 
