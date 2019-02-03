@@ -165,7 +165,7 @@ export default class ClusterNode {
      */
     getAvailableMetrics() {
         if (!_.isNil(this.metrics)) {
-            return this.metrics;
+            return Promise.resolve(this.metrics);
         }
 
         return this.run(queryLibrary.LIST_METRICS.query, {})
