@@ -34,6 +34,10 @@ export default {
         return componentsPromise;
     },
 
+    /**
+     * File streaming (useful for logs and metrics) is an enabled feature if you have a
+     * particular APOC function.
+     */
     hasFileStreaming: node => {
         const prom = node.run(`
             CALL dbms.procedures() 
@@ -41,9 +45,7 @@ export default {
             WHERE name="apoc.file.stream" 
             RETURN count(name) as n
         `, {})
-            .then(results => {
-                return results.rows[0].get('n').toNumber() > 0;
-            })
+            .then(results => results.records[0].get('n').toNumber() > 0)
             .catch(err => {
                 sentry.reportError('Failed to probe for file streaming procedures', err);
                 return false;
