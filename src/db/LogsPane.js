@@ -100,42 +100,45 @@ class LogViewer extends Component {
     }
 
     render() {
+        const spacer = () => <div style={{paddingLeft: '15px', paddingRight: '15px'}}>&nbsp;</div>;
+
         return (
             <div className='LogViewer' key={this.state.key}>
                 <h3>{this.props.file}</h3>
 
                 <Form>
                     <Form.Field>
-                        <Radio
-                            label='Everything'
-                            name='howMuch'
-                            value='everything'
-                            checked={!this.state.partial}
-                            onChange={this.handleChange}
-                        />
+                        <Form.Group inline>
+                            <Radio
+                                label='Everything'
+                                name='howMuch'
+                                value='everything'
+                                checked={!this.state.partial}
+                                onChange={this.handleChange}
+                            />
+                            { spacer() }
+                            <Radio
+                                label='Last few entries'
+                                name='howMuch'
+                                value='partial'
+                                checked={this.state.partial}
+                                onChange={this.handleChange}
+                            />
+                            { spacer() }
+                            <Form.Input
+                                name='lastN'
+                                onChange={this.handleChange}
+                                style={{ width: '100px' }}
+                                value={this.state.lastN} />
+                            { spacer() }
+                            <Button icon labelPosition='left'
+                                onClick={() => this.load()}
+                                disabled={!_.isNil(this.state.loadOp)}>
+                                <Icon name='feed' />
+                                Load
+                            </Button>
+                        </Form.Group>
                     </Form.Field>
-
-                    <Form.Field inline>
-                        <Radio
-                            label='Last few entries'
-                            name='howMuch'
-                            value='partial'
-                            checked={this.state.partial}
-                            onChange={this.handleChange}
-                        />
-                        <Form.Input
-                            name='lastN'
-                            onChange={this.handleChange}
-                            style={{ width: '100px' }}
-                            value={this.state.lastN} />
-                    </Form.Field>
-
-                    <Button icon labelPosition='left'
-                        onClick={() => this.load()}
-                        disabled={!_.isNil(this.state.loadOp)}>
-                        <Icon name='feed' />
-                        Load
-                    </Button>
                 </Form>
 
                 {this.state.loadOp ? <Spinner active={true} /> : ''}
