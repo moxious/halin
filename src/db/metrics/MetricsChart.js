@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Ring from 'ringjs';
 import timewindow from '../../timeseries/timewindow';
 import { styler, Charts, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import {
@@ -28,7 +27,6 @@ export default class MetricsChart extends Component {
 
     render() {
         const rawObservations = this.props.data;
-        const ring = new Ring(rawObservations.length);
         this.dataSeries = new TimeSeries({
             name: 'Data Series',
             events: rawObservations.map(v => new TimeEvent(v.t, v.value)),
