@@ -68,6 +68,15 @@ class MetricsPane extends Component {
         return false;
     }
 
+    convertMetricTimestampToLocalDate(val) {
+        // Weird gotcha that is not documented:
+        // Timings in the metrics file are given in **seconds since the epoch** not ms.
+        // ¯\_(ツ)_/¯ - Also remember these are UTC timestamps, not local TZ.
+        const msSinceEpoch = val * 1000;
+        const utc = moment.utc(msSinceEpoch);
+        return utc.local().toDate();
+    }
+
     getMetric(metric) {
         if (this.haveCurrentMetricData(metric)) {
             return Promise.resolve(this.state[metric]);
@@ -77,7 +86,7 @@ class MetricsPane extends Component {
 
         return this.props.node.run(queryLibrary.GET_METRIC.query, { metric, last: this.state.observations })
             .then(data => data.records.map(r => ({
-                t: new Date(r.get('t').toNumber()),
+                t: this.convertMetricTimestampToLocalDate(r.get('t').toNumber()),
                 value: r.get('value'),
             })).sort((a, b) => a.t - b.t)) // Keep sorted by date
             .catch(err => {
@@ -134,9 +143,9 @@ class MetricsPane extends Component {
     describeDateRange() {
         return (
             <p>
-                <strong>{moment.utc(this.getChartStart()).format(this.state.dateFormat)}</strong>
+                <strong>{moment(this.getChartStart()).format(this.state.dateFormat)}</strong>
                 &nbsp;-&nbsp;
-                <strong>{moment.utc(this.getChartEnd()).format(this.state.dateFormat)}</strong>
+                <strong>{moment(this.getChartEnd()).format(this.state.dateFormat)}</strong>
             </p>
         );
     }
