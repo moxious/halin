@@ -1,5 +1,6 @@
 import sentry from '../sentry/index';
 import neo4jErrors from '../driver/errors';
+import queryLibrary from '../data/query-library';
 
 /**
  * A feature probe is a bit of code that runs against a cluster node to determine whether or not
@@ -8,6 +9,10 @@ import neo4jErrors from '../driver/errors';
  * They all take a node as an argument and return true/false or a small piece of data.
  */
 export default {
+    /**
+     * @returns Object of { name, versions, edition } with basic information about what kind
+     * of Neo4j this is (e.g. enterprise vs. community)
+     */
     getNameVersionsEdition: node => {
         const componentsPromise = node.run('CALL dbms.components()', {})
             .then(results => {
@@ -29,6 +34,9 @@ export default {
         return componentsPromise;
     },
 
+    /**
+     * @returns true if APOC is present, false otherwise.
+     */
     hasAPOC: node => {
         const apocProbePromise = node.run('RETURN apoc.version()', {})
             .then(results => {
@@ -47,6 +55,9 @@ export default {
         return apocProbePromise;
     },
 
+    /**
+     * @returns true if CSV metric reporting is enabled, false otherwise.
+     */
     csvMetricsEnabled: node => {
         const csvMetricsProbePromise = node.run(`
             CALL dbms.listConfig() 
@@ -69,6 +80,9 @@ export default {
         return csvMetricsProbePromise;
     },
 
+    /**
+     * @returns true if auth is enabled, false otherwise.
+     */
     authEnabled: node => {
         const authEnabledQ = `
             CALL dbms.listConfig() YIELD name, value
@@ -97,6 +111,10 @@ export default {
         return authEnabledPromise;
     },
 
+    /**
+     * @returns true if the server supports native auth, false otherwise (e.g. if auth is
+     * disabled, or if another auth provider like ldap is in use)
+     */
     supportsNativeAuth: node => {
         // See issue #27 for what's going on here.  DB must support native auth
         // in order for us to expose some features, such as user management.
@@ -131,5 +149,24 @@ export default {
             });
 
         return authPromise;
+    },
+
+    /**
+     * @returns Array of { name, lastUpdated, path } metrics supported by the server.
+     */
+    getAvailableMetrics: node => {
+        const prom = node.run(queryLibrary.LIST_METRICS.query, {})
+            .then(results =>
+                results.records.map(r => ({
+                    name: r.get('name'),
+                    lastUpdated: r.get('lastUpdated'),
+                    path: r.get('path'),
+                })))
+            .catch(err => {
+                sentry.reportError('Failed to list metrics', err);
+                return [];
+            });
+        
+        return prom;
     },
 };

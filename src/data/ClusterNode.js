@@ -168,22 +168,11 @@ export default class ClusterNode {
             return Promise.resolve(this.metrics);
         }
 
-        return this.run(queryLibrary.LIST_METRICS.query, {})
-            .then(results =>
-                results.records.map(r => ({
-                    name: r.get('name'),
-                    lastUpdated: r.get('lastUpdated'),
-                    path: r.get('path'),
-                })))
-            .then(metrics => {
+        return featureProbes.getAvailableMetrics(this)
+            .then(metrics => { 
                 this.metrics = metrics;
                 return metrics;
-            })
-            .catch(err => {
-                this.metrics = [];
-                sentry.reportError('Failed to list metrics', err);
-            })
-            .then(() => this.metrics);
+            });
     }
 
     checkComponents() {
@@ -204,6 +193,8 @@ export default class ClusterNode {
                 .then(result => { this.dbms.csvMetricsEnabled = result; }),
             featureProbes.hasAPOC(this)
                 .then(result => { this.dbms.apoc = result; }),
+            featureProbes.getAvailableMetrics(this)
+                .then(metrics => { this.metrics = metrics; }),
         ];
 
         return Promise.all(allProbes)
