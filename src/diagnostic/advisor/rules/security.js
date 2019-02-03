@@ -1,5 +1,4 @@
 import InspectionResult from '../InspectionResult';
-import _ from 'lodash';
 
 const browserCredentials = pkg => {
     const findings = [];
