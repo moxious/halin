@@ -9,6 +9,8 @@
  */
 import React, { Component } from 'react';
 import { Icon, Message } from 'semantic-ui-react';
+import Spinner from './Spinner';
+import sentry from './sentry';
 
 const smallCentered = { maxWidth: 300, margin: 'auto' };
 
@@ -113,6 +115,47 @@ const apocOnlyComponent = (WrappedComponent, heading) => {
     }
 };
 
+/**
+ * Compatibility check higher order component.  Wrap your component in this if you need to 
+ * check whether certain features are present in order to run.
+ * @param {Component} WrappedComponent the component being wrapped.
+ * @param {*} compatibilityCheckFn function to call to check for compatibility.  It will be 
+ * passed a halin context, and is expected to return a promise which resolves to a boolean. 
+ * If true, the wrapped component will be displayed.  If false, the onFailFn will be called.
+ * @param {*} onFailFn a function which returns an alternate view if the compatibility check
+ * fails.
+ */
+const compatibilityCheckableComponent = (WrappedComponent, compatibilityCheckFn, onFailFn) => {
+    return class extends Component {
+        state = { 
+            compatible: false,
+            pending: true,
+        }
+        componentDidMount() {
+            return compatibilityCheckFn(window.halinContext)
+                .then(result => {
+                    this.setState({ compatible: result, pending: false });
+                })
+                .catch(err => {
+                    sentry.reportError('Compatibility function failure', err);
+                    this.setState({ compatible: false, pending: false });
+                });
+        }
+
+        render() {
+            if (this.state.pending) {
+                return <Spinner active='true'/>;
+            }
+
+            if (this.state.compatible) {
+                return <WrappedComponent {...this.props} />;
+            }
+
+            return onFailFn();
+        }
+    }
+}
+
 const enterpriseOnlyComponent = (WrappedComponent, heading) => {
     return class extends Component {
         render() {
@@ -141,4 +184,5 @@ export default {
     clusterOnlyComponent,
     apocOnlyComponent,
     csvMetricsComponent,
+    compatibilityCheckableComponent,
 };
