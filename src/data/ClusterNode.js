@@ -1,10 +1,10 @@
 import Parser from 'uri-parser';
 import sentry from '../sentry/index';
-import neo4jErrors from '../driver/errors';
 import _ from 'lodash';
 import math from 'mathjs';
 import Ring from 'ringjs';
 import queryLibrary from '../data/query-library';
+import featureProbes from '../feature/probes';
 
 const MAX_OBSERVATIONS = 500;
 
@@ -208,102 +208,18 @@ export default class ClusterNode {
                 this.dbms.edition = 'UNKNOWN';
             });
 
-        // See issue #27 for what's going on here.  DB must support native auth
-        // in order for us to expose some features, such as user management.
-        const authQ = `
-            CALL dbms.listConfig() YIELD name, value 
-            WHERE name =~ 'dbms.security.auth_provider.*' 
-            RETURN value;`;
-        const authPromise = session.run(authQ, {})
-            .then(results => {
-                let nativeAuth = false;
+        const allProbes = [componentsPromise];
 
-                results.records.forEach(rec => {
-                    const val = rec.get('value');
-                    const valAsStr = `${val}`; // Coerce ['foo','bar']=>'foo,bar' if present
+        allProbes.push(featureProbes.supportsNativeAuth(this)
+            .then(result => { this.dbms.nativeAuth = result; }));
+        allProbes.push(featureProbes.authEnabled(this)
+            .then(result => { this.dbms.authEnabled = result; }));
+        allProbes.push(featureProbes.csvMetricsEnabled(this)
+            .then(result => { this.dbms.csvMetricsEnabled = result; }));
+        allProbes.push(featureProbes.hasAPOC(this)
+            .then(result => { this.dbms.apoc = result; }));
 
-                    if (valAsStr.indexOf('native') > -1) {
-                        nativeAuth = true;
-                    }
-                });
-
-                this.dbms.nativeAuth = nativeAuth;
-            })
-            .catch(err => {
-                if (neo4jErrors.permissionDenied(err)) {
-                    // Read only user can't do this, so we can't tell whether native
-                    // auth is supported.  So disable functionality which requires this.
-                    this.dbms.nativeAuth = false;
-                    return;    
-                }
-
-                sentry.reportError(err, 'Failed to get DBMS auth implementation type');
-                this.dbms.nativeAuth = false;
-            });
-
-        const authEnabledQ = `
-            CALL dbms.listConfig() YIELD name, value
-            WHERE name =~ 'dbms.security.auth_enabled'
-            RETURN value;
-        `;
-        const authEnabledPromise = session.run(authEnabledQ, {})
-            .then(results => {
-                let authEnabled = true;
-                results.records.forEach(rec => {
-                    const val = rec.get('value');
-                    authEnabled = `${val}`;
-                });
-                this.dbms.authEnabled = authEnabled;
-            })
-            .catch(err => {
-                if (neo4jErrors.permissionDenied(err)) {
-                    this.dbms.authEnabled = false;
-                    return;
-                }
-
-                sentry.reportError(err, 'Failed to check auth enabled status');
-                this.dbms.authEnabled = true;
-            });
-
-        const csvMetricsProbePromise = session.run(`
-            CALL dbms.listConfig() 
-            YIELD name, value 
-            WHERE name='metrics.csv.enabled' 
-            return value;`, {})
-                .then(results => {
-                    const row = results.records[0];
-                    if (row && row.get('value') === 'true') {
-                        this.dbms.csvMetricsEnabled = true;
-                    } else {
-                        sentry.fine('CSV metrics not enabled', row);
-                    }
-                })
-                .catch(err => {
-                    sentry.fine('Error on CSV metrics enabled probe', err);
-                    this.dbms.csvMetricsEnabled = false;
-                });
-
-        const apocProbePromise = session.run('RETURN apoc.version()', {})
-            .then(results => {
-                this.dbms.apoc = true;
-            })
-            .catch(err => {
-                const str = `${err}`;
-
-                // Either way APOC isn't present, but only log the error if it's exotic.
-                // If it errors with unknown function, that's how you know APOC isn't installed.
-                if (str.indexOf('Unknown function') === -1) {
-                    sentry.reportError('APOC probe failed', err);
-                }
-                this.dbms.apoc = false;
-            });
-
-        return Promise.all([
-            componentsPromise, 
-            authPromise,
-            apocProbePromise,
-            csvMetricsProbePromise,
-            authEnabledPromise])
+        return Promise.all(allProbes)
             .then(whatever => {
                 if (this.isCommunity()) {
                     // #operability As a special exception, community will fail 
@@ -313,6 +229,7 @@ export default class ClusterNode {
                     this.dbms.nativeAuth = true;
                 }
 
+                session.close();
                 return whatever;
             });
     }
