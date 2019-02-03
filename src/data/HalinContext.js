@@ -311,6 +311,10 @@ export default class HalinContext {
         };
     }
 
+    getBaseURI() {
+        return `bolt://${this.base.host}:${this.base.port}`;
+    }
+
     /**
      * Returns a promise that resolves to the HalinContext object completed,
      * or rejects.
@@ -362,8 +366,7 @@ export default class HalinContext {
                     this.base = _.cloneDeep(active.graph.connection.configuration.protocols.bolt);
 
                     // Create a default driver to have around.
-                    const uri = `bolt://${this.base.host}:${this.base.port}`;
-                    this.base.driver = this.driverFor(uri);
+                    this.base.driver = this.driverFor(this.getBaseURI());
 
                     // sentry.fine('HalinContext created', this);
                     return Promise.all([
