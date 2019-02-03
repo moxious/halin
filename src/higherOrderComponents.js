@@ -14,105 +14,16 @@ import sentry from './sentry';
 
 const smallCentered = { maxWidth: 300, margin: 'auto' };
 
-const clusterOnlyComponent = (WrappedComponent, heading) => {
-    return class extends Component {
-        render() {
-            const nodes = window.halinContext.clusterNodes;
-
-            if (nodes && nodes.length > 1) {
-                return <WrappedComponent {...this.props} />;
-            }
-
-            return (
-                <div className='ClusterOnly'>
-                    { heading ? <h3>{heading}</h3> : '' }
-                    <Message warning icon style={smallCentered}>
-                        <Icon name='warning' />
-                        <Message.Content >
-                            Only available for Neo4j Clusters
-                        </Message.Content>
-                    </Message>
-                </div>
-            )
-        }
-    }
-};
-
-const adminOnlyComponent = (WrappedComponent, heading) => {
-    return class extends Component {
-        render() {
-            const roles = window.halinContext.getCurrentUser().roles;
-
-            // In Neo4j community, there are no roles, effectively
-            // everyone is an admin.  So while under community you
-            // won't have role='admin', you will have permissions
-            // to do stuff.  Weird.            
-            if (!window.halinContext.isEnterprise() || roles.indexOf('admin') > -1) {
-                return <WrappedComponent {...this.props} />;
-            }
-
-            return (
-                <div className='AdminOnly'>
-                    { heading ? <h3>{heading}</h3> : '' }
-                    <Message warning icon style={smallCentered}>
-                        <Icon name='warning' />
-                        <Message.Content>
-                            Only users with role 'admin' may use this function.
-                        </Message.Content>
-                    </Message>
-                </div>
-            );
-        }
-    };
-};
-
-const csvMetricsComponent = (WrappedComponent,  heading) => {
-    return class extends Component {
-        render() {
-            if (this.props.node && this.props.node.csvMetricsEnabled()) {
-                return <WrappedComponent {...this.props} />;
-            }
-
-            return (
-                <div className='CSVMetricsOnly'>
-                    { heading ? <h3>{heading}</h3> : '' }
-                    <Message warning icon style={smallCentered}>
-                        <Icon name='warning' />
-                        <Message.Content>
-                            This feature is only available for databases
-                            that have CSV metrics enabled.   See the
-                            <a href='https://neo4j.com/docs/operations-manual/current/monitoring/metrics/expose/#metrics-csv'>
-                            operations manual section on exposing metrics</a>
-                            to configure this for your database.
-                        </Message.Content>
-                    </Message>
-                </div>
-            )
-        }
-    }
-};
-
-const apocOnlyComponent = (WrappedComponent, heading) => {
-    return class extends Component {
-        render() {
-            if (window.halinContext.supportsAPOC()) {
-                return <WrappedComponent {...this.props} />;
-            }
-
-            return (
-                <div className='APOCOnly'>
-                    { heading ? <h3>{heading}</h3> : '' }
-                    <Message warning icon style={smallCentered}>
-                        <Icon name='warning' />
-                        <Message.Content>
-                            This feature is only available for databases
-                            that have APOC installed.
-                        </Message.Content>
-                    </Message>
-                </div>
-            )
-        }
-    }
+const missingFeatureMessage = (heading, message) => {
+    return (
+        <div className='MissingFeature'>
+            { heading ? <h3>{heading}</h3> : '' }
+            <Message warning icon style={smallCentered}>
+                <Icon name='warning' />
+                <Message.Content>{ message }</Message.Content>
+            </Message>
+        </div>
+    );
 };
 
 /**
@@ -156,27 +67,71 @@ const compatibilityCheckableComponent = (WrappedComponent, compatibilityCheckFn,
     }
 }
 
-const enterpriseOnlyComponent = (WrappedComponent, heading) => {
-    return class extends Component {
-        render() {
-            if (window.halinContext.isEnterprise()) {
-                return <WrappedComponent {...this.props} />;
-            }
+const apocOnlyComponent = (WrappedComponent, heading) => {
+    const failMsg = 'This feature is only available for databases that have APOC installed.';
+    const compatCheck = ctx => Promise.resolve(ctx.supportsAPOC());
 
-            return (
-                <div className='EnterpriseOnly'>
-                    { heading ? <h3>{heading}</h3> : '' }
-                    <Message warning icon style={smallCentered}>
-                        <Icon name='warning' />
-                        <Message.Content>
-                            Only available in Neo4j Enterprise
-                        </Message.Content>
-                    </Message>
-                </div>
-            );
-        }
-    };
-}
+    return compatibilityCheckableComponent(
+        WrappedComponent, 
+        compatCheck,
+        () => missingFeatureMessage(heading, failMsg)
+    );
+};
+
+const enterpriseOnlyComponent = (WrappedComponent, heading) => {
+    const failMsg = 'Only available in Neo4j Enterprise';
+    const compatCheck = ctx => Promise.resolve(ctx.isEnterprise());
+
+    return compatibilityCheckableComponent(
+        WrappedComponent, 
+        compatCheck,
+        () => missingFeatureMessage(heading, failMsg)
+    );
+};
+
+const csvMetricsComponent = (WrappedComponent,  heading) => {
+    const failMsg = <div>
+        This feature is only available for databases
+        that have CSV metrics enabled.   See the
+        <a href='https://neo4j.com/docs/operations-manual/current/monitoring/metrics/expose/#metrics-csv'>
+        operations manual section on exposing metrics</a>
+        to configure this for your database.
+    </div>;
+    const compatCheck = ctx => Promise.resolve(this.props.node && this.props.node.csvMetricsEnabled());
+
+    return compatibilityCheckableComponent(
+        WrappedComponent,
+        compatCheck,
+        () => missingFeatureMessage(heading, failMsg)
+    );
+};
+
+const clusterOnlyComponent = (WrappedComponent, heading) => {
+    const failMsg = 'Only available for Neo4j Clusters';
+    const compatCheck = ctx => Promise.resolve(ctx.clusterNodes && ctx.clusterNodes.length > 1);
+
+    return compatibilityCheckableComponent(
+        WrappedComponent,
+        compatCheck,
+        () => missingFeatureMessage(heading, failMsg)
+    );
+};
+
+const adminOnlyComponent = (WrappedComponent, heading) => {
+    const failMsg = "Only users with role 'admin' may use this function";
+
+    // In Neo4j community, there are no roles, effectively
+    // everyone is an admin.  So while under community you
+    // won't have role='admin', you will have permissions
+    // to do stuff.  Weird.
+    const compatCheck = ctx => Promise.resolve(!ctx.isEnterprise() || ctx.getCurrentUser().roles.indexOf('admin') > -1);
+
+    return compatibilityCheckableComponent(
+        WrappedComponent,
+        compatCheck,
+        () => missingFeatureMessage(heading, failMsg)
+    );
+};
 
 export default {
     adminOnlyComponent,
