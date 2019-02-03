@@ -1,15 +1,17 @@
 import Parser from 'uri-parser';
-import sentry from '../sentry/index';
 import _ from 'lodash';
 import math from 'mathjs';
 import Ring from 'ringjs';
-import queryLibrary from '../data/query-library';
 import featureProbes from '../feature/probes';
 
 const MAX_OBSERVATIONS = 500;
 
 /**
  * Abstraction that captures details and information about a node in a cluster.
+ * For each node in a cluster, this abstraction lets you:
+ *  - Run queries keeping track of performance and errors over time
+ *  - Inspect the node easily to determine what features it supports
+ *  - Gather performance data about how responsive it is
  */
 export default class ClusterNode {
     /**
