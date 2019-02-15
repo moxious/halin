@@ -38,11 +38,11 @@ export default {
      * File streaming (useful for logs and metrics) is an enabled feature if you have a
      * particular APOC function.
      */
-    hasFileStreaming: node => {
+    hasLogStreaming: node => {
         const prom = node.run(`
             CALL dbms.procedures() 
             YIELD name 
-            WHERE name="apoc.file.stream" 
+            WHERE name="apoc.log.stream" 
             RETURN count(name) as n
         `, {})
             .then(results => results.records[0].get('n').toNumber() > 0)
@@ -171,7 +171,7 @@ export default {
     },
 
     /**
-     * @returns Array of { name, lastUpdated, path } metrics supported by the server.
+     * @returns Array of { name, lastUpdated } metrics supported by the server.
      */
     getAvailableMetrics: node => {
         const prom = node.run(queryLibrary.LIST_METRICS.query, {})
@@ -179,9 +179,9 @@ export default {
                 results.records.map(r => ({
                     name: r.get('name'),
                     lastUpdated: r.get('lastUpdated'),
-                    path: r.get('path'),
                 })))
             .catch(err => {
+                sentry.fine(err);
                 const str = `${err}`;
                 if (str.indexOf('no procedure') > -1 && str.indexOf('apoc.metrics.list') > -1) {
                     // This is an ignoreable error that just means the user has an older APOC installed.
