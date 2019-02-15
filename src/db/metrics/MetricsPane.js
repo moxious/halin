@@ -86,7 +86,7 @@ class MetricsPane extends Component {
 
         return this.props.node.run(queryLibrary.GET_METRIC.query, { metric, last: this.state.observations })
             .then(data => data.records.map(r => ({
-                t: this.convertMetricTimestampToLocalDate(r.get('t').toNumber()),
+                t: this.convertMetricTimestampToLocalDate(r.get('timestamp').toNumber()),
                 value: r.get('value'),
             })).sort((a, b) => a.t - b.t)) // Keep sorted by date
             .catch(err => {
@@ -183,7 +183,7 @@ const compatCheckFn = ctx =>
     Promise.resolve(
         ctx.supportsAPOC() && 
         ctx.supportsMetrics() && 
-        ctx.supportsFileStreaming());
+        ctx.supportsLogStreaming());
 
 // What to tell the user if the compatibility checks aren't satisfied.
 const notSupported = () => {

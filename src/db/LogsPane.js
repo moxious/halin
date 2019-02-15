@@ -10,7 +10,7 @@ import sentry from '../sentry';
 
 const MAX_ROWS = 5000;
 
-const code = text => <span style={{fontFamily:'monospace'}}>{text}</span>;
+const code = text => <span style={{ fontFamily: 'monospace' }}>{text}</span>;
 
 class LogViewer extends Component {
     state = {
@@ -34,12 +34,62 @@ class LogViewer extends Component {
         ],
     }
 
+    download() {
+        const promise = this.props.node.run(`
+            CALL apoc.log.stream("${this.props.file}") YIELD lineNo, line
+            RETURN line
+            ORDER BY lineNo ASC
+        `)
+            .then(results => {
+                const logFileData = results.records.map(r => r.get('line')).join('\n');
+
+                const blob = new Blob([logFileData], { type: 'text/plain' });
+                const dataURI = `data:text/plain;chartset=utf-8,${logFileData}`;
+
+                const URL = window.URL || window.webkitURL;
+
+                this.setState({ loadOp: null, err: null, data: null });
+
+                const toDownload = (typeof URL.createObjectURL === 'undefined') ?
+                    dataURI :
+                    URL.createObjectURL(blob);
+
+                const link = document.createElement('a')
+                link.setAttribute('href', toDownload)
+                link.setAttribute('download', this.props.file)
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+                return toDownload;
+            })
+            .catch(err => this.promiseErrorHandler(err));
+
+        this.setState({ loadOp: promise });
+        return promise;
+    }
+
+    promiseErrorHandler(err) {
+        const str = `${err}`;
+
+        if (str.indexOf('apoc.log.stream') > -1 && str.indexOf('no procedure')) {
+            // This is OK - they don't have the right version of APOC installed to stream files.
+            // Not a reportable error though.
+            sentry.fine('User does not have right version of APOC installed to stream logs');
+            this.unsupported = true;
+        } else {
+            sentry.reportError('Failed to stream logfile', err);
+        }
+
+        console.error('Failed to get log', err);
+        this.setState({ err, loadOp: null, data: null });
+    }
+
     load() {
         console.log('LogViewer props', this.props);
         console.log(this);
 
         let query = `
-            CALL apoc.file.stream("logs/${this.props.file}", { last: $n }) 
+            CALL apoc.log.stream("${this.props.file}", { last: $n }) 
             YIELD lineNo, line 
             RETURN lineNo, line
             ORDER BY lineNo DESC LIMIT $limit
@@ -47,7 +97,7 @@ class LogViewer extends Component {
 
         if (!this.state.partial) {
             query = `
-                CALL apoc.file.stream("logs/${this.props.file}") 
+                CALL apoc.log.stream("${this.props.file}") 
                 YIELD lineNo, line 
                 RETURN lineNo, line
                 ORDER BY lineNo DESC LIMIT $limit            
@@ -70,21 +120,7 @@ class LogViewer extends Component {
 
                 this.setState({ err: null, data, loadOp: null });
             })
-            .catch(err => {
-                const str = `${err}`;
-
-                if (str.indexOf('apoc.file.stream') > -1 && str.indexOf('no procedure')) {
-                    // This is OK - they don't have the right version of APOC installed to stream files.
-                    // Not a reportable error though.
-                    sentry.fine('User does not have right version of APOC installed to stream logs');
-                    this.unsupported = true;
-                } else {
-                    sentry.reportError('Failed to stream logfile', err);
-                }
-
-                console.error('Failed to get log', err);
-                this.setState({ err, loadOp: null, data: null });
-            });
+            .catch(err => this.promiseErrorHandler(err));
 
         this.setState({ loadOp: promise });
     }
@@ -100,7 +136,7 @@ class LogViewer extends Component {
     }
 
     render() {
-        const spacer = () => <div style={{paddingLeft: '15px', paddingRight: '15px'}}>&nbsp;</div>;
+        const spacer = () => <div style={{ paddingLeft: '15px', paddingRight: '15px' }}>&nbsp;</div>;
 
         return (
             <div className='LogViewer' key={this.state.key}>
@@ -116,7 +152,7 @@ class LogViewer extends Component {
                                 checked={!this.state.partial}
                                 onChange={this.handleChange}
                             />
-                            { spacer() }
+                            {spacer()}
                             <Radio
                                 label='Last few entries'
                                 name='howMuch'
@@ -124,18 +160,23 @@ class LogViewer extends Component {
                                 checked={this.state.partial}
                                 onChange={this.handleChange}
                             />
-                            { spacer() }
+                            {spacer()}
                             <Form.Input
                                 name='lastN'
                                 onChange={this.handleChange}
                                 style={{ width: '100px' }}
                                 value={this.state.lastN} />
-                            { spacer() }
+                            {spacer()}
                             <Button icon labelPosition='left'
                                 onClick={() => this.load()}
                                 disabled={!_.isNil(this.state.loadOp)}>
                                 <Icon name='feed' />
                                 Load
+                            </Button>
+                            <Button icon
+                                onClick={() => this.download()}>
+                                <Icon name="download" />
+                                Download Entire File
                             </Button>
                         </Form.Group>
                     </Form.Field>
@@ -202,7 +243,7 @@ class LogsPane extends Component {
 
 // These are our dependencies...what must be true for this component to work.
 const compatCheckFn = ctx =>
-    Promise.resolve(ctx.supportsAPOC() && ctx.supportsFileStreaming());
+    Promise.resolve(ctx.supportsAPOC() && ctx.supportsLogStreaming());
 
 // This is what to tell the user if the compatibility checks aren't satisfied.
 const notSupported = () => {

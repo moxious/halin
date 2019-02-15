@@ -114,8 +114,8 @@ export default class ClusterNode {
         return this.dbms.apoc;
     }
 
-    supportsFileStreaming() {
-        return this.dbms.fileStreaming;
+    supportsLogStreaming() {
+        return this.dbms.logStreaming;
     }
 
     /**
@@ -199,8 +199,8 @@ export default class ClusterNode {
                 .then(result => { this.dbms.csvMetricsEnabled = result; }),
             featureProbes.hasAPOC(this)
                 .then(result => { this.dbms.apoc = result; }),
-            featureProbes.hasFileStreaming(this)
-                .then(result => { this.dbms.fileStreaming = result; }),
+            featureProbes.hasLogStreaming(this)
+                .then(result => { this.dbms.logStreaming = result; }),
             featureProbes.getAvailableMetrics(this)
                 .then(metrics => { this.metrics = metrics; }),
         ];

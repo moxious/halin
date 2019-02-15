@@ -117,8 +117,8 @@ export default class HalinContext {
         return this.clusterNodes[0].supportsAPOC();
     }
 
-    supportsFileStreaming() {
-        return this.clusterNodes[0].supportsFileStreaming();
+    supportsLogStreaming() {
+        return this.clusterNodes[0].supportsLogStreaming();
     }
 
     supportsMetrics() {

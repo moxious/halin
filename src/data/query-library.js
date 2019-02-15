@@ -278,13 +278,14 @@ export default {
     },
 
     LIST_METRICS: {
+        // Only supported with very recent versions of APOC
         dependency: {
             type: 'procedure',
             name: 'apoc.metrics.list',
         },
         query: `
-            CALL apoc.metrics.list() YIELD name, lastUpdated, path
-            RETURN name, lastUpdated, path
+            CALL apoc.metrics.list() YIELD name, lastUpdated
+            RETURN name, lastUpdated
             ORDER BY lastUpdated ASC;
         `,
         columns: [
@@ -295,15 +296,16 @@ export default {
     },
 
     GET_METRIC: {
+        // Only supported with very recent versions of APOC
         dependency: {
             type: 'procedure',
             name: 'apoc.metrics.get',
         },
         query: `
             CALL apoc.metrics.get($metric)
-            YIELD t, value
-            RETURN t, value
-            ORDER BY t DESC LIMIT $last
+            YIELD timestamp, value
+            RETURN timestamp, value
+            ORDER BY timestamp DESC LIMIT $last
         `,
         columns: [
             // { Header: 'Timestamp', accessor: 't' },
@@ -313,5 +315,38 @@ export default {
             last: 'Count of most recent items to fetch from the file',
             metric: 'Name of the metric to fetch'
         },
+    },
+
+    APOC_STORAGE_METRIC: {
+        // Only supported with very recent versions of APOC
+        dependency: {
+            type: 'procedure',
+            name: 'apoc.metrics.storage',
+        },
+        query: `
+            CALL apoc.metrics.storage(null)
+        `,
+        columns: [
+            { 
+                Header: 'Location', 
+                accessor: 'setting',
+                Cell: cdt.mappedValueField({
+                    'dbms.directories.certificates': 'SSL Certificates',
+                    'dbms.directories.data': 'Data Files',
+                    'dbms.directories.import': 'Import Data',
+                    'dbms.directories.lib': 'Libraries',
+                    'dbms.directories.logs': 'Log Files',
+                    'dbms.directories.metrics': 'Metrics',
+                    'dbms.directories.plugins': 'Plugins',
+                    'dbms.directories.run': 'Binaries',
+                    'dbms.directories.tx_log': 'Transaction Logs',
+                    'unsupported.dbms.directories.neo4j_home': 'Neo4j Home',
+                }, item => item.value),
+            },
+            { Header: 'Free', accessor: 'freeSpaceBytes', Cell: cdt.dataSizeField },
+            { Header: 'Total', accessor: 'totalSpaceBytes', Cell: cdt.dataSizeField },
+            { Header: 'Usable', accessor: 'usableSpaceBytes', Cell: cdt.dataSizeField },
+            { Header: '% Free', accessor: 'percentFree', Cell: cdt.pctField },
+        ],
     }
 };
