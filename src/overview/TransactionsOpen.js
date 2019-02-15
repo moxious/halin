@@ -5,6 +5,7 @@ import { Button } from 'semantic-ui-react';
 import queryLibrary from '../data/query-library';
 import _ from 'lodash';
 import hoc from '../higherOrderComponents';
+import Explainer from '../Explainer';
 
 class TransactionsOpen extends Component {
     state = {
@@ -53,6 +54,15 @@ class TransactionsOpen extends Component {
         return feed;
     };
 
+    help() {
+        return (
+            <div className='TransactionsOpenHelp'>
+                <p>Any query that updates the graph will run in a transaction. An updating query will always either fully succeed, or not succeed at all.</p>
+                <p><a href="https://neo4j.com/docs/java-reference/current/transactions/">Read more about Transaction Management</a></p>
+            </div>
+        )
+    }
+
     render() {
         const buttons = [
             { label: 'Open', field: 'open' },
@@ -63,7 +73,7 @@ class TransactionsOpen extends Component {
 
         return (
             <div className="TransactionMonitor">
-                <h3>Transactions</h3>
+                <h3>Transactions <Explainer content={this.help()}/></h3>
                 
                 <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
                     buttons.map((b,idx) =>

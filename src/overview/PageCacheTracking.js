@@ -4,6 +4,7 @@ import uuid from 'uuid';
 import { Button } from 'semantic-ui-react';
 import queryLibrary from '../data/query-library';
 import hoc from '../higherOrderComponents';
+import Explainer from '../Explainer';
 import _ from 'lodash';
 
 class PageCacheTracking extends Component {
@@ -87,6 +88,16 @@ class PageCacheTracking extends Component {
     onUpdate = (data, feed) => {
     };
 
+    help() {
+        return (
+            <div className="PageCacheTrackingHelp">
+                <p>The page cache is used to cache the Neo4j data as stored on disk. Ensuring that most of the graph data from disk is cached in memory will help avoid costly disk access.</p>
+
+                <p><a href="https://neo4j.com/developer/guide-performance-tuning/">Read more about performance tuning and the page cache</a></p>
+            </div>
+        )
+    }
+
     render() {
         const buttons = [
             { label: 'Usage Ratio', field: 'usageRatio' },
@@ -97,7 +108,7 @@ class PageCacheTracking extends Component {
 
         return (
             <div className="PageCacheTracking">
-                <h3>Page Cache</h3>
+                <h3>Page Cache <Explainer content={this.help()}/></h3>
 
                 <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
                     buttons.map((b,idx) =>
