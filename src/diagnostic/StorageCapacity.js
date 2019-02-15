@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import CypherDataTable from '../data/CypherDataTable';
 import Explainer from '../Explainer';
 import queryLibrary from '../data/query-library';
-import { Message, Icon, Popup } from 'semantic-ui-react';
+import { Message } from 'semantic-ui-react';
 import hoc from '../higherOrderComponents';
 
 class StorageCapacity extends Component {
@@ -28,6 +28,11 @@ class StorageCapacity extends Component {
                    in each directory specified in your neo4j.conf file.</p>
                 <p>If many statistics are the same, this probably means that most 
                 or all of your files reside on the same disk.</p>
+
+                <p><a target="docs" href="https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_dbms.directories.data">
+                    For more information, consult the configuration settings reference in the operations manual
+                    </a>
+                </p>
             </div>
         );
     }
