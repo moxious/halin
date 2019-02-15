@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import CypherDataTable from '../data/CypherDataTable';
 import hoc from '../higherOrderComponents';
+import Explainer from '../Explainer';
 import 'react-table/react-table.css';
 import './Neo4jConfiguration.css';
 
@@ -57,10 +58,22 @@ class Neo4jConfiguration extends Component {
         'dbms.tx_log.rotation.size',
     ];
 
+    help() {
+        return (
+            <div className='Neo4jConfigurationHelp'>
+                <p>The following table displays the contents of the neo4j.conf file, which details
+                    how the system is configured.
+                </p>
+                <p><a href="https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/">
+                Read the Neo4j Configuration Reference</a></p>
+            </div>
+        )
+    }
+
     render() {
         return (
             <div className="Neo4jConfiguration" style={{ align: 'center', height: 800 }}>
-                <h3>Neo4j Configuration</h3>
+                <h3>Neo4j Configuration <Explainer content={this.help()}/></h3>
 
                 <CypherDataTable
                     node={this.props.node}
