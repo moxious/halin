@@ -59,6 +59,10 @@ const timeField = (item) => {
     return <div className='_timeField'>{convertMsToTime(item.value)}</div>;
 };
 
+const mappedValueField = (mapping) => (item) => {
+    return mapping[item.value] || item.value;
+};
+
 export default {
-    jsonField, numField, dataSizeField, pctField, timeField,
+    jsonField, numField, dataSizeField, pctField, timeField, mappedValueField,
 };
