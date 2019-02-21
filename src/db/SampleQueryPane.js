@@ -6,7 +6,8 @@ import sentry from '../sentry';
 import queryLibrary from '../data/query-library';
 import ReactTable from 'react-table';
 import Spinner from '../Spinner';
-import { Button, Progress, Form } from 'semantic-ui-react';
+import QueryExecutionPlan from './QueryExecutionPlan';
+import { Button, Progress, Form, Modal, Header } from 'semantic-ui-react';
 
 class SampleQueries extends Component {
     state = {
@@ -14,8 +15,26 @@ class SampleQueries extends Component {
         interval: 5000,
         percent: 0,
         updateInterval: null,
-        displayColumns: queryLibrary.DB_QUERY_STATS.columns,
+        displayColumns: [
+            { 
+                Header: 'Plan',
+                width: 80,
+                Cell: ({ row }) => 
+                    <Modal trigger={
+                        <Button icon='cogs'/>
+                    }>
+                        <Header>Query Execution Plan</Header>
+                        <Modal.Content>
+                            <QueryExecutionPlan data={row}/>
+                        </Modal.Content>
+                    </Modal>
+            },
+        ].concat(queryLibrary.DB_QUERY_STATS.columns),
     };
+
+    plan(row) {
+        return 'FooPlan';
+    }
 
     help() {
         return (
