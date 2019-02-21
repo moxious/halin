@@ -7,6 +7,7 @@ import uuid from 'uuid';
 import moment from 'moment';
 import appPkg from '../../../package.json';
 import neo4j from '../../driver/index';
+import sentry from '../../sentry/index.js';
 
 /**
  * Convenience function.  Different versions of Neo4j (community/enterprise) have different response
@@ -71,37 +72,101 @@ const cleanup = pkg => {
 };
 
 /**
- * @param clusterNode{ClusterNode} 
- * @return Promise{Object} of diagnostic information about that node.
+ * Used as a wrapper for some promise; it provides a generic catch block that traps/reports
+ * the error by some name, and resolves some data.
+ * @param {String} title some string to report if things go wrong.
+ * @param {Promise} somePromise a promise which might fail
+ * @param {Object} whatToResolve when the promise fails.
+ * @returns {Promise} that is guaranteed to succeed, either with the promises's results,
+ * or with whatToResolve if the underlying somePromise failed.
  */
-const nodeDiagnostics = (halin, clusterNode) => {
-    const basics = {
-        basics: clusterNode.asJSON(),
-    };
+const swallowAndReportError = (title, somePromise, whatToResolve = {}) => {
+    return somePromise.catch(err => {
+        sentry.reportError(err, title);
+        return whatToResolve;
+    });
+};
 
-    const withSession = f => {
-        const s = halin.driverFor(clusterNode.getBoltAddress()).session();
-        return f(s).finally(() => s.close);
-    };
+/**
+ * Run a promise producing function with a session which will be closed once complete.
+ * @param {HalinContext} halin
+ * @param {ClusterNode} clusterNode 
+ * @param {Function} f a function which produces a promise.
+ * @returns {Promise} which resolves to f's result
+ */
+const withSession = (halin, clusterNode, f) => {
+    const s = halin.driverFor(clusterNode.getBoltAddress()).session();
+    return f(s).finally(() => s.close);
+};
 
-    const session = halin.driverFor(clusterNode.getBoltAddress()).session();
+/**
+ * Gather a single data point from a simple query.
+ * Example args: 'apoc', 'RETURN apoc.version() as value', 'version'
+ * @param {HalinContext} halin 
+ * @param {ClusterNode} node 
+ * @param {String} domain 
+ * @param {String} query a cypher query which produces the data point
+ * @param {String} key the name of the key to return. 
+ * @returns {Promise} which is guaranteed to resolve to an object with domain as a key,
+ * and key as the key of a nested object.  
+ * Example args: domain='apoc', query='RETURN apoc.version() as value', key='version'
+ * you would get { apoc: { version: '3.5.2' } }
+ */
+const simpleGather = (halin, node, domain, query, key) =>
+    withSession(halin, node, s =>
+        s.run(query, {})
+            .then(results => results.records.length === 0 ? null : results.records[0].get('value'))
+            .catch(err => `${err}`) // stringify on purpose, don't need full stacktrace
+            .then(value => {
+                const obj = {};
+                obj[domain] = {};
+                obj[domain][key] = handleNeo4jInt(value);
+                return obj;
+            }));
 
-    // Query must return 'value'
-    const noFailCheck = (domain, query, key) =>
-        withSession(s => 
-            s.run(query, {})
-                .then(results => results.records.length === 0 ? null : results.records[0].get('value'))
-                .catch(err => `${err}`) // stringify on purpose, don't need full stacktrace
-                .then(value => {                
-                    const obj = {};
-                    obj[domain] = {};
-                    obj[domain][key] = handleNeo4jInt(value);
-                    return obj;
-                }));
+const gatherUsers = (halin, node) => {
+    const defaultIfUnable = { users: [] };
 
-    // Format all JMX data into records.
-    // Put the whole thing into an object keyed on jmx.
-    const genJMX = withSession(s =>
+    if (halin.supportsAuth() && halin.supportsNativeAuth()) {
+        const promise = withSession(halin, node,
+            s => s.run('CALL dbms.security.listUsers()', {})
+                .then(results =>
+                    results.records.map(rec => ({
+                        username: rec.get('username'),
+                        flags: rec.get('flags'),
+                        roles: getOrNull(rec, 'roles'), // This field doesn't exist in community.
+                    })))
+                .then(allUsers => ({ users: allUsers })));
+
+        return swallowAndReportError('Gather Users', promise, defaultIfUnable);
+    }
+
+    return Promise.resolve(defaultIfUnable);
+};
+
+const gatherRoles = (halin, node) => {
+    const defaultIfUnable = { roles: [] };
+
+    if (halin.isEnterprise() && halin.supportsAuth()) {
+        const promise = withSession(halin, node,
+            s => s.run('CALL dbms.security.listRoles()', {})
+                .then(results =>
+                    results.records.map(rec => ({
+                        role: rec.get('role'),
+                        users: rec.get('users'),
+                    })))
+                .then(allRoles => ({ roles: allRoles })));
+
+        return swallowAndReportError('Gather Roles', promise, defaultIfUnable);
+    }
+
+    return Promise.resolve(defaultIfUnable);
+};
+
+const gatherJMX = (halin, node) => {
+    const defaultIfUnable = { JMX: [] };
+
+    const promise = withSession(halin, node, s =>
         s.run("CALL dbms.queryJmx('*:*')", {})
             .then(results =>
                 results.records.map(rec => ({
@@ -110,27 +175,48 @@ const nodeDiagnostics = (halin, clusterNode) => {
                 })))
             .then(array => ({ JMX: cleanup(array) })));
 
-    const users = (halin.supportsAuth() && halin.supportsNativeAuth()) ? withSession(s => 
-        s.run('CALL dbms.security.listUsers()', {})
+    return swallowAndReportError('Gather JMX', promise, defaultIfUnable);
+};
+
+const gatherConstraints = (halin, node) => {
+    const defaultIfUnable = { constraints: [] };
+
+    const promise = withSession(halin, node, s =>
+        s.run('CALL db.constraints()', {})
             .then(results =>
-                results.records.map(rec => ({
-                    username: rec.get('username'),
-                    flags: rec.get('flags'),
-                    roles: getOrNull(rec, 'roles'), // This field doesn't exist in community.
+                results.records.map((rec, idx) => ({ idx, description: rec.get('description') })))
+            .then(allConstraints => ({ constraints: allConstraints })));
+
+    return swallowAndReportError('Gather Constraints', promise, defaultIfUnable);
+};
+
+const gatherIndexes = (halin, node) => {
+    const defaultIfUnable = { indexes: [] };
+
+    // Signature differs between 3.4 and 3.5, particularly
+    // label field vs. tokenNames field.  getOrNull handles
+    // both cases.
+    const promise = withSession(halin, node, s =>
+        s.run('CALL db.indexes()', {})
+            .then(results =>
+                results.records.map((rec, idx) => ({
+                    description: getOrNull(rec, 'description'),
+                    label: getOrNull(rec, 'label'),
+                    tokenNames: getOrNull(rec, 'tokenNames'),
+                    properties: getOrNull(rec, 'properties'),
+                    state: getOrNull(rec, 'state'),
+                    type: getOrNull(rec, 'type'),
+                    provider: getOrNull(rec, 'provider'),
                 })))
-            .then(allUsers => ({ users: allUsers }))) : Promise.resolve({ users: [] });
+            .then(allIndexes => ({ indexes: allIndexes })));
 
-    // This op is enterprise only.
-    const roles = (halin.isEnterprise() && halin.supportsAuth()) ? withSession(s => s.run('CALL dbms.security.listRoles()', {})
-        .then(results =>
-            results.records.map(rec => ({
-                role: rec.get('role'),
-                users: rec.get('users'),
-            })))
-        .then(allRoles => ({ roles: allRoles }))) : Promise.resolve({ roles: [] });
+    return swallowAndReportError('Gather Indexes', promise, defaultIfUnable);
+};
 
-    // Format node config into records.
-    const genConfig = withSession(s => 
+const gatherConfig = (halin, node) => {
+    const defaultIfUnable = { configuration: {} };
+
+    const promise = withSession(halin, node, s =>
         s.run('CALL dbms.listConfig()', {})
             .then(results => {
                 const configMap = {};
@@ -160,41 +246,39 @@ const nodeDiagnostics = (halin, clusterNode) => {
             })
             .then(allConfig => ({ configuration: allConfig })));
 
-    const constraints = withSession(s => 
-        s.run('CALL db.constraints()', {})
-            .then(results =>
-                results.records.map((rec, idx) => ({ idx, description: rec.get('description') })))
-            .then(allConstraints => ({ constraints: allConstraints })));
+    return swallowAndReportError('Gather Configuration', promise, defaultIfUnable);
+};
 
-    // Signature differs between 3.4 and 3.5, particularly
-    // label field vs. tokenNames field.  getOrNull handles
-    // both cases.
-    const indexes = withSession(s => 
-        s.run('CALL db.indexes()', {})
-            .then(results =>
-                results.records.map((rec, idx) => ({
-                    description: getOrNull(rec, 'description'),
-                    label: getOrNull(rec, 'label'),
-                    tokenNames: getOrNull(rec, 'tokenNames'),
-                    properties: getOrNull(rec, 'properties'),
-                    state: getOrNull(rec, 'state'),
-                    type: getOrNull(rec, 'type'),
-                    provider: getOrNull(rec, 'provider'),
-                })))
-            .then(allIndexes => ({ indexes: allIndexes })));
+/**
+ * @param clusterNode{ClusterNode} 
+ * @return Promise{Object} of diagnostic information about that node.
+ */
+const nodeDiagnostics = (halin, clusterNode) => {
+    const basics = {
+        basics: clusterNode.asJSON(),
+    };
+
+    /* GATHER STEPS.
+     * Each of these is a promise that is guaranteed not to fail because it's wrapped
+     */
+    const genJMX = gatherJMX(halin, clusterNode);
+    const users = gatherUsers(halin, clusterNode);
+    const roles = gatherRoles(halin, clusterNode);
+    const genConfig = gatherConfig(halin, clusterNode);
+    const constraints = gatherConstraints(halin, clusterNode);
+    const indexes = gatherIndexes(halin, clusterNode);
 
     const otherPromises = [
-        noFailCheck('apoc', 'RETURN apoc.version() as value', 'version'),
-        noFailCheck('nodes', 'MATCH (n) RETURN count(n) as value', 'count'),
-        noFailCheck('schema', 'call db.labels() yield label return collect(label) as value', 'labels'),
-        noFailCheck('algo', 'RETURN algo.version() as value', 'version'),
+        simpleGather(halin, clusterNode, 'apoc', 'RETURN apoc.version() as value', 'version'),
+        simpleGather(halin, clusterNode, 'nodes', 'MATCH (n) RETURN count(n) as value', 'count'),
+        simpleGather(halin, clusterNode, 'schema', 'call db.labels() yield label return collect(label) as value', 'labels'),
+        simpleGather(halin, clusterNode, 'algo', 'RETURN algo.version() as value', 'version'),
     ];
 
     return Promise.all([
         users, roles, indexes, constraints, genJMX, genConfig, ...otherPromises])
         .then(arrayOfDiagnosticObjects =>
-            _.merge(basics, ...arrayOfDiagnosticObjects))
-        .finally(() => session.close());
+            _.merge(basics, ...arrayOfDiagnosticObjects));
 };
 
 /**
