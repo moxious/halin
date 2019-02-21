@@ -9,6 +9,7 @@ import Neo4jConfiguration from './configuration/Neo4jConfiguration';
 import PerformancePane from './performance/PerformancePane';
 import OSPane from './performance/OSPane';
 import PluginPane from './db/PluginPane';
+import SampleQueryPane from './db/SampleQueryPane';
 // import LogsPane from './db/LogsPane';
 // import MetricsPane from './db/metrics/MetricsPane';
 import PermissionsPane from './configuration/PermissionsPane';
@@ -59,6 +60,11 @@ class Halin extends Component {
         menuItem: 'Plugins',
         render: () => this.paneWrapper(
           <PluginPane key={key} node={node} driver={driver} />),
+      },
+      {
+        menuItem: 'Query Performance',
+        render: () => this.paneWrapper(
+          <SampleQueryPane key={key} node={node} driver={driver} />),
       },
 
       // TODO
