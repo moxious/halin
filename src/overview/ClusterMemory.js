@@ -29,7 +29,7 @@ class ClusterMemory extends Component {
     render() {
         return (
             <div className="ClusterMemory">
-                <h3>Heap Size <Explainer position='bottom' content={this.help()}/></h3>
+                <h3>Heap Size <Explainer position='bottom right' content={this.help()}/></h3>
 
                 <ClusterTimeseries key={this.state.key}
                     query={this.state.query} 

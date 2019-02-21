@@ -181,7 +181,6 @@ export default {
                     lastUpdated: r.get('lastUpdated'),
                 })))
             .catch(err => {
-                sentry.fine(err);
                 const str = `${err}`;
                 if (str.indexOf('no procedure') > -1 && str.indexOf('apoc.metrics.list') > -1) {
                     // This is an ignoreable error that just means the user has an older APOC installed.
