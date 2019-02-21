@@ -1,5 +1,8 @@
+import pkg from '../../package.json';
 import fields from './fields';
 const cdt = fields;
+
+const disclaimer = `WITH 'This query was run by Halin v${pkg.version}' AS disclaimer\n`;
 
 /**
  * A collection of queries that other components can refer to.  By using the same
@@ -17,7 +20,7 @@ export default {
             type: 'deploy',
             name: 'cluster',
         },
-        query: 'CALL dbms.cluster.role()',
+        query: `${disclaimer} CALL dbms.cluster.role()`,
         columns: [
             { Header: 'Role', accessor: 'role' },
         ],
@@ -28,6 +31,7 @@ export default {
         // otherStore is a calculated value that catches all other files which may
         // be in the store directory which don't belong to Neo4j.
         query: `
+            ${disclaimer}
             CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Store sizes') 
             YIELD attributes 
             WITH
@@ -73,6 +77,7 @@ export default {
 
     JMX_PAGE_CACHE: {
         query: `
+        ${disclaimer}
         CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Page cache')
         YIELD attributes 
         WITH 
@@ -109,6 +114,7 @@ export default {
 
     JMX_MEMORY_STATS: {
         query: `
+        ${disclaimer}
         CALL dbms.queryJmx('java.lang:type=Memory') yield attributes 
         WITH 
             attributes.HeapMemoryUsage as heap, 
@@ -138,6 +144,7 @@ export default {
 
     JMX_GARBAGE_COLLECTOR: {
         query: `
+        ${disclaimer}
         CALL dbms.queryJmx('java.lang:name=G1 Young Generation,type=GarbageCollector') 
         YIELD name, attributes 
         WHERE name =~ '(?i).*garbage.*' 
@@ -156,6 +163,7 @@ export default {
 
     JMX_TRANSACTIONS: {
         query: `
+        ${disclaimer}
         CALL dbms.queryJmx("org.neo4j:instance=kernel#0,name=Transactions") 
         YIELD attributes WITH attributes as a 
         RETURN 
@@ -180,6 +188,7 @@ export default {
 
     OS_OPEN_FDS: {
         query: `
+        ${disclaimer}
         CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
         YIELD attributes 
         WITH
@@ -197,6 +206,7 @@ export default {
 
     OS_LOAD_STATS: {
         query: `
+        ${disclaimer}
         CALL dbms.queryJmx('java.lang:type=OperatingSystem') 
         YIELD attributes 
         WITH 
@@ -213,6 +223,7 @@ export default {
 
     OS_MEMORY_STATS: {
         query: `
+            ${disclaimer}
             CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
             YIELD attributes 
             WITH
@@ -252,7 +263,7 @@ export default {
     },
 
     LIST_TRANSACTIONS: {
-        query: 'call dbms.listTransactions()',
+        query: `${disclaimer} call dbms.listTransactions()`,
         columns: [
             { Header: 'ID', accessor: 'transactionId' },
             { Header: 'User', accessor: 'username' },
@@ -284,6 +295,7 @@ export default {
             name: 'apoc.metrics.list',
         },
         query: `
+            ${disclaimer}
             CALL apoc.metrics.list() YIELD name, lastUpdated
             RETURN name, lastUpdated
             ORDER BY lastUpdated ASC;
@@ -302,6 +314,7 @@ export default {
             name: 'apoc.metrics.get',
         },
         query: `
+            ${disclaimer}
             CALL apoc.metrics.get($metric)
             YIELD timestamp, value
             RETURN timestamp, value
@@ -324,6 +337,7 @@ export default {
             name: 'apoc.metrics.storage',
         },
         query: `
+            ${disclaimer}
             CALL apoc.metrics.storage(null)
         `,
         columns: [
@@ -347,6 +361,49 @@ export default {
             { Header: 'Total', accessor: 'totalSpaceBytes', Cell: cdt.dataSizeField },
             { Header: 'Usable', accessor: 'usableSpaceBytes', Cell: cdt.dataSizeField },
             { Header: '% Free', accessor: 'percentFree', Cell: cdt.pctField },
+        ],
+    },
+   
+    DB_QUERY_STATS: {
+        query: `
+            ${disclaimer}
+            CALL db.stats.retrieve("QUERIES") 
+            YIELD data 
+            WITH 
+                data.queryExecutionPlan as qep,                
+                data.estimatedRows as estimatedRows,
+                data.invocationSummary.invocationCount as invocationCount,
+                data.invocationSummary.compileTimeInUs as compileTime,
+                data.invocationSummary.executionTimeInUs as executionTime,
+                data.query as query,
+                data.invocations as invocations
+
+            RETURN 
+                query,
+                qep, 
+                invocationCount,
+                compileTime.min as compileMin,
+                compileTime.max as compileMax,
+                compileTime.avg as compileAvg,
+                executionTime.min as executeMin,
+                executionTime.max as executeMax,
+                executionTime.avg as executeAvg,
+                estimatedRows,
+                invocations
+            ORDER BY query ASC
+        `,
+        columns: [
+            { Header: 'Query', accessor: 'query', style: { whiteSpace: 'unset', textAlign: 'left' } },
+            { Header: 'Plan', accessor: 'qep', show: false },
+            { Header: 'Count', accessor: 'invocationCount', Cell: cdt.numField },
+            { Header: 'Compile(min)', accessor: 'compileMin', show: false, Cell: cdt.numField  },
+            { Header: 'Compile(max)', accessor: 'compileMax', show: false, Cell: cdt.numField  },
+            { Header: 'Compile(avg)', accessor: 'compileAvg', Cell: cdt.numField  },
+            { Header: 'Execute(min)', accessor: 'executeMin', show: false, Cell: cdt.numField  },
+            { Header: 'Execute(max)', accessor: 'executeMax', show: false, Cell: cdt.numField  },
+            { Header: 'Execute(avg)', accessor: 'executeAvg', Cell: cdt.numField  },
+            { Header: 'Estimated Rows', accessor: 'estimatedRows', Cell: cdt.numField },
+            { Header: 'Timings', accessor: 'invocations', show: false },
         ],
     }
 };
