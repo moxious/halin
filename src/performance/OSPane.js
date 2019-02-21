@@ -29,14 +29,22 @@ class OSPane extends Component {
                             <DiskUsage key={key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
                     
-                        <Grid.Column>
-                            <StorageCapacity key={key} node={this.props.node} driver={this.props.driver}/>
-                        </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row columns={1}>
+                        {/* 
+                            TODO
+                            The following component is not yet completed or tested because it
+                            relies upon an APOC plugin that isn't finished yet.
+                            Watch this space.
+
+                            <Grid.Column>
+                                <StorageCapacity key={key} node={this.props.node} driver={this.props.driver}/>
+                            </Grid.Column> 
+                        */}
+
                         <Grid.Column>
                             <PageCache key={`${key}1`} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row columns={1}>
                     </Grid.Row>
                 </Grid>  
             </div>
