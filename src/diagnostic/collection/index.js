@@ -110,7 +110,7 @@ const nodeDiagnostics = (halin, clusterNode) => {
                 })))
             .then(array => ({ JMX: cleanup(array) })));
 
-    const users = halin.supportsAuth() ? withSession(s => 
+    const users = (halin.supportsAuth() && halin.supportsNativeAuth()) ? withSession(s => 
         s.run('CALL dbms.security.listUsers()', {})
             .then(results =>
                 results.records.map(rec => ({
