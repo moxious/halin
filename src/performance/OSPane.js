@@ -3,7 +3,7 @@ import "semantic-ui-css/semantic.min.css";
 import { Grid } from 'semantic-ui-react';
 import DiskUsage from './DiskUsage';
 import PageCache from '../diagnostic/PageCache';
-import StorageCapacity from '../diagnostic/StorageCapacity';
+// import StorageCapacity from '../diagnostic/StorageCapacity';
 import OSStats from './OSStats';
 import uuid from 'uuid';
 
