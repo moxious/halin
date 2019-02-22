@@ -12,7 +12,7 @@ export default class AppFooter extends Component {
                 &nbsp;|&nbsp;
                 <a target='halin' href='https://neo4j.com/docs/operations-manual/current/'>Neo4j Operations Manual</a>
                 &nbsp;&nbsp;
-                <Modal 
+                <Modal size='fullscreen' closeIcon
                     trigger={<Button icon='settings'/>}>
                     <Header>Halin Internal Settings</Header>
                     <Modal.Content scrolling>
