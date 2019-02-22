@@ -6,7 +6,22 @@ import queryLibrary from '../data/query-library';
 import ReactTable from 'react-table';
 import Spinner from '../Spinner';
 import QueryExecutionPlan from './QueryExecutionPlan';
-import { Button, Progress, Form, Modal, Header, Checkbox } from 'semantic-ui-react';
+import { 
+    Button, 
+    Progress, 
+    Form, 
+    Modal, 
+    Header, 
+    Checkbox
+} from 'semantic-ui-react';
+
+// These are the states the collector can be in.
+// State machine:  STOPPED -> RUNNING -> GATHERING -> STOPPED
+// And any state can transition to error.
+const STOPPED = 'Collector stopped';
+const RUNNING = 'Collecting queries...';
+const GATHERING = 'Gathering statistics...';
+const ERROR = 'Error';
 
 export default class SampleQueries extends Component {
     state = {
@@ -15,6 +30,7 @@ export default class SampleQueries extends Component {
         interval: 2000,
         percent: 0,
         updateInterval: null,
+        status: STOPPED,
         displayColumns: [
             { 
                 Header: 'Plan',
@@ -45,9 +61,7 @@ export default class SampleQueries extends Component {
                 <p>Halin allows temporary sampling of this data for inspecting what is running on 
                     the system at any given time.</p>
 
-                <p>Because Halin itself runs queries against your system, some of its load will
-                   appear in the boxes below.
-                </p>
+                <p>All times are given in microseconds (one millionth of a second)</p>
 
                 <p>For more information, read about the <strong>db.stats.*</strong>&nbsp;
                 <a href="https://neo4j.com/docs/operations-manual/current/reference/procedures/">procedures here</a></p>
@@ -55,33 +69,7 @@ export default class SampleQueries extends Component {
         );
     }
 
-    stop() {
-        return this.collector.stop()
-            .then(() => {
-                sentry.fine('Stopped collecting');
-                return this.collector.stats();
-            })
-            .then(data => {
-                if (this.state.updateInterval) {
-                    clearInterval(this.state.updateInterval);
-                }
-
-                this.setState({ 
-                    data,
-                    percent: 1,
-                    timer: null,
-                    error: null,
-                    updateInterval: null,
-                });
-            })
-            .catch(err => {
-                sentry.reportError(err, 'When stopping collection');
-                this.setState({ data: null, error: err });
-            });
-    }
-
-    componentWillUnmount() {
-        sentry.fine('SampleQuery is unmounting');
+    stopAsync() {
         if (this.state.updateInterval) {
             clearInterval(this.state.updateInterval);
         }
@@ -89,6 +77,38 @@ export default class SampleQueries extends Component {
         if (this.state.timer) {
             clearTimeout(this.state.timer);
         }
+
+        this.setState({ updateInterval: null, timer: null });
+    }
+
+    stop() {
+        return this.collector.stop()
+            .then(() => {
+                sentry.fine('Stopped collecting');
+                this.setState({ status: GATHERING });
+                return this.collector.stats();
+            })
+            .then(data => {
+                this.stopAsync();
+                this.setState({ 
+                    data,
+                    percent: 1,
+                    timer: null,
+                    error: null,
+                    updateInterval: null,
+                    status: STOPPED,
+                });
+            })
+            .catch(err => {
+                sentry.reportError(err, 'When stopping collection');
+                this.stopAsync();
+                this.setState({ data: null, status: ERROR, error: err });
+            });
+    }
+
+    componentWillUnmount() {
+        sentry.fine('SampleQuery is unmounting');
+        this.stopAsync();
     }
 
     start() {
@@ -102,6 +122,7 @@ export default class SampleQueries extends Component {
             updateInterval: null,
             error: null,
             data: null,
+            status: RUNNING,
         });
 
         return this.collector.start()
@@ -122,15 +143,34 @@ export default class SampleQueries extends Component {
     }
 
     isRunning() {
-        return this.collector && this.collector.isStarted();
+        return (this.collector && this.collector.isStarted()) ||
+            this.state.status === GATHERING;
+    }
+
+    progressMessage() {
+        if (this.state.status === ERROR) {
+            return `Error: ${this.state.error}`;
+        }
+
+        return this.state.status;
     }
 
     progressBar() {
         return (
             <div className='Progress'>
-                <Progress percent={this.state.percent * 100} autoSuccess />
+                <Progress progress
+                    error={this.state.status === ERROR}
+                    success={this.state.status === GATHERING || this.state.status === STOPPED}
+                    percent={Math.round(this.state.percent * 100)}
+                    autoSuccess>
+                    { this.progressMessage() }
+                </Progress>
 
-                <Spinner text='Sampling running queries...Please keep this tab open!' />
+                { 
+                    (this.state.status === RUNNING || this.state.status === GATHERING) ? 
+                    <Spinner text='&nbsp;' /> : 
+                    ''
+                }
             </div>
         );
     }
@@ -178,6 +218,8 @@ export default class SampleQueries extends Component {
             <div className='SampleQueries'>
                 <h3>Sample Query Performance <Explainer content={this.help()}/></h3>
 
+                { this.progressBar() }
+
                 <Form>
                     <Form.Group inline>
                         <Form.Field>                             
@@ -197,14 +239,14 @@ export default class SampleQueries extends Component {
                         </Form.Field>
 
                         <Form.Field>
-                            <Button onClick={() => this.start()} disabled={!this.validInterval() || this.isRunning()}>
+                            <Button primary icon='cog'
+                                 onClick={() => this.start()} 
+                                 disabled={!this.validInterval() || this.isRunning()}>
                                 Start Collection
                             </Button>
                         </Form.Field>
                     </Form.Group>
                 </Form>
-
-                { this.isRunning() ? this.progressBar() : '' }
 
                 { this.state.data ? this.dataTable() : '' }
             </div>
