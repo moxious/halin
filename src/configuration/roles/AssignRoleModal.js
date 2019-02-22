@@ -87,12 +87,18 @@ class AssignRoleModal extends Component {
 
     removeRole(username, role) {
         const params = { username, role };
-        return this.cypher('call dbms.security.removeRoleFromUser({role}, {username})', params);
+        return this.cypher(`
+            CALL dbms.security.removeRoleFromUser({role}, {username})
+            RETURN null as value
+        `, params);
     }
 
     addRole(username, role) {
         const params = { username, role };
-        return this.cypher('call dbms.security.addRoleToUser({role}, {username})', params);
+        return this.cypher(`
+            CALL dbms.security.addRoleToUser({role}, {username})
+            RETURN null as value
+        `, params);
     }
 
     ok = () => {

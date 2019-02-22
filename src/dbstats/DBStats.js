@@ -1,15 +1,6 @@
 import queryLibrary from '../data/query-library';
-import { v1 as neo4j } from 'neo4j-driver';
-import _ from 'lodash';
-
-const isNeo4jInt = o =>
-    o && _.isObject(o) && !_.isNil(o.high) && !_.isNil(o.low) && _.keys(o).length === 2;
-
-
-const handleNeo4jInt = val => {
-    if (!isNeo4jInt(val)) { return val; }
-    return neo4j.integer.inSafeRange(val) ? val.toNumber() : neo4j.integer.toString(val);
-};
+import neo4j from '../driver';
+import ql from '../data/query-library';
 
 /**
  * This class encapsulates functionality around the db.stats.* procedures.
@@ -28,7 +19,17 @@ export default class DBStats {
 
         const session = this.driver.session();
 
-        return session.run('call db.stats.collect("QUERIES")')
+        return session.run(ql.disclaim(`
+            CALL db.stats.clear('QUERIES') 
+            YIELD section 
+            RETURN section 
+            
+            UNION ALL 
+            
+            CALL db.stats.collect('QUERIES') 
+            YIELD section 
+            RETURN section;
+        `))
             .then(() => {
                 this.started = true;
                 return true;
@@ -51,14 +52,14 @@ export default class DBStats {
             .then(results => results.records.map(r => ({
                 query: r.get('query'),
                 qep: r.get('qep'),
-                invocationCount: handleNeo4jInt(r.get('invocationCount')),
-                compileMin: handleNeo4jInt(r.get('compileMin')),
-                compileMax: handleNeo4jInt(r.get('compileMax')),
-                compileAvg: handleNeo4jInt(r.get('compileAvg')),
-                executeMin: handleNeo4jInt(r.get('executeMin')),
-                executeMax: handleNeo4jInt(r.get('executeMax')),
-                executeAvg: handleNeo4jInt(r.get('executeAvg')),
-                estimatedRows: this.average(r.get('estimatedRows').map(handleNeo4jInt)),
+                invocationCount: neo4j.handleNeo4jInt(r.get('invocationCount')),
+                compileMin: neo4j.handleNeo4jInt(r.get('compileMin')),
+                compileMax: neo4j.handleNeo4jInt(r.get('compileMax')),
+                compileAvg: neo4j.handleNeo4jInt(r.get('compileAvg')),
+                executeMin: neo4j.handleNeo4jInt(r.get('executeMin')),
+                executeMax: neo4j.handleNeo4jInt(r.get('executeMax')),
+                executeAvg: neo4j.handleNeo4jInt(r.get('executeAvg')),
+                estimatedRows: this.average(r.get('estimatedRows').map(neo4j.handleNeo4jInt)),
                 invocations: r.get('invocations'),
             })))
             .finally(() => session.close());

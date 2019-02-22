@@ -14,7 +14,11 @@ export default {
      * of Neo4j this is (e.g. enterprise vs. community)
      */
     getNameVersionsEdition: node => {
-        const componentsPromise = node.run('CALL dbms.components()', {})
+        const componentsPromise = node.run(queryLibrary.disclaim(`
+                CALL dbms.components()
+                YIELD name, versions, edition
+                RETURN name, versions, edition
+            `), {})
             .then(results => {
                 const rec = results.records[0];
                 return {
@@ -39,12 +43,12 @@ export default {
      * particular APOC function.
      */
     hasLogStreaming: node => {
-        const prom = node.run(`
+        const prom = node.run(queryLibrary.disclaim(`
             CALL dbms.procedures() 
             YIELD name 
             WHERE name="apoc.log.stream" 
             RETURN count(name) as n
-        `, {})
+        `), {})
             .then(results => results.records[0].get('n').toNumber() > 0)
             .catch(err => {
                 sentry.reportError('Failed to probe for file streaming procedures', err);
@@ -57,7 +61,7 @@ export default {
      * @returns true if APOC is present, false otherwise.
      */
     hasAPOC: node => {
-        const apocProbePromise = node.run('RETURN apoc.version()', {})
+        const apocProbePromise = node.run(queryLibrary.disclaim('RETURN apoc.version()'), {})
             .then(results => {
                 return true;
             })
@@ -78,11 +82,11 @@ export default {
      * @returns true if CSV metric reporting is enabled, false otherwise.
      */
     csvMetricsEnabled: node => {
-        const csvMetricsProbePromise = node.run(`
+        const csvMetricsProbePromise = node.run(queryLibrary.disclaim(`
             CALL dbms.listConfig() 
             YIELD name, value 
             WHERE name='metrics.csv.enabled' 
-            return value;`, {})
+            return value;`), {})
             .then(results => {
                 const row = results.records[0];
                 if (row && row.get('value') === 'true') {
@@ -103,11 +107,11 @@ export default {
      * @returns true if auth is enabled, false otherwise.
      */
     authEnabled: node => {
-        const authEnabledQ = `
+        const authEnabledQ = queryLibrary.disclaim(`
             CALL dbms.listConfig() YIELD name, value
             WHERE name =~ 'dbms.security.auth_enabled'
             RETURN value;
-        `;
+        `);
         const authEnabledPromise = node.run(authEnabledQ, {})
             .then(results => {
                 let authEnabled = true;
@@ -137,10 +141,10 @@ export default {
     supportsNativeAuth: node => {
         // See issue #27 for what's going on here.  DB must support native auth
         // in order for us to expose some features, such as user management.
-        const authQ = `
+        const authQ = queryLibrary.disclaim(`
             CALL dbms.listConfig() YIELD name, value 
             WHERE name =~ 'dbms.security.auth_provider.*' 
-            RETURN value;`;
+            RETURN value;`);
         const authPromise = node.run(authQ, {})
             .then(results => {
                 let nativeAuth = false;

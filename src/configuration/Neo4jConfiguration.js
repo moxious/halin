@@ -4,6 +4,7 @@ import hoc from '../higherOrderComponents';
 import Explainer from '../Explainer';
 import 'react-table/react-table.css';
 import './Neo4jConfiguration.css';
+import ql from '../data/query-library';
 
 class Neo4jConfiguration extends Component {
     // URL path to where a config item can be looked up.
@@ -11,7 +12,11 @@ class Neo4jConfiguration extends Component {
 
     state = {
         rate: (1000 * 60 * 60),
-        query: 'call dbms.listConfig()',
+        query: ql.disclaim(`
+            CALL dbms.listConfig() 
+            YIELD name, description, value 
+            RETURN name, description, value
+        `),
         displayColumns: [
             { 
                 Header: 'Name', 
