@@ -36,11 +36,11 @@ export default class SampleQueries extends Component {
                 Header: 'Plan',
                 width: 80,
                 Cell: ({ row }) => 
-                    <Modal trigger={
+                    <Modal size='fullscreen' closeIcon trigger={
                         <Button icon='cogs'/>
                     }>
                         <Header>Query Execution Plan</Header>
-                        <Modal.Content>
+                        <Modal.Content scrolling>
                             <QueryExecutionPlan data={row}/>
                         </Modal.Content>
                     </Modal>
