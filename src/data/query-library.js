@@ -2,15 +2,30 @@ import pkg from '../../package.json';
 import fields from './fields';
 const cdt = fields;
 
-const disclaimer = `WITH 'This query was run by Halin v${pkg.version}' AS disclaimer\n`;
+const disclaimer = `'This query was run by Halin v${pkg.version}' AS disclaimer\n`;
+
+/**
+ * Mark a query with a disclaimer so console users and session
+ * trackers can tell this is halin doing this.
+ */
+const disclaim = q => {
+    if (q.indexOf(disclaimer) > -1) {
+        return q;
+    }   
+
+    return `WITH ${disclaimer} ${q}`;
+};
 
 /**
  * A collection of queries that other components can refer to.  By using the same
  * queries with various data feeds, they can be reused and centralized.
  */
 export default {
+    disclaimer,
+    disclaim,
+
     PING: {
-        query: 'RETURN true AS value',
+        query: disclaim('RETURN true AS value'),
         columns: [ { Header: 'Value', accessor: 'value' } ],
         rate: 1000,
     },
@@ -20,18 +35,64 @@ export default {
             type: 'deploy',
             name: 'cluster',
         },
-        query: `${disclaimer} CALL dbms.cluster.role()`,
+        query: disclaim('CALL dbms.cluster.role() YIELD role RETURN role'),
         columns: [
             { Header: 'Role', accessor: 'role' },
         ],
         rate: 5000,
     },
 
+    GET_CONSTRAINTS: {
+        dependency: null,
+        query: disclaim(`
+            CALL db.constraints()
+            YIELD description
+            RETURN description
+        `),
+        columns: [
+            { Header: 'Description', accessor: 'description' },
+        ],
+    },
+
+    GET_INDEXES: {
+        dependency: null,
+        query: disclaim(`
+            CALL db.indexes()
+            YIELD description, indexName, tokenNames, properties, state, type, progress, provider, id, failureMessage
+            RETURN description, indexName, tokenNames, properties, state, type, progress, provider, id, failureMessage
+        `),
+        columns: [
+            { Header: 'Description', accessor: 'description' },
+            { Header: 'Name', accessor: 'indexName' },
+            { Header: 'Tokens', accessor: 'tokenNames' },
+            { Header: 'Properties', accessor: 'properties' },
+            { Header: 'State', accessor: 'state' },
+            { Header: 'Type', accessor: 'type' },
+            { Header: 'Progress', accessor: 'progress' },
+            { Header: 'Provider', accessor: 'provider' },
+            { Header: 'ID', accessor: 'id' },
+            { Header: 'Message', accessor: 'failureMessage' },
+        ],
+    },
+
+    JMX_ALL: {
+        dependency: null,
+        query: disclaim(`
+            CALL dbms.queryJmx('*:*') 
+            YIELD name, description, attributes 
+            RETURN name, description, attributes;
+        `),
+        columns: [
+            { Header: 'Name', accessor: 'name' },
+            { Header: 'Description', accessor: 'description' },
+            { Header: 'Attributes', accessor: 'attributes' },
+        ],
+    },
+
     JMX_STORE_SIZES: {
         // otherStore is a calculated value that catches all other files which may
         // be in the store directory which don't belong to Neo4j.
-        query: `
-            ${disclaimer}
+        query: disclaim(`            
             CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Store sizes') 
             YIELD attributes 
             WITH
@@ -58,7 +119,7 @@ export default {
                 stringStore, arrayStore, 
                 relStore, propStore, total, nodeStore,
                 otherStore;        
-        `,
+        `),
 
         columns: [
             { Header: 'Total Disk', accessor: 'total' },
@@ -76,8 +137,7 @@ export default {
     },
 
     JMX_PAGE_CACHE: {
-        query: `
-        ${disclaimer}
+        query: disclaim(`
         CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Page cache')
         YIELD attributes 
         WITH 
@@ -94,7 +154,7 @@ export default {
         RETURN 
             hitRatio, bytesRead, fileMappings, fileUnmappings,
             flushes, usageRatio, bytesWritten, 
-            faults, evictions, evictionExceptions`,
+            faults, evictions, evictionExceptions`),
         columns: [
             { Header: 'Usage Ratio', accessor: 'usageRatio', Cell: cdt.pctField },
             { Header: 'Hit Ratio', accessor: 'hitRatio', Cell: cdt.pctField },
@@ -113,8 +173,7 @@ export default {
     },
 
     JMX_MEMORY_STATS: {
-        query: `
-        ${disclaimer}
+        query: disclaim(`
         CALL dbms.queryJmx('java.lang:type=Memory') yield attributes 
         WITH 
             attributes.HeapMemoryUsage as heap, 
@@ -133,7 +192,7 @@ export default {
             nonHeapProps.committed as nonHeapCommitted,
             nonHeapProps.used as nonHeapUsed,
             nonHeapProps.max as nonHeapMax,
-            heapProps.used + nonHeapProps.used as totalMem`,
+            heapProps.used + nonHeapProps.used as totalMem`),
         columns: [
             { Header: 'Total Memory', accessor: 'totalMem' },
             { Header: 'Heap Used', accessor: 'heapUsed' },
@@ -143,8 +202,7 @@ export default {
     },
 
     JMX_GARBAGE_COLLECTOR: {
-        query: `
-        ${disclaimer}
+        query: disclaim(`
         CALL dbms.queryJmx('java.lang:name=G1 Young Generation,type=GarbageCollector') 
         YIELD name, attributes 
         WHERE name =~ '(?i).*garbage.*' 
@@ -154,7 +212,7 @@ export default {
             lastGC.startTime as startTime,
             lastGC.duration as duration,
             lastGC.GcThreadCount as threadCount
-        LIMIT 1`,
+        LIMIT 1`),
         columns: [
             { Header: 'Duration', accessor: 'duration' },
             { Header: 'Thread Count', accessor: 'threadCount' },
@@ -162,8 +220,7 @@ export default {
     },
 
     JMX_TRANSACTIONS: {
-        query: `
-        ${disclaimer}
+        query: disclaim(`WITH ${disclaimer}
         CALL dbms.queryJmx("org.neo4j:instance=kernel#0,name=Transactions") 
         YIELD attributes WITH attributes as a 
         RETURN 
@@ -172,7 +229,7 @@ export default {
             a.LastCommittedTxId.value as lastCommittedId, 
             a.NumberOfOpenedTransactions.value as opened, 
             a.PeakNumberOfConcurrentTransactions.value as concurrent, 
-            a.NumberOfCommittedTransactions.value as committed`,
+            a.NumberOfCommittedTransactions.value as committed`),
         columns: [
             { Header: 'Rolled Back', accessor: 'rolledBack' },
             { Header: 'Open', accessor: 'open' },
@@ -187,8 +244,7 @@ export default {
     },
 
     OS_OPEN_FDS: {
-        query: `
-        ${disclaimer}
+        query: disclaim(`
         CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
         YIELD attributes 
         WITH
@@ -196,7 +252,7 @@ export default {
             attributes.MaxFileDescriptorCount.value as fdMax
         RETURN 
             fdOpen, fdMax
-        `,
+        `),
         columns: [
             { Header: 'fdOpen', accessor: 'fdOpen' },
             { Header: 'fdMax', accessor: 'fdMax' },
@@ -205,8 +261,7 @@ export default {
     },
 
     OS_LOAD_STATS: {
-        query: `
-        ${disclaimer}
+        query: disclaim(`        
         CALL dbms.queryJmx('java.lang:type=OperatingSystem') 
         YIELD attributes 
         WITH 
@@ -214,7 +269,7 @@ export default {
             attributes.ProcessCpuLoad as ProcessLoad 
         RETURN 
             SystemLoad.value as systemLoad, 
-            ProcessLoad.value as processLoad`,
+            ProcessLoad.value as processLoad`),
         columns: [
             { Header: 'System Load', accessor: 'systemLoad' },
             { Header: 'Process Load', accessor: 'processLoad' },
@@ -222,8 +277,7 @@ export default {
     },
 
     OS_MEMORY_STATS: {
-        query: `
-            ${disclaimer}
+        query: disclaim(`
             CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
             YIELD attributes 
             WITH
@@ -245,7 +299,7 @@ export default {
                 fdOpen, fdMax,
                 physFree, physTotal,
                 virtCommitted, swapFree, swapTotal,
-                osName, osVersion, arch, processors`,
+                osName, osVersion, arch, processors`),
         columns: [
             { Header: 'Open FDs', accessor: 'fdOpen' },
             { Header: 'Max FDs', accessor: 'fdMax' },
@@ -263,7 +317,7 @@ export default {
     },
 
     LIST_TRANSACTIONS: {
-        query: `${disclaimer} call dbms.listTransactions()`,
+        query: disclaim(`call dbms.listTransactions()`),
         columns: [
             { Header: 'ID', accessor: 'transactionId' },
             { Header: 'User', accessor: 'username' },
@@ -294,12 +348,11 @@ export default {
             type: 'procedure',
             name: 'apoc.metrics.list',
         },
-        query: `
-            ${disclaimer}
+        query: disclaim(`
             CALL apoc.metrics.list() YIELD name, lastUpdated
             RETURN name, lastUpdated
             ORDER BY lastUpdated ASC;
-        `,
+        `),
         columns: [
             { Header: 'Name', accessor: 'name' },
             { Header: 'Last Updated', accessor: 'lastUpdated' },
@@ -313,13 +366,12 @@ export default {
             type: 'procedure',
             name: 'apoc.metrics.get',
         },
-        query: `
-            ${disclaimer}
+        query: disclaim(`
             CALL apoc.metrics.get($metric)
             YIELD timestamp, value
             RETURN timestamp, value
             ORDER BY timestamp DESC LIMIT $last
-        `,
+        `),
         columns: [
             // { Header: 'Timestamp', accessor: 't' },
             { Header: 'Value', accessor: 'value' },
@@ -336,10 +388,7 @@ export default {
             type: 'procedure',
             name: 'apoc.metrics.storage',
         },
-        query: `
-            ${disclaimer}
-            CALL apoc.metrics.storage(null)
-        `,
+        query: disclaim('CALL apoc.metrics.storage(null)'),
         columns: [
             { 
                 Header: 'Location', 
@@ -365,8 +414,7 @@ export default {
     },
    
     DB_QUERY_STATS: {
-        query: `
-            ${disclaimer}
+        query: disclaim(`
             CALL db.stats.retrieve("QUERIES") 
             YIELD data 
             WITH 
@@ -391,7 +439,7 @@ export default {
                 estimatedRows,
                 invocations
             ORDER BY query ASC
-        `,
+        `),
         columns: [
             { Header: 'Query', accessor: 'query', style: { whiteSpace: 'unset', textAlign: 'left' } },
             { Header: 'Plan', accessor: 'qep', show: false },
@@ -405,5 +453,5 @@ export default {
             { Header: 'Estimated Rows', accessor: 'estimatedRows', Cell: cdt.numField },
             { Header: 'Timings', accessor: 'invocations', show: false },
         ],
-    }
+    },
 };

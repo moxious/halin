@@ -167,7 +167,7 @@ const gatherJMX = (halin, node) => {
     const defaultIfUnable = { JMX: [] };
 
     const promise = withSession(halin, node, s =>
-        s.run("CALL dbms.queryJmx('*:*')", {})
+        s.run(queryLibrary.JMX_ALL, {})
             .then(results =>
                 results.records.map(rec => ({
                     name: rec.get('name'),
@@ -182,7 +182,7 @@ const gatherConstraints = (halin, node) => {
     const defaultIfUnable = { constraints: [] };
 
     const promise = withSession(halin, node, s =>
-        s.run('CALL db.constraints()', {})
+        s.run(queryLibrary.GET_CONSTRAINTS, {})
             .then(results =>
                 results.records.map((rec, idx) => ({ idx, description: rec.get('description') })))
             .then(allConstraints => ({ constraints: allConstraints })));
@@ -197,7 +197,7 @@ const gatherIndexes = (halin, node) => {
     // label field vs. tokenNames field.  getOrNull handles
     // both cases.
     const promise = withSession(halin, node, s =>
-        s.run('CALL db.indexes()', {})
+        s.run(queryLibrary.GET_INDEXES, {})
             .then(results =>
                 results.records.map((rec, idx) => ({
                     description: getOrNull(rec, 'description'),
