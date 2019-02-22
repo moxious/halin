@@ -12,7 +12,8 @@ import {
     Form, 
     Modal, 
     Header, 
-    Checkbox
+    Checkbox,
+    Icon,
 } from 'semantic-ui-react';
 
 // These are the states the collector can be in.
@@ -239,9 +240,10 @@ export default class SampleQueries extends Component {
                         </Form.Field>
 
                         <Form.Field>
-                            <Button primary icon='cog'
+                            <Button primary
                                  onClick={() => this.start()} 
                                  disabled={!this.validInterval() || this.isRunning()}>
+                                <Icon name='cogs'/>
                                 Start Collection
                             </Button>
                         </Form.Field>
