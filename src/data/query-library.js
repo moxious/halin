@@ -23,6 +23,7 @@ const disclaim = q => {
 export default {
     disclaimer,
     disclaim,
+    isHalinQuery: q => q && q.indexOf(disclaimer) > -1,
 
     PING: {
         query: disclaim('RETURN true AS value'),
@@ -443,14 +444,14 @@ export default {
         columns: [
             { Header: 'Query', accessor: 'query', style: { whiteSpace: 'unset', textAlign: 'left' } },
             { Header: 'Plan', accessor: 'qep', show: false },
-            { Header: 'Count', accessor: 'invocationCount', Cell: cdt.numField },
-            { Header: 'Compile(min)', accessor: 'compileMin', show: false, Cell: cdt.numField  },
-            { Header: 'Compile(max)', accessor: 'compileMax', show: false, Cell: cdt.numField  },
-            { Header: 'Compile(avg)', accessor: 'compileAvg', Cell: cdt.numField  },
-            { Header: 'Execute(min)', accessor: 'executeMin', show: false, Cell: cdt.numField  },
-            { Header: 'Execute(max)', accessor: 'executeMax', show: false, Cell: cdt.numField  },
-            { Header: 'Execute(avg)', accessor: 'executeAvg', Cell: cdt.numField  },
-            { Header: 'Estimated Rows', accessor: 'estimatedRows', Cell: cdt.numField },
+            { Header: 'Count', width: 120, accessor: 'invocationCount', Cell: cdt.numField },
+            { Header: 'Compile(min)', width: 120, accessor: 'compileMin', show: false, Cell: cdt.numField  },
+            { Header: 'Compile(max)', width: 120, accessor: 'compileMax', show: false, Cell: cdt.numField  },
+            { Header: 'Compile(avg)', width: 120, accessor: 'compileAvg', Cell: cdt.numField  },
+            { Header: 'Execute(min)', width: 120, accessor: 'executeMin', show: false, Cell: cdt.numField  },
+            { Header: 'Execute(max)', width: 120, accessor: 'executeMax', show: false, Cell: cdt.numField  },
+            { Header: 'Execute(avg)', width: 120, accessor: 'executeAvg', Cell: cdt.numField  },
+            { Header: 'Estimated Rows', width: 120, accessor: 'estimatedRows', Cell: cdt.numField },
             { Header: 'Timings', accessor: 'invocations', show: false },
         ],
     },
