@@ -73,7 +73,7 @@ export default class QueryExecutionPlan extends Component {
                 <h3>Query</h3>
                 <pre style={preWrap}>{this.props.data.query}</pre>
 
-                <pre style={{ textAlign: 'left' }}>{JSON.stringify(this.props.data.qep, null, 2)}</pre>
+                {/* <pre style={{ textAlign: 'left' }}>{JSON.stringify(this.props.data.qep, null, 2)}</pre> */}
             </div>
         ) : '';
     }
