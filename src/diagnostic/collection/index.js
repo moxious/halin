@@ -8,6 +8,7 @@ import moment from 'moment';
 import appPkg from '../../../package.json';
 import neo4j from '../../driver/index';
 import sentry from '../../sentry/index.js';
+import queryLibrary from '../../data/query-library';
 
 /**
  * Convenience function.  Different versions of Neo4j (community/enterprise) have different response
@@ -23,17 +24,6 @@ const getOrNull = (rec, field) => {
     } catch (e) { return null; }
 };
 
-// Admittedly a bit nasty, this code detects whether what we're looking at is really a neo4j driver
-// int object, which is a special object designed to overcome the range differences between Neo4j numbers
-// and what JS can support.
-const isNeo4jInt = o =>
-    o && _.isObject(o) && !_.isNil(o.high) && !_.isNil(o.low) && _.keys(o).length === 2;
-
-const handleNeo4jInt = val => {
-    if (!isNeo4jInt(val)) { return val; }
-    return neo4j.integer.inSafeRange(val) ? val.toNumber() : neo4j.integer.toString(val);
-};
-
 /**
  * Take a diagnostic package and return a cleaned up version of the same, removing
  * sensitive data that shouldn't go out.
@@ -41,8 +31,8 @@ const handleNeo4jInt = val => {
  */
 const cleanup = pkg => {
     const deepReplace = (keyToClean, newVal, object, path) => {
-        if (isNeo4jInt(object)) {
-            return handleNeo4jInt(object);
+        if (neo4j.isNeo4jInt(object)) {
+            return neo4j.handleNeo4jInt(object);
         }
 
         let found = false;
@@ -52,8 +42,8 @@ const cleanup = pkg => {
                 found = true;
             } else if (_.isArray(val)) {
                 object[key] = val.map((v, i) => deepReplace(keyToClean, newVal, v, `${path}[${i}]`));
-            } else if (isNeo4jInt(val)) {
-                object[key] = handleNeo4jInt(val);
+            } else if (neo4j.isNeo4jInt(val)) {
+                object[key] = neo4j.handleNeo4jInt(val);
             } else if (_.isObject(val)) {
                 object[key] = deepReplace(keyToClean, newVal, val, `${path}.${key}`);
             }
@@ -120,7 +110,7 @@ const simpleGather = (halin, node, domain, query, key) =>
             .then(value => {
                 const obj = {};
                 obj[domain] = {};
-                obj[domain][key] = handleNeo4jInt(value);
+                obj[domain][key] = neo4j.handleNeo4jInt(value);
                 return obj;
             }));
 
