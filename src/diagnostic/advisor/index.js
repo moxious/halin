@@ -40,7 +40,7 @@ const categorize = (ruleFunctions, categoryName) => {
     // at the same time.
     const categorizeResults = (f, category) => 
         pkg => 
-            f(pkg).map(inspectionResult => {
+            (f(pkg) || []).map(inspectionResult => {
                 inspectionResult.category = categoryName;
                 return inspectionResult;
             });
