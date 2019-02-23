@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { Grid, Icon, Popup } from 'semantic-ui-react';
-import Overview from './Overview';
 import './DiagnosticPane.css';
 import GeneratePackage from './GeneratePackage';
 import ClusterEventLog from './ClusterEventLog';
@@ -17,11 +16,11 @@ class DiagnosticPane extends Component {
         return (
             <div className="DiagnosticPane" key={this.state.key}>
                 <Grid divided='vertically'>
-                    <Grid.Row columns={1}>
+                    {/* <Grid.Row columns={1}>
                         <Grid.Column>
                             <Overview key={this.state.key} node={this.props.node} driver={this.props.driver}/>
                         </Grid.Column>
-                    </Grid.Row>
+                    </Grid.Row> */}
 
                     <Grid.Row columns={1}>
                         <Grid.Column>

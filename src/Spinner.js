@@ -20,7 +20,7 @@ export default class Spinner extends Component {
                     src='img/neo4j_logo_globe.png' 
                     size='mini' 
                 />
-                Loading
+                { this.props.text || 'Loading' }
             </div>
         )
     }

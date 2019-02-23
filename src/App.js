@@ -9,6 +9,9 @@ import Neo4jConfiguration from './configuration/Neo4jConfiguration';
 import PerformancePane from './performance/PerformancePane';
 import OSPane from './performance/OSPane';
 import PluginPane from './db/PluginPane';
+import SampleQueryPane from './db/SampleQueryPane';
+// import LogsPane from './db/LogsPane';
+// import MetricsPane from './db/metrics/MetricsPane';
 import PermissionsPane from './configuration/PermissionsPane';
 import ClusterOverviewPane from './overview/ClusterOverviewPane';
 import ClusterNodeTabHeader from './ClusterNodeTabHeader';
@@ -58,6 +61,26 @@ class Halin extends Component {
         render: () => this.paneWrapper(
           <PluginPane key={key} node={node} driver={driver} />),
       },
+      {
+        menuItem: 'Query Performance',
+        render: () => this.paneWrapper(
+          <SampleQueryPane key={key} node={node} driver={driver} />),
+      },
+
+      // TODO
+      // The following two panes are disabled and not yet tested/active, because they're
+      // pending updates to an APOC component that isn't ready yet.
+      // {
+      //   menuItem: 'Metrics',
+      //   render: () => this.paneWrapper(
+      //     <MetricsPane key={key} node={node} driver={driver} />
+      //   ),
+      // },
+      // {
+      //   menuItem: 'Logs',
+      //   render: () => this.paneWrapper(
+      //     <LogsPane key={key} node={node} driver={driver} />),
+      // }
     ]),
   };
 

@@ -1,6 +1,10 @@
 {
   "short_name": "Halin",
   "name": "Halin Neo4j Monitoring",
+  "homepage": ".",
+  "neo4jDesktop": {
+    "apiVersion": "^1.2.0"
+  },
   "icons": [
     {
       "src": "favicon.ico",

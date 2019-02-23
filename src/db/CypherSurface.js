@@ -11,6 +11,7 @@ class CypherSurface extends Component {
             {
                 Header: 'Type',
                 accessor: 'type',
+                width: 100,
                 filterMethod: (filter, row) => {
                     if (filter.value === "all") {
                         return true;

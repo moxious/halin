@@ -287,6 +287,8 @@ class CypherTimeseries extends Component {
         if (!this.state.metadata) { return ''; }
         return (
             <div className='ChartMetadata'>
+                { this.props.explainer || '' }
+
                 <Label>
                     Max
                     <Label.Detail>{datautil.roundToPlaces(this.getChartMax(), 2)}</Label.Detail>
@@ -336,6 +338,7 @@ class CypherTimeseries extends Component {
                                     style: { fill: this.chooseColor(idx) },
                                 }))}
                             />
+
                         </Grid.Column>
                         {/* <Grid.Column>
                             <span style={this.dateStyle}>{`${this.state.time}`}</span>

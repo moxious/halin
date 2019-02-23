@@ -113,6 +113,22 @@ export default class HalinContext {
         return !this.isEnterprise();
     }
 
+    supportsAPOC() {
+        return this.clusterNodes[0].supportsAPOC();
+    }
+
+    supportsLogStreaming() {
+        return this.clusterNodes[0].supportsLogStreaming();
+    }
+
+    supportsMetrics() {
+        return this.clusterNodes[0].metrics && this.clusterNodes[0].metrics.length > 0;
+    }
+
+    supportsDBStats() {
+        return this.clusterNodes[0].supportsDBStats();
+    }
+
     /**
      * Returns true if the context provides for native auth management, false otherwise.
      */
@@ -174,7 +190,11 @@ export default class HalinContext {
     checkForCluster(activeDb) {
         const session = this.base.driver.session();
         // sentry.debug('activeDb', activeDb);
-        return session.run('CALL dbms.cluster.overview()', {})
+        return session.run(queryLibrary.disclaim(`
+            CALL dbms.cluster.overview()
+            YIELD id, addresses, role, groups, database
+            RETURN id, addresses, role, groups, database
+            `, {}))
             .then(results => {
                 this.clusterNodes = results.records.map(rec => new ClusterNode(rec));
 
@@ -230,16 +250,10 @@ export default class HalinContext {
             .then(results => {
                 const rec = results.records[0];
 
-                let roles = [];
-                try {
-                    // Community doesn't expose this field, and
-                    // it's an ignorable error
-                    roles = rec.get('roles');
-                } catch (e) { ; }
-
                 this.currentUser = {
                     username: rec.get('username'),
-                    roles,
+                    // Community doesn't have roles.
+                    roles: rec.has('roles') ? rec.get('roles') : [],
                     flags: rec.get('flags'),
                 };
                 
@@ -307,6 +321,10 @@ export default class HalinContext {
         };
     }
 
+    getBaseURI() {
+        return `bolt://${this.base.host}:${this.base.port}`;
+    }
+
     /**
      * Returns a promise that resolves to the HalinContext object completed,
      * or rejects.
@@ -358,8 +376,7 @@ export default class HalinContext {
                     this.base = _.cloneDeep(active.graph.connection.configuration.protocols.bolt);
 
                     // Create a default driver to have around.
-                    const uri = `bolt://${this.base.host}:${this.base.port}`;
-                    this.base.driver = this.driverFor(uri);
+                    this.base.driver = this.driverFor(this.getBaseURI());
 
                     // sentry.fine('HalinContext created', this);
                     return Promise.all([

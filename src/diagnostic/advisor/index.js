@@ -21,6 +21,7 @@ import indexAndConstraint from './rules/index-and-constraint';
 import users from './rules/users';
 import config from './rules/config';
 import versions from './rules/versions';
+import security from './rules/security';
 
 const dummy = diag => {
     return [
@@ -31,18 +32,35 @@ const dummy = diag => {
     ];
 }
 
+const categorize = (ruleFunctions, categoryName) => {
+    // Takes a rule function, and returns a wrapped function.
+    // The wrapper runs the same rules as the original, but tags a category
+    // to each result that comes out of the rule function.
+    // In this way we can categorize the output of an entire batch of functions
+    // at the same time.
+    const categorizeResults = (f, category) => 
+        pkg => 
+            (f(pkg) || []).map(inspectionResult => {
+                inspectionResult.category = categoryName;
+                return inspectionResult;
+            });
+
+    return ruleFunctions.map(f => categorizeResults(f));
+};
+
 /**
  * The entire rule chain is simply a concat of all rules in all of the imported modules.
  */
 const rules = [
-    dummy,
-    ...memory,
-    ...cluster,
-    ...network,
-    ...indexAndConstraint,
-    ...users,
-    ...config,
-    ...versions,
+    ...categorize([dummy], 'General'),
+    ...categorize(memory, 'Memory'),
+    ...categorize(cluster, 'Cluster'),
+    ...categorize(versions, 'Cluster'),
+    ...categorize(network, 'Network'),
+    ...categorize(indexAndConstraint, 'Graph Schema'),
+    ...categorize(users, 'Users'),
+    ...categorize(config, 'Configuration'),
+    ...categorize(security, 'Security'),
 ];
 
 /**

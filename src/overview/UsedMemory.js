@@ -3,6 +3,7 @@ import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/query-library';
 import _ from 'lodash';
+import Explainer from '../Explainer';
 
 class UsedMemory extends Component {
     state = {
@@ -31,10 +32,21 @@ class UsedMemory extends Component {
         return feed;
     };
 
+    help() {
+        return (
+            <div className='UsedMemoryHelp'>
+                <p>This displays total physical memory / RAM available to the machine that Neo4j runs on.</p>
+                <p>This is <strong>not</strong> limited to what Neo4j uses, but covers all processes running on that machine</p>
+                <p><a href="https://neo4j.com/docs/java-reference/current/jmx-metrics/">
+                Read the docs on JMX monitoring of the operating system</a></p>
+            </div>
+        );
+    }
+
     render() {
         return (
             <div className="UsedMemory">
-                <h3>Used Physical Memory (bytes)</h3>
+                <h3>Used Physical Memory <Explainer content={this.help()}/></h3>
                 
                 <ClusterTimeseries key={this.state.key}
                     width={this.state.width}

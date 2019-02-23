@@ -67,6 +67,30 @@ export default class Advisor extends Component {
                     </select>,
             },
             {
+                Header: 'Category',
+                accessor: 'category',
+                width: 100,
+                filterMethod: (filter, row) => {
+                    if (filter.value === "all") {
+                        return true;
+                    }
+
+                    return row[filter.id] === filter.value;
+                },
+                Filter: ({ filter, onChange }) =>
+                    <select
+                        onChange={event => onChange(event.target.value)}
+                        style={{ width: "100%" }}
+                        value={filter ? filter.value : "all"}
+                    >
+                        <option value="all">All</option>
+                        {
+                            this.getCategories().map((i, idx) =>
+                                <option key={idx} value={i}>{i}</option>)
+                        }
+                    </select>,
+            },
+            {
                 Header: 'Finding',
                 accessor: 'finding',
                 style: { whiteSpace: 'unset', textAlign: 'left' },
@@ -84,6 +108,12 @@ export default class Advisor extends Component {
             },
         ],
     };
+
+    getCategories() {
+        if (!this.props.data) { return []; }
+        const allCategories = this.props.data.map(i => i.category);
+        return _.uniq(allCategories).sort();
+    }
 
     getMachines() {
         if (!this.props.data) { return []; }

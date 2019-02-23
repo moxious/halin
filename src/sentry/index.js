@@ -25,10 +25,24 @@ const error = (...args) => console.error('ERROR', ...args);
 const fine = (...args) => console.log('FINE', ...args);
 const debug = (...args) => console.log('DEBUG', ...args);
 
+// Filter out certain messages which might be so common that they'd create problems.
+const shouldSentryCapture = err => {
+    const str = `${err}`;
+
+    if (str.indexOf('WebSocket connection failure') > -1) {
+        return false;
+    }
+
+    return true;
+}
+
 const reportError = (err, message=null) => {
     if (!initialized) { init(); }
 
-    Sentry.captureException(err);
+    if (shouldSentryCapture(err)) {
+        Sentry.captureException(err);
+    }
+
     if (message) {
         console.error(message, err);
     }

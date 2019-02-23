@@ -1,14 +1,17 @@
 import Parser from 'uri-parser';
-import sentry from '../sentry/index';
-import neo4jErrors from '../driver/errors';
 import _ from 'lodash';
 import math from 'mathjs';
 import Ring from 'ringjs';
+import featureProbes from '../feature/probes';
 
 const MAX_OBSERVATIONS = 500;
 
 /**
  * Abstraction that captures details and information about a node in a cluster.
+ * For each node in a cluster, this abstraction lets you:
+ *  - Run queries keeping track of performance and errors over time
+ *  - Inspect the node easily to determine what features it supports
+ *  - Gather performance data about how responsive it is
  */
 export default class ClusterNode {
     /**
@@ -17,7 +20,7 @@ export default class ClusterNode {
     constructor(record) {
         this.id = record.get('id');
         this.addresses = record.get('addresses');
-        this.role = record.get('role');
+        this.role = (record.get('role') || '').trim();
         this.database = record.get('database');
         this.dbms = {};
         this.driver = null;
@@ -102,9 +105,25 @@ export default class ClusterNode {
     isEnterprise() {
         return this.dbms.edition === 'enterprise';
     }
-    
+
     isCommunity() {
         return !this.isEnterprise();
+    }
+
+    supportsAPOC() {
+        return this.dbms.apoc;
+    }
+
+    supportsLogStreaming() {
+        return this.dbms.logStreaming;
+    }
+
+    /**
+     * If true, this cluster node has CSV metrics enabled which, with APOC, we can 
+     * access.
+     */
+    csvMetricsEnabled() {
+        return this.dbms.csvMetricsEnabled;
     }
 
     /**
@@ -121,6 +140,10 @@ export default class ClusterNode {
         return this.dbms.authEnabled === 'true';
     }
 
+    supportsDBStats() {
+        return this.dbms.hasDBStats;
+    }
+
     getCypherSurface() {
         const session = this.driver.session();
 
@@ -128,7 +151,7 @@ export default class ClusterNode {
             name: rec.get('name'),
             signature: rec.get('signature'),
             description: rec.get('description'),
-            roles: rec.get('roles'),
+            roles: rec.has('roles') ? rec.get('roles') : [],
             type: t,
         }));
 
@@ -141,86 +164,54 @@ export default class ClusterNode {
             .then(results => _.flatten(results));
     }
 
+    /**
+     * Gets a list of metrics that the node has available, as per:
+     * https://neo4j.com/docs/operations-manual/current/monitoring/metrics/expose/#metrics-csv
+     * 
+     * Guaranteed this promise won't fail, but it may return [] if the node doesn't support
+     * metrics.
+     * 
+     * @return Promise that resolves to an array of objects.
+     */
+    getAvailableMetrics() {
+        if (!_.isNil(this.metrics)) {
+            return Promise.resolve(this.metrics);
+        }
+
+        return featureProbes.getAvailableMetrics(this)
+            .then(metrics => { 
+                this.metrics = metrics;
+                return metrics;
+            });
+    }
+
     checkComponents() {
         if (!this.driver) {
             throw new Error('ClusterNode has no driver');
         }
 
-        const q = 'call dbms.components()';
-        const session = this.driver.session();
+        // Probes get individual pieces of information then assign them into our structure,
+        // so we can drive feature request functions for outside callers.
+        const allProbes = [
+            featureProbes.getNameVersionsEdition(this)
+                .then(result => { this.dbms = _.merge(_.cloneDeep(this.dbms), result); }),
+            featureProbes.supportsNativeAuth(this)
+                .then(result => { this.dbms.nativeAuth = result; }),
+            featureProbes.authEnabled(this)
+                .then(result => { this.dbms.authEnabled = result; }),
+            featureProbes.csvMetricsEnabled(this)
+                .then(result => { this.dbms.csvMetricsEnabled = result; }),
+            featureProbes.hasAPOC(this)
+                .then(result => { this.dbms.apoc = result; }),
+            featureProbes.hasLogStreaming(this)
+                .then(result => { this.dbms.logStreaming = result; }),
+            featureProbes.getAvailableMetrics(this)
+                .then(metrics => { this.metrics = metrics; }),
+            featureProbes.hasDBStats(this)
+                .then(result => { this.dbms.hasDBStats = result }),
+        ];
 
-        const componentsPromise = session.run(q, {})
-            .then(results => {
-                const rec = results.records[0];
-                this.dbms.name = rec.get('name')
-                this.dbms.versions = rec.get('versions');
-                this.dbms.edition = rec.get('edition');
-            })
-            .catch(err => {
-                sentry.reportError(err, 'Failed to get DBMS components; this can be because user is not admin');
-                this.dbms.name = 'UNKNOWN';
-                this.dbms.versions = [];
-                this.dbms.edition = 'UNKNOWN';
-            });
-
-        // See issue #27 for what's going on here.  DB must support native auth
-        // in order for us to expose some features, such as user management.
-        const authQ = `
-            CALL dbms.listConfig() YIELD name, value 
-            WHERE name =~ 'dbms.security.auth_provider.*' 
-            RETURN value;`;
-        const authPromise = session.run(authQ, {})
-            .then(results => {
-                let nativeAuth = false;
-
-                results.records.forEach(rec => {
-                    const val = rec.get('value');
-                    const valAsStr = `${val}`; // Coerce ['foo','bar']=>'foo,bar' if present
-
-                    if (valAsStr.indexOf('native') > -1) {
-                        nativeAuth = true;
-                    }
-                });
-
-                this.dbms.nativeAuth = nativeAuth;
-            })
-            .catch(err => {
-                if (neo4jErrors.permissionDenied(err)) {
-                    // Read only user can't do this, so we can't tell whether native
-                    // auth is supported.  So disable functionality which requires this.
-                    this.dbms.nativeAuth = false;
-                    return;    
-                }
-
-                sentry.reportError(err, 'Failed to get DBMS auth implementation type');
-                this.dbms.nativeAuth = false;
-            });
-
-        const authEnabledQ = `
-            CALL dbms.listConfig() YIELD name, value
-            WHERE name =~ 'dbms.security.auth_enabled'
-            RETURN value;
-        `;
-        const authEnabledPromise = session.run(authEnabledQ, {})
-            .then(results => {
-                let authEnabled = true;
-                results.records.forEach(rec => {
-                    const val = rec.get('value');
-                    authEnabled = `${val}`;
-                });
-                this.dbms.authEnabled = authEnabled;
-            })
-            .catch(err => {
-                if (neo4jErrors.permissionDenied(err)) {
-                    this.dbms.authEnabled = false;
-                    return;
-                }
-
-                sentry.reportError(err, 'Failed to check auth enabled status');
-                this.dbms.authEnabled = true;
-            });
-
-        return Promise.all([componentsPromise, authPromise, authEnabledPromise])
+        return Promise.all(allProbes)
             .then(whatever => {
                 if (this.isCommunity()) {
                     // #operability As a special exception, community will fail 
@@ -257,12 +248,12 @@ export default class ClusterNode {
      * @param {String} query a cypher query
      * @param {Object} params parameters to pass to the query.
      */
-    run(query, params={}) {
+    run(query, params = {}) {
         if (!this.driver) { throw new Error('ClusterNode has no driver!'); }
 
         const session = this.driver.session();
 
-        const start = new Date().getTime();        
+        const start = new Date().getTime();
         return session.run(query, params)
             .then(results => {
                 const elapsed = new Date().getTime() - start;
