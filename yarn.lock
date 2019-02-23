@@ -1459,7 +1459,7 @@ atob@^2.1.1:
   resolved "https://neo.jfrog.io/neo/api/npm/npm/atob/-/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
   integrity sha1-bZUX654DDSQ2ZmZR6GvZ9vE1M8k=
 
-autobind-decorator@2.2.1, autobind-decorator@^2.1.0:
+autobind-decorator@2.2.1:
   version "2.2.1"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/autobind-decorator/-/autobind-decorator-2.2.1.tgz#acabfddec272b9c98323dab5dc94f63c61b35855"
   integrity sha1-rKv93sJyucmDI9q13JT2PGGzWFU=
