@@ -16,7 +16,7 @@ let privateLocalCreds = {};
 class ConnectForm extends Component {
     state = {
         username: privateLocalCreds.username || process.env.NEO4J_USERNAME || 'neo4j',
-        password: privateLocalCreds.password || process.env.NEO4J_PASSWORD,
+        password: privateLocalCreds.password || process.env.NEO4J_PASSWORD || '',
         host: privateLocalCreds.host || process.env.NEO4J_URI || 'localhost',
         port: privateLocalCreds.port || 7687,
         encrypted: _.isNil(privateLocalCreds.encrypted) ? false : privateLocalCreds.encrypted,
@@ -40,7 +40,7 @@ class ConnectForm extends Component {
         this.state.errors.host || this.state.errors.port || this.state.errors.username ||
         this.state.errors.password || this.state.errors.encrypted);
 
-    inputUpdated = (meh, data) => {
+    inputUpdated = (event, data) => {
         const { name, value } = data;
 
         const errors = _.cloneDeep(this.state.errors);
@@ -78,6 +78,7 @@ class ConnectForm extends Component {
         }
 
         this.setState({ [name]: value, errors });
+        event.preventDefault();
     };
 
     onSubmit = () => this.props.onSubmit(this.state);
@@ -88,7 +89,6 @@ class ConnectForm extends Component {
 
     render() {
         const { open, errorMsg, onClose } = this.props;
-        const { username, password, host, port, encrypted } = this.state;
         return (
             <Modal size="tiny" closeOnEscape={false} closeOnDimmerClick={false} open={open} onClose={onClose}>
                 <Modal.Header>Connect to a graph</Modal.Header>
@@ -99,7 +99,7 @@ class ConnectForm extends Component {
                         <Form.Field required>
                             <label>Host</label>
                             <Form.Input
-                                value={host}
+                                value={this.state.host}
                                 name="host"
                                 onChange={this.inputUpdated}
                                 placeholder="Host"
@@ -113,7 +113,7 @@ class ConnectForm extends Component {
                         <Form.Field required>
                             <label>Port</label>
                             <Form.Input required
-                                value={port}
+                                value={this.state.port}
                                 name="port"
                                 onChange={this.inputUpdated}
                                 placeholder="Port"
@@ -126,7 +126,7 @@ class ConnectForm extends Component {
                         <Form.Field required>
                             <label>Username</label>
                             <Form.Input required
-                                value={username}
+                                value={this.state.username}
                                 name="username"
                                 onChange={this.inputUpdated}
                                 placeholder="Username"
@@ -139,7 +139,7 @@ class ConnectForm extends Component {
                         <Form.Field required>
                             <label>Password</label>
                             <Form.Input 
-                                value={password}
+                                value={this.state.password}
                                 name="password"
                                 onChange={this.inputUpdated}
                                 type="password"
@@ -152,7 +152,7 @@ class ConnectForm extends Component {
 
                         <Form.Field>
                             <Checkbox                                 
-                                checked={encrypted}
+                                checked={this.state.encrypted}
                                 name="encrypted"
                                 onChange={this.inputUpdated}
                                 type="checkbox"
