@@ -1,5 +1,24 @@
 # Halin Release Notes
 
+## 0.8.0
+
+### Improvements
+
+- Adds query performance profiling ("Query Performance" tab under each machine) which
+permits temporary sampling of live running queries, and performance analysis.
+- Adds "Explainers", info icons to most sections,
+that describe what the data means and provides links to appropriate Neo4j documentation
+- Greatly improves compatibility checking for various
+features of Neo4j.
+
+### Bug Fixes 
+
+- #59 Makes the leader in a cluster more visually distinct in a timeseries graph
+- #57 prevents connection errors by better validating inputs when connecting
+- #62 fixes diagnostic collection for non-native auth (i.e. LDAP) 
+- Defaults roles to [] for community edition, which
+does not support roles.
+
 ## 0.7.2, 0.7.3
 
 - Fixes an issue identified where incorrect roles were reported
