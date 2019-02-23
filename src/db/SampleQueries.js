@@ -28,7 +28,7 @@ export default class SampleQueries extends Component {
     state = {
         includeHalinQueries: true,
         data: null,
-        interval: 2000,
+        interval: 10000,
         percent: 0,
         updateInterval: null,
         status: STOPPED,
@@ -79,37 +79,53 @@ export default class SampleQueries extends Component {
             clearTimeout(this.state.timer);
         }
 
-        this.setState({ updateInterval: null, timer: null });
+        if (this.mounted) {
+            this.setState({ updateInterval: null, timer: null });
+        }
     }
 
-    stop() {
+    stop(doCollection = true) {
         return this.collector.stop()
             .then(() => {
                 sentry.fine('Stopped collecting');
-                this.setState({ status: GATHERING });
-                return this.collector.stats();
+                if (this.mounted) { this.setState({ status: GATHERING }); }
+                
+                if (doCollection) {
+                    return this.collector.stats();
+                }
+                return null;
             })
             .then(data => {
                 this.stopAsync();
-                this.setState({ 
-                    data,
-                    percent: 1,
-                    timer: null,
-                    error: null,
-                    updateInterval: null,
-                    status: STOPPED,
-                });
+                if (this.mounted) {
+                    this.setState({ 
+                        data,
+                        percent: 1,
+                        timer: null,
+                        error: null,
+                        updateInterval: null,
+                        status: STOPPED,
+                    });
+                }
             })
             .catch(err => {
                 sentry.reportError(err, 'When stopping collection');
                 this.stopAsync();
-                this.setState({ data: null, status: ERROR, error: err });
+                if (this.mounted) {
+                    this.setState({ data: null, status: ERROR, error: err });
+                }
             });
     }
 
+    componentDidMount() {
+        this.mounted = true;
+    }
+
     componentWillUnmount() {
+        this.mounted = false;
         sentry.fine('SampleQuery is unmounting');
         this.stopAsync();
+        this.stop(false);
     }
 
     start() {
@@ -138,7 +154,7 @@ export default class SampleQueries extends Component {
                         const percent = (now - start) / this.state.interval;
                         console.log(percent, 'percent complete');
                         this.setState({ percent: percent >= 1 ? 0.99 : percent });
-                    }, 250),
+                    }, 100),
                 });
             })
     }
