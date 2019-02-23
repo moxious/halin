@@ -58,10 +58,15 @@ export default {
     },
 
     hasDBStats: node => {
+        // #operability
+        // The full feature set needed for Halin was first introduced 
+        // Neo4j 3.5.0 doesn't have any of the needed procedures.
+        // Neo4j 3.5.1 has some, but is missing db.stats.clear
+        // Neo4j 3.5.2 introduced db.stats.clear and actually works.
         const probePromise = node.run(queryLibrary.disclaim(`
             CALL dbms.procedures() 
             YIELD name 
-            WHERE name =~ 'db.stats.*'
+            WHERE name =~ 'db.stats.clear'
             RETURN name
         `))
             .then(results => results.records.length > 0)

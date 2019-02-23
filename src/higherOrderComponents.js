@@ -134,7 +134,7 @@ const adminOnlyComponent = (WrappedComponent, heading) => {
 };
 
 const dbStatsOnlyComponent = (WrappedComponent, heading) => {
-    const failMsg = 'Only available in versions of Neo4j which support db.stats (most recent 3.5 series)';
+    const failMsg = 'Only available in versions of Neo4j which support db.stats (Neo4j 3.5.2 and above)';
     const compatCheck = ctx => Promise.resolve(ctx.supportsDBStats());
 
     return compatibilityCheckableComponent(
