@@ -185,9 +185,11 @@ const gatherIndexes = (halin, node) => {
 
     // Signature differs between 3.4 and 3.5, particularly
     // label field vs. tokenNames field.  getOrNull handles
-    // both cases.
+    // both cases.  
+    // **Do not use the queryLibrary version** because it can't handle
+    // the different signatures.
     const promise = withSession(halin, node, s =>
-        s.run(queryLibrary.GET_INDEXES.query, {})
+        s.run('CALL db.indexes()', {})
             .then(results =>
                 results.records.map((rec, idx) => ({
                     description: getOrNull(rec, 'description'),

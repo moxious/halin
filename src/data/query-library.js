@@ -55,27 +55,6 @@ export default {
         ],
     },
 
-    GET_INDEXES: {
-        dependency: null,
-        query: disclaim(`
-            CALL db.indexes()
-            YIELD description, indexName, tokenNames, properties, state, type, progress, provider, id, failureMessage
-            RETURN description, indexName, tokenNames, properties, state, type, progress, provider, id, failureMessage
-        `),
-        columns: [
-            { Header: 'Description', accessor: 'description' },
-            { Header: 'Name', accessor: 'indexName' },
-            { Header: 'Tokens', accessor: 'tokenNames' },
-            { Header: 'Properties', accessor: 'properties' },
-            { Header: 'State', accessor: 'state' },
-            { Header: 'Type', accessor: 'type' },
-            { Header: 'Progress', accessor: 'progress' },
-            { Header: 'Provider', accessor: 'provider' },
-            { Header: 'ID', accessor: 'id' },
-            { Header: 'Message', accessor: 'failureMessage' },
-        ],
-    },
-
     JMX_ALL: {
         dependency: null,
         query: disclaim(`
