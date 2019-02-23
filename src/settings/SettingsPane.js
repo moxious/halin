@@ -35,8 +35,9 @@ class DetectedSettings extends Component {
                     <List.Item>{ this.lineItem(ctx.supportsNativeAuth(), 'Native Authorization') }</List.Item>
                     <List.Item>{ this.lineItem(ctx.supportsAPOC(), 'Supports APOC') }</List.Item>
                     <List.Item>{ this.lineItem(ctx.supportsLogStreaming(), 'Supports File Streaming') }</List.Item>
+                    <List.Item>{ this.lineItem(ctx.supportsDBStats(), 'Supports DB Stats') }</List.Item>
                     <List.Item>{ this.lineItem(ctx.supportsMetrics(), 'Supports Metrics') }</List.Item>
-                    <List.Item>{ this.lineItem(ctx.isCluster(), 'Clustered Deployment') }</List.Item>
+                    <List.Item>{ this.lineItem(ctx.isCluster(), 'Clustered Deployment') }</List.Item>                    
                 </List>
             </div>
         );

@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import SampleQueries from './SampleQueries';
+import hoc from '../higherOrderComponents';
 
-export default class SampleQueryPane extends Component {
+class SampleQueryPane extends Component {
     state = {
         key: uuid.v4(),
     };
@@ -19,3 +20,5 @@ export default class SampleQueryPane extends Component {
         )
     }
 }
+
+export default hoc.dbStatsOnlyComponent(SampleQueryPane);

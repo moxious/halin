@@ -133,6 +133,17 @@ const adminOnlyComponent = (WrappedComponent, heading) => {
     );
 };
 
+const dbStatsOnlyComponent = (WrappedComponent, heading) => {
+    const failMsg = 'Only available in versions of Neo4j which support db.stats (most recent 3.5 series)';
+    const compatCheck = ctx => Promise.resolve(ctx.supportsDBStats());
+
+    return compatibilityCheckableComponent(
+        WrappedComponent,
+        compatCheck,
+        () => missingFeatureMessage(heading, failMsg)
+    );
+};
+
 export default {
     adminOnlyComponent,
     enterpriseOnlyComponent,
@@ -140,4 +151,5 @@ export default {
     apocOnlyComponent,
     csvMetricsComponent,
     compatibilityCheckableComponent,
+    dbStatsOnlyComponent,
 };

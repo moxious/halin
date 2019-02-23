@@ -125,6 +125,10 @@ export default class HalinContext {
         return this.clusterNodes[0].metrics && this.clusterNodes[0].metrics.length > 0;
     }
 
+    supportsDBStats() {
+        return this.clusterNodes[0].supportsDBStats();
+    }
+
     /**
      * Returns true if the context provides for native auth management, false otherwise.
      */

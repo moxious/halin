@@ -57,6 +57,21 @@ export default {
         return prom;
     },
 
+    hasDBStats: node => {
+        const probePromise = node.run(queryLibrary.disclaim(`
+            CALL dbms.procedures() 
+            YIELD name 
+            WHERE name =~ 'db.stats.*'
+            RETURN name
+        `))
+            .then(results => results.records.length > 0)
+            .catch(err => {
+                sentry.reportError('DBStats probe failed', err);
+                return false;
+            });
+        return probePromise;
+    },
+
     /**
      * @returns true if APOC is present, false otherwise.
      */

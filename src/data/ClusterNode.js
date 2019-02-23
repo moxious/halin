@@ -140,6 +140,10 @@ export default class ClusterNode {
         return this.dbms.authEnabled === 'true';
     }
 
+    supportsDBStats() {
+        return this.dbms.hasDBStats;
+    }
+
     getCypherSurface() {
         const session = this.driver.session();
 
@@ -203,6 +207,8 @@ export default class ClusterNode {
                 .then(result => { this.dbms.logStreaming = result; }),
             featureProbes.getAvailableMetrics(this)
                 .then(metrics => { this.metrics = metrics; }),
+            featureProbes.hasDBStats(this)
+                .then(result => { this.dbms.hasDBStats = result }),
         ];
 
         return Promise.all(allProbes)
