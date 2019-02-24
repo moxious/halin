@@ -4,7 +4,6 @@ import {
   GraphAppBase,
   CONNECTED
 } from 'graph-app-kit/components/GraphAppBase';
-import { Render } from 'graph-app-kit/components/Render';
 import Neo4jConfiguration from './configuration/Neo4jConfiguration';
 import PerformancePane from './performance/PerformancePane';
 import OSPane from './performance/OSPane';
@@ -211,11 +210,11 @@ class Halin extends Component {
 
     return (
       <div className="App" key="app">
-        <Render if={this.props.connected}>
+        { this.props.connected ? 
           <div className='MainBody'>
             {err ? err : this.renderCluster()}
           </div>
-        </Render>
+          : '' }
 
         <AppFooter />
       </div>
