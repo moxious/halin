@@ -1464,6 +1464,11 @@ autobind-decorator@2.2.1:
   resolved "https://neo.jfrog.io/neo/api/npm/npm/autobind-decorator/-/autobind-decorator-2.2.1.tgz#acabfddec272b9c98323dab5dc94f63c61b35855"
   integrity sha1-rKv93sJyucmDI9q13JT2PGGzWFU=
 
+autobind-decorator@^2.1.0:
+  version "2.4.0"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/autobind-decorator/-/autobind-decorator-2.4.0.tgz#ea9e1c98708cf3b5b356f7cf9f10f265ff18239c"
+  integrity sha1-6p4cmHCM87WzVvfPnxDyZf8YI5w=
+
 autoprefixer@7.1.6:
   version "7.1.6"
   resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-7.1.6.tgz#fb933039f74af74a83e71225ce78d9fd58ba84d7"
@@ -4986,10 +4991,10 @@ graceful-fs@^4.1.6, graceful-fs@^4.1.9:
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
   integrity sha1-Dovf5NHduIVNZOBOp8AOKgJuVlg=
 
-graph-app-kit@^1.0.3:
-  version "1.0.3"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/graph-app-kit/-/graph-app-kit-1.0.3.tgz#74e39168293215d644bd1f65fb4a11bed4cc5fa7"
-  integrity sha1-dOORaCkyFdZEvR9l+0oRvtTMX6c=
+graph-app-kit@^1.0.4:
+  version "1.0.4"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/graph-app-kit/-/graph-app-kit-1.0.4.tgz#3ad320805ab284d45c210210794033db139a2fed"
+  integrity sha1-OtMggFqyhNRcIQIQeUAz2xOaL+0=
   dependencies:
     "@data-ui/radial-chart" "0.0.11"
     "@data-ui/theme" "0.0.9"

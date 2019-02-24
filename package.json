@@ -22,7 +22,7 @@
     "@sentry/browser": "^4.4.1",
     "autobind-decorator": "2.2.1",
     "bluebird": "^3.5.3",
-    "graph-app-kit": "^1.0.3",
+    "graph-app-kit": "^1.0.4",
     "lodash": "^4.17.11",
     "mathjs": "^5.4.0",
     "moment": "^2.22.2",
