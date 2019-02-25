@@ -84,7 +84,9 @@ export default class HalinContext {
 
     shutdown() {
         sentry.info('Shutting down halin context');
-        _.values(this.dataFeeds).map(df => df.stop);
+        _.values(this.dataFeeds).map(df => df.stop());
+        Promise.all(this.clusterNodes.map(node => node.shutdown()))
+            .catch(err => sentry.reportError(err, 'Failure to shut down clusterNodes', err));
         _.values(this.drivers).map(driver => driver.close());
         this.getClusterManager().addEvent({
             type: 'halin',

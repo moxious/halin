@@ -152,8 +152,6 @@ export default class ClusterNode {
     }
 
     getCypherSurface() {
-        const session = this.driver.session();
-
         const extractRecordsWithType = (results, t) => results.records.map(rec => ({
             name: rec.get('name'),
             signature: rec.get('signature'),
@@ -162,9 +160,9 @@ export default class ClusterNode {
             type: t,
         }));
 
-        const functionsPromise = session.run('CALL dbms.functions()', {})
+        const functionsPromise = this.run('CALL dbms.functions()', {})
             .then(results => extractRecordsWithType(results, 'function'));
-        const procsPromise = session.run('CALL dbms.procedures()', {})
+        const procsPromise = this.run('CALL dbms.procedures()', {})
             .then(results => extractRecordsWithType(results, 'procedure'));
 
         return Promise.all([functionsPromise, procsPromise])
