@@ -12,7 +12,6 @@ class GCMonitor extends Component {
                 <h3>Last Garbage Collection</h3>
 
                 <CypherDataTable 
-                    driver={this.props.driver}
                     node={this.props.node}
                     query={this.query} 
                     rate={1000}

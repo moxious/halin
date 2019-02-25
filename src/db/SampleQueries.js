@@ -85,6 +85,7 @@ export default class SampleQueries extends Component {
     }
 
     stop(doCollection = true) {
+        if (!this.collector) { return false; }
         return this.collector.stop()
             .then(() => {
                 sentry.fine('Stopped collecting');

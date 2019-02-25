@@ -24,7 +24,6 @@ class PageCache extends Component {
             <div className='PageCache'>
                 <h3>Page Cache Statistics</h3>
                 <CypherDataTable 
-                    driver={this.props.driver}
                     node={this.props.node}
                     query={this.state.query}
                     allowColumnSelect={true}

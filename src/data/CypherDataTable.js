@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
-import * as PropTypes from "prop-types";
 import _ from 'lodash';
 import { Grid } from 'semantic-ui-react';
 import ColumnSelector from './ColumnSelector';
@@ -30,7 +29,6 @@ class CypherDataTable extends Component {
             throw new Error('must provide displayColumns');
         }
 
-        this.driver = props.driver || context.driver;
         this.rate = props.rate || 5000;
         this.query = props.query;
         this.params = props.params || {};
@@ -92,9 +90,7 @@ class CypherDataTable extends Component {
     }
 
     sampleData() {
-        const session = this.driver.session();
-
-        return session.run(this.query, this.parameters)
+        return this.props.node.run(this.query, this.parameters)
             .then(results => {
                 const items = results.records.map(row => {
                     const item = {};
@@ -134,8 +130,7 @@ class CypherDataTable extends Component {
             .catch(err => {
                 sentry.reportError(err, `CypherDataTable: error executing ${this.query}`);
                 this.setState({ items: [] });
-            })
-            .finally(() => session.close());
+            });
     }
 
     updateColumns = (cols) => {
@@ -201,9 +196,5 @@ class CypherDataTable extends Component {
         ) : <Spinner active={true}/>;
     }
 }
-
-CypherDataTable.contextTypes = {
-    driver: PropTypes.object,
-};
 
 export default CypherDataTable;

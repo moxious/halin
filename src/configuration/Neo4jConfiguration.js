@@ -82,7 +82,6 @@ class Neo4jConfiguration extends Component {
 
                 <CypherDataTable
                     node={this.props.node}
-                    driver={this.props.driver}
                     query={this.state.query}
                     displayColumns={this.state.displayColumns}
                     rate={this.state.rate}
