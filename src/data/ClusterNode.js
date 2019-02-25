@@ -3,6 +3,7 @@ import _ from 'lodash';
 import math from 'mathjs';
 import Ring from 'ringjs';
 import featureProbes from '../feature/probes';
+import neo4j from '../driver/index';
 
 const MAX_OBSERVATIONS = 500;
 
@@ -33,6 +34,12 @@ export default class ClusterNode {
      */
     setDriver(driver) {
         this.driver = driver;
+        this.pool = neo4j.getSessionPool(this.driver, 15);
+    }
+
+    shutdown() {
+        return this.pool.drain()
+            .then(() => this.pool.clear());
     }
 
     performance() {
@@ -251,10 +258,14 @@ export default class ClusterNode {
     run(query, params = {}) {
         if (!this.driver) { throw new Error('ClusterNode has no driver!'); }
 
-        const session = this.driver.session();
+        let s;
 
         const start = new Date().getTime();
-        return session.run(query, params)
+        return this.pool.acquire()
+            .then(session => {
+                s = session;
+                return session.run(query, params);
+            })
             .then(results => {
                 const elapsed = new Date().getTime() - start;
                 this._txSuccess(elapsed);
@@ -266,6 +277,6 @@ export default class ClusterNode {
                 // Guarantee same thrown response to outer user.
                 throw err;
             })
-            .finally(() => session.close());  // Cleanup session.
+            .finally(() => this.pool.release(s));  // Cleanup session.
     }
 }
