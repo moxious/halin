@@ -11,20 +11,6 @@ import sentry from '../../sentry/index.js';
 import queryLibrary from '../../data/query-library';
 
 /**
- * Convenience function.  Different versions of Neo4j (community/enterprise) have different response
- * types depending on the stored procedure.  To get around failures to access a certain field which
- * may not exist in a certain edition, this is used to replace them with nulls.
- * @param {Object} rec driver response record
- * @param {*} field name of field
- * @returns {Object} the value of the field or null if it does not exist.
- */
-const getOrNull = (rec, field) => {
-    try {
-        return rec.get(field);
-    } catch (e) { return null; }
-};
-
-/**
  * Take a diagnostic package and return a cleaned up version of the same, removing
  * sensitive data that shouldn't go out.
  * This function intentionally modifies its argument.
@@ -78,18 +64,6 @@ const swallowAndReportError = (title, somePromise, whatToResolve = {}) => {
 };
 
 /**
- * Run a promise producing function with a session which will be closed once complete.
- * @param {HalinContext} halin
- * @param {ClusterNode} clusterNode 
- * @param {Function} f a function which produces a promise.
- * @returns {Promise} which resolves to f's result
- */
-const withSession = (halin, clusterNode, f) => {
-    const s = halin.driverFor(clusterNode.getBoltAddress()).session();
-    return f(s).finally(() => s.close);
-};
-
-/**
  * Gather a single data point from a simple query.
  * Example args: 'apoc', 'RETURN apoc.version() as value', 'version'
  * @param {HalinContext} halin 
@@ -102,31 +76,27 @@ const withSession = (halin, clusterNode, f) => {
  * Example args: domain='apoc', query='RETURN apoc.version() as value', key='version'
  * you would get { apoc: { version: '3.5.2' } }
  */
-const simpleGather = (halin, node, domain, query, key) =>
-    withSession(halin, node, s =>
-        s.run(query, {})
-            .then(results => results.records.length === 0 ? null : results.records[0].get('value'))
-            .catch(err => `${err}`) // stringify on purpose, don't need full stacktrace
-            .then(value => {
-                const obj = {};
-                obj[domain] = {};
-                obj[domain][key] = neo4j.handleNeo4jInt(value);
-                return obj;
-            }));
+const simpleGather = (node, domain, query, key) =>
+    node.run(query, {})
+        .then(results => results.records.length === 0 ? null : results.records[0].get('value'))
+        .catch(err => `${err}`) // stringify on purpose, don't need full stacktrace
+        .then(value => {
+            const obj = {};
+            obj[domain] = {};
+            obj[domain][key] = neo4j.handleNeo4jInt(value);
+            return obj;
+        });
 
 const gatherUsers = (halin, node) => {
     const defaultIfUnable = { users: [] };
 
     if (halin.supportsAuth() && halin.supportsNativeAuth()) {
-        const promise = withSession(halin, node,
-            s => s.run('CALL dbms.security.listUsers()', {})
-                .then(results =>
-                    results.records.map(rec => ({
-                        username: rec.get('username'),
-                        flags: rec.get('flags'),
-                        roles: getOrNull(rec, 'roles'), // This field doesn't exist in community.
-                    })))
-                .then(allUsers => ({ users: allUsers })));
+        const promise = node.run('CALL dbms.security.listUsers()', {})
+            .then(results => neo4j.unpackResults(results, {
+                required: ['username', 'flags'],
+                optional: ['roles'],  // field doesn't exist in community
+            }))
+            .then(allUsers => ({ users: allUsers }));
 
         return swallowAndReportError('Gather Users', promise, defaultIfUnable);
     }
@@ -138,14 +108,11 @@ const gatherRoles = (halin, node) => {
     const defaultIfUnable = { roles: [] };
 
     if (halin.isEnterprise() && halin.supportsAuth()) {
-        const promise = withSession(halin, node,
-            s => s.run('CALL dbms.security.listRoles()', {})
-                .then(results =>
-                    results.records.map(rec => ({
-                        role: rec.get('role'),
-                        users: rec.get('users'),
-                    })))
-                .then(allRoles => ({ roles: allRoles })));
+        const promise = node.run('CALL dbms.security.listRoles()', {})
+            .then(results => neo4j.unpackResults(results, {
+                required: ['role', 'users'],
+            }))
+            .then(allRoles => ({ roles: allRoles }));
 
         return swallowAndReportError('Gather Roles', promise, defaultIfUnable);
     }
@@ -156,14 +123,11 @@ const gatherRoles = (halin, node) => {
 const gatherJMX = (halin, node) => {
     const defaultIfUnable = { JMX: [] };
 
-    const promise = withSession(halin, node, s =>
-        s.run(queryLibrary.JMX_ALL.query, {})
-            .then(results =>
-                results.records.map(rec => ({
-                    name: rec.get('name'),
-                    attributes: rec.get('attributes'),
-                })))
-            .then(array => ({ JMX: cleanup(array) })));
+    const promise = node.run(queryLibrary.JMX_ALL.query, {})
+        .then(results => neo4j.unpackResults(results, {
+            required: ['name', 'attributes'],
+        }))
+        .then(array => ({ JMX: cleanup(array) }));
 
     return swallowAndReportError('Gather JMX', promise, defaultIfUnable);
 };
@@ -171,11 +135,11 @@ const gatherJMX = (halin, node) => {
 const gatherConstraints = (halin, node) => {
     const defaultIfUnable = { constraints: [] };
 
-    const promise = withSession(halin, node, s =>
-        s.run(queryLibrary.GET_CONSTRAINTS.query, {})
-            .then(results =>
-                results.records.map((rec, idx) => ({ idx, description: rec.get('description') })))
-            .then(allConstraints => ({ constraints: allConstraints })));
+    const promise = node.run(queryLibrary.GET_CONSTRAINTS.query, {})
+        .then(results => neo4j.unpackResults(results, {
+            required: ['description'],
+        }))
+        .then(allConstraints => ({ constraints: allConstraints }));
 
     return swallowAndReportError('Gather Constraints', promise, defaultIfUnable);
 };
@@ -184,23 +148,15 @@ const gatherIndexes = (halin, node) => {
     const defaultIfUnable = { indexes: [] };
 
     // Signature differs between 3.4 and 3.5, particularly
-    // label field vs. tokenNames field.  getOrNull handles
-    // both cases.  
+    // label field vs. tokenNames field.  
     // **Do not use the queryLibrary version** because it can't handle
     // the different signatures.
-    const promise = withSession(halin, node, s =>
-        s.run('CALL db.indexes()', {})
-            .then(results =>
-                results.records.map((rec, idx) => ({
-                    description: getOrNull(rec, 'description'),
-                    label: getOrNull(rec, 'label'),
-                    tokenNames: getOrNull(rec, 'tokenNames'),
-                    properties: getOrNull(rec, 'properties'),
-                    state: getOrNull(rec, 'state'),
-                    type: getOrNull(rec, 'type'),
-                    provider: getOrNull(rec, 'provider'),
-                })))
-            .then(allIndexes => ({ indexes: allIndexes })));
+    const promise = node.run('CALL db.indexes()', {})
+        .then(results => neo4j.unpackResults(results, {
+            optional: ['description', 'label', 'tokenNames', 'properties', 'state',
+                'type', 'provider'],
+        }))
+        .then(allIndexes => ({ indexes: allIndexes }));
 
     return swallowAndReportError('Gather Indexes', promise, defaultIfUnable);
 };
@@ -208,35 +164,34 @@ const gatherIndexes = (halin, node) => {
 const gatherConfig = (halin, node) => {
     const defaultIfUnable = { configuration: {} };
 
-    const promise = withSession(halin, node, s =>
-        s.run('CALL dbms.listConfig()', {})
-            .then(results => {
-                const configMap = {};
-                results.records.forEach(rec => {
-                    const key = rec.get('name');
-                    const value = rec.get('value');
+    const promise = node.run('CALL dbms.listConfig()', {})
+        .then(results => {
+            const configMap = {};
+            results.records.forEach(rec => {
+                const key = rec.get('name');
+                const value = rec.get('value');
 
-                    // Configs can have duplicate keys!
-                    // which sucks.  but we need to detect that.
-                    // If a second value is found, push it on to an array.
-                    if (configMap.hasOwnProperty(key)) {
-                        const presentValue = configMap[key];
-                        if (_.isArray(presentValue)) {
-                            presentValue.push(value);
-                        } else {
-                            configMap[key] = [presentValue, value];
-                        }
+                // Configs can have duplicate keys!
+                // which sucks.  but we need to detect that.
+                // If a second value is found, push it on to an array.
+                if (configMap.hasOwnProperty(key)) {
+                    const presentValue = configMap[key];
+                    if (_.isArray(presentValue)) {
+                        presentValue.push(value);
                     } else {
-                        if (neo4j.isInt(value)) {
-                            configMap[key] = neo4j.integer.inSafeRange(value) ? value.toNumber() : neo4j.integer.toString(value);
-                        } else {
-                            configMap[key] = value;
-                        }
+                        configMap[key] = [presentValue, value];
                     }
-                });
-                return configMap;
-            })
-            .then(allConfig => ({ configuration: allConfig })));
+                } else {
+                    if (neo4j.isInt(value)) {
+                        configMap[key] = neo4j.integer.inSafeRange(value) ? value.toNumber() : neo4j.integer.toString(value);
+                    } else {
+                        configMap[key] = value;
+                    }
+                }
+            });
+            return configMap;
+        })
+        .then(allConfig => ({ configuration: allConfig }));
 
     return swallowAndReportError('Gather Configuration', promise, defaultIfUnable);
 };
@@ -261,10 +216,10 @@ const nodeDiagnostics = (halin, clusterNode) => {
     const indexes = gatherIndexes(halin, clusterNode);
 
     const otherPromises = [
-        simpleGather(halin, clusterNode, 'apoc', 'RETURN apoc.version() as value', 'version'),
-        simpleGather(halin, clusterNode, 'nodes', 'MATCH (n) RETURN count(n) as value', 'count'),
-        simpleGather(halin, clusterNode, 'schema', 'call db.labels() yield label return collect(label) as value', 'labels'),
-        simpleGather(halin, clusterNode, 'algo', 'RETURN algo.version() as value', 'version'),
+        simpleGather(clusterNode, 'apoc', 'RETURN apoc.version() as value', 'version'),
+        simpleGather(clusterNode, 'nodes', 'MATCH (n) RETURN count(n) as value', 'count'),
+        simpleGather(clusterNode, 'schema', 'call db.labels() yield label return collect(label) as value', 'labels'),
+        simpleGather(clusterNode, 'algo', 'RETURN algo.version() as value', 'version'),
     ];
 
     return Promise.all([
