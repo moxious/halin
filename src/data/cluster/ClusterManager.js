@@ -4,6 +4,7 @@ import sentry from '../../sentry/index';
 import moment from 'moment';
 import uuid from 'uuid';
 import Ring from 'ringjs';
+import neo4j from '../../driver/index';
 
 /**
  * This is a controller for clusters.
@@ -203,13 +204,14 @@ export default class ClusterManager {
         //   (c) Underlying association query fails.
         const gatherRoles = (node) => {
             return node.run('CALL dbms.security.listRolesForUser({username})',
-                {username})
+                { username })
                 .then(results => {
                     sentry.fine('gather raw', results);
                     return results;
                 })
-                .then(results => 
-                    results.records.map(r => r.get('value')))
+                .then(results => neo4j.unpackResults(results, {
+                    required: ['value'],
+                }))
                 .then(r => {
                     sentry.fine('gather roles made',r);
                     return r;
