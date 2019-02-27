@@ -4,6 +4,7 @@ import math from 'mathjs';
 import Ring from 'ringjs';
 import featureProbes from '../feature/probes';
 import neo4j from '../driver/index';
+import queryLibrary from '../data/query-library';
 
 const MAX_OBSERVATIONS = 500;
 
@@ -262,7 +263,7 @@ export default class ClusterNode {
         return this.pool.acquire()
             .then(session => {
                 s = session;
-                return session.run(query, params);
+                return session.run(query, params, queryLibrary.queryMetadata);
             })
             .then(results => {
                 const elapsed = new Date().getTime() - start;

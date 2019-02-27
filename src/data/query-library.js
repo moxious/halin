@@ -16,6 +16,14 @@ const disclaim = q => {
     return `WITH ${disclaimer} ${q}`;
 };
 
+const queryMetadata = {
+    timeout: 5000,
+    metadata: {
+        app: `halin-v${pkg.version}`,
+        type: 'user-direct',
+    },
+};
+
 /**
  * A collection of queries that other components can refer to.  By using the same
  * queries with various data feeds, they can be reused and centralized.
@@ -23,6 +31,7 @@ const disclaim = q => {
 export default {
     disclaimer,
     disclaim,
+    queryMetadata,
     isHalinQuery: q => q && q.indexOf(disclaimer) > -1,
 
     PING: {
