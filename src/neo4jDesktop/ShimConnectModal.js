@@ -1,6 +1,4 @@
 import React, { Component } from "react";
-import * as PropTypes from 'prop-types';
-import { Render } from 'graph-app-kit/components/Render';
 import { Button, Form, Modal, Message, Checkbox } from "semantic-ui-react";
 import _ from 'lodash';
 import sentry from '../sentry/index';
@@ -88,14 +86,14 @@ class ConnectForm extends Component {
     }
 
     render() {
-        const { open, errorMsg, onClose } = this.props;
+        const { open, onClose } = this.props;
         return (
             <Modal size="tiny" closeOnEscape={false} closeOnDimmerClick={false} open={open} onClose={onClose}>
                 <Modal.Header>Connect to a graph</Modal.Header>
                 <Modal.Content>
                     <Splash/>
 
-                    <Form error={errorMsg ? true : false}>
+                    <Form>
                         <Form.Field required>
                             <label>Host</label>
                             <Form.Input
@@ -158,10 +156,6 @@ class ConnectForm extends Component {
                                 type="checkbox"
                                 label='Encrypt Connection'/>
                         </Form.Field>
-
-                        <Render if={errorMsg}>
-                            <Message error header="An error occurred" content={errorMsg} />
-                        </Render>
                     </Form>
                 </Modal.Content>
                 <Modal.Actions>
@@ -188,22 +182,14 @@ class ShimConnectModal extends Component {
         this.setState({ showModal: false });
     };
     render() {
-        const errorMsg = this.state.initial ? false : this.props.errorMsg;
         return (
             <ConnectForm
                 onClose={this.closeModal}
                 onSubmit={this.props.onSubmit}
-                errorMsg={errorMsg}
                 open={this.props.show && this.state.showModal}
             />
         );
     }
 }
-
-ShimConnectModal.propTypes = {
-    onSubmit: PropTypes.func.isRequired,
-    errorMsg: PropTypes.string,
-    show: PropTypes.bool
-};
 
 export default ShimConnectModal;

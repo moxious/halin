@@ -113,10 +113,9 @@ class LogViewer extends Component {
                 console.log('data came back');
 
                 // Records are in reverse order to only get the last ones.  Re-reverse them.
-                const data = results.records.map(r => ({
-                    lineNo: neo4j.integer.inSafeRange(r.get('lineNo')) ? r.get('lineNo').toNumber() : neo4j.integer.toString(r.get('lineNo')),
-                    line: r.get('line'),
-                })).reverse();
+                const data = neo4j.unpackResults(results, {
+                    required: ['lineNo', 'line'],
+                }).reverse();
 
                 this.setState({ err: null, data, loadOp: null });
             })

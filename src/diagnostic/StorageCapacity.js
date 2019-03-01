@@ -42,7 +42,6 @@ class StorageCapacity extends Component {
             <div className='StorageCapacity'>
                 <h3>Storage Capacity <Explainer icon='info' content={this.help()}/></h3>
                 <CypherDataTable 
-                    driver={this.props.driver}
                     node={this.props.node}
                     query={this.state.query}
                     allowColumnSelect={false}

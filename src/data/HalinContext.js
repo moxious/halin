@@ -84,7 +84,9 @@ export default class HalinContext {
 
     shutdown() {
         sentry.info('Shutting down halin context');
-        _.values(this.dataFeeds).map(df => df.stop);
+        _.values(this.dataFeeds).map(df => df.stop());
+        Promise.all(this.clusterNodes.map(node => node.shutdown()))
+            .catch(err => sentry.reportError(err, 'Failure to shut down clusterNodes', err));
         _.values(this.drivers).map(driver => driver.close());
         this.getClusterManager().addEvent({
             type: 'halin',
@@ -150,7 +152,6 @@ export default class HalinContext {
     watchForClusterRoleChange(clusterNode) {
         const roleFeed = this.getDataFeed(_.merge({
             node: clusterNode,
-            driver: this.driverFor(clusterNode.getBoltAddress()),
         }, queryLibrary.CLUSTER_ROLE));
 
         const addr = clusterNode.getBoltAddress();
@@ -196,6 +197,7 @@ export default class HalinContext {
             RETURN id, addresses, role, groups, database
             `, {}))
             .then(results => {
+                console.log('CLUSTER NODE', results.records.map(r => r.toObject()));
                 this.clusterNodes = results.records.map(rec => new ClusterNode(rec));
 
                 // Note that in the case of community or mode=SINGLE, because the cluster overview fails,
@@ -407,7 +409,6 @@ export default class HalinContext {
      */
     ping(clusterNode) {
         const addr = clusterNode.getBoltAddress();
-        const driver = this.driverFor(addr);
 
         // Gets or creates a ping data feed for this cluster node.
         // Data feed keeps running so that we can deliver the data to the user,
@@ -415,7 +416,6 @@ export default class HalinContext {
         // as the app runs.
         const pingFeed = this.getDataFeed(_.merge({
             node: clusterNode,
-            driver,
         }, queryLibrary.PING));
 
         // Caller needs a promise.  The feed is already running, so 

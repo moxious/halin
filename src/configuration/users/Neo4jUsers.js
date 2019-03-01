@@ -214,7 +214,6 @@ class Neo4jUsers extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <CypherDataTable
-                                driver={this.props.driver}
                                 node={this.props.node}
                                 showPagination={true}
                                 query={this.query}

@@ -21,7 +21,6 @@ class ActiveTransactions extends Component {
             <div className="ActiveTransactions">
                 <h2>Active Transactions</h2> 
                 <CypherDataTable
-                    driver={this.props.driver}
                     node={this.props.node}
                     query={this.state.query}
                     allowColumnSelect={true}

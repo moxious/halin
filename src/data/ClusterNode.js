@@ -3,6 +3,9 @@ import _ from 'lodash';
 import math from 'mathjs';
 import Ring from 'ringjs';
 import featureProbes from '../feature/probes';
+import neo4j from '../driver/index';
+import queryLibrary from '../data/query-library';
+import sentry from '../sentry';
 
 const MAX_OBSERVATIONS = 500;
 
@@ -19,7 +22,7 @@ export default class ClusterNode {
      */
     constructor(record) {
         this.id = record.get('id');
-        this.addresses = record.get('addresses');
+        this.addresses = record.get('addresses');        
         this.role = (record.get('role') || '').trim();
         this.database = record.get('database');
         this.dbms = {};
@@ -33,6 +36,12 @@ export default class ClusterNode {
      */
     setDriver(driver) {
         this.driver = driver;
+        this.pool = neo4j.getSessionPool(this.id, this.driver, 15);
+    }
+
+    shutdown() {
+        return this.pool.drain()
+            .then(() => this.pool.clear());
     }
 
     performance() {
@@ -145,8 +154,6 @@ export default class ClusterNode {
     }
 
     getCypherSurface() {
-        const session = this.driver.session();
-
         const extractRecordsWithType = (results, t) => results.records.map(rec => ({
             name: rec.get('name'),
             signature: rec.get('signature'),
@@ -155,9 +162,9 @@ export default class ClusterNode {
             type: t,
         }));
 
-        const functionsPromise = session.run('CALL dbms.functions()', {})
+        const functionsPromise = this.run('CALL dbms.functions()', {})
             .then(results => extractRecordsWithType(results, 'function'));
-        const procsPromise = session.run('CALL dbms.procedures()', {})
+        const procsPromise = this.run('CALL dbms.procedures()', {})
             .then(results => extractRecordsWithType(results, 'procedure'));
 
         return Promise.all([functionsPromise, procsPromise])
@@ -183,6 +190,22 @@ export default class ClusterNode {
                 this.metrics = metrics;
                 return metrics;
             });
+    }
+
+    getVersion() {        
+        if (_.isNil(_.get(this.dbms, 'versions'))) {
+            return { major: 'unknown', minor: 'unknown', patch: 'unknown' };
+        } else if (this.dbms.versions.length > 1) {
+            sentry.warn("This ClusterNode has more than one version installed; only using the first");
+        }
+
+        const v = this.dbms.versions[0];
+        const parts = v.split('.');
+        return {
+            major: parts[0] || 'unknown',
+            minor: parts[1] || 'unknown',
+            patch: parts[2] || 'unknown',
+        };
     }
 
     checkComponents() {
@@ -221,6 +244,9 @@ export default class ClusterNode {
                     this.dbms.nativeAuth = true;
                 }
 
+                // { major, minor, patch }
+                _.set(this.dbms, 'version', this.getVersion());
+
                 return whatever;
             });
     }
@@ -251,10 +277,24 @@ export default class ClusterNode {
     run(query, params = {}) {
         if (!this.driver) { throw new Error('ClusterNode has no driver!'); }
 
-        const session = this.driver.session();
+        let s;
 
         const start = new Date().getTime();
-        return session.run(query, params)
+        return this.pool.acquire()
+            .then(session => {
+                s = session;
+                // #operability: transaction metadata is disabled because it causes errors
+                // in 3.4.x, and is only available in 3.5.x.
+                let useTXMetadata = false;
+
+                if (this.dbms.version && this.dbms.version.major >= 3 && this.dbms.version.minor >= 5) {
+                    useTXMetadata = true;
+                }
+
+                return (useTXMetadata ? 
+                    session.run(query, params, queryLibrary.queryMetadata) : 
+                    session.run(query, params));
+            })
             .then(results => {
                 const elapsed = new Date().getTime() - start;
                 this._txSuccess(elapsed);
@@ -266,6 +306,6 @@ export default class ClusterNode {
                 // Guarantee same thrown response to outer user.
                 throw err;
             })
-            .finally(() => session.close());  // Cleanup session.
+            .finally(() => this.pool.release(s));  // Cleanup session.
     }
 }

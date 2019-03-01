@@ -152,7 +152,6 @@ class Neo4jRoles extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <CypherDataTable
-                                driver={this.props.driver}
                                 node={this.props.node}
                                 query={this.query}
                                 showPagination={true}
