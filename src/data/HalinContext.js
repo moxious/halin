@@ -156,7 +156,6 @@ export default class HalinContext {
 
         const addr = clusterNode.getBoltAddress();
         const onRoleData = (newData, dataFeed) => {
-            console.log('Cluster node role change', clusterNode, newData.data[0]);
             const newRole = newData.data[0].role;
 
             // Something in cluster topology just changed...
@@ -410,7 +409,6 @@ export default class HalinContext {
      */
     ping(clusterNode) {
         const addr = clusterNode.getBoltAddress();
-        const driver = this.driverFor(addr);
 
         // Gets or creates a ping data feed for this cluster node.
         // Data feed keeps running so that we can deliver the data to the user,
