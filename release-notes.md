@@ -1,5 +1,12 @@
 # Halin Release Notes
 
+## 0.8.2
+
+- Implemented session pooling to prevent extra network round-trips to Neo4j,
+which reduces overall latency and improves performance.
+- Centralized querying in ClusterNode#run permitting the use of central TX metadata
+for things that Halin sends to the server.  #65
+
 ## 0.8.0
 
 ### Improvements
