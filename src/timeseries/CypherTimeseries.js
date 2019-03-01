@@ -79,7 +79,6 @@ class CypherTimeseries extends Component {
 
         this.feed = window.halinContext.getDataFeed({
             node: this.props.node,
-            driver: this.props.driver,
             query: this.props.query,
             rate: this.props.rate, 
             windowWidth: this.props.timeWindowWidth,

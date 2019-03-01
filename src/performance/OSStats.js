@@ -20,7 +20,6 @@ export default class OSStats extends Component {
 
         this.feed = window.halinContext.getDataFeed(_.merge({
             node: this.props.node,
-            driver: this.props.driver,
         }, queryLibrary.OS_MEMORY_STATS));
 
         const setMyStateFromDataFeed = newData => {
