@@ -5,6 +5,7 @@ import Ring from 'ringjs';
 import featureProbes from '../feature/probes';
 import neo4j from '../driver/index';
 import queryLibrary from '../data/query-library';
+import sentry from '../sentry';
 
 const MAX_OBSERVATIONS = 500;
 
@@ -191,6 +192,22 @@ export default class ClusterNode {
             });
     }
 
+    getVersion() {        
+        if (_.isNil(_.get(this.dbms, 'versions'))) {
+            return { major: 'unknown', minor: 'unknown', patch: 'unknown' };
+        } else if (this.dbms.versions.length > 1) {
+            sentry.warn("This ClusterNode has more than one version installed; only using the first");
+        }
+
+        const v = this.dbms.versions[0];
+        const parts = v.split('.');
+        return {
+            major: parts[0] || 'unknown',
+            minor: parts[1] || 'unknown',
+            patch: parts[2] || 'unknown',
+        };
+    }
+
     checkComponents() {
         if (!this.driver) {
             throw new Error('ClusterNode has no driver');
@@ -226,6 +243,9 @@ export default class ClusterNode {
                     // auth providers.
                     this.dbms.nativeAuth = true;
                 }
+
+                // { major, minor, patch }
+                _.set(this.dbms, 'version', this.getVersion());
 
                 return whatever;
             });
@@ -263,7 +283,17 @@ export default class ClusterNode {
         return this.pool.acquire()
             .then(session => {
                 s = session;
-                return session.run(query, params, queryLibrary.queryMetadata);
+                // #operability: transaction metadata is disabled because it causes errors
+                // in 3.4.x, and is only available in 3.5.x.
+                let useTXMetadata = false;
+
+                if (this.dbms.version && this.dbms.version.major >= 3 && this.dbms.version.minor >= 5) {
+                    useTXMetadata = true;
+                }
+
+                return (useTXMetadata ? 
+                    session.run(query, params, queryLibrary.queryMetadata) : 
+                    session.run(query, params));
             })
             .then(results => {
                 const elapsed = new Date().getTime() - start;
