@@ -21,7 +21,7 @@ export default class ClusterNode {
      */
     constructor(record) {
         this.id = record.get('id');
-        this.addresses = record.get('addresses');
+        this.addresses = record.get('addresses');        
         this.role = (record.get('role') || '').trim();
         this.database = record.get('database');
         this.dbms = {};
@@ -35,7 +35,7 @@ export default class ClusterNode {
      */
     setDriver(driver) {
         this.driver = driver;
-        this.pool = neo4j.getSessionPool(this.driver, 15);
+        this.pool = neo4j.getSessionPool(this.id, this.driver, 15);
     }
 
     shutdown() {

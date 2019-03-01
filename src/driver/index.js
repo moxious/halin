@@ -3,6 +3,7 @@
 import neo4j from 'neo4j-driver';
 import _ from 'lodash';
 import genericPool from 'generic-pool';
+import sentry from '../sentry';
 
 // As of Neo4j driver 1.7, no longer need to separately import
 // the minified web driver.
@@ -75,9 +76,11 @@ const unpackResults = (results, schema) => results.records.map((record, index) =
  * ones who are pulling these sessions.
  */
 const pools = {};
-const getSessionPool = (driver, poolSize=15) => {
-    if (pools[driver]) {
-        return pools[driver];
+const getSessionPool = (id, driver, poolSize=15) => {
+    sentry.fine('POOL FOR', id);
+    if (pools[id]) {
+        sentry.fine('RECYCLE pool for ', id);
+        return pools[id];
     }
 
     // How to create/destroy sessions.
@@ -102,7 +105,7 @@ const getSessionPool = (driver, poolSize=15) => {
     sessionPool.on('factoryDestroyError', err => console.error('SESSION POOL DESTROY ERROR', err));
     sessionPool.start();
 
-    pools[driver] = sessionPool;
+    pools[id] = sessionPool;
     return sessionPool;
 };
 
