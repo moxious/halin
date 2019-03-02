@@ -11,4 +11,11 @@ describe('HalinQuery', function () {
     it('can be constructed', () => {
         expect(new HalinQuery(props)).toBe.ok;
     });
+
+    it('exposes a disclaimer', () => expect(typeof HalinQuery.disclaimer).toBe('string'));
+    it('can disclaim queries', () => {
+        const q = 'RETURN 1';
+
+        expect(HalinQuery.disclaim(q)).toContain(HalinQuery.disclaimer);
+    });
 });
