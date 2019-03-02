@@ -1,6 +1,5 @@
-import queryLibrary from '../data/query-library';
 import neo4j from '../driver';
-import ql from '../data/query-library';
+import ql from '../data/queries/query-library';
 
 /**
  * This class encapsulates functionality around the db.stats.* procedures.
@@ -48,7 +47,7 @@ export default class DBStats {
     stats() {
         const session = this.driver.session();
 
-        return session.run(queryLibrary.DB_QUERY_STATS.query)
+        return session.run(ql.DB_QUERY_STATS.query)
             .then(results => results.records.map(r => ({
                 query: r.get('query'),
                 qep: r.get('qep'),

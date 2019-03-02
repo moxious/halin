@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import CypherTimeseries from '../timeseries/CypherTimeseries';
 import uuid from 'uuid';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 import Explainer from '../Explainer';
 
 class SystemLoad extends Component {

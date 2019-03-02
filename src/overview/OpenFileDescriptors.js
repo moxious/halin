@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import { Button } from 'semantic-ui-react';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 import uuid from 'uuid';
 import _ from 'lodash';
 

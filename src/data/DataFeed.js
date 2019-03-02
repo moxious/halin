@@ -1,7 +1,7 @@
 import Ring from 'ringjs';
 import { TimeEvent, TimeRange } from 'pondjs';
 import _ from 'lodash';
-import queryLibrary from './query-library';
+import queryLibrary from './queries/query-library';
 import sentry from '../sentry/index';
 import Metric from './Metric';
 import neo4j from '../driver';

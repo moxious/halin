@@ -1,6 +1,6 @@
 import sentry from '../sentry/index';
 import neo4jErrors from '../driver/errors';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 
 /**
  * A feature probe is a bit of code that runs against a cluster node to determine whether or not

@@ -5,7 +5,7 @@ import { Grid } from 'semantic-ui-react';
 import uuid from 'uuid';
 import AllocationChart from './AllocationChart';
 import datautil from '../data/util';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 
 export default class OSStats extends Component {
     state = {

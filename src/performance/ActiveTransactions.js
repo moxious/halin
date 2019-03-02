@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import 'semantic-ui-css/semantic.min.css';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 import 'react-table/react-table.css';
 
 class ActiveTransactions extends Component {

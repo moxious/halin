@@ -1,5 +1,5 @@
-import pkg from '../../package.json';
-import fields from './fields';
+import pkg from '../../../package.json';
+import fields from '../fields';
 const cdt = fields;
 
 const disclaimer = `'This query was run by Halin v${pkg.version}' AS disclaimer\n`;

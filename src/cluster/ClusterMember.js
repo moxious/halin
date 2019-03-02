@@ -16,7 +16,7 @@ const MAX_OBSERVATIONS = 500;
  *  - Inspect the node easily to determine what features it supports
  *  - Gather performance data about how responsive it is
  */
-export default class ClusterNode {
+export default class ClusterMember {
     /**
      * Input is a record that comes back from dbms.cluster.overview()
      */
@@ -308,4 +308,4 @@ export default class ClusterNode {
             })
             .finally(() => this.pool.release(s));  // Cleanup session.
     }
-}
+};

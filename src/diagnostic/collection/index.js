@@ -8,7 +8,7 @@ import moment from 'moment';
 import appPkg from '../../../package.json';
 import neo4j from '../../driver/index';
 import sentry from '../../sentry/index.js';
-import queryLibrary from '../../data/query-library';
+import queryLibrary from '../../data/queries/query-library';
 
 /**
  * Take a diagnostic package and return a cleaned up version of the same, removing

@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Explainer from '../Explainer';
 import DBStats from '../dbstats/DBStats';
 import sentry from '../sentry';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 import ReactTable from 'react-table';
 import Spinner from '../Spinner';
 import QueryExecutionPlan from './QueryExecutionPlan';

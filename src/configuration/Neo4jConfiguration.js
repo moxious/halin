@@ -4,7 +4,7 @@ import hoc from '../higherOrderComponents';
 import Explainer from '../Explainer';
 import 'react-table/react-table.css';
 import './Neo4jConfiguration.css';
-import ql from '../data/query-library';
+import ql from '../data/queries/query-library';
 
 class Neo4jConfiguration extends Component {
     // URL path to where a config item can be looked up.

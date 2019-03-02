@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../data/CypherDataTable';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 import hoc from '../higherOrderComponents';
 
 class PageCache extends Component {

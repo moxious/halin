@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import fields from '../data/fields';
 import CypherDataTable from '../data/CypherDataTable';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 
 class StoreFiles extends Component {
     state = {

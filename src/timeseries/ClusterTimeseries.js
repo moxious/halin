@@ -9,7 +9,7 @@ import {
 } from 'pondjs';
 import uuid from 'uuid';
 import Spinner from '../Spinner';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 import datautil from '../data/util';
 import timewindow from './timewindow';
 import sentry from '../sentry/index';
