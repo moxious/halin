@@ -37,6 +37,9 @@ jobs:
           key: yarn-packages-{{ checksum "yarn.lock" }}
           paths:
             - ~/.cache/yarn
+      - test:
+          name: Run tests
+          command: yarn test
       - run: 
           name: Deploy to S3 (Build Branch)
           command: |
@@ -151,6 +154,9 @@ jobs:
             else
               echo "Not deploying; not master branch."
             fi
+      - store_artifacts:
+            path: coverage
+            prefix: coverage      
       - store_artifacts:
             path: /tmp/artifacts
       - store_artifacts:

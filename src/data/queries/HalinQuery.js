@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import pkg from '../../../package.json';
 
 class HalinQuery {
