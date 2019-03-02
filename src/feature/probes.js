@@ -1,6 +1,7 @@
 import sentry from '../sentry/index';
 import neo4jErrors from '../driver/errors';
 import queryLibrary from '../data/queries/query-library';
+import HalinQuery from '../data/queries/HalinQuery';
 
 /**
  * A feature probe is a bit of code that runs against a cluster node to determine whether or not
@@ -14,7 +15,7 @@ export default {
      * of Neo4j this is (e.g. enterprise vs. community)
      */
     getNameVersionsEdition: node => {
-        const componentsPromise = node.run(queryLibrary.disclaim(`
+        const componentsPromise = node.run(HalinQuery.disclaim(`
                 CALL dbms.components()
                 YIELD name, versions, edition
                 RETURN name, versions, edition
@@ -43,7 +44,7 @@ export default {
      * particular APOC function.
      */
     hasLogStreaming: node => {
-        const prom = node.run(queryLibrary.disclaim(`
+        const prom = node.run(HalinQuery.disclaim(`
             CALL dbms.procedures() 
             YIELD name 
             WHERE name="apoc.log.stream" 
@@ -63,7 +64,7 @@ export default {
         // Neo4j 3.5.0 doesn't have any of the needed procedures.
         // Neo4j 3.5.1 has some, but is missing db.stats.clear
         // Neo4j 3.5.2 introduced db.stats.clear and actually works.
-        const probePromise = node.run(queryLibrary.disclaim(`
+        const probePromise = node.run(HalinQuery.disclaim(`
             CALL dbms.procedures() 
             YIELD name 
             WHERE name =~ 'db.stats.clear'
@@ -81,7 +82,7 @@ export default {
      * @returns true if APOC is present, false otherwise.
      */
     hasAPOC: node => {
-        const apocProbePromise = node.run(queryLibrary.disclaim('RETURN apoc.version()'), {})
+        const apocProbePromise = node.run(HalinQuery.disclaim('RETURN apoc.version()'), {})
             .then(results => {
                 return true;
             })
@@ -102,7 +103,7 @@ export default {
      * @returns true if CSV metric reporting is enabled, false otherwise.
      */
     csvMetricsEnabled: node => {
-        const csvMetricsProbePromise = node.run(queryLibrary.disclaim(`
+        const csvMetricsProbePromise = node.run(HalinQuery.disclaim(`
             CALL dbms.listConfig() 
             YIELD name, value 
             WHERE name='metrics.csv.enabled' 
@@ -127,7 +128,7 @@ export default {
      * @returns true if auth is enabled, false otherwise.
      */
     authEnabled: node => {
-        const authEnabledQ = queryLibrary.disclaim(`
+        const authEnabledQ = HalinQuery.disclaim(`
             CALL dbms.listConfig() YIELD name, value
             WHERE name =~ 'dbms.security.auth_enabled'
             RETURN value;
@@ -161,7 +162,7 @@ export default {
     supportsNativeAuth: node => {
         // See issue #27 for what's going on here.  DB must support native auth
         // in order for us to expose some features, such as user management.
-        const authQ = queryLibrary.disclaim(`
+        const authQ = HalinQuery.disclaim(`
             CALL dbms.listConfig() YIELD name, value 
             WHERE name =~ 'dbms.security.auth_provider.*' 
             RETURN value;`);

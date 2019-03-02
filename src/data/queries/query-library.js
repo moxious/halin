@@ -1,87 +1,60 @@
-import pkg from '../../../package.json';
 import fields from '../fields';
+import HalinQuery from './HalinQuery';
 const cdt = fields;
-
-const disclaimer = `'This query was run by Halin v${pkg.version}' AS disclaimer\n`;
-
-/**
- * Mark a query with a disclaimer so console users and session
- * trackers can tell this is halin doing this.
- */
-const disclaim = q => {
-    if (q.indexOf(disclaimer) > -1) {
-        return q;
-    }   
-
-    return `WITH ${disclaimer} ${q}`;
-};
-
-const queryMetadata = {
-    timeout: 5000,
-    metadata: {
-        app: `halin-v${pkg.version}`,
-        type: 'user-direct',
-    },
-};
 
 /**
  * A collection of queries that other components can refer to.  By using the same
  * queries with various data feeds, they can be reused and centralized.
  */
 export default {
-    disclaimer,
-    disclaim,
-    queryMetadata,
-    isHalinQuery: q => q && q.indexOf(disclaimer) > -1,
-
-    PING: {
-        query: disclaim('RETURN true AS value'),
+    PING: new HalinQuery({
+        query: 'RETURN true AS value',
         columns: [ { Header: 'Value', accessor: 'value' } ],
         rate: 1000,
-    },
+    }),
 
-    CLUSTER_ROLE: {
+    CLUSTER_ROLE: new HalinQuery({
         dependency: {
             type: 'deploy',
             name: 'cluster',
         },
-        query: disclaim('CALL dbms.cluster.role() YIELD role RETURN role'),
+        query: 'CALL dbms.cluster.role() YIELD role RETURN role',
         columns: [
             { Header: 'Role', accessor: 'role' },
         ],
         rate: 5000,
-    },
+    }),
 
-    GET_CONSTRAINTS: {
+    GET_CONSTRAINTS: new HalinQuery({
         dependency: null,
-        query: disclaim(`
+        query: `
             CALL db.constraints()
             YIELD description
             RETURN description
-        `),
+        `,
         columns: [
             { Header: 'Description', accessor: 'description' },
         ],
-    },
+    }),
 
-    JMX_ALL: {
+    JMX_ALL: new HalinQuery({
         dependency: null,
-        query: disclaim(`
+        query: `
             CALL dbms.queryJmx('*:*') 
             YIELD name, description, attributes 
             RETURN name, description, attributes;
-        `),
+        `,
         columns: [
             { Header: 'Name', accessor: 'name' },
             { Header: 'Description', accessor: 'description' },
             { Header: 'Attributes', accessor: 'attributes' },
         ],
-    },
+    }),
 
-    JMX_STORE_SIZES: {
+    JMX_STORE_SIZES: new HalinQuery({
         // otherStore is a calculated value that catches all other files which may
         // be in the store directory which don't belong to Neo4j.
-        query: disclaim(`            
+        query: `            
             CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Store sizes') 
             YIELD attributes 
             WITH
@@ -108,7 +81,7 @@ export default {
                 stringStore, arrayStore, 
                 relStore, propStore, total, nodeStore,
                 otherStore;        
-        `),
+        `,
 
         columns: [
             { Header: 'Total Disk', accessor: 'total' },
@@ -123,10 +96,10 @@ export default {
             { Header: 'Other', accessor: 'otherStore' },
         ],
         rate: 1000,
-    },
+    }),
 
-    JMX_PAGE_CACHE: {
-        query: disclaim(`
+    JMX_PAGE_CACHE: new HalinQuery({
+        query: `
         CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Page cache')
         YIELD attributes 
         WITH 
@@ -143,7 +116,7 @@ export default {
         RETURN 
             hitRatio, bytesRead, fileMappings, fileUnmappings,
             flushes, usageRatio, bytesWritten, 
-            faults, evictions, evictionExceptions`),
+            faults, evictions, evictionExceptions`,
         columns: [
             { Header: 'Usage Ratio', accessor: 'usageRatio', Cell: cdt.pctField },
             { Header: 'Hit Ratio', accessor: 'hitRatio', Cell: cdt.pctField },
@@ -159,10 +132,10 @@ export default {
             { Header: 'File Unmappings', accessor: 'fileUnmappings', Cell: cdt.numField, show: false },
         ],
         rate: 2000,
-    },
+    }),
 
-    JMX_MEMORY_STATS: {
-        query: disclaim(`
+    JMX_MEMORY_STATS: new HalinQuery({
+        query: `
         CALL dbms.queryJmx('java.lang:type=Memory') yield attributes 
         WITH 
             attributes.HeapMemoryUsage as heap, 
@@ -181,17 +154,17 @@ export default {
             nonHeapProps.committed as nonHeapCommitted,
             nonHeapProps.used as nonHeapUsed,
             nonHeapProps.max as nonHeapMax,
-            heapProps.used + nonHeapProps.used as totalMem`),
+            heapProps.used + nonHeapProps.used as totalMem`,
         columns: [
             { Header: 'Total Memory', accessor: 'totalMem' },
             { Header: 'Heap Used', accessor: 'heapUsed' },
             { Header: 'Heap Committed', accessor: 'heapCommitted' },
             { Header: 'Nonheap Used', accessor: 'nonHeapUsed' },
         ],
-    },
+    }),
 
-    JMX_GARBAGE_COLLECTOR: {
-        query: disclaim(`
+    JMX_GARBAGE_COLLECTOR: new HalinQuery({
+        query: `
         CALL dbms.queryJmx('java.lang:name=G1 Young Generation,type=GarbageCollector') 
         YIELD name, attributes 
         WHERE name =~ '(?i).*garbage.*' 
@@ -201,15 +174,15 @@ export default {
             lastGC.startTime as startTime,
             lastGC.duration as duration,
             lastGC.GcThreadCount as threadCount
-        LIMIT 1`),
+        LIMIT 1`,
         columns: [
             { Header: 'Duration', accessor: 'duration' },
             { Header: 'Thread Count', accessor: 'threadCount' },
         ],
-    },
+    }),
 
-    JMX_TRANSACTIONS: {
-        query: disclaim(`WITH ${disclaimer}
+    JMX_TRANSACTIONS: new HalinQuery({
+        query: `
         CALL dbms.queryJmx("org.neo4j:instance=kernel#0,name=Transactions") 
         YIELD attributes WITH attributes as a 
         RETURN 
@@ -218,7 +191,7 @@ export default {
             a.LastCommittedTxId.value as lastCommittedId, 
             a.NumberOfOpenedTransactions.value as opened, 
             a.PeakNumberOfConcurrentTransactions.value as concurrent, 
-            a.NumberOfCommittedTransactions.value as committed`),
+            a.NumberOfCommittedTransactions.value as committed`,
         columns: [
             { Header: 'Rolled Back', accessor: 'rolledBack' },
             { Header: 'Open', accessor: 'open' },
@@ -230,10 +203,10 @@ export default {
             { Header: 'Last Committed', accessor: 'lastCommittedId' },
         ],
         rate: 2000,
-    },
+    }),
 
-    OS_OPEN_FDS: {
-        query: disclaim(`
+    OS_OPEN_FDS: new HalinQuery({
+        query: `
         CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
         YIELD attributes 
         WITH
@@ -241,16 +214,16 @@ export default {
             attributes.MaxFileDescriptorCount.value as fdMax
         RETURN 
             fdOpen, fdMax
-        `),
+        `,
         columns: [
             { Header: 'fdOpen', accessor: 'fdOpen' },
             { Header: 'fdMax', accessor: 'fdMax' },
         ],
         rate: 2000,
-    },
+    }),
 
-    OS_LOAD_STATS: {
-        query: disclaim(`        
+    OS_LOAD_STATS: new HalinQuery({
+        query: `        
         CALL dbms.queryJmx('java.lang:type=OperatingSystem') 
         YIELD attributes 
         WITH 
@@ -258,15 +231,15 @@ export default {
             attributes.ProcessCpuLoad as ProcessLoad 
         RETURN 
             SystemLoad.value as systemLoad, 
-            ProcessLoad.value as processLoad`),
+            ProcessLoad.value as processLoad`,
         columns: [
             { Header: 'System Load', accessor: 'systemLoad' },
             { Header: 'Process Load', accessor: 'processLoad' },
         ],
-    },
+    }),
 
-    OS_MEMORY_STATS: {
-        query: disclaim(`
+    OS_MEMORY_STATS: new HalinQuery({
+        query: `
             CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
             YIELD attributes 
             WITH
@@ -288,7 +261,7 @@ export default {
                 fdOpen, fdMax,
                 physFree, physTotal,
                 virtCommitted, swapFree, swapTotal,
-                osName, osVersion, arch, processors`),
+                osName, osVersion, arch, processors`,
         columns: [
             { Header: 'Open FDs', accessor: 'fdOpen' },
             { Header: 'Max FDs', accessor: 'fdMax' },
@@ -303,10 +276,10 @@ export default {
             { Header: 'Processors', accessor: 'processors' },
         ],
         rate: 1000,
-    },
+    }),
 
-    LIST_TRANSACTIONS: {
-        query: disclaim(`call dbms.listTransactions()`),
+    LIST_TRANSACTIONS: new HalinQuery({
+        query: `call dbms.listTransactions()`,
         columns: [
             { Header: 'ID', accessor: 'transactionId' },
             { Header: 'User', accessor: 'username' },
@@ -329,38 +302,38 @@ export default {
             { Header: 'PageHits', accessor: 'pageHits', Cell: cdt.numField },
             { Header: 'PageFaults', accessor: 'pageFaults', Cell: cdt.numField },
         ],
-    },
+    }),
 
-    LIST_METRICS: {
+    LIST_METRICS: new HalinQuery({
         // Only supported with very recent versions of APOC
         dependency: {
             type: 'procedure',
             name: 'apoc.metrics.list',
         },
-        query: disclaim(`
+        query: `
             CALL apoc.metrics.list() YIELD name, lastUpdated
             RETURN name, lastUpdated
             ORDER BY lastUpdated ASC;
-        `),
+        `,
         columns: [
             { Header: 'Name', accessor: 'name' },
             { Header: 'Last Updated', accessor: 'lastUpdated' },
             { Header: 'Path', accessor: 'path', show: false },
         ],
-    },
+    }),
 
-    GET_METRIC: {
+    GET_METRIC: new HalinQuery({
         // Only supported with very recent versions of APOC
         dependency: {
             type: 'procedure',
             name: 'apoc.metrics.get',
         },
-        query: disclaim(`
+        query: `
             CALL apoc.metrics.get($metric)
             YIELD timestamp, value
             RETURN timestamp, value
             ORDER BY timestamp DESC LIMIT $last
-        `),
+        `,
         columns: [
             // { Header: 'Timestamp', accessor: 't' },
             { Header: 'Value', accessor: 'value' },
@@ -369,15 +342,15 @@ export default {
             last: 'Count of most recent items to fetch from the file',
             metric: 'Name of the metric to fetch'
         },
-    },
+    }),
 
-    APOC_STORAGE_METRIC: {
+    APOC_STORAGE_METRIC: new HalinQuery({
         // Only supported with very recent versions of APOC
         dependency: {
             type: 'procedure',
             name: 'apoc.metrics.storage',
         },
-        query: disclaim('CALL apoc.metrics.storage(null)'),
+        query: 'CALL apoc.metrics.storage(null)',
         columns: [
             { 
                 Header: 'Location', 
@@ -400,10 +373,10 @@ export default {
             { Header: 'Usable', accessor: 'usableSpaceBytes', Cell: cdt.dataSizeField },
             { Header: '% Free', accessor: 'percentFree', Cell: cdt.pctField },
         ],
-    },
+    }),
    
-    DB_QUERY_STATS: {
-        query: disclaim(`
+    DB_QUERY_STATS: new HalinQuery({
+        query: `
             CALL db.stats.retrieve("QUERIES") 
             YIELD data 
             WITH 
@@ -428,7 +401,7 @@ export default {
                 estimatedRows,
                 invocations
             ORDER BY query ASC
-        `),
+        `,
         columns: [
             { Header: 'Query', accessor: 'query', style: { whiteSpace: 'unset', textAlign: 'left' } },
             { Header: 'Plan', accessor: 'qep', show: false },
@@ -442,5 +415,5 @@ export default {
             { Header: 'Estimated Rows', width: 120, accessor: 'estimatedRows', Cell: cdt.numField },
             { Header: 'Timings', accessor: 'invocations', show: false },
         ],
-    },
+    }),
 };
