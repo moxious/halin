@@ -4,7 +4,7 @@ import math from 'mathjs';
 import Ring from 'ringjs';
 import featureProbes from '../feature/probes';
 import neo4j from '../driver/index';
-import queryLibrary from '../data/queries/query-library';
+import HalinQuery from '../data/queries/HalinQuery';
 import sentry from '../sentry';
 
 const MAX_OBSERVATIONS = 500;
@@ -285,15 +285,13 @@ export default class ClusterNode {
                 s = session;
                 // #operability: transaction metadata is disabled because it causes errors
                 // in 3.4.x, and is only available in 3.5.x.
-                let useTXMetadata = false;
+                let transactionConfig = null;
 
                 if (this.dbms.version && this.dbms.version.major >= 3 && this.dbms.version.minor >= 5) {
-                    useTXMetadata = true;
+                    transactionConfig = HalinQuery.transactionConfig;
                 }
 
-                return (useTXMetadata ? 
-                    session.run(query, params, queryLibrary.queryMetadata) : 
-                    session.run(query, params));
+                return session.run(query, params, transactionConfig);
             })
             .then(results => {
                 const elapsed = new Date().getTime() - start;
