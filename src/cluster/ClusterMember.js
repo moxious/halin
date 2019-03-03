@@ -196,7 +196,7 @@ export default class ClusterMember {
         if (_.isNil(_.get(this.dbms, 'versions'))) {
             return { major: 'unknown', minor: 'unknown', patch: 'unknown' };
         } else if (this.dbms.versions.length > 1) {
-            sentry.warn("This ClusterNode has more than one version installed; only using the first");
+            sentry.warn("This ClusterMember has more than one version installed; only using the first");
         }
 
         const v = this.dbms.versions[0];
@@ -210,7 +210,7 @@ export default class ClusterMember {
 
     checkComponents() {
         if (!this.driver) {
-            throw new Error('ClusterNode has no driver');
+            throw new Error('ClusterMember has no driver');
         }
 
         // Probes get individual pieces of information then assign them into our structure,
@@ -275,7 +275,7 @@ export default class ClusterMember {
      * @param {Object} params parameters to pass to the query.
      */
     run(query, params = {}) {
-        if (!this.driver) { throw new Error('ClusterNode has no driver!'); }
+        if (!this.driver) { throw new Error('ClusterMember has no driver!'); }
 
         let s;
 

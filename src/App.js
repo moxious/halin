@@ -113,7 +113,7 @@ class Halin extends Component {
   }
 
   renderCluster() {
-    const nodePanes = this.state.halin.clusterNodes.map((node, key) => ({
+    const nodePanes = this.state.halin.clusterMembers.map((node, key) => ({
       menuItem: {
         key: `node-${key}`,
         content: <ClusterNodeTabHeader key={key} node={node}/>,
@@ -127,7 +127,7 @@ class Halin extends Component {
     const userMgmtPane = {
       menuItem: { key: 'User Management', content: 'User Management', icon: 'user' },
       render: () => {
-        const node = this.state.halin.clusterNodes[0];
+        const node = this.state.halin.members()[0];
         const driver = this.state.halin.driverFor(node.getBoltAddress());
 
         return this.paneWrapper(
@@ -140,7 +140,7 @@ class Halin extends Component {
     const diagnosticPane = {
       menuItem: { key: 'Diagnostics', content: 'Diagnostics', icon: 'cogs' },
       render: () => {
-        const node = this.state.halin.clusterNodes[0];
+        const node = this.state.halin.clusterMembers[0];
         const driver = this.state.halin.driverFor(node.getBoltAddress());
 
         return this.paneWrapper(

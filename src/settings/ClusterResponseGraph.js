@@ -10,7 +10,7 @@ export default class ClusterResponseGraph extends Component {
         if (!this.mounted) { return null; } 
         const ctx = window.halinContext;
 
-        const dataSeries = ctx.clusterNodes.map(node => ({
+        const dataSeries = ctx.members().map(node => ({
             label: node.getLabel(),
             values: node.getObservations().toArray(),
         }));

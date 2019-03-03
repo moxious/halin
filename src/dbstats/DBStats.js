@@ -1,5 +1,6 @@
 import neo4j from '../driver';
 import ql from '../data/queries/query-library';
+import HalinQuery from '../data/queries/HalinQuery';
 
 /**
  * This class encapsulates functionality around the db.stats.* procedures.
@@ -18,7 +19,7 @@ export default class DBStats {
 
         const session = this.driver.session();
 
-        return session.run(ql.disclaim(`
+        return session.run(HalinQuery.disclaim(`
             CALL db.stats.clear('QUERIES') 
             YIELD section 
             RETURN section 

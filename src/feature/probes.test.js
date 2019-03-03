@@ -10,7 +10,7 @@ describe('Feature Probes', function () {
     const edition = 'enterprise';
 
     const fakeData = [{ name, versions, edition }];
-    const fakeNode = fakes.ClusterNode(fakeData);
+    const fakeNode = fakes.ClusterMember(fakeData);
 
     it('knows how to get name, versions, and edition', () => {
         return probes.getNameVersionsEdition(fakeNode)
@@ -23,38 +23,38 @@ describe('Feature Probes', function () {
 
     describe('APOC probe', () => {
         it('returns true if APOC is present', () =>
-            probes.hasAPOC(fakes.ClusterNode([{ value: true }]))
+            probes.hasAPOC(fakes.ClusterMember([{ value: true }]))
                 .then(result => expect(result).toEqual(true)));
 
         it('returns false if the function does not exist', () =>
-            probes.hasAPOC(fakes.FailingClusterNode('Unknown function'))
+            probes.hasAPOC(fakes.FailingClusterMember('Unknown function'))
                 .then(result => expect(result).toEqual(false)));
     });
 
     describe('Auth Enabled Check', () => {
         it('returns the value of auth_enabled', () =>
-            probes.authEnabled(fakes.ClusterNode([ { value: "true" }]))
+            probes.authEnabled(fakes.ClusterMember([ { value: "true" }]))
                 .then(result => expect(result).toEqual('true')));
 
         it('returns false when it sees permission denied', () =>
-            probes.authEnabled(fakes.FailingClusterNode('Permission denied'))
+            probes.authEnabled(fakes.FailingClusterMember('Permission denied'))
                 .then(result => expect(result).toEqual(false)));
     });
 
     describe('Native Auth Check', () => {
         it('returns true when type is native', () => 
-            probes.supportsNativeAuth(fakes.ClusterNode([ { value: ['native'] }]))
+            probes.supportsNativeAuth(fakes.ClusterMember([ { value: ['native'] }]))
                 .then(r => expect(r).toEqual(true)));
 
         it('returns false when type is not native', () =>
-            probes.supportsNativeAuth(fakes.ClusterNode([ { value: ['ldap'] }]))
+            probes.supportsNativeAuth(fakes.ClusterMember([ { value: ['ldap'] }]))
                 .then(r => expect(r).toEqual(false)));
     });
 
     describe('Listing Metrics', () => {
         const metrics = [ { name: 'a', lastUpdated: 'sss' } ];
         it('can get metrics', () =>
-            probes.getAvailableMetrics(fakes.ClusterNode(metrics))
+            probes.getAvailableMetrics(fakes.ClusterMember(metrics))
                 .then(r => {
                     // console.log(r);
                     expect(r.length).toEqual(1);
@@ -62,7 +62,7 @@ describe('Feature Probes', function () {
                 }));
         
         it('returns an empty array on error', () =>
-            probes.getAvailableMetrics(fakes.FailingClusterNode('no procedure'))
+            probes.getAvailableMetrics(fakes.FailingClusterMember('no procedure'))
                 .then(r => expect(r).toEqual([])));
     });
 });

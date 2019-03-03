@@ -67,7 +67,7 @@ const swallowAndReportError = (title, somePromise, whatToResolve = {}) => {
  * Gather a single data point from a simple query.
  * Example args: 'apoc', 'RETURN apoc.version() as value', 'version'
  * @param {HalinContext} halin 
- * @param {ClusterNode} node 
+ * @param {ClusterMember} node 
  * @param {String} domain 
  * @param {String} query a cypher query which produces the data point
  * @param {String} key the name of the key to return. 
@@ -197,29 +197,29 @@ const gatherConfig = (halin, node) => {
 };
 
 /**
- * @param clusterNode{ClusterNode} 
+ * @param clusterMember{ClusterMember} 
  * @return Promise{Object} of diagnostic information about that node.
  */
-const nodeDiagnostics = (halin, clusterNode) => {
+const nodeDiagnostics = (halin, clusterMember) => {
     const basics = {
-        basics: clusterNode.asJSON(),
+        basics: clusterMember.asJSON(),
     };
 
     /* GATHER STEPS.
      * Each of these is a promise that is guaranteed not to fail because it's wrapped
      */
-    const genJMX = gatherJMX(halin, clusterNode);
-    const users = gatherUsers(halin, clusterNode);
-    const roles = gatherRoles(halin, clusterNode);
-    const genConfig = gatherConfig(halin, clusterNode);
-    const constraints = gatherConstraints(halin, clusterNode);
-    const indexes = gatherIndexes(halin, clusterNode);
+    const genJMX = gatherJMX(halin, clusterMember);
+    const users = gatherUsers(halin, clusterMember);
+    const roles = gatherRoles(halin, clusterMember);
+    const genConfig = gatherConfig(halin, clusterMember);
+    const constraints = gatherConstraints(halin, clusterMember);
+    const indexes = gatherIndexes(halin, clusterMember);
 
     const otherPromises = [
-        simpleGather(clusterNode, 'apoc', 'RETURN apoc.version() as value', 'version'),
-        simpleGather(clusterNode, 'nodes', 'MATCH (n) RETURN count(n) as value', 'count'),
-        simpleGather(clusterNode, 'schema', 'call db.labels() yield label return collect(label) as value', 'labels'),
-        simpleGather(clusterNode, 'algo', 'RETURN algo.version() as value', 'version'),
+        simpleGather(clusterMember, 'apoc', 'RETURN apoc.version() as value', 'version'),
+        simpleGather(clusterMember, 'nodes', 'MATCH (n) RETURN count(n) as value', 'count'),
+        simpleGather(clusterMember, 'schema', 'call db.labels() yield label return collect(label) as value', 'labels'),
+        simpleGather(clusterMember, 'algo', 'RETURN algo.version() as value', 'version'),
     ];
 
     return Promise.all([
@@ -286,8 +286,8 @@ const neo4jDesktopDiagnostics = () => {
  */
 const runDiagnostics = halinContext => {
     const allNodeDiags = Promise.all(
-        halinContext.clusterNodes.map(clusterNode => nodeDiagnostics(halinContext, clusterNode))
-    )
+        halinContext.members().map(clusterMember => 
+            nodeDiagnostics(halinContext, clusterMember)))
         .then(nodeDiagnostics => ({ nodes: nodeDiagnostics }));
 
     const root = Promise.resolve({

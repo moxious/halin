@@ -1,7 +1,7 @@
 import CompositeMetric from './CompositeMetric';
 
 export default class ClusterNodeHealthMetric extends CompositeMetric {
-    constructor(clusterNode) {
+    constructor(clusterMember) {
         super('Cluster Node Health');
 
         

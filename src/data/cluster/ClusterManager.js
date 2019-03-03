@@ -78,7 +78,7 @@ export default class ClusterManager {
      * query.  
      */
     mapQueryAcrossCluster(query, params) {
-        const promises = this.ctx.clusterNodes.map(node => {
+        const promises = this.ctx.members().map(node => {
             // Guarantee that promise resolves.
             // it resolves to an object that indicates success
             // or failure.
@@ -275,7 +275,7 @@ export default class ClusterManager {
                 });
         };
 
-        const allPromises = this.ctx.clusterNodes.map(node => {
+        const allPromises = this.ctx.members().map(node => {
             return gatherRoles(node)
                 .then(rolesHere => determineDifferences(rolesHere, node))
                 .then(roleChanges => applyChanges(roleChanges, node))

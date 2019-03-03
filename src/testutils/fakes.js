@@ -18,7 +18,7 @@ const results = results => ({
     records: results.map(record),
 });
 
-const ClusterNode = data => {
+const ClusterMember = data => {
     const host = `fakehost-${i++}`;
     return {
         dbms: {},
@@ -28,7 +28,7 @@ const ClusterNode = data => {
     };
 };
 
-const FailingClusterNode = err => ({
+const FailingClusterMember = err => ({
     dbms: {},
     run: () => Promise.reject(new Error(err)),
 });
@@ -85,13 +85,14 @@ const ClusterManager = () => {
 
 const HalinContext = (returnData) => {
     const mgr = ClusterManager();
+    const clusterMembers = [
+        ClusterMember(returnData),
+        ClusterMember(returnData),
+    ];
 
     return {
         getDataFeed: sinon.fake.returns(DataFeed(returnData)),
-        clusterNodes: [
-            ClusterNode(returnData),
-            ClusterNode(returnData),
-        ],
+        members: sinon.fake.returns(clusterMembers),
         getClusterManager: sinon.fake.returns(mgr),
     };
 };
@@ -99,8 +100,8 @@ const HalinContext = (returnData) => {
 export default {
     results,
     record,
-    ClusterNode,
-    FailingClusterNode,
+    ClusterMember,
+    FailingClusterMember,
     HalinContext,
     DataFeed,
     ClusterManager,

@@ -109,7 +109,7 @@ This is a short overview of how Halin is put together, with hopes that it's usef
 hacking on it or wanting to extend it.
 
 The HalinContext class is a global and gets attached to the window object.  It always has an
-array of ClusterNode instances.  Halin treats single-node databases as a cluster with only one
+array of ClusterMember instances.  Halin treats single-node databases as a cluster with only one
 member.
 
 Both the HalinContext object and the ClusterNodes that it has have the concept of feature
@@ -123,7 +123,7 @@ Each of the components then expresses requirements by wrapping themselves in a h
 component, or none, if they work anywhere.
 
 Neo4j driver management is done centrally.  Components are discouraged from creating drivers
-or even using them. By using the ClusterNode object to run queries, we get to centrally manage
+or even using them. By using the ClusterMember object to run queries, we get to centrally manage
 all of that and also track performance and errors.
 
 Sentry is used throughout for error detection and reporting.

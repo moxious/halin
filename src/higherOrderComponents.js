@@ -108,7 +108,7 @@ const csvMetricsComponent = (WrappedComponent,  heading) => {
 
 const clusterOnlyComponent = (WrappedComponent, heading) => {
     const failMsg = 'Only available for Neo4j Clusters';
-    const compatCheck = ctx => Promise.resolve(ctx.clusterNodes && ctx.clusterNodes.length > 1);
+    const compatCheck = ctx => Promise.resolve(ctx.members() && ctx.members().length > 1);
 
     return compatibilityCheckableComponent(
         WrappedComponent,

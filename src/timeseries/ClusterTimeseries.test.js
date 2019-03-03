@@ -22,7 +22,7 @@ describe('Cluster Timeseries', function() {
     
     beforeEach(() => {
         window.halinContext = fakes.HalinContext(returnData);
-        node = fakes.ClusterNode(returnData);
+        node = fakes.ClusterMember(returnData);
 
         const props = {
             key, query, width: 400, rate, displayProperty: 'x',

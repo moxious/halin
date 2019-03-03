@@ -3,7 +3,7 @@ import * as PropTypes from 'prop-types';
 import { Message } from 'semantic-ui-react';
 import { Image, Grid } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css';
-import ClusterNode from '../data/ClusterNode';
+import ClusterMember from '../cluster/ClusterMember';
 import _ from 'lodash';
 import './Overview.css';
 import sentry from '../sentry/index';
@@ -34,8 +34,8 @@ class Overview extends Component {
         const s1 = this.driver.session();
         return s1.run('CALL dbms.cluster.overview()', {})
             .then(results => {
-                const clusterNodes = results.records.map(rec => new ClusterNode(rec));
-                this.setState({ mode: 'CLUSTER', topology: clusterNodes });
+                const clusterMembers = results.records.map(rec => new ClusterMember(rec));
+                this.setState({ mode: 'CLUSTER', topology: clusterMembers });
             })
             .catch(err => {
                 if (neo4jErrors.noProcedure(err)) {
@@ -113,10 +113,10 @@ class Overview extends Component {
         return (
             <ul>
                 {
-                    this.state.topology.map((clusterNode, key) => 
+                    this.state.topology.map((clusterMember, key) => 
                         <li key={key}>
-                            {clusterNode.getAddress()}: {clusterNode.role}, supporting protocols
-                            &nbsp;{clusterNode.protocols().join(', ')}
+                            {clusterMember.getAddress()}: {clusterMember.role}, supporting protocols
+                            &nbsp;{clusterMember.protocols().join(', ')}
                         </li>)
                 }
             </ul>

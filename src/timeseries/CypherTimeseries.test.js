@@ -15,7 +15,7 @@ describe('Cypher Timeseries', function() {
     
     beforeEach(() => {
         window.halinContext = fakes.HalinContext(returnData);
-        node = fakes.ClusterNode(returnData);
+        node = fakes.ClusterMember(returnData);
     });
 
     it('renders without crashing', () => {

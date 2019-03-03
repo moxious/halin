@@ -4,7 +4,7 @@ import hoc from '../higherOrderComponents';
 import Explainer from '../Explainer';
 import 'react-table/react-table.css';
 import './Neo4jConfiguration.css';
-import ql from '../data/queries/query-library';
+import HalinQuery from '../data/queries/HalinQuery';
 
 class Neo4jConfiguration extends Component {
     // URL path to where a config item can be looked up.
@@ -12,7 +12,7 @@ class Neo4jConfiguration extends Component {
 
     state = {
         rate: (1000 * 60 * 60),
-        query: ql.disclaim(`
+        query: HalinQuery.disclaim(`
             CALL dbms.listConfig() 
             YIELD name, description, value 
             RETURN name, description, value

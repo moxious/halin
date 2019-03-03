@@ -53,8 +53,7 @@ class PermissionsPane extends Component {
                 <Grid divided='vertically'>
                     { 
                         (window.halinContext && 
-                         window.halinContext.clusterNodes && 
-                         window.halinContext.clusterNodes.length > 1) ? 
+                         window.halinContext.members().length > 1) ? 
                             <Grid.Row columns={1}>
                                 <Grid.Column><PermsWarning/></Grid.Column>
                             </Grid.Row>
