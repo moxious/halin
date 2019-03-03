@@ -25,6 +25,9 @@ const ClusterMember = data => {
         getLabel: sinon.fake.returns(host),
         run: sinon.fake.returns(Promise.resolve(results(data))),
         getBoltAddress: sinon.fake.returns(`bolt://${host}:7777`),
+        getCypherSurface: sinon.fake.returns(Promise.resolve([
+            { type: 'function', name: 'foobar', signature: 'foobar()', description: 'blah', roles: [] },
+        ])),
     };
 };
 
