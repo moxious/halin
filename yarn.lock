@@ -9603,7 +9603,7 @@ react-hot-loader@4.1.2:
     react-lifecycles-compat "^3.0.2"
     shallowequal "^1.0.2"
 
-react-is@^16.8.1:
+react-is@^16.8.1, react-is@^16.8.3:
   version "16.8.3"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/react-is/-/react-is-16.8.3.tgz#4ad8b029c2a718fc0cfc746c8d4e1b7221e5387d"
   integrity sha1-StiwKcKnGPwM/HRsjU4bciHlOH0=
@@ -9687,6 +9687,16 @@ react-table@^6.8.6:
   integrity sha1-almt/rjV3s7SiCQe0ceEcDW17F8=
   dependencies:
     classnames "^2.2.5"
+
+react-test-renderer@^16.8.3:
+  version "16.8.3"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-test-renderer/-/react-test-renderer-16.8.3.tgz#230006af264cc46aeef94392e04747c21839e05e"
+  integrity sha1-IwAGryZMxGru+UOS4EdHwhg54F4=
+  dependencies:
+    object-assign "^4.1.1"
+    prop-types "^15.6.2"
+    react-is "^16.8.3"
+    scheduler "^0.13.3"
 
 react-timeseries-charts@^0.15.3:
   version "0.15.5"
@@ -10267,6 +10277,14 @@ scheduler@^0.11.2:
   version "0.11.3"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/scheduler/-/scheduler-0.11.3.tgz#b5769b90cf8b1464f3f3cfcafe8e3cd7555a2d6b"
   integrity sha1-tXabkM+LFGTz88/K/o4811VaLWs=
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+
+scheduler@^0.13.3:
+  version "0.13.3"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/scheduler/-/scheduler-0.13.3.tgz#bed3c5850f62ea9c716a4d781f9daeb9b2a58896"
+  integrity sha1-vtPFhQ9i6pxxak14H52uubKliJY=
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
