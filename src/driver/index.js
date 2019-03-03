@@ -5,7 +5,7 @@ import _ from 'lodash';
 import genericPool from 'generic-pool';
 import sentry from '../sentry';
 
-// As of Neo4j driver 1.7, no longer need to separately import
+// As of Neo4j driver 1.7, no longer     need to separately import
 // the minified web driver.
 // let driverObj;
 // driverObj = neo4j.v1;

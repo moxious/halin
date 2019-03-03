@@ -144,7 +144,6 @@ export default {
             })
             .catch(err => {
                 if (neo4jErrors.permissionDenied(err)) {
-                    this.dbms.authEnabled = false;
                     return false;
                 }
 
@@ -169,7 +168,6 @@ export default {
         const authPromise = node.run(authQ, {})
             .then(results => {
                 let nativeAuth = false;
-
                 results.records.forEach(rec => {
                     const val = rec.get('value');
                     const valAsStr = `${val}`; // Coerce ['foo','bar']=>'foo,bar' if present

@@ -6,6 +6,7 @@ import * as Sentry from '@sentry/browser';
 import appPkg from '../../package.json';
 
 let initialized = false;
+let enabled = true;
 
 const init = () => {
     const dsn = 'https://82705ec41177415dbf13621167480fd8@sentry.io/1297023';
@@ -19,11 +20,11 @@ const init = () => {
       });    
 };
 
-const info = (...args) => console.log('INFO', ...args);
-const warn = (...args) => console.error('WARN', ...args);
-const error = (...args) => console.error('ERROR', ...args);
-const fine = (...args) => console.log('FINE', ...args);
-const debug = (...args) => console.log('DEBUG', ...args);
+const info = (...args) => enabled ? console.log('INFO', ...args) : null;
+const warn = (...args) => enabled ? console.error('WARN', ...args) : null;
+const error = (...args) => enabled ? console.error('ERROR', ...args) : null;
+const fine = (...args) => enabled ? console.log('FINE', ...args) : null;
+const debug = (...args) => enabled ? console.log('DEBUG', ...args) : null;
 
 // Filter out certain messages which might be so common that they'd create problems.
 const shouldSentryCapture = err => {
@@ -38,6 +39,7 @@ const shouldSentryCapture = err => {
 
 const reportError = (err, message=null) => {
     if (!initialized) { init(); }
+    if (!enabled) { return null; }
 
     if (shouldSentryCapture(err)) {
         Sentry.captureException(err);
@@ -49,7 +51,12 @@ const reportError = (err, message=null) => {
     return err;
 };
 
+const disable = () => {
+    enabled = false;
+};
+
 export default {
     init, reportError,
     info, warn, error, fine, debug,
+    disable,
 };
