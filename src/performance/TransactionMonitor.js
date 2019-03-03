@@ -37,7 +37,6 @@ class TransactionMonitor extends Component {
         return (
             <div className="TransactionMonitor">
                 <CypherTimeseries key={this.state.key}
-                    driver={this.props.driver}
                     node={this.props.node}
                     query={this.state.query} 
                     explainer={explainer}

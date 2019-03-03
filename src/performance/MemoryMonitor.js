@@ -37,7 +37,6 @@ class MemoryMonitor extends Component {
         return (
             <div className="MemoryMonitor">
                 <CypherTimeseries key={this.state.key}
-                    driver={this.props.driver}
                     node={this.props.node}
                     explainer={explainer}
                     query={this.state.query} 

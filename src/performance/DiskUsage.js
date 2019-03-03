@@ -15,7 +15,6 @@ class DiskUsage extends Component {
         return (
             <div className="DiskUsage">
                 <CypherTimeseries key={this.state.key}
-                    driver={this.props.driver}
                     node={this.props.node}
                     query={q.query}
                     width={this.state.width}

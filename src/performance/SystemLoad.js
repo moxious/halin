@@ -32,7 +32,6 @@ class SystemLoad extends Component {
         return (
             <div className="SystemLoad">
                 <CypherTimeseries key={this.state.key}
-                    driver={this.props.driver}
                     explainer={explainer}
                     node={this.props.node}
                     query={this.state.query}
