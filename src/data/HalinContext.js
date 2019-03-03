@@ -4,7 +4,7 @@ import DataFeed from '../data/DataFeed';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import uuid from 'uuid';
-import ClusterManager from './cluster/ClusterManager';
+import ClusterManager from '../cluster/ClusterManager';
 import queryLibrary from '../data/queries/query-library';
 import sentry from '../sentry/index';
 import neo4j from '../driver';

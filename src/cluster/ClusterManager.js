@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
-import sentry from '../../sentry/index';
+import sentry from '../sentry/index';
 import moment from 'moment';
 import uuid from 'uuid';
 import Ring from 'ringjs';
-import neo4j from '../../driver/index';
+import neo4j from '../driver/index';
 
 /**
  * This is a controller for clusters.
