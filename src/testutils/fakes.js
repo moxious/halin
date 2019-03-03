@@ -1,6 +1,7 @@
 import sinon from 'sinon';
 import Ring from 'ringjs';
-import { TimeEvent, TimeRange } from 'pondjs';
+import { TimeEvent } from 'pondjs';
+import moment from 'moment';
 
 let i = 0;
 
@@ -41,7 +42,7 @@ const DataFeed = (returnData) => {
         events,
         event: new TimeEvent(new Date(), returnData[0]),
     };
-    
+
     const df = {
         events,
         feedStartTime: new Date(),
@@ -69,13 +70,31 @@ const DataFeed = (returnData) => {
     return df;
 };
 
-const HalinContext = (returnData) => ({
-    getDataFeed: sinon.fake.returns(DataFeed(returnData)),
-    clusterNodes: [
-        ClusterNode(returnData),
-        ClusterNode(returnData),
-    ],
-});
+const ClusterManager = () => {
+    return {
+        getEventLog: sinon.fake.returns([
+            {
+                date: moment.utc(),
+                type: 'foo',
+                message: 'bar',
+                machine: 'whatever'
+            }
+        ])
+    };
+};
+
+const HalinContext = (returnData) => {
+    const mgr = ClusterManager();
+
+    return {
+        getDataFeed: sinon.fake.returns(DataFeed(returnData)),
+        clusterNodes: [
+            ClusterNode(returnData),
+            ClusterNode(returnData),
+        ],
+        getClusterManager: sinon.fake.returns(mgr),
+    };
+};
 
 export default {
     results,
@@ -84,4 +103,5 @@ export default {
     FailingClusterNode,
     HalinContext,
     DataFeed,
+    ClusterManager,
 };
