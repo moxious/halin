@@ -56,7 +56,7 @@ describe('Feature Probes', function () {
         it('can get metrics', () =>
             probes.getAvailableMetrics(fakes.ClusterNode(metrics))
                 .then(r => {
-                    console.log(r);
+                    // console.log(r);
                     expect(r.length).toEqual(1);
                     expect(r[0]).toEqual(metrics[0]);
                 }));

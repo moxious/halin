@@ -12,6 +12,22 @@ class HalinQuery {
         this.rate = props.rate || 1000;
         this.parameters = props.parameters || {};
         this.legendOnlyColumns = props.legendOnlyColumns || [];
+
+        this.validate();
+    }
+
+    validate() {
+        this.columns.forEach((column, i) => {
+            if (!column || !column.accessor) {
+                throw new Error(`Column ${i} of query ${this.query} is invalid or missing accessor`);
+            }
+        });
+
+        if (this.rate < 0) {
+            throw new Error('Rate must be positive');
+        }
+
+        return true;
     }
 
     static disclaim(query) {

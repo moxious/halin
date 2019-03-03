@@ -9,7 +9,7 @@ const authEnabled = pkg => {
     pkg.nodes.forEach(node => {        
         const addr = node.basics.address;
         const authEnabled = node.configuration[k];
-        console.log(authEnabled);
+        // console.log(authEnabled);
 
         if (_.isNil(authEnabled)) {
             findings.push(new InspectionResult(InspectionResult.INFO, addr, 

@@ -1,3 +1,5 @@
+import sinon from 'sinon';
+
 const record = data => {
     return {
         get: (field) => {
@@ -13,9 +15,8 @@ const results = results => ({
 
 const ClusterNode = data => ({
     dbms: {},
-    run: (query, params) => {
-        return Promise.resolve(results(data));
-    },
+    getLabel: sinon.fake.returns('FAKE_CLUSTER_NODE'),
+    run: sinon.fake.returns(Promise.resolve(results(data))),
 });
 
 const FailingClusterNode = err => ({
@@ -23,9 +24,23 @@ const FailingClusterNode = err => ({
     run: () => Promise.reject(new Error(err)),
 });
 
+const DataFeed = (returnData) => ({
+    feedStartTime: new Date(),
+    addListener: sinon.fake.returns(true),
+    currentState: sinon.fake.returns({ time: new Date(), data: returnData }),
+    min: sinon.fake.returns(13),
+    max: sinon.fake.returns(31),
+});
+
+const HalinContext = (returnData) => ({
+    getDataFeed: sinon.fake.returns(DataFeed(returnData)),
+});
+
 export default {
     results,
     record,
     ClusterNode,
     FailingClusterNode,
+    HalinContext,
+    DataFeed,
 };

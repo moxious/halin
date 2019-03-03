@@ -61,7 +61,8 @@
     "@babel/plugin-proposal-class-properties": "^7.2.1",
     "@babel/preset-env": "^7.2.0",
     "@babel/preset-react": "^7.0.0",
-    "react-test-renderer": "^16.8.3"
+    "react-test-renderer": "^16.8.3",
+    "sinon": "^7.2.6"
   },
   "browserslist": [
     ">0.2%",
