@@ -38,4 +38,21 @@ describe('ClusterMember', function () {
         expect(prots).toContain('http');
         expect(prots).toContain('bolt');
     });
+
+    it('keeps stats in observations', () => {
+        c.setDriver(fakes.Driver());
+
+        return Promise.all([
+            c.run('RETURN true AS value'),
+            c.run('RETURN true AS value'),
+            c.run('RETURN true AS value'),
+        ]).then(results => {
+            // Observations is a RingJS ring
+            expect(c.getObservations().toArray().length).toEqual(3);
+            c.getObservations().toArray().forEach(obs => {
+                expect(obs).toHaveProperty('x');
+                expect(obs).toHaveProperty('y');
+            });
+        });
+    });
 });

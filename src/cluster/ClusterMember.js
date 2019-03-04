@@ -280,7 +280,6 @@ export default class ClusterMember {
         let s;
 
         const start = new Date().getTime();
-        let endResult;
         return this.pool.acquire()
             .then(session => {
                 s = session;
@@ -300,7 +299,6 @@ export default class ClusterMember {
                 const elapsed = new Date().getTime() - start;
                 this._txSuccess(elapsed);
                 // Guarantee same result set to outer user.
-                endResult = results;
                 return results;
             })
             .catch(err => {
@@ -309,12 +307,9 @@ export default class ClusterMember {
                 throw err;
             })
             // Cleanup session.
-            .finally(() => this.pool.release(s))
-            .catch(err => {
-                if (`${err}`.indexOf('Resource not currently part of this pool') > -1) {
-                    return endResult;
-                }
-                throw err;
+            .finally(() => {
+                return this.pool.release(s)
+                    .catch(e => sentry.fine('Pool release error', e));
             });
     }
 };
