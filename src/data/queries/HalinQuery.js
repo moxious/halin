@@ -22,7 +22,7 @@ class HalinQuery {
         this.query = HalinQuery.disclaim(props.query);
         this.columns = props.columns;
         this.dependency = props.dependency || null;
-        this.rate = props.rate || 1000;
+        this.rate = _.isNil(props.rate) ? 1000 : props.rate;
         this.parameters = props.parameters || {};
         this.legendOnlyColumns = props.legendOnlyColumns || [];
         this.exampleResult = props.exampleResult || [];
@@ -47,6 +47,7 @@ class HalinQuery {
 
         this.columns.forEach((column, i) => {
             if (!column || !column.accessor) {
+                console.error(column);
                 throw new Error(`Column ${i} of query ${this.query} is invalid or missing accessor`);
             }
         });

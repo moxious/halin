@@ -18,6 +18,8 @@ import GET_METRIC from './metrics/get';
 import APOC_STORAGE_METRIC from './metrics/storageMetric';
 import DB_QUERY_STATS from './dbStats/query';
 
+import DBMS_COMPONENTS from './dbms/components';
+
 /**
  * A collection of queries that other components can refer to.  By using the same
  * queries with various data feeds, they can be reused and centralized.
@@ -40,4 +42,6 @@ export default {
     GET_METRIC,
     APOC_STORAGE_METRIC,
     DB_QUERY_STATS,
+
+    DBMS_COMPONENTS,
 };

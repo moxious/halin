@@ -15,11 +15,7 @@ export default {
      * of Neo4j this is (e.g. enterprise vs. community)
      */
     getNameVersionsEdition: node => {
-        const componentsPromise = node.run(HalinQuery.disclaim(`
-                CALL dbms.components()
-                YIELD name, versions, edition
-                RETURN name, versions, edition
-            `), {})
+        const componentsPromise = node.run(queryLibrary.DBMS_COMPONENTS.query)
             .then(results => {
                 const rec = results.records[0];
                 return {
