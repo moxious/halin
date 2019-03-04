@@ -196,11 +196,7 @@ export default class HalinContext {
     checkForCluster(activeDb) {
         const session = this.base.driver.session();
         // sentry.debug('activeDb', activeDb);
-        return session.run(`
-            CALL dbms.cluster.overview()
-            YIELD id, addresses, role, groups, database
-            RETURN id, addresses, role, groups, database
-            `, {})
+        return session.run(queryLibrary.CLUSTER_OVERVIEW.query)
             .then(results => {
                 this.clusterMembers = results.records.map(rec => new ClusterMember(rec));
 
