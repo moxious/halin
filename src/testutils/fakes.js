@@ -2,28 +2,58 @@ import sinon from 'sinon';
 import Ring from 'ringjs';
 import { TimeEvent } from 'pondjs';
 import moment from 'moment';
+import Neo4jDesktopApiStandIn from '../neo4jDesktop/Neo4jDesktopStandIn';
+import queryFakes from './queryfakes';
+import uuid from 'uuid';
+import _ from 'lodash';
+import sentry from '../sentry/index';
+
+sentry.disable();
 
 let i = 0;
+const basics = {
+    username: 'neo4j',
+    password: 'secret',
+    host: 'test-host',
+    port: 7777,
+    encrypted: true,
+    name: 'testing-shim',
+};
 
-const record = data => {
+const record = (data = { value: 1 }) => {
     return {
         get: (field) => {
-            if (data[field]) { return data[field]; }
-            throw new Error('Missing field in FakeRecord');
+            if (field in data) { return data[field]; }
+            throw new Error(`Missing field in FakeRecord caller expected ${field} in ${JSON.stringify(data)}`);
         },
+        has: field => !_.isNil(_.get(data, field)),
+        toObject: () => data,
     };
 };
 
-const results = results => ({
+const results = (results = []) => ({
     records: results.map(record),
 });
 
-const ClusterMember = data => {
+const fakeRun = (data) => (query, params) => {
+    if (data && data.length > 0) { return Promise.resolve(results(data)); }
+
+    let foundFake = queryFakes.response(query, params);
+    if (!_.isNil(foundFake)) { 
+        if (!_.isArray(foundFake)) {
+            throw new Error('Invalid non-array fake', foundFake);
+        }
+        return Promise.resolve(results(foundFake));
+    }
+    return Promise.resolve(results(data));
+};
+
+const ClusterMember = (data = []) => {
     const host = `fakehost-${i++}`;
     return {
         dbms: {},
         getLabel: sinon.fake.returns(host),
-        run: sinon.fake.returns(Promise.resolve(results(data))),
+        run: fakeRun(data),
         getBoltAddress: sinon.fake.returns(`bolt://${host}:7777`),
         getCypherSurface: sinon.fake.returns(Promise.resolve([
             { type: 'function', name: 'foobar', signature: 'foobar()', description: 'blah', roles: [] },
@@ -36,7 +66,7 @@ const FailingClusterMember = err => ({
     run: () => Promise.reject(new Error(err)),
 });
 
-const DataFeed = (returnData) => {
+const DataFeed = (returnData = []) => {
     const events = new Ring(5);
     const listeners = [];
     let state = {
@@ -86,7 +116,7 @@ const ClusterManager = () => {
     };
 };
 
-const HalinContext = (returnData) => {
+const HalinContext = (returnData = []) => {
     const mgr = ClusterManager();
     const clusterMembers = [
         ClusterMember(returnData),
@@ -100,9 +130,32 @@ const HalinContext = (returnData) => {
     };
 };
 
+const Session = (data = []) => {
+    return {
+        id: uuid.v4(),
+        run: fakeRun(data),
+        close: sinon.fake.returns(true),
+    };
+};
+
+const Driver = (data = []) => {
+    return {
+        id: uuid.v4(),
+        session: sinon.fake.returns(Session(data)),
+    };
+};
+
+window.neo4jDesktopApi = {
+    getContext: () =>
+        Promise.resolve(Neo4jDesktopApiStandIn.buildFakeContext(basics)),
+};
+
 export default {
+    basics,
     results,
     record,
+    Driver,
+    Session,
     ClusterMember,
     FailingClusterMember,
     HalinContext,

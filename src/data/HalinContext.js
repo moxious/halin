@@ -202,7 +202,6 @@ export default class HalinContext {
             RETURN id, addresses, role, groups, database
             `, {})
             .then(results => {
-                console.log('CLUSTER NODE', results.records.map(r => r.toObject()));
                 this.clusterMembers = results.records.map(rec => new ClusterMember(rec));
 
                 // Note that in the case of community or mode=SINGLE, because the cluster overview fails,

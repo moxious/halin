@@ -5,19 +5,15 @@ import sentry from '../sentry/index';
 sentry.disable();
 
 describe('Feature Probes', function () {
-    const name = 'some-name';
-    const versions = ['3.5.0'];
-    const edition = 'enterprise';
-
-    const fakeData = [{ name, versions, edition }];
-    const fakeNode = fakes.ClusterMember(fakeData);
+    const fakeNode = fakes.ClusterMember();
 
     it('knows how to get name, versions, and edition', () => {
         return probes.getNameVersionsEdition(fakeNode)
             .then(output => {
-                expect(output.name).toEqual(name);
-                expect(output.versions).toEqual(versions);
-                expect(output.edition).toEqual(edition);
+                // Values taken from queryfakes
+                expect(output.name).toEqual('some-name');
+                expect(output.versions).toEqual(['3.5.0']);
+                expect(output.edition).toEqual('enterprise');
             });
     });
 
@@ -54,11 +50,12 @@ describe('Feature Probes', function () {
     describe('Listing Metrics', () => {
         const metrics = [ { name: 'a', lastUpdated: 'sss' } ];
         it('can get metrics', () =>
-            probes.getAvailableMetrics(fakes.ClusterMember(metrics))
+            probes.getAvailableMetrics(fakes.ClusterMember())
                 .then(r => {
-                    // console.log(r);
+                    // Values taken from queryfakes
                     expect(r.length).toEqual(1);
-                    expect(r[0]).toEqual(metrics[0]);
+                    expect(r[0].lastUpdated).toEqual(1111111);
+                    expect(r[0].name).toEqual('foometric');
                 }));
         
         it('returns an empty array on error', () =>

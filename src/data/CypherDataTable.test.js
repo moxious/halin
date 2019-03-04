@@ -6,7 +6,7 @@ import fakes from '../testutils/fakes';
 
 describe('Cypher Data Table', function() {
     const key = uuid.v4();
-    const query = 'RETURN 1 as value';
+    const query = 'RETURN "whatever" as value';
     const rate = 11111;
     const displayColumns = [
         { Header: 'X', accessor: 'x' },
