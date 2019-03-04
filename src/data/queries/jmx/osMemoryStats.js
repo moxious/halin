@@ -1,6 +1,7 @@
 import HalinQuery from '../HalinQuery';
 
 export default new HalinQuery({
+    description: 'Fetches operating system memory statistics using JMX',
     query: `
         CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
         YIELD attributes 

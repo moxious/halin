@@ -1,6 +1,7 @@
 import HalinQuery from '../HalinQuery';
 
 export default new HalinQuery({
+    description: 'Inspects number of open file descriptors at the OS level',
     query: `
     CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
     YIELD attributes 

@@ -4,6 +4,7 @@ import neo4j from '../../../driver';
 const cdt = fields;
 
 export default new HalinQuery({
+    description: 'Fetches a list of running transactions on the database at this moment',
     query: `call dbms.listTransactions()`,
     columns: [
         { Header: 'ID', accessor: 'transactionId' },

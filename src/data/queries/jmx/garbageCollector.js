@@ -2,6 +2,7 @@ import HalinQuery from '../HalinQuery';
 import neo4j from '../../../driver/index';
 
 export default new HalinQuery({
+    description: 'Fetches statistics about garbage collection performance',
     query: `
     CALL dbms.queryJmx('java.lang:name=G1 Young Generation,type=GarbageCollector') 
     YIELD name, attributes 

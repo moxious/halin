@@ -3,6 +3,7 @@ import fields from '../../fields';
 const cdt = fields;
 
 export default new HalinQuery({
+    description: 'Fetches page cache statistics for running Neo4j',
     query: `
     CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Page cache')
     YIELD attributes 

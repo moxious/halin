@@ -2,6 +2,7 @@ import HalinQuery from '../HalinQuery';
 import neo4j from '../../../driver/index';
 
 export default new HalinQuery({
+    description: 'Fetches memory utilization statistics using JMX',
     query: `
     CALL dbms.queryJmx('java.lang:type=Memory') yield attributes 
     WITH 

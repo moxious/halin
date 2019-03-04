@@ -1,6 +1,7 @@
 import HalinQuery from '../HalinQuery';
 
 export default new HalinQuery({
+    description: 'Fetches a list of graph schema constraints',
     dependency: null,
     query: `
         CALL db.constraints()

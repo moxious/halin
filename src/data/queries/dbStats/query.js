@@ -4,6 +4,7 @@ import neo4j from '../../../driver';
 const cdt = fields;
 
 export default new HalinQuery({
+    description: 'Returns database query statistics from DB internal records',
     query: `
         CALL db.stats.retrieve("QUERIES") 
         YIELD data 

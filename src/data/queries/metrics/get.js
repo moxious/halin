@@ -1,6 +1,7 @@
 import HalinQuery from '../HalinQuery';
 
 export default new HalinQuery({
+    description: 'Fetches an APOC metric by name, if supported',
     // Only supported with very recent versions of APOC
     dependency: {
         type: 'procedure',

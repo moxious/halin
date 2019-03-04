@@ -1,6 +1,7 @@
 import HalinQuery from '../HalinQuery';
 
 export default new HalinQuery({
+    description: 'Fetches system and process load averages using JMX',
     query: `        
     CALL dbms.queryJmx('java.lang:type=OperatingSystem') 
     YIELD attributes 

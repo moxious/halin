@@ -29,6 +29,7 @@ class HalinQuery {
             throw new Error('All queries require columns and query');
         }
 
+        this.description = props.description || 'No description available';
         this.query = HalinQuery.disclaim(props.query);
         this.columns = props.columns;
         this.dependency = props.dependency || null;
@@ -40,6 +41,7 @@ class HalinQuery {
         this.validate();
     }
 
+    getDescription() { return this.description; } 
     getQuery() { return this.query; }
     getColumns() { return this.columns; }
     getRate() { return this.rate; }

@@ -3,6 +3,7 @@ import fields from '../../fields';
 const cdt = fields;
 
 export default new HalinQuery({
+    description: 'Fetches storage metrics from APOC, if supported',
     // Only supported with very recent versions of APOC
     dependency: {
         type: 'procedure',

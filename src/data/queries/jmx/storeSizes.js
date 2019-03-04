@@ -2,6 +2,7 @@ import HalinQuery from '../HalinQuery';
 import neo4j from '../../../driver/index';
 
 export default new HalinQuery({
+    description: 'Fetches statistics on overall disk utilization by the database',
     // otherStore is a calculated value that catches all other files which may
     // be in the store directory which don't belong to Neo4j.
     query: `            

@@ -1,6 +1,7 @@
 import HalinQuery from '../HalinQuery';
 
 export default new HalinQuery({
+    description: 'Determines basics about the database such as version of Neo4j and Edition (enterprise or community)',
     query: `
         CALL dbms.components()
         YIELD name, versions, edition
