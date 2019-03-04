@@ -6,6 +6,7 @@ import featureProbes from '../feature/probes';
 import neo4j from '../driver/index';
 import queryLibrary from '../data/queries/query-library';
 import sentry from '../sentry';
+import HalinQuery from '../data/queries/HalinQuery';
 
 const MAX_OBSERVATIONS = 500;
 
@@ -271,11 +272,13 @@ export default class ClusterMember {
      * This function behaves just like neo4j driver session.run, but manages
      * session creation/closure for you, and gathers metrics about the run so
      * that we can track the cluster node's responsiveness and performance over time.
-     * @param {String} query a cypher query
+     * @param {String | HalinQuery} query a cypher query
      * @param {Object} params parameters to pass to the query.
+     * @returns {Promise} which resolves to a neo4j driver result set
      */
     run(query, params = {}) {
         if (!this.driver) { throw new Error('ClusterMember has no driver!'); }
+        if (!query) { throw new Error('Missing query'); }
 
         let s;
 
@@ -285,15 +288,17 @@ export default class ClusterMember {
                 s = session;
                 // #operability: transaction metadata is disabled because it causes errors
                 // in 3.4.x, and is only available in 3.5.x.
-                let useTXMetadata = false;
+                let transactionConfig = {};
 
                 if (this.dbms.version && this.dbms.version.major >= 3 && this.dbms.version.minor >= 5) {
-                    useTXMetadata = true;
+                    transactionConfig = queryLibrary.queryMetadata;
                 }
 
-                return (useTXMetadata ? 
-                    session.run(query, params, queryLibrary.queryMetadata) : 
-                    session.run(query, params));
+                if (query instanceof HalinQuery) {
+                    return session.run(query.getQuery(), params);
+                }
+                
+                return session.run(query, params, transactionConfig);
             })
             .then(results => {
                 const elapsed = new Date().getTime() - start;
