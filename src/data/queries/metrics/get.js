@@ -1,4 +1,5 @@
 import HalinQuery from '../HalinQuery';
+import column from '../column';
 
 export default new HalinQuery({
     description: 'Fetches an APOC metric by name, if supported',
@@ -13,10 +14,7 @@ export default new HalinQuery({
         RETURN timestamp, value
         ORDER BY timestamp DESC LIMIT $last
     `,
-    columns: [
-        // { Header: 'Timestamp', accessor: 't' },
-        { Header: 'Value', accessor: 'value' },
-    ],
+    columns: ['value'].map(column),
     parameters: { 
         last: 'Count of most recent items to fetch from the file',
         metric: 'Name of the metric to fetch'

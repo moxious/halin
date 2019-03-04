@@ -13,7 +13,9 @@ describe('Query Library', function () {
             it('provides example results', () => expect(query.getExample().length).toBeGreaterThan(0));
             it('has valid columns', () => {
                 expect(query.getColumns().length).toBeGreaterThan(0);
-                query.getColumns().map(c => expect(c.accessor).toBeTruthy());
+                query.getColumns().map(c => expect(c.accessor, 'Has Accessor').toBeTruthy());
+                query.getColumns().map(c => expect(c.Header, 'Has Header').toBeTruthy());
+
             });
             it('has a positive rate', () => expect(query.getRate()).toBeGreaterThan(0));
 

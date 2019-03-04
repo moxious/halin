@@ -1,4 +1,5 @@
 import HalinQuery from '../HalinQuery';
+import column from '../column';
 
 export default new HalinQuery({
     description: 'Inspects number of open file descriptors at the OS level',
@@ -11,10 +12,7 @@ export default new HalinQuery({
     RETURN 
         fdOpen, fdMax
     `,
-    columns: [
-        { Header: 'fdOpen', accessor: 'fdOpen' },
-        { Header: 'fdMax', accessor: 'fdMax' },
-    ],
+    columns: ['fdOpen', 'fdMax'].map(column),
     rate: 2000,
     exampleResult: [
         {

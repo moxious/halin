@@ -1,4 +1,5 @@
 import HalinQuery from '../HalinQuery';
+import column from '../column';
 
 export default new HalinQuery({
     description: 'Fetches all JMX observations tracked by the database',
@@ -8,11 +9,7 @@ export default new HalinQuery({
         YIELD name, description, attributes 
         RETURN name, description, attributes;
     `,
-    columns: [
-        { Header: 'Name', accessor: 'name' },
-        { Header: 'Description', accessor: 'description' },
-        { Header: 'Attributes', accessor: 'attributes' },
-    ],
+    columns: ['name', 'description', 'attributes'].map(column),
     exampleResult: [
         {
             name: "org.neo4j:instance=kernel#0,name=Kernel",

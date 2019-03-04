@@ -1,4 +1,5 @@
 import HalinQuery from '../HalinQuery';
+import column from '../column';
 
 export default new HalinQuery({
     description: 'Determines whether or not the database has CSV metrics enabled',
@@ -8,8 +9,6 @@ export default new HalinQuery({
         WHERE name='metrics.csv.enabled' 
         return value;
     `,
-    columns: [
-        { Header: 'Value', accessor: 'value' },
-    ],
+    columns: ['value'].map(column),
     exampleResult: [ { value: true } ],
 });
