@@ -43,7 +43,7 @@ class Halin extends Component {
       {
         menuItem: 'Performance',
         render: () => this.paneWrapper(
-          <PerformancePane key={key} node={node} driver={driver} />),
+          <PerformancePane key={key} node={node}/>),
       },
       {
         menuItem: 'Configuration',
@@ -53,17 +53,17 @@ class Halin extends Component {
       {
         menuItem: 'OS',
         render: () => this.paneWrapper(
-          <OSPane key={key} node={node} driver={driver} />),
+          <OSPane key={key} node={node}/>),
       },
       {
         menuItem: 'Plugins',
         render: () => this.paneWrapper(
-          <PluginPane key={key} node={node} driver={driver} />),
+          <PluginPane key={key} node={node}/>),
       },
       {
         menuItem: 'Query Performance',
         render: () => this.paneWrapper(
-          <SampleQueryPane key={key} node={node} driver={driver} />),
+          <SampleQueryPane key={key} node={node}/>),
       },
 
       // TODO
@@ -72,13 +72,13 @@ class Halin extends Component {
       // {
       //   menuItem: 'Metrics',
       //   render: () => this.paneWrapper(
-      //     <MetricsPane key={key} node={node} driver={driver} />
+      //     <MetricsPane key={key} node={node}/>
       //   ),
       // },
       // {
       //   menuItem: 'Logs',
       //   render: () => this.paneWrapper(
-      //     <LogsPane key={key} node={node} driver={driver} />),
+      //     <LogsPane key={key} node={node}/>),
       // }
     ]),
   };
@@ -131,7 +131,7 @@ class Halin extends Component {
         const driver = this.state.halin.driverFor(node.getBoltAddress());
 
         return this.paneWrapper(
-          <PermissionsPane node={node} driver={driver} />,
+          <PermissionsPane node={node}/>,
           'primary'
         );
       },
@@ -145,8 +145,7 @@ class Halin extends Component {
 
         return this.paneWrapper(
           <DiagnosticPane
-            node={node}
-            driver={driver} />,
+            node={node} />,
           'primary'
         );
       },

@@ -6,8 +6,8 @@ import ql from '../data/queries/query-library';
  * See: https://neo4j.com/docs/operations-manual/current/reference/procedures/
  */
 export default class DBStats {
-    constructor(driver) {
-        this.driver = driver;
+    constructor(clusterMember) {
+        this.clusterMember = clusterMember;
         this.started = false;
     }
 
@@ -16,14 +16,11 @@ export default class DBStats {
             return Promise.resolve(true);
         }
 
-        const session = this.driver.session();
-
-        return session.run(ql.DB_QUERY_STATS_COLLECT.query)
+        return this.clusterMember.run(ql.DB_QUERY_STATS_COLLECT)
             .then(() => {
                 this.started = true;
                 return true;
-            })
-            .finally(() => session.close());
+            });
     }
 
     average(list) {
@@ -35,9 +32,7 @@ export default class DBStats {
     }
 
     stats() {
-        const session = this.driver.session();
-
-        return session.run(ql.DB_QUERY_STATS.query)
+        return this.clusterMember.run(ql.DB_QUERY_STATS)
             .then(results => results.records.map(r => ({
                 query: r.get('query'),
                 qep: r.get('qep'),
@@ -50,8 +45,7 @@ export default class DBStats {
                 executeAvg: neo4j.handleNeo4jInt(r.get('executeAvg')),
                 estimatedRows: this.average(r.get('estimatedRows').map(neo4j.handleNeo4jInt)),
                 invocations: r.get('invocations'),
-            })))
-            .finally(() => session.close());
+            })));
     }
 
     stop() {
@@ -59,13 +53,11 @@ export default class DBStats {
             return Promise.resolve(false);
         }
 
-        const session = this.driver.session();
-        return session.run(ql.DB_QUERY_STATS_STOP.query)
+        return this.clusterMember.run(ql.DB_QUERY_STATS_STOP)
             .then(() => {
                 this.started = false;
                 return true;
-            })
-            .finally(() => session.close());
+            });
     }
 
     isStarted() { return this.started; }

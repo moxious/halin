@@ -131,7 +131,7 @@ export default class SampleQueries extends Component {
 
     start() {
         if (!this.collector) {
-            this.collector = new DBStats(this.props.driver);
+            this.collector = new DBStats(this.props.node);
         }
 
         this.setState({

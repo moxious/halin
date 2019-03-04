@@ -64,14 +64,12 @@ class PermissionsPane extends Component {
                         <Grid.Column>
                             <NewUserForm
                                 key={this.state.key}
-                                driver={this.props.driver}
                                 node={this.props.node}
                                 onUserCreate={username => this.event('user', username)} />
                         </Grid.Column>
                         { enterprise ? <Grid.Column>
                             <NewRoleForm
                                 key={this.state.key}
-                                driver={this.props.driver}
                                 node={this.props.node}
                                 onRoleCreate={role => this.event('role', role)} />
                         </Grid.Column> : '' }
@@ -81,14 +79,12 @@ class PermissionsPane extends Component {
                         <Grid.Column>
                             <Neo4jUsers
                                 key={this.state.key}
-                                driver={this.props.driver}
                                 node={this.props.node}
                                 refresh={this.state.childRefresh} />
                         </Grid.Column>
                         { enterprise ? <Grid.Column>
                             <Neo4jRoles
                                 key={this.state.key}
-                                driver={this.props.driver}
                                 node={this.props.node}
                                 refresh={this.state.childRefresh} />
                         </Grid.Column> : '' }
