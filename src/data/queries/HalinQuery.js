@@ -5,7 +5,7 @@ import _ from 'lodash';
  * A HalinQuery is a container object for a complex cypher query that contains
  * several other parts:
  * 
- * - Optional parameters
+ * - Optional parameters (these are descriptions of parameters, not instance values)
  * - Dependencies (i.e. must have APOC to run this)
  * - A set of column metadata that the query produces
  * - An example result

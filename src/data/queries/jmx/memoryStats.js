@@ -1,4 +1,5 @@
 import HalinQuery from '../HalinQuery';
+import neo4j from '../../../driver/index';
 
 export default new HalinQuery({
     query: `
@@ -26,5 +27,18 @@ export default new HalinQuery({
         { Header: 'Heap Used', accessor: 'heapUsed' },
         { Header: 'Heap Committed', accessor: 'heapCommitted' },
         { Header: 'Nonheap Used', accessor: 'nonHeapUsed' },
+    ],
+    exampleResults: [
+        {
+            heapInit: neo4j.int(536870912),
+            heapCommitted: neo4j.int(536870912),
+            heapUsed: neo4j.int(341835784),
+            heapMax: neo4j.int(1073741824),
+            nonHeapInit: neo4j.int(2555904),
+            nonHeapCommitted: neo4j.int(165609472),
+            nonHeapUsed: neo4j.int(161623152),
+            nonHeapMax: neo4j.int(-1),
+            totalMem: neo4j.int(503458936),
+        },
     ],
 });

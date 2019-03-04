@@ -10,4 +10,8 @@ export default new HalinQuery({
     columns: [
         { Header: 'Description', accessor: 'description' },
     ],
+    exampleResult: [
+        { description: "CONSTRAINT ON ( person:Person ) ASSERT exists(person.name)" },
+        { description: "CONSTRAINT ON ( person:Person ) ASSERT person.id IS UNIQUE" },
+    ],
 });

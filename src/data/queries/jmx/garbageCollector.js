@@ -1,4 +1,5 @@
 import HalinQuery from '../HalinQuery';
+import neo4j from '../../../driver/index';
 
 export default new HalinQuery({
     query: `
@@ -15,5 +16,8 @@ export default new HalinQuery({
     columns: [
         { Header: 'Duration', accessor: 'duration' },
         { Header: 'Thread Count', accessor: 'threadCount' },
+    ],
+    exampleResult: [
+        { startTime: neo4j.int(320938), duration: neo4j.int(18), threadCount: neo4j.int(18) },
     ],
 });

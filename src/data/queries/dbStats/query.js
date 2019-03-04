@@ -1,5 +1,6 @@
 import HalinQuery from '../HalinQuery';
 import fields from '../../fields';
+import neo4j from '../../../driver';
 const cdt = fields;
 
 export default new HalinQuery({
@@ -41,5 +42,28 @@ export default new HalinQuery({
         { Header: 'Execute(avg)', width: 120, accessor: 'executeAvg', Cell: cdt.numField  },
         { Header: 'Estimated Rows', width: 120, accessor: 'estimatedRows', Cell: cdt.numField },
         { Header: 'Timings', accessor: 'invocations', show: false },
+    ],
+    exampleResults: [
+        {
+            query: 'call db.stats.collect("QUERIES")',
+            qep: {
+                operator: 'ProcedureCall',
+                id: 0,
+            },
+            invocationCount: neo4j.int(1),
+            compileMin: neo4j.int(83),
+            compileMax: neo4j.int(181),
+            compileAvg: neo4j.int(132),
+            executeMin: neo4j.int(14458),
+            executeMax: neo4j.int(15544),
+            executeAvg: neo4j.int(15001),
+            estimatedRows: [neo4j.int(1), neo4j.int(1), neo4j.int(1000)],
+            invocations: [
+                {
+                    elapsedExecutionTimeInUs: neo4j.int(14458),
+                    elapsedCompileTimeInUs: neo4j.int(181),
+                },
+            ],
+        },
     ],
 });

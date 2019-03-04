@@ -9,5 +9,6 @@ export default new HalinQuery({
     columns: [
         { Header: 'Role', accessor: 'role' },
     ],
+    exampleResult: [ { role: 'FOLLOWER' } ],
     rate: 5000,
 });
