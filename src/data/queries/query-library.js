@@ -32,6 +32,7 @@ import DBMS_LIST_CONFIG from './dbms/listConfig';
 import DBMS_SECURITY_USER_ROLES from './dbms/security/userRoles';
 import DBMS_LIST_TRANSACTIONS from './dbms/listTransactions';
 import DBMS_LIST_CONNECTIONS from './dbms/listConnections';
+import DBMS_LIST_ACTIVE_LOCKS from './dbms/listActiveLocks';
 
 import APOC_LOG_STREAM from './apoc/logStream';
 import APOC_VERSION from './apoc/version';
@@ -79,6 +80,7 @@ export default {
     DBMS_SECURITY_USER_ROLES,
     DBMS_LIST_TRANSACTIONS,
     DBMS_LIST_CONNECTIONS,
+    DBMS_LIST_ACTIVE_LOCKS,
 
     APOC_LOG_STREAM,
     APOC_VERSION,
