@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import neo4j from '../driver/index';
+import HalinQuery from '../data/queries/HalinQuery';
 
 const queries = {
     'RETURN true AS value': [
@@ -51,7 +52,12 @@ const queries = {
 export default {
     ...queries,
     response: (query, params) => {
-        const input = query.toLowerCase().replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
+        let queryText = query;
+        if (query instanceof HalinQuery) {
+            queryText = query.getQuery();
+        }
+
+        const input = queryText.toLowerCase().replace(/[\r\n]+/g, ' ').replace(/\s+/g, ' ');
         let found = null;
 
         Object.keys(queries).forEach(q => {

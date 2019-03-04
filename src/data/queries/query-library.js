@@ -15,10 +15,18 @@ import GET_CONSTRAINTS from './schema/constraints';
 
 import LIST_METRICS from './metrics/list';
 import GET_METRIC from './metrics/get';
+import METRICS_CSV_ENABLED from './metrics/csvEnabled';
+
 import APOC_STORAGE_METRIC from './metrics/storageMetric';
 import DB_QUERY_STATS from './dbStats/query';
+import DB_QUERY_HAS_STATS from './dbStats/hasStats';
 
 import DBMS_COMPONENTS from './dbms/components';
+import DBMS_AUTH_ENABLED from './dbms/authEnabled';
+import DBMS_GET_AUTH_PROVIDER from './dbms/getAuthProvider';
+
+import APOC_LOG_STREAM from './apoc/logStream';
+import APOC_VERSION from './apoc/version';
 
 /**
  * A collection of queries that other components can refer to.  By using the same
@@ -39,9 +47,16 @@ export default {
     OS_MEMORY_STATS,
     LIST_TRANSACTIONS,
     LIST_METRICS,
+    METRICS_CSV_ENABLED,
     GET_METRIC,
     APOC_STORAGE_METRIC,
     DB_QUERY_STATS,
+    DB_QUERY_HAS_STATS,
 
     DBMS_COMPONENTS,
+    DBMS_AUTH_ENABLED,
+    DBMS_GET_AUTH_PROVIDER,
+
+    APOC_LOG_STREAM,
+    APOC_VERSION,
 };
