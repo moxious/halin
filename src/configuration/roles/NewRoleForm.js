@@ -19,7 +19,6 @@ class NewRoleForm extends Component {
 
     constructor(props, context) {
         super(props, context);
-        this.driver = props.driver || context.driver;
         this.onRoleCreate = props.onRoleCreate || (() => null);
     }
 

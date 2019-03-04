@@ -12,16 +12,13 @@ class AssignRoleModal extends Component {
 
     constructor(props, context) {
         super(props, context);
-        this.driver = props.driver || context.driver;
         this.state.open = props.open;
         this.state.onConfirm = props.onConfirm || (() => null);
         this.state.onCancel = props.onCancel || (() => null);
     }
 
     cypher(q, params={}) {
-        const session = this.driver.session();
-
-        return session.run(q, params)
+        return this.props.node.run(q, params)
             .catch(err => {
                 sentry.reportError(err);
 
@@ -30,8 +27,7 @@ class AssignRoleModal extends Component {
                     message: null,
                     error: status.message('Error', `Could not execute cypher: ${err}`),
                 });
-            })
-            .finally(() => session.close());
+            });
     }
 
     loadUsers() {

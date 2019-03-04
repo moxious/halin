@@ -20,7 +20,6 @@ class NewUserForm extends Component {
 
     constructor(props, context) {
         super(props, context);
-        this.driver = props.driver || context.driver;
         this.onUserCreate = props.onUserCreate || (() => null);
     }
 

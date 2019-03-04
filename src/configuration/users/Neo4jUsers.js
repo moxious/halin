@@ -50,12 +50,7 @@ class Neo4jUsers extends Component {
         refresh: 1,
         message: null,
         error: null,
-    }
-
-    constructor(props, context) {
-        super(props, context);
-        this.driver = props.driver || context.driver;
-    }
+    };
 
     refresh(val = (this.state.refresh + 1)) {
         // These are passed by state to child components, updating it, 
@@ -193,7 +188,6 @@ class Neo4jUsers extends Component {
                     </Grid.Row>
 
                     { window.halinContext.isEnterprise() ? <AssignRoleModal key={this.key}
-                        driver={this.props.driver}
                         node={this.props.node}
                         open={this.state.assignOpen}
                         onCancel={this.closeAssign}

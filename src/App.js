@@ -127,11 +127,9 @@ class Halin extends Component {
     const userMgmtPane = {
       menuItem: { key: 'User Management', content: 'User Management', icon: 'user' },
       render: () => {
-        const node = this.state.halin.members()[0];
-        const driver = this.state.halin.driverFor(node.getBoltAddress());
-
+        const clusterMember = this.state.halin.members()[0];
         return this.paneWrapper(
-          <PermissionsPane node={node}/>,
+          <PermissionsPane node={clusterMember}/>,
           'primary'
         );
       },
@@ -140,12 +138,10 @@ class Halin extends Component {
     const diagnosticPane = {
       menuItem: { key: 'Diagnostics', content: 'Diagnostics', icon: 'cogs' },
       render: () => {
-        const node = this.state.halin.clusterMembers[0];
-        const driver = this.state.halin.driverFor(node.getBoltAddress());
-
+        const clusterMember = this.state.halin.clusterMembers[0];
         return this.paneWrapper(
           <DiagnosticPane
-            node={node} />,
+            node={clusterMember} />,
           'primary'
         );
       },

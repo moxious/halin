@@ -14,11 +14,6 @@ class StorageCapacity extends Component {
         displayColumns: queryLibrary.APOC_STORAGE_METRIC.columns,
     };
 
-    constructor(props, context) {
-        super(props, context);
-        this.driver = props.driver || context.driver;
-    }
-
     help() {
         return (
             <div className='StorageCapacityHelp'>

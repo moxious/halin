@@ -25,11 +25,6 @@ class Overview extends Component {
         user: null,
     };
 
-    constructor(props, context) {
-        super(props, context);
-        this.driver = props.driver || context.driver;
-    }
-
     getClusterStatus() {
         const s1 = this.driver.session();
         return s1.run('CALL dbms.cluster.overview()', {})

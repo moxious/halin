@@ -47,11 +47,6 @@ class ActiveQueries extends Component {
         rate: 1000,
     };
 
-    constructor(props, context) {
-        super(props, context);
-        this.driver = props.driver || context.driver;
-    }
-
     render() {
         return (
             <div className="ActiveQueries">

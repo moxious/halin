@@ -211,7 +211,6 @@ class LogsPane extends Component {
         return (
             <LogViewer key={file}
                 node={this.props.node}
-                driver={this.props.driver}
                 file={file} />
         );
     }

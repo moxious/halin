@@ -19,14 +19,13 @@ class OSPane extends Component {
                             <OSStats 
                                 key={key} 
                                 node={this.props.node} 
-                                driver={this.props.driver}
                             />
                         </Grid.Column>
                     </Grid.Row>
 
                     <Grid.Row columns={2}>
                         <Grid.Column>
-                            <DiskUsage key={key} node={this.props.node} driver={this.props.driver}/>
+                            <DiskUsage key={key} node={this.props.node} />
                         </Grid.Column>
                     
                         {/* 
@@ -36,12 +35,12 @@ class OSPane extends Component {
                             Watch this space.
 
                             <Grid.Column>
-                                <StorageCapacity key={key} node={this.props.node} driver={this.props.driver}/>
+                                <StorageCapacity key={key} node={this.props.node} />
                             </Grid.Column> 
                         */}
 
                         <Grid.Column>
-                            <PageCache key={`${key}1`} node={this.props.node} driver={this.props.driver}/>
+                            <PageCache key={`${key}1`} node={this.props.node} />
                         </Grid.Column>
                     </Grid.Row>
                     <Grid.Row columns={1}>

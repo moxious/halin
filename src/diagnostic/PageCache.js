@@ -10,15 +10,6 @@ class PageCache extends Component {
         displayColumns: queryLibrary.JMX_PAGE_CACHE.columns,
     };
 
-    constructor(props, context) {
-        super(props, context);
-        this.driver = props.driver || context.driver;
-    }
-
-    componentDidMount() {
-
-    }
-
     render() {
         return (
             <div className='PageCache'>

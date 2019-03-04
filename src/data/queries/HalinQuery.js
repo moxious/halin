@@ -65,6 +65,9 @@ class HalinQuery {
     
         return `WITH ${HalinQuery.disclaimer} ${query}`;
     }
+    static isDisclaimed(query) {
+        return query.indexOf(HalinQuery.disclaimer) > -1;
+    }
 };
 
 HalinQuery.disclaimer = `'This query was run by Halin v${pkg.version}' AS disclaimer\n`;

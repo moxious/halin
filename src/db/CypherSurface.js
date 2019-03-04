@@ -55,11 +55,6 @@ class CypherSurface extends Component {
         ],
     };
 
-    constructor(props, context) {
-        super(props, context);
-        this.driver = props.driver || context.driver;
-    }
-
     componentWillMount() {
         return this.props.node.getCypherSurface()
             .then(surface => {
