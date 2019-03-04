@@ -24,6 +24,16 @@ describe('Query Library', function () {
                     expect(col in example, `Accessor ${col}`).toBeTruthy();
                 });
             });
+
+            const params = query.getParameters();
+            const paramNames = Object.keys(params);
+
+            // If the query declares parameters, they should be referenced in the query itself.
+            paramNames.forEach(param => {
+                const ref = `$${param}`;
+
+                expect(query.getQuery().indexOf(ref), `Query contains reference to param ${param} as ${ref}`).toBeGreaterThan(-1);
+            });
         })
     });
 });

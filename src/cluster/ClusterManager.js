@@ -5,6 +5,7 @@ import moment from 'moment';
 import uuid from 'uuid';
 import Ring from 'ringjs';
 import neo4j from '../driver/index';
+import ql from '../data/queries/query-library';
 
 /**
  * This is a controller for clusters.
@@ -203,8 +204,7 @@ export default class ClusterManager {
         //   (b) role doesn't exist on that node
         //   (c) Underlying association query fails.
         const gatherRoles = (node) => {
-            return node.run('CALL dbms.security.listRolesForUser({username})',
-                { username })
+            return node.run(ql.DBMS_SECURITY_USER_ROLES, { username })
                 .then(results => {
                     sentry.fine('gather raw', results);
                     return results;

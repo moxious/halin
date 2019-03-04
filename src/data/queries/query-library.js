@@ -30,6 +30,7 @@ import DBMS_GET_AUTH_PROVIDER from './dbms/getAuthProvider';
 import DBMS_FUNCTIONS from './dbms/functions';
 import DBMS_PROCEDURES from './dbms/procedures';
 import DBMS_LIST_CONFIG from './dbms/listConfig';
+import DBMS_SECURITY_USER_ROLES from './dbms/security/userRoles';
 
 import APOC_LOG_STREAM from './apoc/logStream';
 import APOC_VERSION from './apoc/version';
@@ -76,6 +77,7 @@ export default {
     DBMS_FUNCTIONS,
     DBMS_PROCEDURES,
     DBMS_LIST_CONFIG,
+    DBMS_SECURITY_USER_ROLES,
 
     APOC_LOG_STREAM,
     APOC_VERSION,

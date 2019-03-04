@@ -42,6 +42,7 @@ class HalinQuery {
         if (_.isNil(this.columns)) { throw new Error('Missing columns'); }
     }
 
+    getParameters() { return this.parameters; }
     getDescription() { return this.description; } 
     getQuery() { return this.query; }
     getColumns() { return this.columns; }
