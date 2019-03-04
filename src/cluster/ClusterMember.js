@@ -163,9 +163,9 @@ export default class ClusterMember {
             type: t,
         }));
 
-        const functionsPromise = this.run('CALL dbms.functions()', {})
+        const functionsPromise = this.run(queryLibrary.DBMS_FUNCTIONS)
             .then(results => extractRecordsWithType(results, 'function'));
-        const procsPromise = this.run('CALL dbms.procedures()', {})
+        const procsPromise = this.run(queryLibrary.DBMS_PROCEDURES)
             .then(results => extractRecordsWithType(results, 'procedure'));
 
         return Promise.all([functionsPromise, procsPromise])
