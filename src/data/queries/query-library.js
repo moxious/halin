@@ -1,6 +1,5 @@
 import JMX_ALL from './jmx/all';
 import JMX_GARBAGE_COLLECTOR from './jmx/garbageCollector';
-import LIST_TRANSACTIONS from './jmx/listTransactions';
 import JMX_MEMORY_STATS from './jmx/memoryStats';
 import OS_LOAD_STATS from './jmx/osLoadStats';
 import OS_MEMORY_STATS from './jmx/osMemoryStats';
@@ -31,6 +30,8 @@ import DBMS_FUNCTIONS from './dbms/functions';
 import DBMS_PROCEDURES from './dbms/procedures';
 import DBMS_LIST_CONFIG from './dbms/listConfig';
 import DBMS_SECURITY_USER_ROLES from './dbms/security/userRoles';
+import DBMS_LIST_TRANSACTIONS from './dbms/listTransactions';
+import DBMS_LIST_CONNECTIONS from './dbms/listConnections';
 
 import APOC_LOG_STREAM from './apoc/logStream';
 import APOC_VERSION from './apoc/version';
@@ -58,8 +59,6 @@ export default {
     OS_LOAD_STATS,
     OS_MEMORY_STATS,
     
-    LIST_TRANSACTIONS,
-    
     LIST_METRICS,
     METRICS_CSV_ENABLED,
     GET_METRIC,
@@ -78,6 +77,8 @@ export default {
     DBMS_PROCEDURES,
     DBMS_LIST_CONFIG,
     DBMS_SECURITY_USER_ROLES,
+    DBMS_LIST_TRANSACTIONS,
+    DBMS_LIST_CONNECTIONS,
 
     APOC_LOG_STREAM,
     APOC_VERSION,
