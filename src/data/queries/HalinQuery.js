@@ -12,6 +12,16 @@ import _ from 'lodash';
  * 
  * Queries then are a bit self-documenting, and the app can be thought of as
  * managing a library of these instances.
+ * 
+ * HalinQuery properties (constructor arguments)
+ * - query: a cypher query, e.g. "MATCH (n) RETURN count(n) as value"
+ * - columns: an array of result columns.  Each column must at a minimum have the keys
+ * Header, accessor.  Columns may have the following additional keys: Cell, style, width,
+ * show: (true|false), width
+ * - rate: (optional) specifies an interval in ms to run the query
+ * - parameters: (optional) an object with { paramName: 'description of param this query can take' }
+ * - exampleResult: an array of objects providing an example of what the query is expected to return
+ * - dependency: (optional) an object describing the query's dependencies (e.g. it requires APOC)
  */
 class HalinQuery {
     constructor(props) {
@@ -29,6 +39,10 @@ class HalinQuery {
 
         this.validate();
     }
+
+    getQuery() { return this.query; }
+    getColumns() { return this.columns; }
+    getRate() { return this.rate; }
 
     /**
      * Example results form a type of documentation for a known query, so that
