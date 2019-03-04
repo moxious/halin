@@ -1,5 +1,6 @@
 import HalinQuery from '../HalinQuery';
 import fields from '../../fields';
+import neo4j from '../../../driver/index';
 const cdt = fields;
 
 export default new HalinQuery({
@@ -31,5 +32,14 @@ export default new HalinQuery({
         { Header: 'Total', accessor: 'totalSpaceBytes', Cell: cdt.dataSizeField },
         { Header: 'Usable', accessor: 'usableSpaceBytes', Cell: cdt.dataSizeField },
         { Header: '% Free', accessor: 'percentFree', Cell: cdt.pctField },
+    ],
+    exampleResult: [
+        {
+            setting: "dbms.directories.certificates",
+            freeSpaceBytes: neo4j.int(167096918016),
+            totalSpaceBytes: neo4j.int(499963170816),
+            usableSpaceBytes: neo4j.int(162099400704),
+            percentFree: 0.3342184540178784,
+        },
     ],
 });

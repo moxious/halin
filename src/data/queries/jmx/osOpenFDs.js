@@ -16,4 +16,10 @@ export default new HalinQuery({
         { Header: 'fdMax', accessor: 'fdMax' },
     ],
     rate: 2000,
+    exampleResult: [
+        {
+            fdOpen: 622,
+            fdMax: 10240,
+        },
+    ],
 });

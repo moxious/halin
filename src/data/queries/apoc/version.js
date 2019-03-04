@@ -6,5 +6,5 @@ export default new HalinQuery({
     columns: [
         { Header: 'Version', accessor: 'version' },
     ],
-    exampleResults: [ { version: "3.5.0.2" } ],
+    exampleResult: [ { version: "3.5.0.2" } ],
 });

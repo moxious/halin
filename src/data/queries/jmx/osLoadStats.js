@@ -15,4 +15,7 @@ export default new HalinQuery({
         { Header: 'System Load', accessor: 'systemLoad' },
         { Header: 'Process Load', accessor: 'processLoad' },
     ],
+    exampleResult: [
+        { systemLoad: 3.359375, processLoad: 0.0013729 },
+    ],
 });

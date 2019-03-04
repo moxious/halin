@@ -12,7 +12,7 @@ export default new HalinQuery({
         { Header: 'Versions', accessor: 'versions' },
         { Header: 'Edition', accessor: 'edition' },
     ],
-    exampleResults: [
+    exampleResult: [
         {
             name: 'Neo4j Kernel',
             versions: ['3.5.3'],

@@ -5,7 +5,25 @@ describe('Query Library', function () {
     it('is an object', () => expect(ql).toBeInstanceOf(Object));
 
     Object.keys(ql).forEach(key => {
-        it(`has key ${key} which is a HalinQuery`, () =>
-            expect(ql[key]).toBeInstanceOf(HalinQuery));
+        describe(key, function () {
+            const query = ql[key];
+
+            it('is a HalinQuery', () => expect(query).toBeInstanceOf(HalinQuery));
+            it('has a description', () => expect(query.getDescription()).toBeTruthy());
+            it('provides example results', () => expect(query.getExample().length).toBeGreaterThan(0));
+            it('has valid columns', () => {
+                expect(query.getColumns().length).toBeGreaterThan(0);
+                query.getColumns().map(c => expect(c.accessor).toBeTruthy());
+            });
+            it('has a positive rate', () => expect(query.getRate()).toBeGreaterThan(0));
+
+            it('has an example result which covers its columns', () => {
+                const example = query.getExample()[0];
+
+                query.getColumns().map(c => c.accessor).forEach(col => {
+                    expect(col in example, `Accessor ${col}`).toBeTruthy();
+                });
+            });
+        })
     });
 });

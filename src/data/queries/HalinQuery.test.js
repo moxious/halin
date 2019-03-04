@@ -25,13 +25,4 @@ describe('HalinQuery', function () {
 
         expect(() => new HalinQuery(partial)).toThrow(Error);
     });
-
-    it('requires columns with accessors', () => {
-        const partial = _.pick(props, ['query']);
-        partial.columns = [ {
-            Header: 'I have no accessor',
-        }];
-
-        expect(() => new HalinQuery(partial)).toThrow(Error);
-    });
 });

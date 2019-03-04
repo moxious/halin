@@ -11,5 +11,5 @@ export default new HalinQuery({
         { Header: 'Value', accessor: 'value' },
     ],
     // Because it's from listConfig, value comes as a string **not** a boolean.
-    exampleResults: [ { value: 'true' } ],
+    exampleResult: [ { value: 'true' } ],
 });

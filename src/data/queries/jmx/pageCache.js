@@ -37,4 +37,19 @@ export default new HalinQuery({
         { Header: 'File Unmappings', accessor: 'fileUnmappings', Cell: cdt.numField, show: false },
     ],
     rate: 2000,
+    exampleResult: [
+        {
+            hitRatio: 0.9945,
+            bytesRead: 237650,
+            bytesWritten: 237650,
+            fileMappings: 40,
+            fileUnmappings: 22,
+            flushes: 16,
+            usageRatio: 0.0001313,
+            bytesWRitten: 163790,
+            faults: 35,
+            evictions: 0,
+            evictionExceptions: 0,            
+        },
+    ],
 });

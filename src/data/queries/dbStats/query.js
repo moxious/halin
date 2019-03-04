@@ -44,7 +44,7 @@ export default new HalinQuery({
         { Header: 'Estimated Rows', width: 120, accessor: 'estimatedRows', Cell: cdt.numField },
         { Header: 'Timings', accessor: 'invocations', show: false },
     ],
-    exampleResults: [
+    exampleResult: [
         {
             query: 'call db.stats.collect("QUERIES")',
             qep: {

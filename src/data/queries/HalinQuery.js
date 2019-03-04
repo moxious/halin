@@ -29,7 +29,7 @@ class HalinQuery {
             throw new Error('All queries require columns and query');
         }
 
-        this.description = props.description || 'No description available';
+        this.description = props.description || null;
         this.query = HalinQuery.disclaim(props.query);
         this.columns = props.columns;
         this.dependency = props.dependency || null;
@@ -38,7 +38,8 @@ class HalinQuery {
         this.legendOnlyColumns = props.legendOnlyColumns || [];
         this.exampleResult = props.exampleResult || [];
 
-        this.validate();
+        if (!this.query) { throw new Error('Missing query'); }
+        if (_.isNil(this.columns)) { throw new Error('Missing columns'); }
     }
 
     getDescription() { return this.description; } 
@@ -52,27 +53,8 @@ class HalinQuery {
      * a query.
      * @returns {Array} of example object record results.
      */
-    getExamples() {
+    getExample() {
         return this.exampleResult;
-    }
-
-    validate() {
-        if (_.isNil(this.columns) || this.columns.length === 0) {
-            throw new Error(`Missing columns on query ${this.query}`);
-        }
-
-        this.columns.forEach((column, i) => {
-            if (!column || !column.accessor) {
-                console.error(column);
-                throw new Error(`Column ${i} of query ${this.query} is invalid or missing accessor`);
-            }
-        });
-
-        if (this.rate < 0) {
-            throw new Error('Rate must be positive');
-        }
-
-        return true;
     }
 
     static disclaim(query) {

@@ -21,4 +21,7 @@ export default new HalinQuery({
         last: 'Count of most recent items to fetch from the file',
         metric: 'Name of the metric to fetch'
     },
+    exampleResult: [
+        { timestamp: 1111, value: 0.0 },
+    ],
 });

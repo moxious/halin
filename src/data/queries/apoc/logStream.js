@@ -12,5 +12,5 @@ export default new HalinQuery({
     columns: [
         { Header: 'N', accessor: 'n' },
     ],
-    exampleResults: [ { n: neo4j.int(1) } ],
+    exampleResult: [ { n: neo4j.int(1) } ],
 });

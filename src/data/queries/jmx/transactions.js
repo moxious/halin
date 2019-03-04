@@ -23,4 +23,14 @@ export default new HalinQuery({
         { Header: 'Last Committed', accessor: 'lastCommittedId' },
     ],
     rate: 2000,
+    exampleResult: [
+        {
+            rolledBack: 283,
+            open: 1,
+            lastCommittedId: 7,
+            opened: 42929,
+            concurrent: 8,
+            committed: 42645,
+        },
+    ],
 });

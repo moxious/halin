@@ -11,5 +11,5 @@ export default new HalinQuery({
     columns: [
         { Header: 'Value', accessor: 'value' },
     ],
-    exampleResults: [ { value: true } ],
+    exampleResult: [ { value: true } ],
 });

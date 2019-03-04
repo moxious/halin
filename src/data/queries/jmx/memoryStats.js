@@ -29,7 +29,7 @@ export default new HalinQuery({
         { Header: 'Heap Committed', accessor: 'heapCommitted' },
         { Header: 'Nonheap Used', accessor: 'nonHeapUsed' },
     ],
-    exampleResults: [
+    exampleResult: [
         {
             heapInit: neo4j.int(536870912),
             heapCommitted: neo4j.int(536870912),

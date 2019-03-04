@@ -11,5 +11,5 @@ export default new HalinQuery({
     columns: [
         { Header: 'Name', accessor: 'name' },
     ],
-    exampleResults: [ { name: 'db.stats.clear' } ],
+    exampleResult: [ { name: 'db.stats.clear' } ],
 });
