@@ -1,4 +1,5 @@
 import HalinQuery from '../HalinQuery';
+import neo4j from '../../../driver/index';
 
 export default new HalinQuery({
     // otherStore is a calculated value that catches all other files which may
@@ -45,4 +46,20 @@ export default new HalinQuery({
         { Header: 'Other', accessor: 'otherStore' },
     ],
     rate: 1000,
+    exampleResult: [
+        {
+            countStore: neo4j.int(96),
+            indexStore: neo4j.int(40960),
+            labelStore: neo4j.int(16400),
+            schemaStore: neo4j.int(8201),
+            txLogs: neo4j.int(628),
+            stringStore: neo4j.int(8201),
+            arrayStore: neo4j.int(8201),
+            relStore: neo4j.int(24610),
+            propStore: neo4j.int(16409),
+            total: neo4j.int(140474),
+            nodeStore: neo4j.int(8210),
+            otherStore: neo4j.int(8558),
+        },
+    ],
 });

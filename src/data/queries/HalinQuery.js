@@ -1,6 +1,18 @@
 import pkg from '../../../package.json';
 import _ from 'lodash';
 
+/**
+ * A HalinQuery is a container object for a complex cypher query that contains
+ * several other parts:
+ * 
+ * - Optional parameters
+ * - Dependencies (i.e. must have APOC to run this)
+ * - A set of column metadata that the query produces
+ * - An example result
+ * 
+ * Queries then are a bit self-documenting, and the app can be thought of as
+ * managing a library of these instances.
+ */
 class HalinQuery {
     constructor(props) {
         if (!props.query || !props.columns) {
@@ -13,8 +25,19 @@ class HalinQuery {
         this.rate = props.rate || 1000;
         this.parameters = props.parameters || {};
         this.legendOnlyColumns = props.legendOnlyColumns || [];
+        this.exampleResult = props.exampleResult || [];
 
         this.validate();
+    }
+
+    /**
+     * Example results form a type of documentation for a known query, so that
+     * unit tests and other readers know what kind of data is expected back from
+     * a query.
+     * @returns {Array} of example object record results.
+     */
+    getExamples() {
+        return this.exampleResult;
     }
 
     validate() {
