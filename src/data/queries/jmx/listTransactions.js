@@ -5,7 +5,17 @@ const cdt = fields;
 
 export default new HalinQuery({
     description: 'Fetches a list of running transactions on the database at this moment',
-    query: `call dbms.listTransactions()`,
+    query: `
+        CALL dbms.listTransactions()
+        YIELD transactionId, username, metaData, startTime, protocol,
+        clientAddress, requestUri, currentQueryId, currentQuery, 
+        activeLockCount, status, resourceInformation, elapsedTimeMillis,
+        cpuTimeMillis, waitTimeMillis, idleTimeMillis
+        RETURN transactionId, username, metaData, startTime, protocol,
+        clientAddress, requestUri, currentQueryId, currentQuery, 
+        activeLockCount, status, resourceInformation, elapsedTimeMillis,
+        cpuTimeMillis, waitTimeMillis, idleTimeMillis
+    `,
     columns: [
         { Header: 'ID', accessor: 'transactionId' },
         { Header: 'User', accessor: 'username' },
