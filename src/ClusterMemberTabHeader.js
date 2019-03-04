@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Menu, Icon, Popup } from 'semantic-ui-react'
 import util from './data/util.js';
 
-export default class ClusterNodeTabHeader extends Component {
+export default class ClusterMemberTabHeader extends Component {
     state = {
         ratio: 1,
         total: 1,

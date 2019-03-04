@@ -13,7 +13,7 @@ import SampleQueryPane from './db/SampleQueryPane';
 // import MetricsPane from './db/metrics/MetricsPane';
 import PermissionsPane from './configuration/PermissionsPane';
 import ClusterOverviewPane from './overview/ClusterOverviewPane';
-import ClusterNodeTabHeader from './ClusterNodeTabHeader';
+import ClusterMemberTabHeader from './ClusterMemberTabHeader';
 import { Tab, Button } from 'semantic-ui-react'
 import DiagnosticPane from './diagnostic/DiagnosticPane';
 import Spinner from './Spinner';
@@ -116,7 +116,7 @@ class Halin extends Component {
     const nodePanes = this.state.halin.clusterMembers.map((node, key) => ({
       menuItem: {
         key: `node-${key}`,
-        content: <ClusterNodeTabHeader key={key} node={node}/>,
+        content: <ClusterMemberTabHeader key={key} node={node}/>,
       },
       render: () =>
         this.paneWrapper(
