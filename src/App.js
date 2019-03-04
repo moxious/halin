@@ -48,7 +48,7 @@ class Halin extends Component {
       {
         menuItem: 'Configuration',
         render: () => this.paneWrapper(
-          <Neo4jConfiguration key={key} node={node} driver={driver} />),
+          <Neo4jConfiguration key={key} node={node} />),
       },
       {
         menuItem: 'OS',
