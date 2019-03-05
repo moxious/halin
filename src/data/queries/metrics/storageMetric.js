@@ -6,10 +6,10 @@ const cdt = fields;
 export default new HalinQuery({
     description: 'Fetches storage metrics from APOC, if supported',
     // Only supported with very recent versions of APOC
-    dependency: {
-        type: 'procedure',
-        name: 'apoc.metrics.storage',
-    },
+    dependency: ctx => ({
+        pass: ctx.supportsMetrics(),
+        description: 'Requires CSV Metrics Support (present in recent APOC releases)',
+    }),
     query: 'CALL apoc.metrics.storage(null)',
     columns: [
         { 

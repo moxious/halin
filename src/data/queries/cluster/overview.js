@@ -2,10 +2,10 @@ import HalinQuery from '../HalinQuery';
 
 export default new HalinQuery({
     description: 'Provides an overview of cluster topology',
-    dependency: {
-        type: 'deploy',
-        name: 'cluster',
-    },
+    dependency: ctx => ({
+        pass: ctx.isCluster(),
+        description: 'Requires clustered configuration',
+    }),
     query: `
         CALL dbms.cluster.overview()
         YIELD id, addresses, role, groups, database

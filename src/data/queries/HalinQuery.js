@@ -32,7 +32,10 @@ class HalinQuery {
         this.description = props.description || null;
         this.query = HalinQuery.disclaim(props.query);
         this.columns = props.columns;
-        this.dependency = props.dependency || null;
+        this.dependency = props.dependency || (() => ({
+            pass: true,
+            description: 'No dependencies',
+        }));
         this.rate = _.isNil(props.rate) ? 1000 : props.rate;
         this.parameters = props.parameters || {};
         this.legendOnlyColumns = props.legendOnlyColumns || [];
@@ -42,6 +45,7 @@ class HalinQuery {
         if (_.isNil(this.columns)) { throw new Error('Missing columns'); }
     }
 
+    getDependency() { return this.dependency; }
     getParameters() { return this.parameters; }
     getDescription() { return this.description; } 
     getQuery() { return this.query; }

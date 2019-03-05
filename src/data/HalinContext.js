@@ -150,6 +150,10 @@ export default class HalinContext {
         return this.clusterMembers[0].supportsAuth();
     }
 
+    getVersion() {
+        return this.members()[0].getVersion();
+    }
+
     /**
      * Starts a slow data feed for the node's cluster role.  In this way, if the leader
      * changes, we can detect it.

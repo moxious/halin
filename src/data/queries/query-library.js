@@ -34,6 +34,9 @@ import DBMS_LIST_TRANSACTIONS from './dbms/listTransactions';
 import DBMS_LIST_CONNECTIONS from './dbms/listConnections';
 import DBMS_LIST_ACTIVE_LOCKS from './dbms/listActiveLocks';
 
+import DBMS_35_TASKS from './dbms/3.5/tasks';
+import DBMS_34_TASKS from './dbms/3.4/tasks';
+
 import APOC_LOG_STREAM from './apoc/logStream';
 import APOC_VERSION from './apoc/version';
 
@@ -81,6 +84,9 @@ export default {
     DBMS_LIST_TRANSACTIONS,
     DBMS_LIST_CONNECTIONS,
     DBMS_LIST_ACTIVE_LOCKS,
+
+    DBMS_34_TASKS,
+    DBMS_35_TASKS,
 
     APOC_LOG_STREAM,
     APOC_VERSION,
