@@ -10,7 +10,8 @@ import TaskDetail from './TaskDetail';
 
 class Tasks extends Component {
     state = {
-        query: queryLibrary.DBMS_35_TASKS.getQuery(),
+        // The 3.4 version of this query doesn't have as much info, but works.
+        query: queryLibrary.DBMS_34_TASKS.getQuery(),
         selected: null,
         columns: [
             {
@@ -59,6 +60,16 @@ class Tasks extends Component {
         ],
         rate: 1000,
     };
+
+    componentWillMount() {
+        // We use a different query according to supported features if 3.5 is present.
+        const version = window.halinContext.getVersion();
+        if (version.major >= 3 && version.minor >= 5) {
+            this.setState({
+                query: queryLibrary.DBMS_35_TASKS.getQuery()
+            });
+        }
+    }
 
     open = (row) => {
         console.log('Clicked row',row);
