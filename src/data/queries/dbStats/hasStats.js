@@ -5,7 +5,7 @@ export default new HalinQuery({
     dependency: ctx => {
         const v = ctx.getVersion();
         return {
-            pass: v.major >= 3 && v.minor >= 5 && v.patch >= 2;
+            pass: v.major >= 3 && v.minor >= 5 && v.patch >= 2,
             description: 'Requires Neo4j >= 3.5.2',
         };
     },

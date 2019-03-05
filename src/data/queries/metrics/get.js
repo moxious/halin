@@ -7,11 +7,6 @@ export default new HalinQuery({
         pass: ctx.supportsMetrics(),
         description: 'Requires CSV Metrics Support (present in recent APOC releases)',
     }),
-    // Only supported with very recent versions of APOC
-    dependency: {
-        type: 'procedure',
-        name: 'apoc.metrics.get',
-    },
     query: `
         CALL apoc.metrics.get($metric)
         YIELD timestamp, value
