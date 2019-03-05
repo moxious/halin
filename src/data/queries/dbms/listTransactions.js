@@ -10,14 +10,15 @@ export default new HalinQuery({
         YIELD transactionId, username, metaData, startTime, protocol,
         clientAddress, requestUri, currentQueryId, currentQuery, 
         activeLockCount, status, resourceInformation, elapsedTimeMillis,
-        cpuTimeMillis, waitTimeMillis, idleTimeMillis
+        cpuTimeMillis, waitTimeMillis, idleTimeMillis, connectionId
         RETURN transactionId, username, metaData, startTime, protocol,
         clientAddress, requestUri, currentQueryId, currentQuery, 
         activeLockCount, status, resourceInformation, elapsedTimeMillis,
-        cpuTimeMillis, waitTimeMillis, idleTimeMillis
+        cpuTimeMillis, waitTimeMillis, idleTimeMillis, connectionId
     `,
     columns: [
         { Header: 'ID', accessor: 'transactionId' },
+        { Header: 'CID', accessor: 'connectionId' },
         { Header: 'User', accessor: 'username' },
         { Header: 'Metadata', accessor: 'metaData', show: false, Cell: cdt.jsonField },
         { Header: 'Start Time', accessor: 'startTime', show: false },
@@ -33,10 +34,6 @@ export default new HalinQuery({
         { Header: 'Wait', accessor: 'waitTimeMillis', Cell: cdt.timeField },
         { Header: 'CPU', accessor: 'cpuTimeMillis', Cell: cdt.timeField, show: false },
         { Header: 'Elapsed', accessor: 'elapsedTimeMillis', Cell: cdt.timeField },
-        { Header: 'Bytes', accessor: 'allocatedBytes', Cell: cdt.numField, show: false },
-        { Header: 'Direct (b)', accessor: 'allocatedDirectBytes', Cell: cdt.numField, show: false },            
-        { Header: 'PageHits', accessor: 'pageHits', Cell: cdt.numField },
-        { Header: 'PageFaults', accessor: 'pageFaults', Cell: cdt.numField },
     ],
     exampleResult: [
         {
@@ -59,10 +56,6 @@ export default new HalinQuery({
             cpuTimeMillis: neo4j.int(0),
             waitTimeMillis: neo4j.int(0),
             idleTimeMillis: neo4j.int(17),
-            allocatedBytes: neo4j.int(0),
-            allocatedDirectBytes: neo4j.int(0),
-            pageHits: neo4j.int(12),
-            pageFaults: neo4j.int(0),
             connectionId: 'bolt-12',
         },
     ],
