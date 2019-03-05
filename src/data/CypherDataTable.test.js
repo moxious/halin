@@ -37,8 +37,10 @@ describe('Cypher Data Table', function() {
 
     it('renders without crashing', () => expect(component).toBeTruthy());
     
-    it('set items on its state to the data it fetched', () =>
-        expect(component.state.items).toEqual(returnData));
+    it('set items on its state to the data it fetched', () => {
+        expect(component.state.items[0].x).toEqual(returnData[0].x);
+        expect(component.state.items[1].y).toEqual(returnData[1].y);
+    });
 
     it('knows how to update columns with the show flag', () => {
         const showSubset = [ 'x' ];
