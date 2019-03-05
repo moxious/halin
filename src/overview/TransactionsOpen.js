@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
-import { Button } from 'semantic-ui-react';
+import { Button, Card } from 'semantic-ui-react';
 import queryLibrary from '../data/queries/query-library';
 import _ from 'lodash';
 import hoc from '../higherOrderComponents';
@@ -72,28 +72,34 @@ class TransactionsOpen extends Component {
         ];
 
         return (
-            <div className="TransactionMonitor">
-                <h3>Transactions <Explainer content={this.help()}/></h3>
-                
-                <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
-                    buttons.map((b,idx) =>
-                        <Button size='tiny'
-                            key={idx}
-                            active={this.state.displayProperty===b.field}
-                            onClick={() => this.toggleView(b.field)}>
-                            { b.label }
-                        </Button>)
-                }</Button.Group>
+            <Card fluid className="TransactionMonitor">
+                <Card.Content>
+                    <Card.Header>
+                        Transactions                       
+                    </Card.Header>
+                    <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
+                        buttons.map((b,idx) =>
+                            <Button size='tiny'
+                                key={idx}
+                                active={this.state.displayProperty===b.field}
+                                onClick={() => this.toggleView(b.field)}>
+                                { b.label }
+                            </Button>)
+                    }</Button.Group>
 
-                <ClusterTimeseries key={this.state.key}
-                    query={this.state.query} 
-                    width={this.state.width}
-                    feedMaker={this.dataFeedMaker}
-                    onUpdate={this.onUpdate}
-                    displayProperty={this.state.displayProperty}
-                />
-            </div>
-        )
+                    <ClusterTimeseries key={this.state.key}
+                        query={this.state.query} 
+                        width={this.state.width}
+                        feedMaker={this.dataFeedMaker}
+                        onUpdate={this.onUpdate}
+                        displayProperty={this.state.displayProperty}
+                    />
+                </Card.Content>
+                <Card.Content extra>
+                    <Explainer content={this.help()}/>
+                </Card.Content>
+            </Card>
+        );
     }
 }
 

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
-import { Button } from 'semantic-ui-react';
+import { Button, Card } from 'semantic-ui-react';
+import Explainer from '../Explainer';
 import queryLibrary from '../data/queries/query-library';
 import uuid from 'uuid';
 import _ from 'lodash';
@@ -44,6 +45,14 @@ class OpenFileDescriptors extends Component {
         this.setState({ displayProperty: val });
     };
 
+    help() {
+        return (
+            <div className='FileDescriptorsHelp'>
+                <p>TBD</p>
+            </div>
+        );
+    }
+
     render() {
         const buttons = [
             { label: 'Used', field: 'fdUsed' },
@@ -52,27 +61,33 @@ class OpenFileDescriptors extends Component {
         ];
 
         return (
-            <div className="OpenFileDescriptors">
-                <h3>File Descriptors</h3>
-                
-                <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
-                    buttons.map((b,idx) =>
-                        <Button size='tiny'
-                            key={idx}
-                            active={this.state.displayProperty===b.field}
-                            onClick={() => this.toggleView(b.field)}>
-                            { b.label }
-                        </Button>)
-                }</Button.Group>
+            <Card fluid className="OpenFileDescriptors">
+                <Card.Content>
+                    <Card.Header>
+                        File Descriptors                       
+                    </Card.Header>
+                    <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
+                        buttons.map((b,idx) =>
+                            <Button size='tiny'
+                                key={idx}
+                                active={this.state.displayProperty===b.field}
+                                onClick={() => this.toggleView(b.field)}>
+                                { b.label }
+                            </Button>)
+                    }</Button.Group>
 
-                <ClusterTimeseries key={this.state.key}
-                    width={this.state.width}
-                    feedMaker={this.dataFeedMaker}
-                    onUpdate={this.onUpdate}
-                    displayProperty={this.state.displayProperty}
-                />
-            </div>
-        )
+                    <ClusterTimeseries key={this.state.key}
+                        width={this.state.width}
+                        feedMaker={this.dataFeedMaker}
+                        onUpdate={this.onUpdate}
+                        displayProperty={this.state.displayProperty}
+                    />
+                </Card.Content>
+                <Card.Content extra>
+                    <Explainer content={this.help()}/>
+                </Card.Content>
+            </Card>            
+        );
     }
 }
 

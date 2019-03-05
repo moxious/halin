@@ -4,6 +4,7 @@ import uuid from 'uuid';
 import queryLibrary from '../data/queries/query-library';
 import _ from 'lodash';
 import Explainer from '../Explainer';
+import { Card } from 'semantic-ui-react';
 
 class GCPauseTime extends Component {
     state = {
@@ -31,16 +32,23 @@ class GCPauseTime extends Component {
 
     render() {
         return (
-            <div className="GCPauseTime">
-                <h3>Last GC Pause Time <Explainer content={this.help()}/></h3>
-                <ClusterTimeseries key={this.state.key}
-                    query={this.state.query} 
-                    width={this.state.width}
-                    rate={this.state.rate}
-                    displayProperty='duration'
-                />
-            </div>
-        )
+            <Card fluid className="GCPauseTime">
+                <Card.Content>
+                    <Card.Header>
+                        Last GC Pause Time                       
+                    </Card.Header>
+                    <ClusterTimeseries key={this.state.key}
+                        query={this.state.query} 
+                        width={this.state.width}
+                        rate={this.state.rate}
+                        displayProperty='duration'
+                    />
+                </Card.Content>
+                <Card.Content extra>
+                    <Explainer content={this.help()}/>
+                </Card.Content>
+            </Card>            
+        );
     }
 }
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid } from 'semantic-ui-react';
+import { Card } from 'semantic-ui-react';
 
 import ClusterMemory from './ClusterMemory';
 import GCPauseTime from './GCPauseTime';
@@ -14,43 +14,14 @@ import OpenFileDescriptors from './OpenFileDescriptors';
 export default class ClusterOverviewPane extends Component {
     render() {
         return (
-            <div className="PerformancePane">
-                <Grid divided='vertically'>
-                    {/* <Grid.Row columns={1}>
-                        <Grid.Column>
-                            <ClusterView />
-                        </Grid.Column>
-                    </Grid.Row> */}
-
-                    <Grid.Row columns={3}>
-                        <Grid.Column>
-                            <ClusterMemory />
-                        </Grid.Column>
-
-                        <Grid.Column>
-                            <UsedMemory />
-                        </Grid.Column>
-
-                        <Grid.Column>
-                            <GCPauseTime />
-                        </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={3}>
-                        <Grid.Column>
-                            <PageCacheTracking />
-                        </Grid.Column>
-
-                        <Grid.Column>
-                            <TransactionsOpen />
-                        </Grid.Column>
-
-                        <Grid.Column>
-                            <OpenFileDescriptors />
-                        </Grid.Column>
-                    </Grid.Row>
-                </Grid>
-            </div>
+            <Card.Group itemsPerRow={3} className="PerformancePane">
+                <ClusterMemory />
+                <UsedMemory />
+                <GCPauseTime />
+                <PageCacheTracking />
+                <TransactionsOpen />
+                <OpenFileDescriptors />
+            </Card.Group>
         );
     }
 };

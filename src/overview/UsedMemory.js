@@ -4,6 +4,7 @@ import uuid from 'uuid';
 import queryLibrary from '../data/queries/query-library';
 import _ from 'lodash';
 import Explainer from '../Explainer';
+import { Card } from 'semantic-ui-react';
 
 class UsedMemory extends Component {
     state = {
@@ -45,17 +46,23 @@ class UsedMemory extends Component {
 
     render() {
         return (
-            <div className="UsedMemory">
-                <h3>Used Physical Memory <Explainer content={this.help()}/></h3>
-                
-                <ClusterTimeseries key={this.state.key}
-                    width={this.state.width}
-                    feedMaker={this.dataFeedMaker}
-                    onUpdate={this.onUpdate}
-                    displayProperty={this.state.displayProperty}
-                />
-            </div>
-        )
+            <Card fluid className="UsedMemory">
+                <Card.Content>
+                    <Card.Header>
+                        Used Physical Memory                       
+                    </Card.Header>
+                    <ClusterTimeseries key={this.state.key}
+                        width={this.state.width}
+                        feedMaker={this.dataFeedMaker}
+                        onUpdate={this.onUpdate}
+                        displayProperty={this.state.displayProperty}
+                    />
+                </Card.Content>
+                <Card.Content extra>
+                    <Explainer content={this.help()}/>
+                </Card.Content>
+            </Card>
+        );
     }
 }
 
