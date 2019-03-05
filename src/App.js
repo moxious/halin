@@ -4,26 +4,22 @@ import {
   GraphAppBase,
   CONNECTED
 } from 'graph-app-kit/components/GraphAppBase';
-import Neo4jConfiguration from './configuration/Neo4jConfiguration';
-import PerformancePane from './performance/PerformancePane';
-import OSPane from './performance/OSPane';
-import PluginPane from './db/PluginPane';
-import SampleQueryPane from './db/SampleQueryPane';
-// import LogsPane from './db/LogsPane';
-// import MetricsPane from './db/metrics/MetricsPane';
 import PermissionsPane from './configuration/PermissionsPane';
 import ClusterOverviewPane from './overview/ClusterOverviewPane';
-import ClusterMemberTabHeader from './ClusterMemberTabHeader';
+import MembersPane from './MembersPane';
 import { Tab, Button } from 'semantic-ui-react'
 import DiagnosticPane from './diagnostic/DiagnosticPane';
 import Spinner from './Spinner';
 import status from './status/index';
 import AppFooter from './AppFooter';
 import './App.css';
-import 'semantic-ui-css/semantic.min.css';
+
+// CUSTOM-BUILT THEME
+// import 'semantic-ui-css/semantic.min.css';
+import './semantic/dist/semantic.min.css';
+
 import HalinContext from './data/HalinContext';
 import Neo4jDesktopStandIn from './neo4jDesktop/Neo4jDesktopStandIn';
-import uuid from 'uuid';
 import _ from 'lodash';
 import Troubleshooting from './neo4jDesktop/Troubleshooting';
 import neo4j from './driver';
@@ -34,53 +30,6 @@ class Halin extends Component {
     halin: null,
     initPromise: null,
     error: null,
-    panes: (driver = null, node = null, key = uuid.v4()) => ([
-      // Because panes get reused across cluster nodes, we have to 
-      // give them all a unique key so that as we recreate panes, we're passing down
-      // different props that get separately constructed, and not reusing the same
-      // objects.  
-      // https://stackoverflow.com/questions/29074690/react-why-components-constructor-is-called-only-once
-      {
-        menuItem: 'Performance',
-        render: () => this.paneWrapper(
-          <PerformancePane key={key} node={node}/>),
-      },
-      {
-        menuItem: 'Configuration',
-        render: () => this.paneWrapper(
-          <Neo4jConfiguration key={key} node={node} />),
-      },
-      {
-        menuItem: 'OS',
-        render: () => this.paneWrapper(
-          <OSPane key={key} node={node}/>),
-      },
-      {
-        menuItem: 'Plugins',
-        render: () => this.paneWrapper(
-          <PluginPane key={key} node={node}/>),
-      },
-      {
-        menuItem: 'Query Performance',
-        render: () => this.paneWrapper(
-          <SampleQueryPane key={key} node={node}/>),
-      },
-
-      // TODO
-      // The following two panes are disabled and not yet tested/active, because they're
-      // pending updates to an APOC component that isn't ready yet.
-      // {
-      //   menuItem: 'Metrics',
-      //   render: () => this.paneWrapper(
-      //     <MetricsPane key={key} node={node}/>
-      //   ),
-      // },
-      // {
-      //   menuItem: 'Logs',
-      //   render: () => this.paneWrapper(
-      //     <LogsPane key={key} node={node}/>),
-      // }
-    ]),
   };
 
   paneWrapper = (obj, cls = 'secondary') =>
@@ -113,17 +62,6 @@ class Halin extends Component {
   }
 
   renderCluster() {
-    const nodePanes = this.state.halin.clusterMembers.map((node, key) => ({
-      menuItem: {
-        key: `node-${key}`,
-        content: <ClusterMemberTabHeader key={key} node={node}/>,
-      },
-      render: () =>
-        this.paneWrapper(
-          this.renderSingleNode(this.state.halin.driverFor(node.getBoltAddress()), node),
-          'primary'),
-    }));
-
     const userMgmtPane = {
       menuItem: { key: 'User Management', content: 'User Management', icon: 'user' },
       render: () => {
@@ -155,18 +93,33 @@ class Halin extends Component {
       render: () => this.paneWrapper(<ClusterOverviewPane />, 'primary'),
     };
 
-    const allPanesInOrder = [overviewPane].concat(nodePanes);
+    const membersPane = {
+      menuItem: {
+        key: 'members',
+        content: 'Members',
+      },
+      render: () => this.paneWrapper(<MembersPane />, 'primary'),
+    };
+
+    const allPanesInOrder = [overviewPane, membersPane];
 
     if (window.halinContext.supportsAuth() && window.halinContext.supportsNativeAuth()) {
       allPanesInOrder.push(userMgmtPane);
     }
     allPanesInOrder.push(diagnosticPane);
 
-    return <Tab panes={allPanesInOrder} />;
-  }
-
-  renderSingleNode(driver = null, node = null) {
-    return <Tab menu={{ secondary: true, pointing: true }} panes={this.state.panes(driver, node)} />;
+    return <Tab 
+        grid={{
+          paneWidth: 14, 
+          tabWidth: 2,
+        }} 
+        menu={{ 
+          fluid: true, 
+          vertical: true, 
+          tabular: true, 
+        }} 
+        panes={allPanesInOrder} 
+      />;
   }
 
   render() {
