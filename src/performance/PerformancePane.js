@@ -5,7 +5,10 @@ import MemoryMonitor from './MemoryMonitor';
 import SystemLoad from './SystemLoad';
 import GCMonitor from './GCMonitor';
 import TransactionMonitor from './TransactionMonitor';
-import ActiveQueries from './ActiveQueries';
+// import ActiveQueries from './ActiveQueries';
+// import ActiveTransactions from './ActiveTransactions';
+// import Connections from './Connections';
+import Tasks from './task/Tasks';
 import StoreFiles from '../diagnostic/StoreFiles';
 import uuid from 'uuid';
 
@@ -37,7 +40,7 @@ class PerformancePane extends Component {
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <ActiveQueries key={key} node={this.props.node} />
+                            <Tasks key={key} node={this.props.node} />
                         </Grid.Column>
                     </Grid.Row>
 
