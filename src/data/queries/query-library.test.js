@@ -27,6 +27,10 @@ describe('Query Library', function () {
                 });
             });
 
+            if (query.getDependency()) {
+                expect(query.getDependency()).toBeInstanceOf(Function);
+            }
+
             const params = query.getParameters();
             const paramNames = Object.keys(params);
 
