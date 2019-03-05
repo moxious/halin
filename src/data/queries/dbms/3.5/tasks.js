@@ -4,7 +4,10 @@ export default new HalinQuery({
     description: 'Lists active tasks the database',
     dependency: ctx => {
         const version = ctx.getVersion():
-        return version.major >= 3 && version.minor >= 5;
+        return {
+            pass: version.major >= 3 && version.minor >= 5,
+            description: 'Requires Neo4j >= 3.4',
+        };
     },
     /**
      * This query calls 3 key procedures in Neo4j, 
