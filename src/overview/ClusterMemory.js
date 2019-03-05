@@ -3,6 +3,7 @@ import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/queries/query-library';
 import Explainer from '../Explainer';
+import { Card } from 'semantic-ui-react';
 
 class ClusterMemory extends Component {
     state = {
@@ -28,17 +29,24 @@ class ClusterMemory extends Component {
 
     render() {
         return (
-            <div className="ClusterMemory">
-                <h3>Heap Size <Explainer position='bottom right' content={this.help()}/></h3>
+            <Card fluid className="ClusterMemory">
+                <Card.Content>
+                    <Card.Header>
+                        Heap Size                         
+                    </Card.Header>
 
-                <ClusterTimeseries key={this.state.key}
-                    query={this.state.query} 
-                    width={this.state.width}
-                    rate={this.state.rate}
-                    displayProperty='heapUsed'
-                />
-            </div>
-        )
+                    <ClusterTimeseries key={this.state.key}
+                        query={this.state.query} 
+                        width={this.state.width}
+                        rate={this.state.rate}
+                        displayProperty='heapUsed'
+                    />
+                </Card.Content>
+                <Card.Content extra>
+                    <Explainer position='bottom right' content={this.help()}/>
+                </Card.Content>
+            </Card>
+        );
     }
 }
 
