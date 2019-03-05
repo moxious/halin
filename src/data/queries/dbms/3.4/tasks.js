@@ -3,8 +3,9 @@ import column from '../../column';
 
 export default new HalinQuery({
     description: 'Lists active tasks the database',
-    dependency: {
-        version: 'Minimum 3.4.0',
+    dependency: ctx => {
+        const version = ctx.getVersion():
+        return version.major >= 3 && version.minor >= 4;
     },
     /**
      * This query calls 3 key procedures in Neo4j, 
