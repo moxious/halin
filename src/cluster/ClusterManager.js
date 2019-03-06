@@ -205,13 +205,12 @@ export default class ClusterManager {
         //   (c) Underlying association query fails.
         const gatherRoles = (node) => {
             return node.run(ql.DBMS_SECURITY_USER_ROLES, { username })
-                .then(results => {
-                    sentry.fine('gather raw', results);
-                    return results;
-                })
                 .then(results => neo4j.unpackResults(results, {
                     required: ['value'],
                 }))
+                // Pluck out only the role name to get to a simple array of strings
+                // rather than array of objects.
+                .then(results => results.map(r => r.value))
                 .then(r => {
                     sentry.fine('gather roles made',r);
                     return r;
