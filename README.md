@@ -2,17 +2,31 @@
 
 ## Halin Neo4j Monitoring
 
-Halin is a Graph App for monitoring your Neo4j instance, or cluster.  It works with both
-single instance graphs (like those you create in Desktop) and also remote connections to 
-Causal Clusters.
+Halin is a Graph App for monitoring Neo4j. 
 
 **[Click here to run Halin!](https://halin.graphapp.io/)**
 
 Primary features:
-1. Basic performance monitoring (system load, memory usage)
-2. Advisor and Diagnostics:  Checks your Neo4j configuration and finds problems, makes suggestions on how to improve.
-3. Works with both Neo4j Enterprise and Neo4j Community
-4. User & Role Management: allows you to administer users & roles across any number of machines.
+1. Performance monitoring (system load, memory usage)
+2. Checks your Neo4j configuration and finds problems, makes suggestions on how to improve.
+3. Works with both Neo4j Enterprise and Neo4j Community, clusters and stand-alone.
+4. User & Role Management
+
+### Deploying Halin on Your Own (e.g. behind a company firewall)
+
+1. `yarn install` to pull dependencies
+2. Edit package.json locally, and change the "homepage" field to the URL where Halin
+will be accessible when deployed.  For example, if you're using an internal company
+site `https://fileserver.mycompany.com` you might set this to 
+`https://fileserver.mycompany.com/halin`
+3. `npm run build` to build the finished HTML/CSS artifacts; this will produce a `dist`
+folder containing everything needed to be deployed.
+4. Copy everything in the `dist` folder to your file sharing server; in the example above
+that would be a `halin` directory hosted by `fileserver.mycompany.com`.
+
+Halin's build chain already does all of these steps; the public version of Halin is hosted
+in an AWS S3 bucket.  If you'd like to see a scripted version of how that was done, 
+check the `.circleci/config.yml` file, and look for the "Deploy to S3" step.
 
 ## Running Halin in Development Mode
 
@@ -20,10 +34,6 @@ Primary features:
 2. `yarn install`
 3. `yarn start`
 4. Navigate to `http://localhost:3000/`
-
-### Running Stand Alone
-
-Browse to http://localhost:3000/ and you're ready to go.
 
 ### Running in Docker
 
@@ -58,23 +68,43 @@ Both.  Some features must be disabled for community (such as user management) be
 Halin runs purely in your browser and does not share details of your database outside of
 your machine.  Even when you generate a diagnostic package, this is not shared.  Halin 
 does use a JS error reporting library called Sentry to help catch errors and improve the
-software, but nothing about your configuration is sent back to me.
+software, but nothing about your configuration is sent back to me.  You may optionally
+tick a box in the diagnostics pane to "opt-in" share your diagnostic package, which helps
+us improve Halin & Neo4j.
 
-3. How does Halin work?
+3. What versions of Neo4j does Halin support?
+
+*Supported*:  3.4.* and 3.5.*; causal cluster and stand-alone, enterprise and community.
+
+*Unsupported*: Neo4j < 3.4, embedded deployments, and HA deployments.
+
+4. How does Halin work?
 
 Halin uses pure cypher/bolt connections to nodes in your cluster, and uses Neo4j's existing
-management interfaces and queries, including things like JMX, to obtain all statistics.  The upside
-of this approach is that it will work on any Neo4j instance with zero modification or configuration.
-The downside is that there are certain aspects of debugging (like getting remote log files) that Halin
-cannot yet access because this would require server-side SSH access.
+management interfaces and queries, including things like JMX, to obtain all statistics.  This approach will work on any Neo4j instance with zero modification or configuration.
 
-4. Do I have to run Halin as an admin user?
+If you'd like to see what kinds of queries Halin is running, click on the gear icon at
+the very bottom and you'll get a pop-up showing all of the queries and their response
+times.
+
+5. Do I have to run Halin as an admin user?
 
 No, but some types of data (for example your configuration) are not available unless you
 are an administrator.  If you run halin with a low privileged user, some features may not
-be available or work as expected.
+be available or work as expected.  An admin user is highly recommended.
 
-5. Why is it called Halin?
+6. Why doesn't (this feature) appear in Halin?  Why can't I use User administration?
+
+Depending on how your database is configured, some options are not available.  For example,
+active running query monitoring requires procedures that are only available in Neo4j
+Enterprise, so if you're running Community this feature will be disabled.  This is not
+due to a limitation of Halin, simply which functionality the Neo4j instance exposes.
+
+Additionally, there are some special circumstances. For example if you use an LDAP
+authorization provider, Halin will not permit adding users because Neo4j itself is not
+the authority on the user set.
+
+7. Why is it called Halin?
 
 The application is named for [Rudolf Halin](https://en.wikipedia.org/wiki/Rudolf_Halin) an
 influential German graph theorist, who came up with (among many other things) [Halin graphs](https://en.wikipedia.org/wiki/Halin_graph).

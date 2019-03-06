@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import fields from '../data/fields';
 import Spinner from '../Spinner';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
@@ -44,13 +43,6 @@ class CypherSurface extends Component {
                 Header: 'Description',
                 accessor: 'description',
                 style: { whiteSpace: 'unset', textAlign: 'left' }
-            },
-            {
-                Header: 'Roles',
-                accessor: 'roles',
-                Cell: fields.jsonField,
-                style: { whiteSpace: 'unset', textAlign: 'left' },
-                show: false,
             },
         ],
     };

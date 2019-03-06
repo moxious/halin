@@ -21,7 +21,22 @@ const handleNeo4jInt = val => {
     return neo4j.integer.inSafeRange(val) ? val.toNumber() : neo4j.integer.toString(val);
 };
 
-const getValueFromRecord = (record, field, required=false, defaultValue=null) => {
+const getValueFromRecord = (record, toExtract, required=false, defaultValue=null) => {
+    /**
+     * toExtract may either be a string "fooField" or a row object with an accessor, like:
+     * { Header: "Whatever", accessor: 'fooField', absentValue: [] }
+     */
+    let field;
+    if (typeof toExtract === 'string') {
+        field = toExtract;
+    } else {
+        field = toExtract.accessor;
+    }
+
+    if (!field) {
+        throw new Error(`Cannot determine which field to extract from record given ${JSON.stringify(toExtract)}`);
+    }
+
     const dotted = field.indexOf('.') > -1;
     const resultField = dotted ? field.substring(0, field.indexOf('.')) : field;
     const restPath = dotted ? field.substring(field.indexOf('.') + 1) : null;
@@ -37,7 +52,9 @@ const getValueFromRecord = (record, field, required=false, defaultValue=null) =>
     } catch (e) {
         if (required) { throw e; }
 
-        return defaultValue;
+        // If the record specifies an absentValue, return that, otherwise
+        // the default
+        return _.get(toExtract, 'absentValue') || defaultValue;
     }
 };
 

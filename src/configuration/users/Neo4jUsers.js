@@ -20,7 +20,7 @@ class Neo4jUsers extends Component {
             Cell: ({ row }) => (
                 <Button compact negative
                     // Don't let people delete neo4j or admins for now.
-                    disabled={row.username === 'neo4j' || row.roles.indexOf('admin') > -1}
+                    disabled={row.username === 'neo4j' || (row.roles || []).indexOf('admin') > -1}
                     onClick={e => this.open(row)}
                     type='submit' icon="cancel"/>
             ),
@@ -30,14 +30,19 @@ class Neo4jUsers extends Component {
             accessor: 'username',
         },
         {
+            // #operabilty - major pain that the return type of this procedure is 
+            // different between enterprise and community.  Would be better if 
+            // community always return roles [].  As such, the field doesn't exist.
             Header: 'Roles',
             accessor: 'roles',
             absentValue: [],
-            Cell: ({ row }) => row.roles.map((role, idx) => (
+            // In community roles may not exist, so default to []
+            Cell: ({ row }) => (row.roles || []).map((role, idx) => (
                 <div className='role' key={idx}>
                     {role}{idx < row.roles.length - 1 ? ',' : ''}
                 </div>
             )),
+            show: window.halinContext.isEnterprise(),
         },
         {
             Header: 'Flags',

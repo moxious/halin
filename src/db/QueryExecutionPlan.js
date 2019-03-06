@@ -16,7 +16,6 @@ export default class QueryExecutionPlan extends Component {
     };
 
     qepToTreeData(qep, label='') {
-        console.log('RECURSE',qep);
         if (_.isNil(qep)) { return null; }
 
         const mkTitle = () =>
