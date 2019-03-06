@@ -48,7 +48,7 @@ jobs:
             else
               export SUBDIR="${CIRCLE_BRANCH}-${CIRCLE_SHA1}"
               export BUCKET=halin
-              export BASE_URL=http://halin.s3-website-us-east-1.amazonaws.com/
+              export BASE_URL=http://halin.graphapp.io/
               export FINAL_URL="$BASE_URL$SUBDIR/"
               cp package.json package.orig
               # Have to monkeypatch the "homepage" field so that the react build will

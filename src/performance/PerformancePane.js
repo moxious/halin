@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import "semantic-ui-css/semantic.min.css";
-import { Grid } from 'semantic-ui-react';
+import { Grid, Card } from 'semantic-ui-react';
 import MemoryMonitor from './MemoryMonitor';
 import SystemLoad from './SystemLoad';
 import GCMonitor from './GCMonitor';
@@ -19,23 +19,13 @@ class PerformancePane extends Component {
         return (
             <div className="PerformancePane">
                 <Grid divided='vertically'>
-                    <Grid.Row columns={2}>
-                        <Grid.Column>
+                    <Grid.Row columns={1}>
+                        <Card.Group>
                             <SystemLoad key={key} node={this.props.node} />
-                        </Grid.Column>
-
-                        <Grid.Column>
                             <MemoryMonitor key={key} node={this.props.node} />
-                        </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={2}>
-                        <Grid.Column>
                             <TransactionMonitor key={key} node={this.props.node} />
-                        </Grid.Column>
-                        <Grid.Column>
                             <GCMonitor key={key} node={this.props.node} />
-                        </Grid.Column>
+                        </Card.Group>
                     </Grid.Row>
 
                     <Grid.Row columns={1}>

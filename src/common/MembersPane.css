@@ -8,7 +8,13 @@
     padding: 0px;
 }
 
-.MembersPane > div > .ui.grid > .four.wide.column {
+.MembersPane > div.ui.grid {
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-top: 10px;
+}
+
+.MembersPane > .ui.grid > .four.wide.column {
     max-width: 250px;
     padding-top: 0px;
     padding-bottom: 0px;
@@ -16,6 +22,27 @@
     padding-right: 0px;
 }
 
-.MembersPane > div > .ui.grid > .stretched.ten.wide.column {
-    width: 100% ;/* !important;*/
+.MembersPane > .ui.grid > .four.wide.column > .ui.fluid.vertical.tabular.menu {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.MembersPane > .ui.grid > .four.wide.column > .ui.fluid.vertical.tabular.menu > a.item {
+    /* padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px; */
+}
+
+.MembersPane > .ui.grid > .stretched.ten.wide.column {
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    width: 79% !important;
+}
+
+.MembersPane > .ui.grid > .stretched.ten.wide.column > .ui.segment.active.tab {
+    padding-left: 0px;
+    padding-right: 0px;
 }

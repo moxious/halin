@@ -89,9 +89,7 @@ class Halin extends Component {
     return (
       <div className="App" key="app">
         { this.props.connected ? 
-          <div className='MainBody'>
-            <MainNav />
-          </div>
+          <MainNav />
           : '' }
 
         <AppFooter />

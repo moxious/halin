@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import CypherTimeseries from '../timeseries/CypherTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/queries/query-library';
+import HalinCard from '../common/HalinCard';
 
 class DiskUsage extends Component {
     state = {
@@ -13,7 +14,7 @@ class DiskUsage extends Component {
         const q = queryLibrary.JMX_STORE_SIZES;
 
         return (
-            <div className="DiskUsage">
+            <HalinCard header='Disk Usage'>
                 <CypherTimeseries key={this.state.key}
                     node={this.props.node}
                     query={q.query}
@@ -24,7 +25,7 @@ class DiskUsage extends Component {
                         q.columns[0]
                     ]}
                 />
-            </div>
+            </HalinCard>
         )
     }
 }

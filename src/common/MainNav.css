@@ -6,6 +6,19 @@
     margin: 0 auto;
 }
 
+.MainNav {
+    height: 100%;
+}
+
+.MainNav > .ui.grid {
+    height: 100%;
+    margin-top: 10px;
+    padding-left: 0px;
+    padding-right: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
 .MainNav > .ui.grid > .two.wide.column > .ui.fluid.vertical.tabular.menu {
     padding-right: 0px;
     padding-left: 0px;
@@ -18,4 +31,16 @@
 .MainNav > .ui.grid > .stretched.fourteen.wide.column {
     padding: 0px;
     margin: 0px;
+}
+
+.MainNav > .ui.grid > .two.wide.column > .ui.fluid.vertical.tabular.menu > a.item {
+    height: 60px;
+}
+
+
+.MainNav > .ui.grid > .stretched.fourteen.wide.column > .ui.active.tab {
+    border: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    padding-top: 0px;
 }

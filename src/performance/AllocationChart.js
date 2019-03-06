@@ -70,7 +70,7 @@ export default class AllocationChart extends Component {
 
         return (
             <div className='AllocationChart'>
-                <h5>{this.props.label} Total: {tot}</h5>
+                <h5>Total: {tot}</h5>
                 { this.state.populated ? 
                     ((this.state.total && this.state.total > 0) ? 
                     <PieChart

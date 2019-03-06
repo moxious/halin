@@ -1,6 +1,9 @@
-.HalinCard.fluid.card {
-    /* border: 1px solid red; */
+.ui.HalinCard.fluid.card {
+    border: 1px solid grey;
     min-width: 350px;
+    max-width: 440px;
+    margin-left: 10px;
+    margin-right: 10px;
 }
 
 button.ui.tiny.button {

@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import Spinner from '../Spinner';
 import _ from 'lodash';
-import { Grid } from 'semantic-ui-react';
+import { Grid, Card } from 'semantic-ui-react';
 import uuid from 'uuid';
 import AllocationChart from './AllocationChart';
 import datautil from '../data/util';
 import queryLibrary from '../data/queries/query-library';
+import HalinCard from '../common/HalinCard';
 
 export default class OSStats extends Component {
     state = {
@@ -67,36 +68,30 @@ export default class OSStats extends Component {
 
         return this.state.data ? (
             <div className='OSStats' key={this.state.id}>
-                <h4>{header}</h4>
+                <h3>{header}</h3>
 
-                <Grid className='OSStats' key={this.state.id}>
-                    <Grid.Row columns={3}>
-                        <Grid.Column>
-                            <AllocationChart
-                                dataMeasurement={true}
-                                free={this.state.data.physFree}
-                                total={this.state.data.physTotal}
-                                label="Physical Memory"
-                            />
-                        </Grid.Column>
-                        <Grid.Column>
-                            <AllocationChart
-                                dataMeasurement={true}
-                                free={this.state.data.swapFree}
-                                total={this.state.data.swapTotal}
-                                label="Swap Memory"
-                            />
-                        </Grid.Column>
-
-                        <Grid.Column>
-                            <AllocationChart
-                                free={this.state.data.fdOpen}
-                                total={this.state.data.fdMax}
-                                label="File Descriptors"
-                            />
-                        </Grid.Column>
-                    </Grid.Row>
-                </Grid>
+                <Card.Group>
+                    <HalinCard header='Physical Memory'>
+                        <AllocationChart
+                            dataMeasurement={true}
+                            free={this.state.data.physFree}
+                            total={this.state.data.physTotal}
+                        />
+                    </HalinCard>
+                    <HalinCard header='Swap Memory'>
+                        <AllocationChart
+                            dataMeasurement={true}
+                            free={this.state.data.swapFree}
+                            total={this.state.data.swapTotal}
+                        />
+                    </HalinCard>
+                    <HalinCard header='File Descriptors'>
+                        <AllocationChart
+                            free={this.state.data.fdOpen}
+                            total={this.state.data.fdMax}
+                        />
+                    </HalinCard>
+                </Card.Group>
             </div>
         ) : <Spinner active={true} />;
     }

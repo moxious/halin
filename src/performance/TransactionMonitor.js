@@ -4,6 +4,7 @@ import uuid from 'uuid';
 import queryLibrary from '../data/queries/query-library';
 import hoc from '../higherOrderComponents';
 import Explainer from '../Explainer';
+import HalinCard from '../common/HalinCard';
 
 class TransactionMonitor extends Component {
     state = {
@@ -35,7 +36,7 @@ class TransactionMonitor extends Component {
     render() {
         const explainer = <Explainer content={this.help()}/>;
         return (
-            <div className="TransactionMonitor">
+            <HalinCard header='Transaction Monitor'>
                 <CypherTimeseries key={this.state.key}
                     node={this.props.node}
                     query={this.state.query} 
@@ -47,7 +48,7 @@ class TransactionMonitor extends Component {
                     displayColumns={this.state.displayColumns}
                     legendOnlyColumns={this.state.legendOnlyColumns}
                 />
-            </div>
+            </HalinCard>
         )
     }
 }

@@ -5,6 +5,7 @@ import DiskUsage from './DiskUsage';
 import PageCache from '../diagnostic/PageCache';
 // import StorageCapacity from '../diagnostic/StorageCapacity';
 import OSStats from './OSStats';
+import { Card } from 'semantic-ui-react';
 import uuid from 'uuid';
 
 class OSPane extends Component {
@@ -12,22 +13,14 @@ class OSPane extends Component {
         const key = uuid.v4();
 
         return (
-            <div className="OSPage">
-                <Grid divided='vertically'>
-                    <Grid.Row columns={1}>
-                        <Grid.Column>
+            <Card.Group className="OSPage">
                             <OSStats 
                                 key={key} 
                                 node={this.props.node} 
                             />
-                        </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={2}>
-                        <Grid.Column>
                             <DiskUsage key={key} node={this.props.node} />
-                        </Grid.Column>
-                    
+
+
                         {/* 
                             TODO
                             The following component is not yet completed or tested because it
@@ -39,14 +32,8 @@ class OSPane extends Component {
                             </Grid.Column> 
                         */}
 
-                        <Grid.Column>
                             <PageCache key={`${key}1`} node={this.props.node} />
-                        </Grid.Column>
-                    </Grid.Row>
-                    <Grid.Row columns={1}>
-                    </Grid.Row>
-                </Grid>  
-            </div>
+            </Card.Group>
         );
     }
 }

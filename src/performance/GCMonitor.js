@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../data/CypherDataTable';
 import queryLibrary from '../data/queries/query-library';
+import HalinCard from '../common/HalinCard';
 
 class GCMonitor extends Component {
     query = queryLibrary.JMX_GARBAGE_COLLECTOR.query;
@@ -8,9 +9,7 @@ class GCMonitor extends Component {
 
     render() {
         return (
-            <div className="GCMonitor">
-                <h3>Last Garbage Collection</h3>
-
+            <HalinCard header='Last Garbage Collection'>
                 <CypherDataTable 
                     node={this.props.node}
                     query={this.query} 
@@ -21,7 +20,7 @@ class GCMonitor extends Component {
                     defaultPageSize={1}
                     displayColumns={this.displayColumns}
                 />
-            </div>
+            </HalinCard>
         )
     }
 }

@@ -1,11 +1,10 @@
-.App {
-  text-align: center;
+body, #root {
+  height: 100%;
 }
 
-.MainBody {
-  /* padding-top: 15px;
-  padding-left: 15px;
-  padding-right: 15px; */
+.App {
+  text-align: center;
+  height: 100%;
 }
 
 .MainBodyError {

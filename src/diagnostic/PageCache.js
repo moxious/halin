@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import CypherDataTable from '../data/CypherDataTable';
 import queryLibrary from '../data/queries/query-library';
 import hoc from '../higherOrderComponents';
+import HalinCard from '../common/HalinCard';
 
 class PageCache extends Component {
     state = {
@@ -12,8 +13,7 @@ class PageCache extends Component {
 
     render() {
         return (
-            <div className='PageCache'>
-                <h3>Page Cache Statistics</h3>
+            <HalinCard header='Page Cache Statistics'>
                 <CypherDataTable 
                     node={this.props.node}
                     query={this.state.query}
@@ -24,7 +24,7 @@ class PageCache extends Component {
                     sortable={false}
                     filterable={false}
                     rate={this.state.rate}/>
-            </div>
+            </HalinCard>
         );
     }
 }

@@ -3,6 +3,7 @@ import CypherTimeseries from '../timeseries/CypherTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/queries/query-library';
 import Explainer from '../Explainer';
+import HalinCard from '../common/HalinCard';
 
 class MemoryMonitor extends Component {
     state = {
@@ -35,7 +36,7 @@ class MemoryMonitor extends Component {
         const explainer = <Explainer content={this.help()} />;
 
         return (
-            <div className="MemoryMonitor">
+            <HalinCard header='Memory Monitor'>
                 <CypherTimeseries key={this.state.key}
                     node={this.props.node}
                     explainer={explainer}
@@ -45,7 +46,7 @@ class MemoryMonitor extends Component {
                     startingEnabled={[this.state.displayColumns[1]]}
                     displayColumns={this.state.displayColumns}
                 />
-            </div>
+            </HalinCard>
         )
     }
 }
