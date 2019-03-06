@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../data/CypherDataTable';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 import hoc from '../higherOrderComponents';
 
 class PageCache extends Component {
@@ -9,15 +9,6 @@ class PageCache extends Component {
         query: queryLibrary.JMX_PAGE_CACHE.query,
         displayColumns: queryLibrary.JMX_PAGE_CACHE.columns,
     };
-
-    constructor(props, context) {
-        super(props, context);
-        this.driver = props.driver || context.driver;
-    }
-
-    componentDidMount() {
-
-    }
 
     render() {
         return (

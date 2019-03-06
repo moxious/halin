@@ -47,11 +47,6 @@ class Neo4jRoles extends Component {
         refresh: 1,
     }
 
-    constructor(props, context) {
-        super(props, context);
-        this.driver = props.driver || context.driver;
-    }
-
     componentWillReceiveProps(props) {
         // If I receive a refresh signal, copy to child
         // which does data polling.  Man I wish there were a better way.

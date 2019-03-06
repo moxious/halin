@@ -6,6 +6,9 @@ import SystemLoad from './SystemLoad';
 import GCMonitor from './GCMonitor';
 import TransactionMonitor from './TransactionMonitor';
 import ActiveQueries from './ActiveQueries';
+// import ActiveTransactions from './ActiveTransactions';
+// import Connections from './Connections';
+// import Tasks from './task/Tasks';
 import StoreFiles from '../diagnostic/StoreFiles';
 import uuid from 'uuid';
 
@@ -18,32 +21,32 @@ class PerformancePane extends Component {
                 <Grid divided='vertically'>
                     <Grid.Row columns={2}>
                         <Grid.Column>
-                            <SystemLoad key={key} node={this.props.node} driver={this.props.driver}/>
+                            <SystemLoad key={key} node={this.props.node} />
                         </Grid.Column>
 
                         <Grid.Column>
-                            <MemoryMonitor key={key} node={this.props.node} driver={this.props.driver}/>
+                            <MemoryMonitor key={key} node={this.props.node} />
                         </Grid.Column>
                     </Grid.Row>
 
                     <Grid.Row columns={2}>
                         <Grid.Column>
-                            <TransactionMonitor key={key} node={this.props.node} driver={this.props.driver}/>
+                            <TransactionMonitor key={key} node={this.props.node} />
                         </Grid.Column>
                         <Grid.Column>
-                            <GCMonitor key={key} node={this.props.node} driver={this.props.driver}/>
-                        </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={1}>
-                        <Grid.Column>
-                            <ActiveQueries key={key} node={this.props.node} driver={this.props.driver}/>
+                            <GCMonitor key={key} node={this.props.node} />
                         </Grid.Column>
                     </Grid.Row>
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <StoreFiles key={key} node={this.props.node} driver={this.props.driver}/>
+                            <ActiveQueries key={key} node={this.props.node}/>
+                        </Grid.Column>
+                    </Grid.Row>
+
+                    <Grid.Row columns={1}>
+                        <Grid.Column>
+                            <StoreFiles key={key} node={this.props.node} />
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>  

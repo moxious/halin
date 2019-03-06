@@ -21,7 +21,6 @@ class DBSize extends Component {
             <div className="DBSize">
                 <h3>Total Node Count</h3>
                 <CypherTimeseries key={this.state.key}
-                    driver={this.props.driver}
                     node={this.props.node}
                     query={this.state.query} 
                     displayColumns={this.state.displayColumns}

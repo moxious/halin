@@ -1,10 +1,11 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
-import sentry from '../../sentry/index';
+import sentry from '../sentry/index';
 import moment from 'moment';
 import uuid from 'uuid';
 import Ring from 'ringjs';
-import neo4j from '../../driver/index';
+import neo4j from '../driver/index';
+import ql from '../data/queries/query-library';
 
 /**
  * This is a controller for clusters.
@@ -78,7 +79,7 @@ export default class ClusterManager {
      * query.  
      */
     mapQueryAcrossCluster(query, params) {
-        const promises = this.ctx.clusterNodes.map(node => {
+        const promises = this.ctx.members().map(node => {
             // Guarantee that promise resolves.
             // it resolves to an object that indicates success
             // or failure.
@@ -203,15 +204,13 @@ export default class ClusterManager {
         //   (b) role doesn't exist on that node
         //   (c) Underlying association query fails.
         const gatherRoles = (node) => {
-            return node.run('CALL dbms.security.listRolesForUser({username})',
-                { username })
-                .then(results => {
-                    sentry.fine('gather raw', results);
-                    return results;
-                })
+            return node.run(ql.DBMS_SECURITY_USER_ROLES, { username })
                 .then(results => neo4j.unpackResults(results, {
                     required: ['value'],
                 }))
+                // Pluck out only the role name to get to a simple array of strings
+                // rather than array of objects.
+                .then(results => results.map(r => r.value))
                 .then(r => {
                     sentry.fine('gather roles made',r);
                     return r;
@@ -275,7 +274,7 @@ export default class ClusterManager {
                 });
         };
 
-        const allPromises = this.ctx.clusterNodes.map(node => {
+        const allPromises = this.ctx.members().map(node => {
             return gatherRoles(node)
                 .then(rolesHere => determineDifferences(rolesHere, node))
                 .then(roleChanges => applyChanges(roleChanges, node))

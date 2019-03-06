@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import CypherTimeseries from '../timeseries/CypherTimeseries';
 import uuid from 'uuid';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 import Explainer from '../Explainer';
 
 class MemoryMonitor extends Component {
@@ -37,7 +37,6 @@ class MemoryMonitor extends Component {
         return (
             <div className="MemoryMonitor">
                 <CypherTimeseries key={this.state.key}
-                    driver={this.props.driver}
                     node={this.props.node}
                     explainer={explainer}
                     query={this.state.query} 

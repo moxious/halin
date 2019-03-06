@@ -5,7 +5,7 @@ import _ from 'lodash';
 import genericPool from 'generic-pool';
 import sentry from '../sentry';
 
-// As of Neo4j driver 1.7, no longer need to separately import
+// As of Neo4j driver 1.7, no longer     need to separately import
 // the minified web driver.
 // let driverObj;
 // driverObj = neo4j.v1;
@@ -21,16 +21,48 @@ const handleNeo4jInt = val => {
     return neo4j.integer.inSafeRange(val) ? val.toNumber() : neo4j.integer.toString(val);
 };
 
-const getOrDefault = (rec, field, defaultValue=null) => {
+const getValueFromRecord = (record, toExtract, required=false, defaultValue=null) => {
+    /**
+     * toExtract may either be a string "fooField" or a row object with an accessor, like:
+     * { Header: "Whatever", accessor: 'fooField', absentValue: [] }
+     */
+    let field;
+    if (typeof toExtract === 'string') {
+        field = toExtract;
+    } else {
+        field = toExtract.accessor;
+    }
+
+    if (!field) {
+        throw new Error(`Cannot determine which field to extract from record given ${JSON.stringify(toExtract)}`);
+    }
+
+    const dotted = field.indexOf('.') > -1;
+    const resultField = dotted ? field.substring(0, field.indexOf('.')) : field;
+    const restPath = dotted ? field.substring(field.indexOf('.') + 1) : null;
+
     try {
-        return rec.get(field);
-    } catch (e) { return defaultValue; }
+        const value = record.get(resultField);
+
+        if (restPath) {
+            return _.get(value, restPath);
+        }
+
+        return value;
+    } catch (e) {
+        if (required) { throw e; }
+
+        // If the record specifies an absentValue, return that, otherwise
+        // the default
+        return _.get(toExtract, 'absentValue') || defaultValue;
+    }
 };
 
 /**
  * Converts a Neo4j result set into an array of vanilla javascript objects.
  * Converts all numbers to either a number (if in range) or a string on a best effort
- * basis.
+ * basis.  Permits the use of dot notation, so that you can extract a sub-field of
+ * a map.
  * 
  * If a property is optional and it's missing, you will get null back.  If a property
  * is required and it's missing, you get an error thrown.
@@ -54,12 +86,12 @@ const unpackResults = (results, schema) => results.records.map((record, index) =
 
     (schema.required || []).forEach(requiredField => {
         // Throws error if missing
-        const value = record.get(requiredField);
+        const value = getValueFromRecord(record, requiredField, true);
         unpacked[requiredField] = isNeo4jInt(value) ? handleNeo4jInt(value) : value;
     });
 
     (schema.optional || []).forEach(optionalField => {
-        const value = getOrDefault(record, optionalField);
+        const value = getValueFromRecord(record, optionalField, false);
         unpacked[optionalField] = isNeo4jInt(value) ? handleNeo4jInt(value) : value;
     });
 

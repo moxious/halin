@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import Explainer from '../Explainer';
 import DBStats from '../dbstats/DBStats';
 import sentry from '../sentry';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
+import HalinQuery from '../data/queries/HalinQuery';
 import ReactTable from 'react-table';
 import Spinner from '../Spinner';
 import QueryExecutionPlan from './QueryExecutionPlan';
@@ -131,7 +132,7 @@ export default class SampleQueries extends Component {
 
     start() {
         if (!this.collector) {
-            this.collector = new DBStats(this.props.driver);
+            this.collector = new DBStats(this.props.node);
         }
 
         this.setState({
@@ -198,7 +199,7 @@ export default class SampleQueries extends Component {
         const filterData = () => (
             this.state.includeHalinQueries ? 
             this.state.data : 
-            this.state.data.filter(i => !queryLibrary.isHalinQuery(i.query)));
+            this.state.data.filter(i => !HalinQuery.isDisclaimed(i.query)));
 
         return (
             <ReactTable

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../data/CypherDataTable';
 import Explainer from '../Explainer';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 import { Message } from 'semantic-ui-react';
 import hoc from '../higherOrderComponents';
 
@@ -13,11 +13,6 @@ class StorageCapacity extends Component {
         query: queryLibrary.APOC_STORAGE_METRIC.query,
         displayColumns: queryLibrary.APOC_STORAGE_METRIC.columns,
     };
-
-    constructor(props, context) {
-        super(props, context);
-        this.driver = props.driver || context.driver;
-    }
 
     help() {
         return (

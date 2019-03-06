@@ -92,31 +92,13 @@ class CypherDataTable extends Component {
     sampleData() {
         return this.props.node.run(this.query, this.parameters)
             .then(results => {
-                const items = results.records.map(row => {
-                    const item = {};
-
-                    // Loop through all columns with accessors to populate their 
-                    // data
-                    this.state.displayColumns.filter(col => col.accessor).forEach(col => {
-                        try {
-                            const val = row.get(col.accessor);
-                            item[col.accessor] = neo4j.isInt(val) ? neo4j.integer.toNumber(val) : val;
-                        } catch (e) {
-                            const str = `${e}`;
-                            if (str.indexOf('record has no field with key')) {
-                                // This is survivable; in community some queries don't
-                                // return all fields.
-                                if (!col.absentValue) { 
-                                    sentry.warn(str);
-                                }
-                                item[col.accessor] = col.absentValue || null;
-                            } else {
-                                throw e;
-                            }
-                        }
-                    });
-
-                    return item;
+                // Unpack results, but only for columns with an accessor
+                // (as extra virtual columns may be defined)
+                // All values are optional to prevent errors when a field might exist between
+                // different versions of Neo4j.
+                const items = neo4j.unpackResults(results, {
+                    required: [],
+                    optional: this.state.displayColumns.map(col => col.accessor).filter(a => a),
                 });
 
                 if (this.mounted) {
@@ -167,7 +149,7 @@ class CypherDataTable extends Component {
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <ReactTable
+                            <ReactTable className='-striped -highlight'
                                 // By default, filter only catches data if the value STARTS WITH
                                 // the entered string.  This makes it less picky.
                                 defaultFilterMethod={(filter, row, column) => {

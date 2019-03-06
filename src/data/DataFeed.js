@@ -1,7 +1,7 @@
 import Ring from 'ringjs';
 import { TimeEvent, TimeRange } from 'pondjs';
 import _ from 'lodash';
-import queryLibrary from './query-library';
+import queryLibrary from './queries/query-library';
 import sentry from '../sentry/index';
 import Metric from './Metric';
 import neo4j from '../driver';
@@ -11,7 +11,7 @@ const actualNumber = i => !_.isNaN(i) && !(i === Infinity) && !(i === -Infinity)
 
 /**
  * DataFeed is an abstraction that polls a cypher query
- * against a ClusterNode in a configurable way, and can happen
+ * against a ClusterMember in a configurable way, and can happen
  * in the background independent of a component being 
  * mounted or not mounted.  It accumulates data in a sliding window through time.
  * 

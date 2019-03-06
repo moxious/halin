@@ -48,7 +48,7 @@ const buildFakeContext = (data) => {
     return fakeContext;
 };
 
-export default class Neo4jDesktopStandIn extends Component {
+class Neo4jDesktopStandIn extends Component {
     state = {
         username: null,
         password: null,
@@ -91,4 +91,8 @@ export default class Neo4jDesktopStandIn extends Component {
             />
         )
     }
-}
+};
+
+Neo4jDesktopStandIn.buildFakeContext = buildFakeContext;
+
+export default Neo4jDesktopStandIn;

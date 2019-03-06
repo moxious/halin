@@ -18,7 +18,7 @@ class DiagnosticPane extends Component {
                 <Grid divided='vertically'>
                     {/* <Grid.Row columns={1}>
                         <Grid.Column>
-                            <Overview key={this.state.key} node={this.props.node} driver={this.props.driver}/>
+                            <Overview key={this.state.key} node={this.props.node}/>
                         </Grid.Column>
                     </Grid.Row> */}
 
@@ -41,7 +41,6 @@ class DiagnosticPane extends Component {
                             <GeneratePackage 
                                 key={this.state.key} 
                                 node={this.props.node} 
-                                driver={this.props.driver}
                             />
                         </Grid.Column>
                     </Grid.Row>
@@ -55,7 +54,7 @@ class DiagnosticPane extends Component {
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <Ping key={this.state.key} node={this.props.node} driver={this.props.driver}/>
+                            <Ping key={this.state.key} node={this.props.node} />
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>  

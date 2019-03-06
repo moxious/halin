@@ -5,7 +5,7 @@ import hoc from '../../higherOrderComponents';
 import _ from 'lodash';
 import Spinner from '../../Spinner';
 import sentry from '../../sentry';
-import queryLibrary from '../../data/query-library';
+import queryLibrary from '../../data/queries/query-library';
 import { Grid, Dropdown, Message } from 'semantic-ui-react';
 import unflatten from './unflatten';
 import MetricsChart from './MetricsChart';

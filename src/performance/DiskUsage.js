@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import CypherTimeseries from '../timeseries/CypherTimeseries';
 import uuid from 'uuid';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 
 class DiskUsage extends Component {
     state = {
@@ -15,7 +15,6 @@ class DiskUsage extends Component {
         return (
             <div className="DiskUsage">
                 <CypherTimeseries key={this.state.key}
-                    driver={this.props.driver}
                     node={this.props.node}
                     query={q.query}
                     width={this.state.width}

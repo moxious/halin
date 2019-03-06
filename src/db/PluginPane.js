@@ -11,7 +11,8 @@ export default class PluginPane extends Component {
         return (
             <div className='PluginPane'>
                 <CypherSurface
-                    key={this.state.key} node={this.props.node} driver={this.props.driver}
+                    key={this.state.key} 
+                    node={this.props.node}
                 />
             </div>
         )

@@ -53,8 +53,7 @@ class PermissionsPane extends Component {
                 <Grid divided='vertically'>
                     { 
                         (window.halinContext && 
-                         window.halinContext.clusterNodes && 
-                         window.halinContext.clusterNodes.length > 1) ? 
+                         window.halinContext.members().length > 1) ? 
                             <Grid.Row columns={1}>
                                 <Grid.Column><PermsWarning/></Grid.Column>
                             </Grid.Row>
@@ -65,14 +64,12 @@ class PermissionsPane extends Component {
                         <Grid.Column>
                             <NewUserForm
                                 key={this.state.key}
-                                driver={this.props.driver}
                                 node={this.props.node}
                                 onUserCreate={username => this.event('user', username)} />
                         </Grid.Column>
                         { enterprise ? <Grid.Column>
                             <NewRoleForm
                                 key={this.state.key}
-                                driver={this.props.driver}
                                 node={this.props.node}
                                 onRoleCreate={role => this.event('role', role)} />
                         </Grid.Column> : '' }
@@ -82,14 +79,12 @@ class PermissionsPane extends Component {
                         <Grid.Column>
                             <Neo4jUsers
                                 key={this.state.key}
-                                driver={this.props.driver}
                                 node={this.props.node}
                                 refresh={this.state.childRefresh} />
                         </Grid.Column>
                         { enterprise ? <Grid.Column>
                             <Neo4jRoles
                                 key={this.state.key}
-                                driver={this.props.driver}
                                 node={this.props.node}
                                 refresh={this.state.childRefresh} />
                         </Grid.Column> : '' }

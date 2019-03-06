@@ -14,7 +14,6 @@ class SampleQueryPane extends Component {
                 <SampleQueries
                     key={this.state.key} 
                     node={this.props.node} 
-                    driver={this.props.driver}
                 />
             </div>
         )

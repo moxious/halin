@@ -4,6 +4,24 @@ import { LineChart } from 'react-d3-components';
 import datautil from '../data/util';
 import NodeLabel from '../NodeLabel';
 import _ from 'lodash';
+import queryLibrary from '../data/queries/query-library';
+
+const simpleLabel = (key, value) => 
+    <Label>
+        {key}
+        <Label.Detail>{value}</Label.Detail>
+    </Label>;
+
+const getDescription = label => {
+    const q = queryLibrary[label];
+    const defaultDescription = 'No description of this query is available';
+
+    if(q) {
+        return q.getDescription() || defaultDescription;
+    }
+
+    return defaultDescription;
+};
 
 export default class DataFeedStats extends Component {
     state = { activeIndex: null };
@@ -71,13 +89,13 @@ export default class DataFeedStats extends Component {
                             <Accordion.Content
                                 active={this.state.activeIndex === idx}
                                 index={idx}>
-                                <ul style={style}>
-                                    <li>Listeners: {stats.listeners}</li>
-                                    <li>Augmentation Functions: {stats.augFns}</li>
-                                    <li>Aliases: {stats.aliases}</li>
-                                    <li>Timings: {stats.timings.map(i => `${i}`).join(', ')}</li>
-                                    <li>Packets: {stats.packets}</li>
-                                </ul>
+
+                                <p>{ getDescription(stats.label) }</p>
+
+                                { simpleLabel('Listeners', stats.listeners) }
+                                { simpleLabel('Augmentation Functions', stats.augFns) }
+                                { simpleLabel('Aliases', stats.aliases) }
+                                { simpleLabel('Packets', stats.packets) }
 
                                 <h5>Response Timings</h5>
 

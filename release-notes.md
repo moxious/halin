@@ -1,5 +1,13 @@
 # Halin Release Notes
 
+## 0.8.3
+
+- Minor improvements to the settings pane
+- Fixed somewhat exotic bug that could cause problems removing roles from users under
+certain versions of Neo4j
+- Introduced a number of unit tests & testing approach
+- Documented almost all queries Halin executes
+
 ## 0.8.2
 
 - Implemented session pooling to prevent extra network round-trips to Neo4j,

@@ -28,7 +28,7 @@ export default class Ping extends Component {
         if (!this.mounted) { return false; }
         const ctx = window.halinContext;
 
-        const promises = ctx.clusterNodes.map(node => ctx.ping(node));
+        const promises = ctx.members().map(node => ctx.ping(node));
 
         if (this.state.pingResults) {
             this.state.allResults.push(this.state.pingResults);
@@ -69,8 +69,8 @@ export default class Ping extends Component {
         let message = status.formatStatusMessage(this);
 
         let rows = [
-            { header: 'Machine', show: true, render: r => <NodeLabel node={r.clusterNode} /> },
-            { header: 'Role', show: true, render: r => r.clusterNode.role },
+            { header: 'Machine', show: true, render: r => <NodeLabel node={r.clusterMember} /> },
+            { header: 'Role', show: true, render: r => r.clusterMember.role },
             { header: 'Result (ms)', show: true, render: r => r.elapsedMs },
             { header: 'Status', show: true, render: r => <SignalMeter strength={datautil.signalStrengthFromPing(r.elapsedMs, r.err) } /> },
             { 

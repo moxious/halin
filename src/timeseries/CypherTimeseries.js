@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import 'semantic-ui-css/semantic.min.css';
 import { Grid, Label } from 'semantic-ui-react';
-import * as PropTypes from "prop-types";
 import {
     TimeSeries,
     TimeRange,
@@ -42,7 +41,6 @@ class CypherTimeseries extends Component {
 
     constructor(props, context) {
         super(props, context);
-        this.driver = props.driver || context.driver;
         this.id = uuid.v4();
 
         if (!props.query) {
@@ -399,9 +397,5 @@ class CypherTimeseries extends Component {
         ) : <Spinner active={true}/>;
     }
 }
-
-CypherTimeseries.contextTypes = {
-    driver: PropTypes.object,
-};
 
 export default CypherTimeseries;

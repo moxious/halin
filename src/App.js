@@ -13,7 +13,7 @@ import SampleQueryPane from './db/SampleQueryPane';
 // import MetricsPane from './db/metrics/MetricsPane';
 import PermissionsPane from './configuration/PermissionsPane';
 import ClusterOverviewPane from './overview/ClusterOverviewPane';
-import ClusterNodeTabHeader from './ClusterNodeTabHeader';
+import ClusterMemberTabHeader from './ClusterMemberTabHeader';
 import { Tab, Button } from 'semantic-ui-react'
 import DiagnosticPane from './diagnostic/DiagnosticPane';
 import Spinner from './Spinner';
@@ -43,27 +43,27 @@ class Halin extends Component {
       {
         menuItem: 'Performance',
         render: () => this.paneWrapper(
-          <PerformancePane key={key} node={node} driver={driver} />),
+          <PerformancePane key={key} node={node}/>),
       },
       {
         menuItem: 'Configuration',
         render: () => this.paneWrapper(
-          <Neo4jConfiguration key={key} node={node} driver={driver} />),
+          <Neo4jConfiguration key={key} node={node} />),
       },
       {
         menuItem: 'OS',
         render: () => this.paneWrapper(
-          <OSPane key={key} node={node} driver={driver} />),
+          <OSPane key={key} node={node}/>),
       },
       {
         menuItem: 'Plugins',
         render: () => this.paneWrapper(
-          <PluginPane key={key} node={node} driver={driver} />),
+          <PluginPane key={key} node={node}/>),
       },
       {
         menuItem: 'Query Performance',
         render: () => this.paneWrapper(
-          <SampleQueryPane key={key} node={node} driver={driver} />),
+          <SampleQueryPane key={key} node={node}/>),
       },
 
       // TODO
@@ -72,13 +72,13 @@ class Halin extends Component {
       // {
       //   menuItem: 'Metrics',
       //   render: () => this.paneWrapper(
-      //     <MetricsPane key={key} node={node} driver={driver} />
+      //     <MetricsPane key={key} node={node}/>
       //   ),
       // },
       // {
       //   menuItem: 'Logs',
       //   render: () => this.paneWrapper(
-      //     <LogsPane key={key} node={node} driver={driver} />),
+      //     <LogsPane key={key} node={node}/>),
       // }
     ]),
   };
@@ -113,10 +113,10 @@ class Halin extends Component {
   }
 
   renderCluster() {
-    const nodePanes = this.state.halin.clusterNodes.map((node, key) => ({
+    const nodePanes = this.state.halin.clusterMembers.map((node, key) => ({
       menuItem: {
         key: `node-${key}`,
-        content: <ClusterNodeTabHeader key={key} node={node}/>,
+        content: <ClusterMemberTabHeader key={key} node={node}/>,
       },
       render: () =>
         this.paneWrapper(
@@ -127,11 +127,9 @@ class Halin extends Component {
     const userMgmtPane = {
       menuItem: { key: 'User Management', content: 'User Management', icon: 'user' },
       render: () => {
-        const node = this.state.halin.clusterNodes[0];
-        const driver = this.state.halin.driverFor(node.getBoltAddress());
-
+        const clusterMember = this.state.halin.members()[0];
         return this.paneWrapper(
-          <PermissionsPane node={node} driver={driver} />,
+          <PermissionsPane node={clusterMember}/>,
           'primary'
         );
       },
@@ -140,13 +138,10 @@ class Halin extends Component {
     const diagnosticPane = {
       menuItem: { key: 'Diagnostics', content: 'Diagnostics', icon: 'cogs' },
       render: () => {
-        const node = this.state.halin.clusterNodes[0];
-        const driver = this.state.halin.driverFor(node.getBoltAddress());
-
+        const clusterMember = this.state.halin.clusterMembers[0];
         return this.paneWrapper(
           <DiagnosticPane
-            node={node}
-            driver={driver} />,
+            node={clusterMember} />,
           'primary'
         );
       },

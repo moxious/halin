@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import CypherTimeseries from '../timeseries/CypherTimeseries';
 import uuid from 'uuid';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 import Explainer from '../Explainer';
 
 class SystemLoad extends Component {
@@ -32,7 +32,6 @@ class SystemLoad extends Component {
         return (
             <div className="SystemLoad">
                 <CypherTimeseries key={this.state.key}
-                    driver={this.props.driver}
                     explainer={explainer}
                     node={this.props.node}
                     query={this.state.query}

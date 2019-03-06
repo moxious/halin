@@ -18,10 +18,10 @@ class ClusterView extends Component {
     };
 
     componentDidMount() {
-        const clusterNodes = window.halinContext.clusterNodes.map(clusterNode => ({
-            id: clusterNode.id,
-            label: clusterNode.getLabel(),
-            clusterNode,
+        const clusterMembers = window.halinContext.members().map(clusterMember => ({
+            id: clusterMember.id,
+            label: clusterMember.getLabel(),
+            clusterMember,
         }));
 
         const overall = {
@@ -29,13 +29,13 @@ class ClusterView extends Component {
             label: 'Neo4j Cluster',
         };
         
-        const roles = _.uniq(clusterNodes.map(n => n.clusterNode.role)).map(role => ({ id: `role-${role}`, label: role }));
+        const roles = _.uniq(clusterMembers.map(n => n.clusterMember.role)).map(role => ({ id: `role-${role}`, label: role }));
 
         const edges = roles.map(roleNode => ({ from: '0', to: roleNode.id }))
-            .concat(clusterNodes.map(n => ({ from: `role-${n.clusterNode.role}`, to: n.id })));
+            .concat(clusterMembers.map(n => ({ from: `role-${n.clusterMember.role}`, to: n.id })));
 
         const graph = { 
-            nodes: [overall].concat(clusterNodes).concat(roles), 
+            nodes: [overall].concat(clusterMembers).concat(roles), 
             edges,
         };
         this.setState({ graph });

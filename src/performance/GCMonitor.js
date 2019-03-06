@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../data/CypherDataTable';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 
 class GCMonitor extends Component {
     query = queryLibrary.JMX_GARBAGE_COLLECTOR.query;

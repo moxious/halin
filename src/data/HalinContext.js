@@ -1,11 +1,11 @@
 import nd from '../neo4jDesktop/index';
-import ClusterNode from '../data/ClusterNode';
+import ClusterMember from '../cluster/ClusterMember';
 import DataFeed from '../data/DataFeed';
 import _ from 'lodash';
 import Promise from 'bluebird';
 import uuid from 'uuid';
-import ClusterManager from './cluster/ClusterManager';
-import queryLibrary from '../data/query-library';
+import ClusterManager from '../cluster/ClusterManager';
+import queryLibrary from '../data/queries/query-library';
 import sentry from '../sentry/index';
 import neo4j from '../driver';
 import neo4jErrors from '../driver/errors';
@@ -25,12 +25,17 @@ export default class HalinContext {
         this.drivers = {};
         this.dataFeeds = {};
         this.pollRate = 1000;
+        this.clusterMembers = null;
         this.driverOptions = {
             connectionTimeout: 10000,
             trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
         };
         this.debug = false;
         this.mgr = new ClusterManager(this);
+    }
+
+    members() {
+        return this.clusterMembers;
     }
 
     getPollRate() {
@@ -44,8 +49,8 @@ export default class HalinContext {
         return this.mgr;
     }
 
-    getFeedsFor(clusterNode) {
-        return _.values(this.dataFeeds).filter(df => df.node === clusterNode);
+    getFeedsFor(clusterMember) {
+        return _.values(this.dataFeeds).filter(df => df.node === clusterMember);
     }
 
     getDataFeed(feedOptions) {
@@ -85,8 +90,8 @@ export default class HalinContext {
     shutdown() {
         sentry.info('Shutting down halin context');
         _.values(this.dataFeeds).map(df => df.stop());
-        Promise.all(this.clusterNodes.map(node => node.shutdown()))
-            .catch(err => sentry.reportError(err, 'Failure to shut down clusterNodes', err));
+        Promise.all(this.clusterMembers.map(node => node.shutdown()))
+            .catch(err => sentry.reportError(err, 'Failure to shut down cluster members', err));
         _.values(this.drivers).map(driver => driver.close());
         this.getClusterManager().addEvent({
             type: 'halin',
@@ -100,7 +105,7 @@ export default class HalinContext {
      */
     isCluster() {
         // Must have more than one node
-        return this.clusterNodes && this.clusterNodes.length > 1;
+        return this.clusterMembers && this.clusterMembers.length > 1;
     }
 
     /**
@@ -108,7 +113,7 @@ export default class HalinContext {
      * false otherwise.
      */
     isEnterprise() {
-        return this.clusterNodes[0].isEnterprise();
+        return this.clusterMembers[0].isEnterprise();
     }
 
     isCommunity() {
@@ -116,57 +121,61 @@ export default class HalinContext {
     }
 
     supportsAPOC() {
-        return this.clusterNodes[0].supportsAPOC();
+        return this.clusterMembers[0].supportsAPOC();
     }
 
     supportsLogStreaming() {
-        return this.clusterNodes[0].supportsLogStreaming();
+        return this.clusterMembers[0].supportsLogStreaming();
     }
 
     supportsMetrics() {
-        return this.clusterNodes[0].metrics && this.clusterNodes[0].metrics.length > 0;
+        return this.clusterMembers[0].metrics && this.clusterMembers[0].metrics.length > 0;
     }
 
     supportsDBStats() {
-        return this.clusterNodes[0].supportsDBStats();
+        return this.clusterMembers[0].supportsDBStats();
     }
 
     /**
      * Returns true if the context provides for native auth management, false otherwise.
      */
     supportsNativeAuth() {
-        return this.clusterNodes[0].supportsNativeAuth();
+        return this.clusterMembers[0].supportsNativeAuth();
     }
 
     /**
      * Returns true if the context supports authorization overall.
      */
     supportsAuth() {
-        return this.clusterNodes[0].supportsAuth();
+        return this.clusterMembers[0].supportsAuth();
+    }
+
+    getVersion() {
+        return this.members()[0].getVersion();
     }
 
     /**
      * Starts a slow data feed for the node's cluster role.  In this way, if the leader
      * changes, we can detect it.
      */
-    watchForClusterRoleChange(clusterNode) {
+    watchForClusterRoleChange(clusterMember) {
         const roleFeed = this.getDataFeed(_.merge({
-            node: clusterNode,
+            node: clusterMember,
         }, queryLibrary.CLUSTER_ROLE));
 
-        const addr = clusterNode.getBoltAddress();
+        const addr = clusterMember.getBoltAddress();
         const onRoleData = (newData, dataFeed) => {
             const newRole = newData.data[0].role;
 
             // Something in cluster topology just changed...
-            if (newRole !== clusterNode.role) {
-                const oldRole = clusterNode.role;
-                clusterNode.role = newRole;
+            if (newRole !== clusterMember.role) {
+                const oldRole = clusterMember.role;
+                clusterMember.role = newRole;
 
                 this.getClusterManager().addEvent({
                     message: `Role change from ${oldRole} to ${newRole}`,
                     type: 'rolechange',
-                    address: clusterNode.getBoltAddress(),
+                    address: clusterMember.getBoltAddress(),
                     payload: {
                         old: oldRole,
                         new: newRole,
@@ -191,21 +200,16 @@ export default class HalinContext {
     checkForCluster(activeDb) {
         const session = this.base.driver.session();
         // sentry.debug('activeDb', activeDb);
-        return session.run(queryLibrary.disclaim(`
-            CALL dbms.cluster.overview()
-            YIELD id, addresses, role, groups, database
-            RETURN id, addresses, role, groups, database
-            `, {}))
+        return session.run(queryLibrary.CLUSTER_OVERVIEW.query)
             .then(results => {
-                console.log('CLUSTER NODE', results.records.map(r => r.toObject()));
-                this.clusterNodes = results.records.map(rec => new ClusterNode(rec));
+                this.clusterMembers = results.records.map(rec => new ClusterMember(rec));
 
                 // Note that in the case of community or mode=SINGLE, because the cluster overview fails,
                 // this will never take place.  Watching for cluster role changes doesn't apply in those cases.
-                return this.clusterNodes.map(clusterNode => {
-                    const driver = this.driverFor(clusterNode.getBoltAddress());
-                    clusterNode.setDriver(driver);
-                    return this.watchForClusterRoleChange(clusterNode);
+                return this.clusterMembers.map(clusterMember => {
+                    const driver = this.driverFor(clusterMember.getBoltAddress());
+                    clusterMember.setDriver(driver);
+                    return this.watchForClusterRoleChange(clusterMember);
                 });
             })
             .catch(err => {
@@ -225,18 +229,18 @@ export default class HalinContext {
                     const get = key => rec[key];
                     rec.get = get;
 
-                    const singleton = new ClusterNode(rec);
+                    const singleton = new ClusterMember(rec);
                     const driver = this.driverFor(singleton.getBoltAddress());
                     singleton.setDriver(driver);
-                    this.clusterNodes = [singleton];
+                    this.clusterMembers = [singleton];
                 } else {
                     sentry.reportError(err);
                     throw err;
                 }
             })
-            .then(() => Promise.all(this.clusterNodes.map(cn => cn.checkComponents())))
+            .then(() => Promise.all(this.clusterMembers.map(cn => cn.checkComponents())))
             .then(() => 
-                Promise.all(this.clusterNodes.map(cn => this.ping(cn))))
+                Promise.all(this.clusterMembers.map(cn => this.ping(cn))))
             .finally(() => session.close());
     }
 
@@ -403,19 +407,19 @@ export default class HalinContext {
      * Ping a cluster node with a trivial query, just to keep connections
      * alive and verify it's still listening.  This forces driver creation
      * for a node if it hasn't already happened.
-     * @param {ClusterNode} the node to ping
+     * @param {ClusterMember} the node to ping
      * @returns {Promise} that resolves to an object with an elapsedMs field
      * or an err field populated.
      */
-    ping(clusterNode) {
-        const addr = clusterNode.getBoltAddress();
+    ping(clusterMember) {
+        const addr = clusterMember.getBoltAddress();
 
         // Gets or creates a ping data feed for this cluster node.
         // Data feed keeps running so that we can deliver the data to the user,
         // but also have a feed of data to know if the cord is getting unplugged
         // as the app runs.
         const pingFeed = this.getDataFeed(_.merge({
-            node: clusterNode,
+            node: clusterMember,
         }, queryLibrary.PING));
 
         // Caller needs a promise.  The feed is already running, so 
@@ -424,7 +428,7 @@ export default class HalinContext {
         return new Promise((resolve, reject) => {
             const onPingData = (newData, dataFeed) => {
                 return resolve({
-                    clusterNode,
+                    clusterMember: clusterMember,
                     elapsedMs: _.get(newData, 'data[0]_sampleTime'),
                     newData,
                     err: null,

@@ -4,8 +4,9 @@ import math from 'mathjs';
 import Ring from 'ringjs';
 import featureProbes from '../feature/probes';
 import neo4j from '../driver/index';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 import sentry from '../sentry';
+import HalinQuery from '../data/queries/HalinQuery';
 
 const MAX_OBSERVATIONS = 500;
 
@@ -16,7 +17,7 @@ const MAX_OBSERVATIONS = 500;
  *  - Inspect the node easily to determine what features it supports
  *  - Gather performance data about how responsive it is
  */
-export default class ClusterNode {
+export default class ClusterMember {
     /**
      * Input is a record that comes back from dbms.cluster.overview()
      */
@@ -162,9 +163,9 @@ export default class ClusterNode {
             type: t,
         }));
 
-        const functionsPromise = this.run('CALL dbms.functions()', {})
+        const functionsPromise = this.run(queryLibrary.DBMS_FUNCTIONS)
             .then(results => extractRecordsWithType(results, 'function'));
-        const procsPromise = this.run('CALL dbms.procedures()', {})
+        const procsPromise = this.run(queryLibrary.DBMS_PROCEDURES)
             .then(results => extractRecordsWithType(results, 'procedure'));
 
         return Promise.all([functionsPromise, procsPromise])
@@ -196,7 +197,7 @@ export default class ClusterNode {
         if (_.isNil(_.get(this.dbms, 'versions'))) {
             return { major: 'unknown', minor: 'unknown', patch: 'unknown' };
         } else if (this.dbms.versions.length > 1) {
-            sentry.warn("This ClusterNode has more than one version installed; only using the first");
+            sentry.warn("This ClusterMember has more than one version installed; only using the first");
         }
 
         const v = this.dbms.versions[0];
@@ -210,7 +211,7 @@ export default class ClusterNode {
 
     checkComponents() {
         if (!this.driver) {
-            throw new Error('ClusterNode has no driver');
+            throw new Error('ClusterMember has no driver');
         }
 
         // Probes get individual pieces of information then assign them into our structure,
@@ -271,11 +272,13 @@ export default class ClusterNode {
      * This function behaves just like neo4j driver session.run, but manages
      * session creation/closure for you, and gathers metrics about the run so
      * that we can track the cluster node's responsiveness and performance over time.
-     * @param {String} query a cypher query
+     * @param {String | HalinQuery} query a cypher query
      * @param {Object} params parameters to pass to the query.
+     * @returns {Promise} which resolves to a neo4j driver result set
      */
     run(query, params = {}) {
-        if (!this.driver) { throw new Error('ClusterNode has no driver!'); }
+        if (!this.driver) { throw new Error('ClusterMember has no driver!'); }
+        if (!query) { throw new Error('Missing query'); }
 
         let s;
 
@@ -285,15 +288,17 @@ export default class ClusterNode {
                 s = session;
                 // #operability: transaction metadata is disabled because it causes errors
                 // in 3.4.x, and is only available in 3.5.x.
-                let useTXMetadata = false;
+                let transactionConfig = {};
 
                 if (this.dbms.version && this.dbms.version.major >= 3 && this.dbms.version.minor >= 5) {
-                    useTXMetadata = true;
+                    transactionConfig = queryLibrary.queryMetadata;
                 }
 
-                return (useTXMetadata ? 
-                    session.run(query, params, queryLibrary.queryMetadata) : 
-                    session.run(query, params));
+                if (query instanceof HalinQuery) {
+                    return session.run(query.getQuery(), params);
+                }
+                
+                return session.run(query, params, transactionConfig);
             })
             .then(results => {
                 const elapsed = new Date().getTime() - start;
@@ -306,6 +311,10 @@ export default class ClusterNode {
                 // Guarantee same thrown response to outer user.
                 throw err;
             })
-            .finally(() => this.pool.release(s));  // Cleanup session.
+            // Cleanup session.
+            .finally(() => {
+                return this.pool.release(s)
+                    .catch(e => sentry.fine('Pool release error', e));
+            });
     }
-}
+};

@@ -29,11 +29,6 @@ class GeneratePackage extends Component {
         ],
     };
     
-    constructor(props, context) {
-        super(props, context)
-        this.driver = props.driver || context.driver;
-    }
-
     generatePackage = () => {
         this.setState({
             message: status.message('Generating package', 'Please wait while data is gathered'),

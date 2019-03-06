@@ -9,7 +9,7 @@ import {
 } from 'pondjs';
 import uuid from 'uuid';
 import Spinner from '../Spinner';
-import queryLibrary from '../data/query-library';
+import queryLibrary from '../data/queries/query-library';
 import datautil from '../data/util';
 import timewindow from './timewindow';
 import sentry from '../sentry/index';
@@ -73,7 +73,7 @@ class ClusterTimeseries extends Component {
             borderColor: "#F4F4F4"
         };
 
-        this.nodes = window.halinContext.clusterNodes.map(node => node.getBoltAddress());
+        this.nodes = window.halinContext.members().map(node => node.getBoltAddress());
     }
 
     /**
@@ -149,7 +149,7 @@ class ClusterTimeseries extends Component {
 
         const halin = window.halinContext;
 
-        halin.clusterNodes.forEach(node => {
+        halin.members().forEach(node => {
             const addr = node.getBoltAddress();
 
             this.streams[addr] = new Stream();
@@ -200,8 +200,8 @@ class ClusterTimeseries extends Component {
         this.mounted = false;
     }
 
-    onData(clusterNode, newData, dataFeed) {
-        const addr = clusterNode.getBoltAddress();
+    onData(clusterMember, newData, dataFeed) {
+        const addr = clusterMember.getBoltAddress();
 
         if (!this.mounted) { return; }
 
@@ -299,7 +299,7 @@ class ClusterTimeseries extends Component {
             return 'transparent';
         }
 
-        if (window.halinContext.clusterNodes[idx].role === 'LEADER') {
+        if (window.halinContext.members()[idx].role === 'LEADER') {
             return LEADER_COLOR;
         }
 
@@ -397,7 +397,7 @@ class ClusterTimeseries extends Component {
                                 onSelectionChange={this.legendClick}
                                 categories={this.nodes.map((addr, idx) => ({
                                     key: ClusterTimeseries.keyFor(addr, this.state.displayProperty),
-                                    label: window.halinContext.clusterNodes[idx].getLabel(),
+                                    label: window.halinContext.members()[idx].getLabel(),
                                     style: { 
                                         fill: this.chooseColor(idx),
                                     },
