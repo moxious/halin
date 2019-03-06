@@ -1,0 +1,10 @@
+.HalinCard.fluid.card {
+    /* border: 1px solid red; */
+    min-width: 350px;
+}
+
+button.ui.tiny.button {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+    

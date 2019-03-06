@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import 'semantic-ui-css/semantic.min.css';
 import { Grid, Label } from 'semantic-ui-react';
 import {
     TimeSeries,
@@ -13,6 +12,7 @@ import queryLibrary from '../data/queries/query-library';
 import datautil from '../data/util';
 import timewindow from './timewindow';
 import sentry from '../sentry/index';
+import './ClusterTimeseries.css';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 
@@ -58,7 +58,7 @@ class ClusterTimeseries extends Component {
         this.state.displayProperty = props.displayProperty;
         this.query = props.query;
         this.rate = props.rate || 2000;
-        this.width = props.width || 800;
+        this.width = 350;//props.width || 800;
         this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 5;  // 5 min
         this.palette = props.palette || DEFAULT_PALETTE;
         this.showGrid = _.isNil(props.showGrid) ? false : props.showGrid;
@@ -388,7 +388,7 @@ class ClusterTimeseries extends Component {
         }
 
         return (this.mounted && hasData) ? (
-            <div className="CypherTimeseries">
+            <div className="ClusterTimeseries">
                 <Grid>
                     <Grid.Row columns={1}>
                         <Grid.Column>
@@ -406,8 +406,8 @@ class ClusterTimeseries extends Component {
                         </Grid.Column>
                     </Grid.Row>
                     <Grid.Row columns={1}>
-                        <Grid.Column textAlign='left'>
-                            <ChartContainer
+                        <Grid.Column className='ClusterTimeseries' textAlign='left'>
+                            <ChartContainer className='ClusterTimeseries'
                                 showGrid={this.showGrid}
                                 showGridPosition={this.showGridPosition}
                                 width={this.width}

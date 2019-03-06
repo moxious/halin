@@ -5,11 +5,11 @@ import sentry from '../sentry/index';
 import Splash from './Splash';
 
 let privateLocalCreds = {};
-// try {    
-//     privateLocalCreds = require('./cluster-credentials.json');
-// } catch (e) {
-//     sentry.fine('No pre-configured halin credentials were found, but that\'s OK', e);
-// }
+try {    
+    privateLocalCreds = require('./cluster-credentials.json');
+} catch (e) {
+    sentry.fine('No pre-configured halin credentials were found, but that\'s OK', e);
+}
 
 class ConnectForm extends Component {
     state = {

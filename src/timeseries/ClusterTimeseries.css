@@ -1,0 +1,8 @@
+div.ClusterTimeseries {
+    /* border: 1px solid green; */
+}
+
+.left.aligned.column.ClusterTimeseries {
+    padding-left: 0px;
+    padding-right: 0px;
+}

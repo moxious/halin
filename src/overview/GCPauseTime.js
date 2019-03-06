@@ -3,8 +3,7 @@ import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/queries/query-library';
 import _ from 'lodash';
-import Explainer from '../Explainer';
-import { Card } from 'semantic-ui-react';
+import HalinCard from '../common/HalinCard';
 
 class GCPauseTime extends Component {
     state = {
@@ -32,22 +31,14 @@ class GCPauseTime extends Component {
 
     render() {
         return (
-            <Card fluid className="GCPauseTime">
-                <Card.Content>
-                    <Card.Header>
-                        Last GC Pause Time                       
-                    </Card.Header>
-                    <ClusterTimeseries key={this.state.key}
-                        query={this.state.query} 
-                        width={this.state.width}
-                        rate={this.state.rate}
-                        displayProperty='duration'
-                    />
-                </Card.Content>
-                <Card.Content extra>
-                    <Explainer content={this.help()}/>
-                </Card.Content>
-            </Card>            
+            <HalinCard header='Last GC Pause Time' owner={this}>
+                <ClusterTimeseries key={this.state.key}
+                    query={this.state.query} 
+                    width={this.state.width}
+                    rate={this.state.rate}
+                    displayProperty='duration'
+                />            
+            </HalinCard>
         );
     }
 }

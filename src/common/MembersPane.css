@@ -1,0 +1,21 @@
+.MembersPane > div > .ui.grid > .two.wide.column > .ui.fluid.vertical.tabular.menu {
+    padding-right: 0px;
+    padding-left: 0px;
+}
+
+.MembersPane > div > .ui.grid {
+    margin: 0px;
+    padding: 0px;
+}
+
+.MembersPane > div > .ui.grid > .four.wide.column {
+    max-width: 250px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.MembersPane > div > .ui.grid > .stretched.ten.wide.column {
+    width: 100% ;/* !important;*/
+}

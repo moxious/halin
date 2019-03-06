@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import { Tab } from 'semantic-ui-react'
-import ClusterMemberTabHeader from './ClusterMemberTabHeader';
+import ClusterMemberTabHeader from '../ClusterMemberTabHeader';
 import uuid from 'uuid';
-import PerformancePane from './performance/PerformancePane';
-import Neo4jConfiguration from './configuration/Neo4jConfiguration';
-import OSPane from './performance/OSPane';
-import PluginPane from './db/PluginPane';
-import SampleQueryPane from './db/SampleQueryPane';
-
+import PerformancePane from '../performance/PerformancePane';
+import Neo4jConfiguration from '../configuration/Neo4jConfiguration';
+import OSPane from '../performance/OSPane';
+import PluginPane from '../db/PluginPane';
+import SampleQueryPane from '../db/SampleQueryPane';
+import './MembersPane.css';
 
 export default class MembersPane extends Component {
     state = {
@@ -92,7 +92,7 @@ export default class MembersPane extends Component {
     render() {
         return (
             <div className='MembersPane'>
-                <Tab grid={{paneWidth: 14, tabWidth: 2}} menu={{ secondary: true, pointing: true, vertical: true, fluid: true, tabular: true }}
+                <Tab grid={{paneWidth: 10, tabWidth: 4}} menu={{ secondary: true, pointing: true, vertical: true, fluid: true, tabular: true }}
                     panes={this.state.memberPanes} />
             </div>
         );

@@ -4,19 +4,15 @@ import {
   GraphAppBase,
   CONNECTED
 } from 'graph-app-kit/components/GraphAppBase';
-import PermissionsPane from './configuration/PermissionsPane';
-import ClusterOverviewPane from './overview/ClusterOverviewPane';
-import MembersPane from './MembersPane';
-import { Tab, Button } from 'semantic-ui-react'
-import DiagnosticPane from './diagnostic/DiagnosticPane';
+import { Button } from 'semantic-ui-react'
+import MainNav from './common/MainNav';
 import Spinner from './Spinner';
 import status from './status/index';
 import AppFooter from './AppFooter';
 import './App.css';
 
-// CUSTOM-BUILT THEME
-// import 'semantic-ui-css/semantic.min.css';
-import './semantic/dist/semantic.min.css';
+// TBD: theme support here
+import 'semantic-ui-css/semantic.min.css';
 
 import HalinContext from './data/HalinContext';
 import Neo4jDesktopStandIn from './neo4jDesktop/Neo4jDesktopStandIn';
@@ -31,11 +27,6 @@ class Halin extends Component {
     initPromise: null,
     error: null,
   };
-
-  paneWrapper = (obj, cls = 'secondary') =>
-    <Tab.Pane>
-      <div className={`PaneWrapper ${cls}`}>{obj}</div>
-    </Tab.Pane>;
 
   componentDidMount() {
     try {
@@ -59,67 +50,6 @@ class Halin extends Component {
 
   componentWillUnmount() {
     window.halinContext.shutdown();
-  }
-
-  renderCluster() {
-    const userMgmtPane = {
-      menuItem: { key: 'User Management', content: 'User Management', icon: 'user' },
-      render: () => {
-        const clusterMember = this.state.halin.members()[0];
-        return this.paneWrapper(
-          <PermissionsPane node={clusterMember}/>,
-          'primary'
-        );
-      },
-    };
-
-    const diagnosticPane = {
-      menuItem: { key: 'Diagnostics', content: 'Diagnostics', icon: 'cogs' },
-      render: () => {
-        const clusterMember = this.state.halin.clusterMembers[0];
-        return this.paneWrapper(
-          <DiagnosticPane
-            node={clusterMember} />,
-          'primary'
-        );
-      },
-    };
-
-    const overviewPane = {
-      menuItem: {
-        key: 'overview', 
-        content: 'Overview',
-      },
-      render: () => this.paneWrapper(<ClusterOverviewPane />, 'primary'),
-    };
-
-    const membersPane = {
-      menuItem: {
-        key: 'members',
-        content: 'Members',
-      },
-      render: () => this.paneWrapper(<MembersPane />, 'primary'),
-    };
-
-    const allPanesInOrder = [overviewPane, membersPane];
-
-    if (window.halinContext.supportsAuth() && window.halinContext.supportsNativeAuth()) {
-      allPanesInOrder.push(userMgmtPane);
-    }
-    allPanesInOrder.push(diagnosticPane);
-
-    return <Tab 
-        grid={{
-          paneWidth: 14, 
-          tabWidth: 2,
-        }} 
-        menu={{ 
-          fluid: true, 
-          vertical: true, 
-          tabular: true, 
-        }} 
-        panes={allPanesInOrder} 
-      />;
   }
 
   render() {
@@ -160,7 +90,7 @@ class Halin extends Component {
       <div className="App" key="app">
         { this.props.connected ? 
           <div className='MainBody'>
-            {err ? err : this.renderCluster()}
+            <MainNav />
           </div>
           : '' }
 

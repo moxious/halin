@@ -4,9 +4,8 @@ import uuid from 'uuid';
 import { Button } from 'semantic-ui-react';
 import queryLibrary from '../data/queries/query-library';
 import hoc from '../higherOrderComponents';
-import Explainer from '../Explainer';
 import _ from 'lodash';
-import { Card } from 'semantic-ui-react';
+import HalinCard from '../common/HalinCard';
 
 class PageCacheTracking extends Component {
     state = {
@@ -108,31 +107,23 @@ class PageCacheTracking extends Component {
         ];
 
         return (
-            <Card fluid className="PageCacheTracking">
-                <Card.Content>
-                    <Card.Header>
-                        Page Cache                       
-                    </Card.Header>
-                    <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
-                        buttons.map((b,idx) =>
-                            <Button size='tiny'
-                                key={idx}
-                                active={this.state.displayProperty===b.field}
-                                onClick={() => this.toggleView(b.field)}>
-                                { b.label }
-                            </Button>)
-                    }</Button.Group>                    
-                    <ClusterTimeseries key={this.state.key}
-                        width={this.state.width}
-                        feedMaker={this.dataFeedMaker}
-                        onUpdate={this.onUpdate}
-                        displayProperty={this.state.displayProperty}
-                    />
-                </Card.Content>
-                <Card.Content extra>
-                    <Explainer content={this.help()}/>
-                </Card.Content>
-            </Card>
+            <HalinCard header='Page Cache' owner={this}>
+                <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
+                    buttons.map((b,idx) =>
+                        <Button size='tiny'
+                            key={idx}
+                            active={this.state.displayProperty===b.field}
+                            onClick={() => this.toggleView(b.field)}>
+                            { b.label }
+                        </Button>)
+                }</Button.Group>                    
+                <ClusterTimeseries key={this.state.key}
+                    width={this.state.width}
+                    feedMaker={this.dataFeedMaker}
+                    onUpdate={this.onUpdate}
+                    displayProperty={this.state.displayProperty}
+                />
+            </HalinCard>
         );
     }
 }

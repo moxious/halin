@@ -1,0 +1,21 @@
+.ui.fluid.vertical.tabular.menu > a.item > div.item.BigMenuIcon {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+    margin: 0 auto;
+}
+
+.MainNav > .ui.grid > .two.wide.column > .ui.fluid.vertical.tabular.menu {
+    padding-right: 0px;
+    padding-left: 0px;
+}
+
+.MainNav > .ui.grid > .two.wide.column {
+    max-width: 98px;
+}
+
+.MainNav > .ui.grid > .stretched.fourteen.wide.column {
+    padding: 0px;
+    margin: 0px;
+}

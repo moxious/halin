@@ -3,8 +3,7 @@ import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/queries/query-library';
 import _ from 'lodash';
-import Explainer from '../Explainer';
-import { Card } from 'semantic-ui-react';
+import HalinCard from '../common/HalinCard';
 
 class UsedMemory extends Component {
     state = {
@@ -46,22 +45,14 @@ class UsedMemory extends Component {
 
     render() {
         return (
-            <Card fluid className="UsedMemory">
-                <Card.Content>
-                    <Card.Header>
-                        Used Physical Memory                       
-                    </Card.Header>
-                    <ClusterTimeseries key={this.state.key}
-                        width={this.state.width}
-                        feedMaker={this.dataFeedMaker}
-                        onUpdate={this.onUpdate}
-                        displayProperty={this.state.displayProperty}
-                    />
-                </Card.Content>
-                <Card.Content extra>
-                    <Explainer content={this.help()}/>
-                </Card.Content>
-            </Card>
+            <HalinCard header='Used Physical Memory' owner={this}>
+                <ClusterTimeseries key={this.state.key}
+                    width={this.state.width}
+                    feedMaker={this.dataFeedMaker}
+                    onUpdate={this.onUpdate}
+                    displayProperty={this.state.displayProperty}
+                />
+            </HalinCard>
         );
     }
 }

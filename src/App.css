@@ -3,9 +3,9 @@
 }
 
 .MainBody {
-  padding-top: 15px;
+  /* padding-top: 15px;
   padding-left: 15px;
-  padding-right: 15px;
+  padding-right: 15px; */
 }
 
 .MainBodyError {
@@ -16,16 +16,19 @@
   margin-right: auto;
 }
 
-.PaneWrapper {
-  /* padding-top: 15px;
-  padding-left: 15px;
-  padding-right: 15px; */
+.ui.fluid.vertical.tabular.menu {
+  padding-left: 2px;
+  padding-right: 12px;
+  height: 100%;
 }
 
-.PaneWrapper.primary {
-  /* border-left: 1px solid #d4d4d5;
-  border-right: 1px solid #d4d4d5;
-  border-bottom: 1px solid #d4d4d5; */
+.ui.fluid.vertical.tabular.menu > a.active.item {
+  background-color: grey;
+  border: 0px;
+}
+
+.ui.fluid.vertical.tabular.menu > a.active.item, a.item {
+  height: 60px;
 }
 
 .App-logo {

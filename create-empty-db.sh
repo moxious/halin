@@ -4,8 +4,13 @@ docker stop neo4j-empty
 
 PASSWORD=admin
 CWD=`pwd`
-NEO4J=neo4j:3.4.0
+if [ -z "$1" ] ; then
+   NEO4J=neo4j:3.4.0
+else
+   NEO4J=neo4j:$1
+fi
 
+echo Running $NEO4J
 docker run -d --name neo4j-empty --rm \
 	-p 127.0.0.1:7474:7474 \
         -p 127.0.0.1:7687:7687 \
@@ -13,6 +18,7 @@ docker run -d --name neo4j-empty --rm \
         --env=NEO4J_dbms_memory_heap_initial__size=2G \
         --env=NEO4J_dbms_memory_heap_max__size=4G \
 	--env NEO4J_AUTH=neo4j/admin \
+        --env NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
 	-t $NEO4J
 
 echo "When you're ready to run some cypher, execute this:"
