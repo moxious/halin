@@ -47,7 +47,7 @@ jobs:
               echo "Skipping branch build; master will be deployed"
             else
               export SUBDIR="${CIRCLE_BRANCH}-${CIRCLE_SHA1}"
-              export BUCKET=halin
+              export BUCKET=halin.graphapp.io
               export BASE_URL=http://halin.graphapp.io/
               export FINAL_URL="$BASE_URL$SUBDIR/"
               cp package.json package.orig
