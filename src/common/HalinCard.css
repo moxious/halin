@@ -11,3 +11,9 @@ button.ui.tiny.button {
     padding-right: 10px;
 }
     
+.ui.HalinCard.fluid.card > * > div.ui.grid {
+    margin-left: 0px;
+    margin-right: 0px;
+    padding-left: 0px;
+    padding-right: 0px;
+}

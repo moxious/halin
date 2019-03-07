@@ -5,8 +5,9 @@ import './AllocationChart.css';
 import datautil from '../data/util';
 import Spinner from '../Spinner';
 
-const defaultHeight = 200;
-const defaultWidth = 400;
+const outerRadius = 80;
+const defaultHeight = outerRadius * 2 + 5;
+const defaultWidth = outerRadius * 2 + 5;
 
 export default class AllocationChart extends Component {
     state = {
@@ -78,8 +79,12 @@ export default class AllocationChart extends Component {
                         tooltipHtml={this.tooltip}
                         width={this.state.width}
                         height={this.state.height}
+                        outerRadius={outerRadius}
+                        innerRadius={outerRadius/2}
+                        padRadius={0}
                         colorScale={d3.scale.category20()}
-                        margin={{top: 10, bottom: 10, left: 100, right: 100}}
+                        hideLabels={true}
+                        // margin={{top: 10, bottom: 10, left: 100, right: 100}}
                         sort={this.state.sort}
                     /> : <h5>None/Not Enabled</h5>)
                 : <Spinner active={true} /> }

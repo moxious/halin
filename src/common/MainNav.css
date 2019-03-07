@@ -4,6 +4,7 @@
     padding-left: 0px;
     padding-right: 0px;
     margin: 0 auto;
+    color: #ffffff;
 }
 
 .MainNav {
@@ -12,7 +13,7 @@
 
 .MainNav > .ui.grid {
     height: 100%;
-    margin-top: 10px;
+    margin-top: 0px;
     padding-left: 0px;
     padding-right: 0px;
     margin-left: 0px;
@@ -22,10 +23,13 @@
 .MainNav > .ui.grid > .two.wide.column > .ui.fluid.vertical.tabular.menu {
     padding-right: 0px;
     padding-left: 0px;
+    margin-top: -13px;
 }
 
 .MainNav > .ui.grid > .two.wide.column {
     max-width: 98px;
+    padding-left: 0px;
+    padding-right: 0px;
 }
 
 .MainNav > .ui.grid > .stretched.fourteen.wide.column {
@@ -33,10 +37,22 @@
     margin: 0px;
 }
 
+i.big.icon {
+    color: #f5f8fa;
+}
+
+img#homelogo {
+    filter: invert(100%);
+    height: 28px;
+    width: 28px;
+    position: relative;
+    left: 28px;
+    top: 8px;
+}
+
 .MainNav > .ui.grid > .two.wide.column > .ui.fluid.vertical.tabular.menu > a.item {
     height: 60px;
 }
-
 
 .MainNav > .ui.grid > .stretched.fourteen.wide.column > .ui.active.tab {
     border: 0px;

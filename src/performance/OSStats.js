@@ -7,6 +7,7 @@ import AllocationChart from './AllocationChart';
 import datautil from '../data/util';
 import queryLibrary from '../data/queries/query-library';
 import HalinCard from '../common/HalinCard';
+import './OSStats.css';
 
 export default class OSStats extends Component {
     state = {

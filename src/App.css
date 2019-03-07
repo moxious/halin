@@ -1,5 +1,6 @@
 body, #root {
   height: 100%;
+  background-color: #182026;
 }
 
 .App {
@@ -22,12 +23,16 @@ body, #root {
 }
 
 .ui.fluid.vertical.tabular.menu > a.active.item {
-  background-color: grey;
+  background-color: #40444a;
   border: 0px;
 }
 
 .ui.fluid.vertical.tabular.menu > a.active.item, a.item {
   height: 60px;
+}
+
+body > * > .ui.bottom.attached.active.tab {
+  background-color: #30333a;
 }
 
 .App-logo {

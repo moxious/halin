@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
-import { Tab, Popup, Icon } from 'semantic-ui-react';
+import { Tab, Popup, Icon, Image } from 'semantic-ui-react';
 import ClusterOverviewPane from '../overview/ClusterOverviewPane';
 import DiagnosticPane from '../diagnostic/DiagnosticPane';
 import PermissionsPane from '../configuration/PermissionsPane';
 import MembersPane from './MembersPane';
+import AppFooter from '../AppFooter';
 import './MainNav.css';
 
 const tooltipIcon = (txt, icon) =>
@@ -57,7 +58,13 @@ export default class MainNav extends Component {
             menuItem: {
                 key: 'overview',
                 // content: 'Overview',
-                content: tooltipIcon('Overview', 'home'),
+                content: (
+                    <Popup trigger={
+                        <Image id='homelogo'
+                            alt='Halin Monitoring'
+                            className='SplashHalin' 
+                            src='img/halin-icon.png'/>
+                    } content={'Overview'} />),
             },
             render: () => this.paneWrapper(<ClusterOverviewPane />, 'primary'),
         };
@@ -78,17 +85,23 @@ export default class MainNav extends Component {
         }
         allPanesInOrder.push(diagnosticPane);
 
-        return <Tab className='MainNav'
-            grid={{
-                paneWidth: 14,
-                tabWidth: 2,
-            }}
-            menu={{
-                fluid: true,
-                vertical: true,
-                tabular: true,
-            }}
-            panes={allPanesInOrder}
-        />;
+        return (
+            <div className='MainNavWrapper'>
+                <Tab className='MainNav'
+                    grid={{
+                        paneWidth: 14,
+                        tabWidth: 2,
+                    }}
+                    menu={{
+                        fluid: true,
+                        vertical: true,
+                        tabular: true,
+                    }}
+                    panes={allPanesInOrder}
+                />
+
+                <AppFooter />
+            </div>
+        );
     }
 };

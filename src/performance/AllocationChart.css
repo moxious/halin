@@ -1,7 +1,5 @@
-.AllocationChart {
+.AllocationChart > div > svg {
+}
 
-    /* svg {
-        max-width: 300 !important;
-        max-height: 300 !important;
-    } */
+.AllocationChart > div > svg * g.arc {
 }

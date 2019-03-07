@@ -8,7 +8,6 @@ import { Button } from 'semantic-ui-react'
 import MainNav from './common/MainNav';
 import Spinner from './Spinner';
 import status from './status/index';
-import AppFooter from './AppFooter';
 import './App.css';
 
 // TBD: theme support here
@@ -91,8 +90,6 @@ class Halin extends Component {
         { this.props.connected ? 
           <MainNav />
           : '' }
-
-        <AppFooter />
       </div>
     );
   }

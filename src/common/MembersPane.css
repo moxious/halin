@@ -1,4 +1,14 @@
-.MembersPane > div > .ui.grid > .two.wide.column > .ui.fluid.vertical.tabular.menu {
+.MembersPane {
+    background-color: #182026;
+}
+.MembersPane > .ui.grid {
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.MembersPane > .ui.grid > .two.wide.column > .ui.fluid.vertical.tabular.menu {
     padding-right: 0px;
     padding-left: 0px;
 }
@@ -16,22 +26,25 @@
 
 .MembersPane > .ui.grid > .four.wide.column {
     max-width: 250px;
-    padding-top: 0px;
+    margin-top: -13px;
+    padding-top: 0px;    
     padding-bottom: 0px;
     padding-left: 0px;
     padding-right: 0px;
 }
 
-.MembersPane > .ui.grid > .four.wide.column > .ui.fluid.vertical.tabular.menu {
+.MembersPane > .ui.grid > .four.wide.column > .ui.fluid.vertical.secondary.tabular.menu {
     padding-left: 0px;
     padding-right: 0px;
+    width: 200px !important;
 }
 
 .MembersPane > .ui.grid > .four.wide.column > .ui.fluid.vertical.tabular.menu > a.item {
-    /* padding-top: 0px;
-    padding-bottom: 0px;
-    padding-left: 0px;
-    padding-right: 0px; */
+    color: #f5f8fa;
+}
+
+.MembersPane > .ui.grid > .four.wide.column > .ui.fluid.vertical.tabular.menu > a.item > * > span {
+    color: #f5f8fa;
 }
 
 .MembersPane > .ui.grid > .stretched.ten.wide.column {
