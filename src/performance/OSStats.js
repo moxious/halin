@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import Spinner from '../Spinner';
 import _ from 'lodash';
-import { Grid, Card } from 'semantic-ui-react';
+import { Card } from 'semantic-ui-react';
 import uuid from 'uuid';
 import AllocationChart from './AllocationChart';
 import datautil from '../data/util';
