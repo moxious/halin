@@ -13,11 +13,12 @@ class OSPane extends Component {
 
         return (
             <Card.Group className="OSPage">
-                            <OSStats 
-                                key={key} 
-                                node={this.props.node} 
-                            />
-                            <DiskUsage key={key} node={this.props.node} />
+                <OSStats 
+                    key={key+'osstats'} 
+                    node={this.props.node} 
+                />
+
+                <DiskUsage key={key+'disk'} node={this.props.node} />
 
 
                         {/* 
@@ -31,7 +32,7 @@ class OSPane extends Component {
                             </Grid.Column> 
                         */}
 
-                            <PageCache key={`${key}1`} node={this.props.node} />
+                <PageCache key={`${key}pagecache`} node={this.props.node} />
             </Card.Group>
         );
     }

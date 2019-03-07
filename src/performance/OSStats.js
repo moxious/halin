@@ -26,6 +26,7 @@ export default class OSStats extends Component {
         const setMyStateFromDataFeed = newData => {
             if (this.mounted && newData) {
                 const data = _.cloneDeep(newData.data[0]);
+                console.log('data',data);
                 this.setState({ data });
             }
         };
@@ -70,7 +71,7 @@ export default class OSStats extends Component {
             <div className='OSStats' key={this.state.id}>
                 <h3>{header}</h3>
 
-                <Card.Group>
+                <Card.Group itemsPerRow={3}>
                     <HalinCard header='Physical Memory'>
                         <AllocationChart
                             dataMeasurement={true}
@@ -78,13 +79,16 @@ export default class OSStats extends Component {
                             total={this.state.data.physTotal}
                         />
                     </HalinCard>
-                    <HalinCard header='Swap Memory'>
-                        <AllocationChart
-                            dataMeasurement={true}
-                            free={this.state.data.swapFree}
-                            total={this.state.data.swapTotal}
-                        />
-                    </HalinCard>
+                    {/* Some systems don't have swap, in which case don't show the extra card. */}
+                    { (this.state.data.swapTotal && this.state.data.swapTotal) > 0 ? 
+                        <HalinCard header='Swap Memory'>
+                            <AllocationChart
+                                dataMeasurement={true}
+                                free={this.state.data.swapFree}
+                                total={this.state.data.swapTotal}
+                            />
+                        </HalinCard> : 
+                        '' }
                     <HalinCard header='File Descriptors'>
                         <AllocationChart
                             free={this.state.data.fdOpen}

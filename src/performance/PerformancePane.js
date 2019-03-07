@@ -21,10 +21,10 @@ class PerformancePane extends Component {
                 <Grid divided='vertically'>
                     <Grid.Row columns={1}>
                         <Card.Group>
-                            <SystemLoad key={key} node={this.props.node} />
-                            <MemoryMonitor key={key} node={this.props.node} />
-                            <TransactionMonitor key={key} node={this.props.node} />
-                            <GCMonitor key={key} node={this.props.node} />
+                            <SystemLoad key={key + '1'} node={this.props.node} />
+                            <MemoryMonitor key={key + '2'} node={this.props.node} />
+                            <TransactionMonitor key={key + '3'} node={this.props.node} />
+                            <GCMonitor key={key + '4'} node={this.props.node} />
                         </Card.Group>
                     </Grid.Row>
 

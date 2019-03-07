@@ -21,27 +21,27 @@ export default class MembersPane extends Component {
       {
         menuItem: 'Performance',
         render: () => this.paneWrapper(
-          <PerformancePane key={key} node={node} />),
+          <PerformancePane key={key+'perfpane'} node={node} />),
       },
       {
         menuItem: 'Configuration',
         render: () => this.paneWrapper(
-          <Neo4jConfiguration key={key} node={node} />),
+          <Neo4jConfiguration key={key+'configpane'} node={node} />),
       },
       {
         menuItem: 'OS',
         render: () => this.paneWrapper(
-          <OSPane key={key} node={node} />),
+          <OSPane key={key+'ospane'} node={node} />),
       },
       {
         menuItem: 'Plugins',
         render: () => this.paneWrapper(
-          <PluginPane key={key} node={node} />),
+          <PluginPane key={key+'pluginpane'} node={node} />),
       },
       {
         menuItem: 'Query Performance',
         render: () => this.paneWrapper(
-          <SampleQueryPane key={key} node={node} />),
+          <SampleQueryPane key={key+'querypane'} node={node} />),
       },
 
       // TODO
