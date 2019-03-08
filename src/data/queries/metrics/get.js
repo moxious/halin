@@ -19,6 +19,12 @@ export default new HalinQuery({
         metric: 'Name of the metric to fetch'
     },
     exampleResult: [
-        { timestamp: 1111, value: 0.0 },
+        { 
+            timestamp: 1111, 
+            map: {
+                count: "406022",
+            },
+            metric: "neo4j.bolt.accumulated_processing_time",
+        }, 
     ],
 });
