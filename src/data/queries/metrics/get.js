@@ -9,11 +9,11 @@ export default new HalinQuery({
     }),
     query: `
         CALL apoc.metrics.get($metric)
-        YIELD timestamp, value
-        RETURN timestamp, value
+        YIELD timestamp, metric, map
+        RETURN timestamp, metric, map
         ORDER BY timestamp DESC LIMIT $last
     `,
-    columns: ['value'].map(column),
+    columns: ['timestamp', 'metric', 'map'].map(column),
     parameters: { 
         last: 'Count of most recent items to fetch from the file',
         metric: 'Name of the metric to fetch'
