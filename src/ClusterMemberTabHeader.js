@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { Menu, Icon, Popup } from 'semantic-ui-react'
 import util from './data/util.js';
+import score from './cluster/health/score';
 
 export default class ClusterMemberTabHeader extends Component {
     state = {
-        ratio: 1,
+        score: 1,
         total: 1,
         fresh: 1,
         notFresh: 0,
@@ -13,19 +14,8 @@ export default class ClusterMemberTabHeader extends Component {
 
     sampleFeeds() {
         if (!this.mounted) { return null; } 
-        const feeds = window.halinContext.getFeedsFor(this.props.node).map(feed => feed.isFresh());
-
-        const total = feeds.length;
-        const fresh = feeds.filter(f => f).length;
-        const notFresh = feeds.filter(f => !f).length;
-
-        this.setState({ 
-            ratio: fresh/total,
-            total,
-            fresh,
-            notFresh,
-            performance: this.props.node.performance(),
-        });
+        const currentState = score.feedFreshness(window.halinContext, this.props.node);
+        this.setState(currentState);
     }
 
     componentDidMount() {
@@ -38,9 +28,9 @@ export default class ClusterMemberTabHeader extends Component {
         clearInterval(this.interval);
     }
 
-    colorFor = (ratio) => {
-        if (ratio >= 0.8) { return 'green'; }
-        if (ratio >= 0.6) { return 'yellow'; }
+    colorFor = (score) => {
+        if (score >= 0.8) { return 'green'; }
+        if (score >= 0.6) { return 'yellow'; }
         return 'red';
     };
 
@@ -69,7 +59,7 @@ export default class ClusterMemberTabHeader extends Component {
         else if(this.isReadReplica()) { iconName = 'copy'; }
         else { iconName = 'circle'; }  // Follower
 
-        const color = this.colorFor(this.state.ratio);
+        const color = this.colorFor(this.state.score);
 
         return (
             <Icon name={iconName} color={color} />
