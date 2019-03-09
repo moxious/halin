@@ -20,6 +20,7 @@ class MetricsPane extends Component {
     state = {
         key: uuid.v4(),
         metrics: null,
+        loading: false,
         activeMetric: null,
         menu: {},
         observations: RECORDS,
@@ -41,8 +42,23 @@ class MetricsPane extends Component {
 
                 const menu = unflatten(flatMap);
 
+                let defaultMetric = 'neo4j.bolt.connections_opened';
+                
+                if (metrics.filter(m => m.name === defaultMetric).length === 0) {
+                    defaultMetric = _.get(metrics[0], 'name');
+                }
+               
                 // Sorted and unique options
-                this.setState({ metrics: metricOptions, menu });
+                this.setState({ 
+                    metrics: metricOptions, 
+                    menu,
+                    activeMetric: defaultMetric,
+                });
+
+                if (defaultMetric) {
+                    return this.getMetric(defaultMetric);
+                }
+                return null;
             });
     }
 
@@ -82,7 +98,7 @@ class MetricsPane extends Component {
             return Promise.resolve(this.state[metric]);
         }
 
-        this.loading = true;
+        this.setState({ loading: true });
 
         return this.props.node.run(queryLibrary.GET_METRIC.query, { metric, last: this.state.observations })
             .then(data => data.records.map(r => ({
@@ -95,8 +111,7 @@ class MetricsPane extends Component {
                 return [];
             })
             .then(data => {
-                this.loading = false;
-                this.setState({ [metric]: data });
+                this.setState({ [metric]: data, loading: false });
                 return data;
             });
     }
@@ -136,14 +151,16 @@ class MetricsPane extends Component {
 
     getChartStart() {
         // Data is kept sorted.
-        const arr = this.state[this.state.activeMetric];
-        return arr[0].t.getTime();
+        const arr = this.state[this.state.activeMetric] || [];
+        const v = _.get(arr[0], 't');
+        return v ? v.getTime() : new Date();
     }
 
     getChartEnd() {
         // Data is kept sorted.
-        const arr = this.state[this.state.activeMetric];
-        return arr[arr.length - 1].t.getTime();
+        const arr = this.state[this.state.activeMetric] || [];
+        const v = _.get(arr[arr.length-1], 't');
+        return v ? v.getTime() : new Date();
     }
 
     describeDateRange() {
@@ -153,6 +170,25 @@ class MetricsPane extends Component {
                 &nbsp;-&nbsp;
                 <strong>{moment(this.getChartEnd()).format(this.state.dateFormat)}</strong>
             </h4>
+        );
+    }
+
+    isLoading() {
+        return (this.state.loading || 
+            (this.state.activeMetric && _.isNil(this.state[this.state.activeMetric])));
+    }
+
+    renderMetricsChart() {
+        return (
+            <div>
+                <Grid.Row columns={1}>
+                    <Grid.Column>{ this.describeDateRange() }</Grid.Column>
+                </Grid.Row>
+
+                <Grid.Row columns={1}>
+                    <MetricsChart metric={this.state.activeMetric} data={this.state[this.state.activeMetric]} />
+                </Grid.Row> 
+            </div>
         );
     }
 
@@ -168,19 +204,8 @@ class MetricsPane extends Component {
                         <MetricDescription metric={this.state.activeMetric} />
                     </Grid.Row>
 
-                    { this.loading ? 
-                        <Spinner active='true' /> : 
-
-                        <div>
-                            <Grid.Row columns={1}>
-                                <Grid.Column>{ this.describeDateRange() }</Grid.Column>
-                            </Grid.Row>
-
-                            <Grid.Row columns={1}>
-                                <MetricsChart metric={this.state.activeMetric} data={this.state[this.state.activeMetric]} />
-                            </Grid.Row> 
-                        </div>
-                    }
+                    { this.isLoading() ? <Spinner active='true' /> : 
+                        this.renderMetricsChart() }
                 </Grid>
             </div>
         );

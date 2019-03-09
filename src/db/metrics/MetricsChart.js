@@ -129,8 +129,6 @@ export default class MetricsChart extends Component {
                     // All the rest just depends on what the metric is and what was sent.
                     return entry.key === 'count' || entry.key === 'value' || _.isNumber(entry.val);
                 }).map(entry => entry.key);
-
-            console.log(this.numericKeys);
         } else {
             // Safe default?
             this.numericKeys = ['value'];
