@@ -4,7 +4,7 @@ import metricsReference from './reference.json';
 
 export default class MetricDescription extends Component {
     render() {
-        const crumbs = this.props.metric.split(/\./);
+        const crumbs = this.props.chosen.split(/\./);
         return (
             <div className='MetricDescription' style={{textAlign:'center'}}>
                 <Breadcrumb size='large'>
