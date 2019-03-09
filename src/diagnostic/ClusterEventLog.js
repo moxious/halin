@@ -10,7 +10,7 @@ class ClusterEventLog extends Component {
         displayColumns: [
             { 
                 Header: 'Date', 
-                Cell: e => moment(e.date).toISOString(),
+                Cell: e => moment(e.date).format(),
             },
             {
                 Header: 'Type',
@@ -22,8 +22,8 @@ class ClusterEventLog extends Component {
                 style: { whiteSpace: 'unset', textAlign: 'left' },
             },
             { 
-                Header: 'Machine',
-                Cell: e => e.address || 'all machines',
+                Header: 'Member',
+                accessor: 'address',
             },
         ],
     };
@@ -32,17 +32,17 @@ class ClusterEventLog extends Component {
         const events = _.sortBy(
             _.clone(window.halinContext.getClusterManager().getEventLog()),
             'date').reverse();
-
+        console.log('CEV items', events);
         return (
             <div className='ClusterEventLog'>
                 <h3>Cluster Event Log</h3>
 
-                <ReactTable
+                <ReactTable className='-striped -highlight'
                     data={events}
                     sortable={true}
                     filterable={true}
                     columns={this.state.displayColumns}
-                    defaultPageSize={20}
+                    defaultPageSize={8}
                 />
             </div>
         );
