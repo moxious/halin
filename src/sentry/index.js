@@ -43,11 +43,11 @@ const reportError = (err, message=null) => {
 
     if (shouldSentryCapture(err)) {
         Sentry.captureException(err);
+        if (message) {
+            console.error(message, err);
+        }    
     }
 
-    if (message) {
-        console.error(message, err);
-    }
     return err;
 };
 
