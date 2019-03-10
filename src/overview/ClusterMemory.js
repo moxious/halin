@@ -28,7 +28,7 @@ class ClusterMemory extends Component {
 
     render() {
         return (
-            <HalinCard header='Heap Size' owner={this}>
+            <HalinCard header='USED TO BE HEAP SIZE' owner={this}>
                 <ClusterTimeseries key={this.state.key}
                     query={this.state.query} 
                     width={this.state.width}
