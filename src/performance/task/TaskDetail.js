@@ -28,11 +28,12 @@ const age = since => {
 
 const displayQuery = q => 
     <div style={{
-        maxHeight: 250,
+        maxHeight: 400,
+        width: '100%',
         overflowY: 'scroll',
         overflowX: 'auto',
         textAlign: 'left',
-    }}>{q}</div>
+    }}><pre>{q}</pre></div>
 
 const connection = task => {
     const fields = [
@@ -63,7 +64,6 @@ const transaction = task => {
         [ 'Elapsed Time (ms)', f(task, 'transaction.elapsedTimeMillis') ],
         [ 'Idle Time (ms)', f(task, 'transaction.idleTimeMillis') ],
         [ 'Wait Time (ms)', f(task, 'transaction.waitTimeMillis') ],
-        [ 'Metadata', f(task, 'transaction.metaData') ],
     ];
 
     return cardWrapper('Transaction',
@@ -75,8 +75,12 @@ const transaction = task => {
         </List>);
 };
 
+const transactionMetadata = task =>
+    cardWrapper('Transaction Metadata',
+        <pre>{ JSON.stringify(_.get(task, 'transaction.metaData'), null, 2) }</pre>);
+
 const query = task => 
-    cardWrapper('Query', displayQuery(f(task, 'query.query')));
+    displayQuery(f(task, 'query.query'));
 
 export default class TaskDetail extends Component {
     field(f) {
@@ -87,11 +91,14 @@ export default class TaskDetail extends Component {
         return (
             <div className='TaskDetail'>
                 {this.props.task ? 
-                <Card.Group>
+                <div>
                     { query(this.props.task) }
-                    { _.isNil(_.get(this.props.task, 'connection')) ? '' : connection(this.props.task) }
-                    { transaction(this.props.task) }
-                </Card.Group> :
+                    <Card.Group>                    
+                        { _.isNil(_.get(this.props.task, 'connection')) ? '' : connection(this.props.task) }
+                        { transaction(this.props.task) }
+                        { transactionMetadata(this.props.task) }
+                    </Card.Group>
+                </div> :
                 'Please select a task' }
             </div>
         )

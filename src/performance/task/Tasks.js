@@ -5,8 +5,17 @@ import queryLibrary from '../../data/queries/query-library';
 import CypherDataTable from '../../data/CypherDataTable';
 import fields from '../../data/fields';
 import 'react-table/react-table.css';
-import { Grid, Button, Popup } from 'semantic-ui-react';
+import _ from 'lodash';
+import moment from 'moment';
+import { Button, Popup, Modal, Header } from 'semantic-ui-react';
 import TaskDetail from './TaskDetail';
+
+const age = since => {
+    const start = moment.utc(since);
+    const now = moment.utc();
+    const duration = moment.duration(now.diff(start));
+    return duration.asSeconds() + ' sec';
+};
 
 class Tasks extends Component {
     state = {
@@ -19,25 +28,57 @@ class Tasks extends Component {
                 id: 'delete',
                 minWidth: 70,
                 maxWidth: 100,
-                Cell: ({ row }) => (
-                    <Button compact 
-                        disabled={false}
-                        onClick={e => this.open(row)}
-                        type='submit' icon="info"/>
-                ),
+                Cell: e => this.detailModal(e),
             },    
             { 
                 Header: 'ID', 
-                accessor: 'id',
-                show: false,
+                accessor: 'transaction.id',
+                show: true,
             },
             { 
                 Header: 'Query', 
                 accessor: 'query.query',
                 Cell: row => 
-                    <Popup trigger={<span>{row.value}</span>} content={row.value}/>,
+                    <Popup trigger={<span>{row.value}</span>} content={
+                        <div><pre>{row.value}</pre></div>
+                    }/>,
                 style: { textAlign: 'left' },
                 show: true,
+            },
+            {
+                Header: 'Client',
+                Cell: ({ row }) => 
+                    (   (_.get(row, 'connection.connector') || 'bolt') + '://' + 
+                        _.get(row, 'connection.clientAddress') + ' (' + 
+                        _.get(row, 'connection.userAgent') + ')'),
+            },
+            {
+                Header: 'Username',
+                accessor: 'connection.username',
+            },
+            {
+                Header: 'Age',
+                Cell: ({ row }) => age(_.get(row, 'transaction.startTime')),
+            },
+            {
+                Header: 'CPU (ms)',
+                accessor: 'transaction.cpuTimeMillis',
+                Cell: fields.numField,              
+            },
+            {
+                Header: 'Elapsed(ms)',
+                accessor: 'transaction.elapsedTimeMillis',
+                Cell: fields.numField,
+            },
+            {
+                Header: 'Idle(ms)',
+                accessor: 'transaction.idleTimeMillis',
+                Cell: fields.numField,
+            },
+            {
+                Header: 'Wait(ms)',
+                accessor: 'transaction.waitTimeMillis',
+                Cell: fields.numField,
             },
             { 
                 Header: 'Connection', 
@@ -76,30 +117,37 @@ class Tasks extends Component {
         this.setState({ selected: row });
     };
 
+    detailModal({ row }) {
+        return (
+            <Modal size='fullscreen' closeIcon
+                trigger={
+                    <Button compact 
+                        disabled={false}
+                        onClick={e => this.open(row)}
+                        type='submit' icon="info"/>
+                }>
+                <Header>Query Detail</Header>
+                <Modal.Content scrolling>
+                    <TaskDetail task={this.state.selected} />
+                </Modal.Content>
+            </Modal>
+        );
+    }
+
     render() {
         return (
             <div className="Tasks">
                 <h2>Tasks</h2>
-                <Grid divided='vertically'>
-                    <Grid.Row columns={16}>
-                        <Grid.Column width={8}>
-                            <CypherDataTable
-                                node={this.props.node}
-                                query={this.state.query}
-                                allowColumnSelect={false}
-                                sortable={true}
-                                filterable={false}
-                                refresh={this.state.childRefresh}
-                                displayColumns={this.state.columns}
-                                rate={this.rate}
-                            />
-                        </Grid.Column>
-                        <Grid.Column width={8}>
-                            <TaskDetail task={this.state.selected} />
-                        </Grid.Column>
-                    </Grid.Row>
-                </Grid>
-
+                <CypherDataTable
+                    node={this.props.node}
+                    query={this.state.query}
+                    allowColumnSelect={false}
+                    sortable={true}
+                    filterable={false}
+                    refresh={this.state.childRefresh}
+                    displayColumns={this.state.columns}
+                    rate={this.rate}
+                />
             </div>
         );
     }
