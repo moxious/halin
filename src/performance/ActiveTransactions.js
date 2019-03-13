@@ -8,6 +8,9 @@ import { Popup } from 'semantic-ui-react'
 import 'react-table/react-table.css';
 const cdt = fields;
 
+/**
+ * @deprecated by Tasks
+ */
 class ActiveTransactions extends Component {
     query = 'call dbms.listTransactions()';
     state = {
