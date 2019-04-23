@@ -106,13 +106,18 @@ class MetricsPane extends Component {
                 metric: r.get('metric'),
                 map: r.get('map'),
             })).sort((a, b) => a.t - b.t)) // Keep sorted by date
+            .then(data => {
+                this.setState({ [metric]: data, loading: false, error: null });
+                return data;
+            })
             .catch(err => {
                 sentry.reportError(`Failed to fetch metric ${metric}`, err);
+                this.setState({
+                    [metric]: [],
+                    loading: false,
+                    error: err,
+                });
                 return [];
-            })
-            .then(data => {
-                this.setState({ [metric]: data, loading: false });
-                return data;
             });
     }
 
@@ -179,6 +184,21 @@ class MetricsPane extends Component {
     }
 
     renderMetricsChart() {
+        if (this.state.error) {
+            const err = `${this.state.error}`;
+
+            return (
+                <Grid.Row columns={1}>
+                    <Grid.Column>
+                        <Message negative>
+                            <Message.Header>Error Fetching Metric</Message.Header>
+                            <p>{err}</p>
+                        </Message>
+                    </Grid.Column>
+                </Grid.Row>
+            );
+        }
+
         return (
             <div>
                 <Grid.Row columns={1}>
