@@ -65,12 +65,12 @@ class Halin extends Component {
         render: () => this.paneWrapper(
           <SampleQueryPane key={key} node={node}/>),
       },
-      {
-        menuItem: 'Metrics',
-        render: () => this.paneWrapper(
-          <MetricsPane key={key} node={node}/>
-        ),
-      },
+      // {
+      //   menuItem: 'Metrics',
+      //   render: () => this.paneWrapper(
+      //     <MetricsPane key={key} node={node}/>
+      //   ),
+      // },
       {
         menuItem: 'Logs',
         render: () => this.paneWrapper(
