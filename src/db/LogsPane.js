@@ -254,7 +254,7 @@ const notSupported = () => {
 
                 <ul style={{ textAlign: 'left' }}>
                     <li>Ensure that you have <a href='https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases'>APOC installed</a>&nbsp;
-                        <strong>and that it is a recent version</strong> higher than 3.5.01 for Neo4j 3.5, or 3.4.0.4 for Neo4j 3.4</li>
+                        <strong>and that it is a recent version</strong> higher than 3.5.0.3 for Neo4j 3.5, or 3.4.0.6 for Neo4j 3.4</li>
                     <li>Ensure that your {code('neo4j.conf')} includes {code('apoc.import.file.enabled=true')}, which
                     will permit access to the metrics.</li>
                 </ul>
