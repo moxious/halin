@@ -191,7 +191,9 @@ export default class DataFeed extends Metric {
     stats() {
         const packets = this.getDataPackets();
         
-        const timings = packets.map(p => p._sampleTime);
+        const sampleTimes = packets.map(p => p._sampleTime);
+        const timings = _.isEmpty(sampleTimes) ? [0] : sampleTimes;
+
         return {
             name: this.name,
             label: this.label,
