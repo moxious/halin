@@ -10,7 +10,7 @@ import OSPane from './performance/OSPane';
 import PluginPane from './db/PluginPane';
 import SampleQueryPane from './db/SampleQueryPane';
 import LogsPane from './db/LogsPane';
-import MetricsPane from './db/metrics/MetricsPane';
+// import MetricsPane from './db/metrics/MetricsPane';
 import PermissionsPane from './configuration/PermissionsPane';
 import ClusterOverviewPane from './overview/ClusterOverviewPane';
 import ClusterMemberTabHeader from './ClusterMemberTabHeader';
