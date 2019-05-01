@@ -1,5 +1,16 @@
 # Halin Release Notes
 
+## 0.9
+
+- Logs pane added to individual nodes, so that you can see the content of debug.log, neo4j.log, and security.log, if you are using a recent APOC distribution
+- "Active Queries" component has been replaced by "Tasks" panel (Machine->Performance) which adds the 
+ability to inspect transaction metadata
+- Expanded unit testing
+- Bug fixes for address handling, Neo4j int handling
+- Fixes #71 member address does not change when role updates
+- Fixes #73 too few arguments to std
+- Partially addressing #60, log & metric access.
+
 ## 0.8.3
 
 - Minor improvements to the settings pane
