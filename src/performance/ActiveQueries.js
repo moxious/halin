@@ -10,6 +10,9 @@ const jsonField = fields.jsonField;
 const numField = fields.numField;
 const timeField = fields.timeField;
 
+/**
+ * @deprecated by Tasks
+ */
 class ActiveQueries extends Component {
     query = 'call dbms.listQueries()';
     state = {

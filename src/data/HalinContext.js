@@ -172,7 +172,7 @@ export default class HalinContext {
                 const oldRole = clusterMember.role;
                 clusterMember.role = newRole;
 
-                this.getClusterManager().addEvent({
+                const event = {
                     message: `Role change from ${oldRole} to ${newRole}`,
                     type: 'rolechange',
                     address: clusterMember.getBoltAddress(),
@@ -180,7 +180,9 @@ export default class HalinContext {
                         old: oldRole,
                         new: newRole,
                     },
-                });
+                };
+
+                this.getClusterManager().addEvent(event);
             }
         };
 
@@ -394,6 +396,7 @@ export default class HalinContext {
                     this.getClusterManager().addEvent({
                         type: 'halin',
                         message: 'Halin monitoring started',
+                        address: 'all members',
                     });
                     return this;
                 })

@@ -1,5 +1,5 @@
-const _set = require('lodash.set')
-const _setWith = require('lodash.setwith')
+const _set = require('lodash').set;
+const _setWith = require('lodash').setWith;
 /**
  * @id unflatten
  * @function unflatten

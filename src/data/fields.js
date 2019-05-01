@@ -1,6 +1,7 @@
 import datautil from '../data/util';
 import _ from 'lodash';
 import React from 'react';
+import neo4j from '../driver/index';
 
 const convertMsToTime = (millis) => {
     if (_.isNil(millis)) { return 'n/a'; }
@@ -22,6 +23,10 @@ const convertMsToTime = (millis) => {
 
 const toInt = val => {
     if (_.isNil(val)) { return 'n/a'; }
+    if (neo4j.isNeo4jInt(val)) {
+        const ni = Number(neo4j.handleNeo4jInt(val));
+        return ni.toLocaleString();
+    }
     const num = parseInt(val, 10);
     return num.toLocaleString();
 };

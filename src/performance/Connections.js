@@ -4,6 +4,9 @@ import queryLibrary from '../data/queries/query-library';
 import CypherDataTable from '../data/CypherDataTable';
 import 'react-table/react-table.css';
 
+/**
+ * @deprecated by Tasks
+ */
 class Connections extends Component {
     state = {
         query: queryLibrary.DBMS_LIST_CONNECTIONS.getQuery(),

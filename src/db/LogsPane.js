@@ -12,6 +12,13 @@ const MAX_ROWS = 5000;
 
 const code = text => <span style={{ fontFamily: 'monospace' }}>{text}</span>;
 
+const style = {
+    whitespace: 'unset',
+    textAlign: 'left',
+    fontFamily: 'monospace',
+    fontSize: '0.8em',
+};
+
 class LogViewer extends Component {
     state = {
         key: uuid.v4(),
@@ -20,16 +27,16 @@ class LogViewer extends Component {
         lastN: 20,
         partial: true,
         displayColumns: [
-            { Header: 'Line', accessor: 'lineNo', width: 70 },
+            { 
+                Header: 'Line', 
+                accessor: 'lineNo', 
+                width: 50,
+                style,
+            },
             {
                 Header: 'Entry',
                 accessor: 'line',
-                style: {
-                    whiteSpace: 'unset',
-                    textAlign: 'left',
-                    fontFamily: 'monospace',
-                    fontSize: '0.8em',
-                }
+                style,
             },
         ],
     }
@@ -134,12 +141,33 @@ class LogViewer extends Component {
         }
     }
 
+    displayError() {
+        if (!this.state.err) {
+            throw new Error('Only call me when error is in state');
+        }
+
+        const strError = `${this.state.err}`;
+        const addendum = strError.indexOf('No log file exists by that name') > -1 ? 
+            'Some installs of Neo4j may use journalctl to access logs, which may not ' +
+            'be on disk in their usual location' : '';
+
+        return (
+            <Message negative>
+            <Message.Header>Error Fetching Log File</Message.Header>
+                <p>{strError}</p>
+                <p>{addendum}</p>
+            </Message>
+        );
+    }
+
     render() {
         const spacer = () => <div style={{ paddingLeft: '15px', paddingRight: '15px' }}>&nbsp;</div>;
 
         return (
             <div className='LogViewer' key={this.state.key}>
                 <h3>{this.props.file}</h3>
+
+                { this.state.err ? this.displayError() : '' }
 
                 <Form>
                     <Form.Field>
@@ -205,6 +233,7 @@ class LogViewer extends Component {
 class LogsPane extends Component {
     state = {
         key: uuid.v4(),
+        file: null,
     };
 
     viewerFor(file) {
@@ -219,15 +248,24 @@ class LogsPane extends Component {
         const panes = [
             {
                 menuItem: 'neo4j.log',
-                render: () => this.viewerFor('neo4j.log'),
+                render: () => {
+                    const file = 'neo4j.log';
+                    return this.viewerFor(file);
+                },
             },
             {
                 menuItem: 'debug.log',
-                render: () => this.viewerFor('debug.log'),
+                render: () => {
+                    const file = 'debug.log';
+                    return this.viewerFor(file);
+                },
             },
             {
                 menuItem: 'security.log',
-                render: () => this.viewerFor('security.log'),
+                render: () => {
+                    const file = 'security.log';
+                    return this.viewerFor(file);
+                },
             }
         ];
 
@@ -254,7 +292,7 @@ const notSupported = () => {
 
                 <ul style={{ textAlign: 'left' }}>
                     <li>Ensure that you have <a href='https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases'>APOC installed</a>&nbsp;
-                        <strong>and that it is a recent version</strong> higher than 3.5.01 for Neo4j 3.5, or 3.4.0.4 for Neo4j 3.4</li>
+                        <strong>and that it is a recent version</strong> higher than 3.5.0.3 for Neo4j 3.5, or 3.4.0.6 for Neo4j 3.4</li>
                     <li>Ensure that your {code('neo4j.conf')} includes {code('apoc.import.file.enabled=true')}, which
                     will permit access to the metrics.</li>
                 </ul>

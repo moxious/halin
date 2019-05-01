@@ -6,7 +6,7 @@ export default class MetricDescription extends Component {
     render() {
         const crumbs = this.props.metric.split(/\./);
         return (
-            <div className='MetricDescription'>
+            <div className='MetricDescription' style={{textAlign:'center'}}>
                 <Breadcrumb size='large'>
                     {
                         crumbs.map((piece, idx) =>
