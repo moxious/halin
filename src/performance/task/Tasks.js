@@ -17,6 +17,15 @@ const age = since => {
     return duration.asSeconds() + ' sec';
 };
 
+const createHiddenColumnFromSubfield = (section, subfield) => {
+    const accessor = `${section}.${subfield}`;
+    return {
+        Header: accessor,
+        show: false,
+        accessor,
+    };
+};
+
 class Tasks extends Component {
     state = {
         // The 3.4 version of this query doesn't have as much info, but works.
@@ -80,24 +89,54 @@ class Tasks extends Component {
                 accessor: 'transaction.waitTimeMillis',
                 Cell: fields.numField,
             },
+
             { 
                 Header: 'Connection', 
                 accessor: 'connection', 
                 show: false,
+                excludeFromCSV: true,
                 Cell: fields.jsonField,
             },
             {
                 Header: 'Transaction',
                 accessor: 'transaction',
                 show: false,
+                excludeFromCSV: true,
                 Cell: fields.jsonField,
             },
             {
                 Header: 'QueryDetails',
                 accessor: 'query',
                 show: false,
+                excludeFromCSV: true,
                 Cell: fields.jsonField,
-            },
+            },            
+
+            // All fields below this are hidden by default and not
+            // shown to the user, but destructured in this way so
+            // that saving as CSV works for this nested structure.
+
+            // CONNECTION PROPERTIES
+            ...[
+                'id', 'connectTime', 'connector',
+                'userAgent', 'serverAddress',
+                'clientAddress',
+            ].map(sf => createHiddenColumnFromSubfield('connection', sf)),
+
+            // TRANSACTION PROPERTIES
+            ...[
+                'metaData', 'startTime', 'protocol', 
+                'clientAddress', 'requestUri', 'currentQueryId',
+                'currentQuery', 'activeLockCount', 'status',
+                'resourceInformation', 'elapsedTimeMillis',
+                'cpuTimeMillis', 'waitTimeMillis', 'idleTimeMillis',
+            ].map(sf => createHiddenColumnFromSubfield('transaction', sf)),
+
+            ...[
+                'id', 'parameters', 'planner', 'runtime', 
+                'indexes', 'startTime',
+                'allocatedBytes', 'pageHits', 'pageFaults',
+            ].map(sf => createHiddenColumnFromSubfield('query', sf)),
         ],
         rate: 1000,
     };
