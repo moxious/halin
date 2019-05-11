@@ -31,6 +31,7 @@
     "pondjs": "^0.8.9",
     "prop-types": "^15.6.0",
     "react": "^16.6.3",
+    "react-csv": "^1.1.1",
     "react-d3-components": "^0.9.1",
     "react-dom": "^16.6.3",
     "react-graph-vis": "^1.0.2",

@@ -4,17 +4,18 @@ import DBStats from '../dbstats/DBStats';
 import sentry from '../sentry';
 import queryLibrary from '../data/queries/query-library';
 import HalinQuery from '../data/queries/HalinQuery';
-import ReactTable from 'react-table';
 import Spinner from '../Spinner';
 import QueryExecutionPlan from './QueryExecutionPlan';
 import QueryStatTable from './queries/QueryStatTable';
+import CSVDownload from '../data/download/CSVDownload';
+import moment from 'moment';
 
-import { 
-    Button, 
-    Progress, 
-    Form, 
-    Modal, 
-    Header, 
+import {
+    Button,
+    Progress,
+    Form,
+    Modal,
+    Header,
     Checkbox,
     Icon,
 } from 'semantic-ui-react';
@@ -36,16 +37,16 @@ export default class SampleQueries extends Component {
         updateInterval: null,
         status: STOPPED,
         displayColumns: [
-            { 
+            {
                 Header: 'Plan',
                 width: 80,
-                Cell: ({ row }) => 
+                Cell: ({ row }) =>
                     <Modal size='fullscreen' closeIcon trigger={
-                        <Button icon='cogs'/>
+                        <Button icon='cogs' />
                     }>
                         <Header>Query Execution Plan</Header>
                         <Modal.Content scrolling>
-                            <QueryExecutionPlan data={row}/>
+                            <QueryExecutionPlan data={row} />
                         </Modal.Content>
                     </Modal>
             },
@@ -62,7 +63,7 @@ export default class SampleQueries extends Component {
                 <p>Neo4j includes built-in procedures that let us monitor query execution plan and
                 execution times for queries that run on the system.</p>
 
-                <p>Halin allows temporary sampling of this data for inspecting what is running on 
+                <p>Halin allows temporary sampling of this data for inspecting what is running on
                     the system at any given time.</p>
 
                 <p>All times are given in microseconds (one millionth of a second)</p>
@@ -93,7 +94,7 @@ export default class SampleQueries extends Component {
             .then(() => {
                 sentry.fine('Stopped collecting');
                 if (this.mounted) { this.setState({ status: GATHERING }); }
-                
+
                 if (doCollection) {
                     return this.collector.stats();
                 }
@@ -102,7 +103,7 @@ export default class SampleQueries extends Component {
             .then(data => {
                 this.stopAsync();
                 if (this.mounted) {
-                    this.setState({ 
+                    this.setState({
                         data,
                         percent: 1,
                         timer: null,
@@ -150,7 +151,7 @@ export default class SampleQueries extends Component {
             .then(() => {
                 const start = new Date().getTime();
 
-                this.setState({ 
+                this.setState({
                     // Schedule the stoppage.
                     timer: setTimeout(() => this.stop(), this.state.interval),
                     updateInterval: setInterval(() => {
@@ -184,32 +185,33 @@ export default class SampleQueries extends Component {
                     success={this.state.status === GATHERING || this.state.status === STOPPED}
                     percent={Math.round(this.state.percent * 100)}
                     autoSuccess>
-                    { this.progressMessage() }
+                    {this.progressMessage()}
                 </Progress>
 
-                { 
-                    (this.state.status === RUNNING || this.state.status === GATHERING) ? 
-                    <Spinner text='&nbsp;' /> : 
-                    ''
+                {
+                    (this.state.status === RUNNING || this.state.status === GATHERING) ?
+                        <Spinner text='&nbsp;' /> :
+                        ''
                 }
             </div>
         );
     }
 
+    filterData() {
+        return this.state.includeHalinQueries ?
+            this.state.data :
+            this.state.data.filter(i => !HalinQuery.isDisclaimed(i.query));
+    }
+
     dataTable() {
-        // User can select whether or not they want to see Halin stuff.
-        const filterData = () => (
-            this.state.includeHalinQueries ? 
-            this.state.data : 
-            this.state.data.filter(i => !HalinQuery.isDisclaimed(i.query)));
+        if (!this.state.data) { return ''; }
 
         return (
             <div className='ViewQueryStats'>
-                <QueryStatTable 
-                    data={this.state.data}
-                    includeHalinQueries={this.state.includeHalinQueries}
+                <QueryStatTable
+                    data={this.filterData()}
                     displayColumns={this.state.displayColumns} />
-            </div>                
+            </div>
         );
     }
 
@@ -231,13 +233,13 @@ export default class SampleQueries extends Component {
     render() {
         return (
             <div className='SampleQueries'>
-                <h3>Sample Query Performance <Explainer content={this.help()}/></h3>
+                <h3>Sample Query Performance <Explainer content={this.help()} /></h3>
 
-                { this.progressBar() }
+                {this.progressBar()}
 
                 <Form>
                     <Form.Group inline>
-                        <Form.Field>                             
+                        <Form.Field>
                             <Form.Input
                                 label='Sample for: (milliseconds)'
                                 name='lastN'
@@ -255,16 +257,25 @@ export default class SampleQueries extends Component {
 
                         <Form.Field>
                             <Button primary
-                                 onClick={() => this.start()} 
-                                 disabled={!this.validInterval() || this.isRunning()}>
-                                <Icon name='cogs'/>
+                                onClick={() => this.start()}
+                                disabled={!this.validInterval() || this.isRunning()}>
+                                <Icon name='cogs' />
                                 Start Collection
                             </Button>
                         </Form.Field>
+
+                        {this.state.data ?
+                            <Form.Field>
+                                <CSVDownload
+                                    filename={`Halin-querystats-${moment.utc().format()}.csv`}
+                                    data={this.filterData()}
+                                    displayColumns={this.state.displayColumns} />
+                            </Form.Field>
+                            : ''}
                     </Form.Group>
                 </Form>
 
-                { this.state.data ? this.dataTable() : '' }
+                {this.dataTable()}
             </div>
         );
     }
