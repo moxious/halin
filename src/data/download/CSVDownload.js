@@ -5,8 +5,12 @@ import moment from 'moment';
 import { Icon } from 'semantic-ui-react';
 import neo4j from '../../driver/index';
 
-const toCsvString = obj => 
-    JSON.stringify(neo4j.handleNeo4jInt(obj), null, 2);
+// We must convert neo4j ints if present, turn JSON into string,
+// and then safely escape that string for CSV
+const toCsvString = obj => {
+    const intermed = neo4j.handleNeo4jInt(obj);
+    return _.isString(intermed) ? intermed : JSON.stringify(intermed);
+};
 
 export default class CSVDownload extends Component {
     getButtonText() {
@@ -42,7 +46,7 @@ export default class CSVDownload extends Component {
         const headerRow = accessible.map(col => col.Header || col.accessor);
 
         const csvData = [headerRow].concat(data);
-        console.log('csvData', csvData);
+        // console.log('csvData', csvData);
 
         return (
             <div className='DownloadCSV'>
