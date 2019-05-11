@@ -170,7 +170,7 @@ class GeneratePackage extends Component {
                     </Message>
                 </div>
 
-                <Button basic disabled={this.state.loading}
+                <Button primary disabled={this.state.loading}
                         onClick={this.generatePackage}>
                     <Icon name='cogs'/>
                     Run Diagnostics!
