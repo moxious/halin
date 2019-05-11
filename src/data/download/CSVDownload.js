@@ -46,6 +46,7 @@ export default class CSVDownload extends Component {
         // meaning that there won't be any data available for that column.
         const accessible = this.props.displayColumns
             .filter(col => col.accessor)
+            .filter(col => _.isNil(col.excludeFromCSV) || !col.excludeFromCSV)
             .filter(shouldShowColumn);
 
         const data = this.props.data.map(obj => {
