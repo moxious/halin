@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import Spinner from '../Spinner';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
+import CSVDownload from '../data/download/CSVDownload';
+import moment from 'moment';
 
 class CypherSurface extends Component {
     state = {
@@ -69,6 +71,11 @@ class CypherSurface extends Component {
         return (
             <div className='CypherSurface'>
                 <h3>Installed Functions &amp; Procedures</h3>
+
+                <CSVDownload 
+                    filename={`Cypher-surface-${this.props.node.getLabel()}-${moment.utc().format()}.csv`}
+                    data={this.state.surface}
+                    displayColumns={this.state.displayColumns} />
 
                 <ReactTable
                     // By default, filter only catches data if the value STARTS WITH

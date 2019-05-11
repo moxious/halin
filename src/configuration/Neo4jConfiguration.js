@@ -64,6 +64,7 @@ class Neo4jConfiguration extends Component {
                 <CypherDataTable
                     node={this.props.node}
                     query={this.state.query}
+                    allowDownloadCSV={true}
                     displayColumns={this.state.displayColumns}
                     rate={this.state.rate}
                 />
