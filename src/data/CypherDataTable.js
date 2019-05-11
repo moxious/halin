@@ -149,7 +149,10 @@ class CypherDataTable extends Component {
         return (
             <Grid.Row columns={1}>
                 <Grid.Column>
-                    <CSVDownload data={this.state.items} displayColumns={this.state.displayColumns} />
+                    <CSVDownload 
+                        includeHidden={true}
+                        data={this.state.items} 
+                        displayColumns={this.state.displayColumns} />
                 </Grid.Column>
             </Grid.Row>
         );
