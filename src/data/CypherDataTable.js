@@ -9,6 +9,7 @@ import NodeLabel from '../NodeLabel';
 import Spinner from '../Spinner';
 import neo4j from '../driver';
 import sentry from '../sentry/index';
+import CSVDownload from '../data/download/CSVDownload';
 
 import './CypherDataTable.css';
 
@@ -34,6 +35,7 @@ class CypherDataTable extends Component {
         this.params = props.params || {};
 
         this.allowColumnSelect = _.isNil(props.allowColumnSelect) ? false : props.allowColumnSelect;
+        this.allowDownloadCSV = _.isNil(props.allowDownloadCSV) ? false : props.allowDownloadCSV;
 
         // Immutable original display columns.  In the state, we will modify columns
         // as needed, but parent's won't be modified.
@@ -131,21 +133,34 @@ class CypherDataTable extends Component {
         return this.setState({ displayColumns: newColumns });
     };
 
+    renderColumnSelector() {
+        return (
+            <Grid.Row columns={1}>
+                <Grid.Column>
+                    <ColumnSelector
+                        onSelect={this.updateColumns}
+                        displayColumns={this.state.displayColumns} /> 
+                </Grid.Column>
+            </Grid.Row>
+        );
+    }
+
+    renderDownloadCSV() {
+        return (
+            <Grid.Row columns={1}>
+                <Grid.Column>
+                    <CSVDownload data={this.state.items} displayColumns={this.state.displayColumns} />
+                </Grid.Column>
+            </Grid.Row>
+        );
+    }
+
     render() {
         return this.state.items ? (
             <div className='CypherDataTable'>
                 <Grid>
-                {
-                    this.allowColumnSelect ?
-                        <Grid.Row columns={1}>
-                            <Grid.Column>
-                                <ColumnSelector
-                                    onSelect={this.updateColumns}
-                                    displayColumns={this.state.displayColumns} /> 
-                            </Grid.Column>
-                        </Grid.Row>:
-                        ''
-                }
+                    { this.allowColumnSelect ? this.renderColumnSelector() : '' }
+                    { this.allowDownloadCSV ? this.renderDownloadCSV() : '' } 
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
