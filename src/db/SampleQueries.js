@@ -7,6 +7,8 @@ import HalinQuery from '../data/queries/HalinQuery';
 import ReactTable from 'react-table';
 import Spinner from '../Spinner';
 import QueryExecutionPlan from './QueryExecutionPlan';
+import QueryStatTable from './queries/QueryStatTable';
+
 import { 
     Button, 
     Progress, 
@@ -202,18 +204,12 @@ export default class SampleQueries extends Component {
             this.state.data.filter(i => !HalinQuery.isDisclaimed(i.query)));
 
         return (
-            <ReactTable
-                defaultFilterMethod={(filter, row, column) => {
-                    const id = filter.pivotId || filter.id
-                    return row[id] !== undefined ? String(row[id]).indexOf(filter.value) > -1 : true
-                }}
-                sortable={true}
-                filterable={true}
-                data={filterData(this.state.data)}
-                showPagination={true}
-                defaultPageSize={Math.min(this.state.data.length, 10)}
-                className="-striped -highlight"
-                columns={this.state.displayColumns} />
+            <div className='ViewQueryStats'>
+                <QueryStatTable 
+                    data={this.state.data}
+                    includeHalinQueries={this.state.includeHalinQueries}
+                    displayColumns={this.state.displayColumns} />
+            </div>                
         );
     }
 
