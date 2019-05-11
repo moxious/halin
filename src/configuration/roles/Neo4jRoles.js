@@ -152,6 +152,7 @@ class Neo4jRoles extends Component {
                                 showPagination={true}
                                 refresh={this.state.childRefresh}
                                 displayColumns={this.displayColumns}
+                                allowDownloadCSV={true}
                             />
                         </Grid.Column>
                     </Grid.Row>

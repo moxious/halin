@@ -218,6 +218,7 @@ class Neo4jUsers extends Component {
                                 query={this.query}
                                 refresh={this.state.childRefresh}
                                 displayColumns={this.displayColumns}
+                                allowDownloadCSV={true}
                             />
                         </Grid.Column>
                     </Grid.Row>
