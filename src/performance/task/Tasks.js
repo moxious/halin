@@ -139,6 +139,7 @@ class Tasks extends Component {
             <div className="Tasks">
                 <h2>Tasks</h2>
                 <CypherDataTable
+                    allowDownloadCSV={true}
                     node={this.props.node}
                     query={this.state.query}
                     allowColumnSelect={false}
