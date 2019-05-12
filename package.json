@@ -53,7 +53,8 @@
     "test": "./node_modules/.bin/react-scripts test --env=jsdom --coverage",
     "eject": "./node_modules/.bin/react-scripts eject",
     "postbuild": "rm -rf dist && mv build dist",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "lint": "eslint src/**/*.js src/**/*.jsx"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.0",
