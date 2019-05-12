@@ -39,6 +39,12 @@ describe('ClusterMember', function () {
         expect(prots).toContain('bolt');
     });
 
+    it('knows its role', () => {
+        expect(c.isLeader()).toEqual(true);
+        expect(c.isFollower()).toEqual(false);
+        expect(c.canWrite()).toEqual(true);
+    });
+
     it('keeps stats in observations', () => {
         c.setDriver(fakes.Driver());
 

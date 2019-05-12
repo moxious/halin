@@ -108,6 +108,13 @@ export default class ClusterMember {
             .map(parsed => parsed.protocol);
     }
 
+    isLeader() { return this.role === 'LEADER'; }
+    isFollower() { return this.role === 'FOLLOWER'; }
+    isSingle() { return this.role === 'SINGLE'; }
+    canWrite() { 
+        return this.isLeader() || this.isSingle();
+    }
+
     /**
      * Returns true if the context is attached to a Neo4j Enterprise edition server,
      * false otherwise.
@@ -142,6 +149,8 @@ export default class ClusterMember {
     supportsNativeAuth() {
         return this.dbms.nativeAuth;
     }
+
+    supportsSystemGraph() { return this.dbms.systemGraph; }
 
     /**
      * Returns true if auth is enabled on this node.
@@ -220,7 +229,10 @@ export default class ClusterMember {
             featureProbes.getNameVersionsEdition(this)
                 .then(result => { this.dbms = _.merge(_.cloneDeep(this.dbms), result); }),
             featureProbes.supportsNativeAuth(this)
-                .then(result => { this.dbms.nativeAuth = result; }),
+                .then(result => { 
+                    this.dbms.nativeAuth = result.nativeAuth; 
+                    this.dbms.systemGraph = result.systemGraph;
+                }),
             featureProbes.authEnabled(this)
                 .then(result => { this.dbms.authEnabled = result; }),
             featureProbes.csvMetricsEnabled(this)

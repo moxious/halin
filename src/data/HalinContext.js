@@ -38,6 +38,19 @@ export default class HalinContext {
         return this.clusterMembers;
     }
 
+    getWriteMember() {
+        const writer = this.clusterMembers.filter(cm => cm.canWrite())[0];
+
+        if (!writer) {
+            throw new Error(`
+                Cluster has no write members! This could mean that it is broken,
+                or is currently undergoing a leader election.
+            `);
+        }
+
+        return writer;
+    }
+
     getPollRate() {
         return this.pollRate;
     }
@@ -141,6 +154,14 @@ export default class HalinContext {
      */
     supportsNativeAuth() {
         return this.clusterMembers[0].supportsNativeAuth();
+    }
+
+    /**
+     * Returns true if context provides for the system graph, which is generally
+     * Neo4j >= 3.6.  False otherwise.
+     */
+    supportsSystemGraph() {
+        return this.clusterMembers[0].supportsSystemGraph();
     }
 
     /**

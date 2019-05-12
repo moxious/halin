@@ -129,8 +129,7 @@ export default {
     },
 
     /**
-     * @returns true if the server supports native auth, false otherwise (e.g. if auth is
-     * disabled, or if another auth provider like ldap is in use)
+     * @returns { nativeAuth: true/false, systemGraph: true/false } 
      */
     supportsNativeAuth: node => {
         // See issue #27 for what's going on here.  DB must support native auth
@@ -138,17 +137,22 @@ export default {
         const authPromise = node.run(queryLibrary.DBMS_GET_AUTH_PROVIDER)
             .then(results => {
                 let nativeAuth = false;
+                let systemGraph = false;
+
                 results.records.forEach(rec => {
                     const val = rec.get('value');
                     const valAsStr = `${val}`; // Coerce ['foo','bar']=>'foo,bar' if present
 
-                    if (valAsStr.indexOf('native') > -1 ||
-                        valAsStr.indexOf('system-graph') > -1) {
+                    if (valAsStr.indexOf('native') > -1) {
                         nativeAuth = true;
+                        systemGraph = false;
+                    } else if(valAsStr.indexOf('system-graph') > -1) {
+                        nativeAuth = true;
+                        systemGraph = true;
                     }
                 });
 
-                return nativeAuth;
+                return { nativeAuth, systemGraph };
             })
             .catch(err => {
                 if (neo4jErrors.permissionDenied(err)) {
