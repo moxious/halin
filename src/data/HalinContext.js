@@ -126,7 +126,7 @@ export default class HalinContext {
      * false otherwise.
      */
     isEnterprise() {
-        return this.clusterMembers[0].isEnterprise();
+        return this.getWriteMember().isEnterprise();
     }
 
     isCommunity() {
@@ -134,26 +134,26 @@ export default class HalinContext {
     }
 
     supportsAPOC() {
-        return this.clusterMembers[0].supportsAPOC();
+        return this.getWriteMember().supportsAPOC();
     }
 
     supportsLogStreaming() {
-        return this.clusterMembers[0].supportsLogStreaming();
+        return this.getWriteMember().supportsLogStreaming();
     }
 
     supportsMetrics() {
-        return this.clusterMembers[0].metrics && this.clusterMembers[0].metrics.length > 0;
+        return this.getWriteMember().metrics && this.clusterMembers[0].metrics.length > 0;
     }
 
     supportsDBStats() {
-        return this.clusterMembers[0].supportsDBStats();
+        return this.getWriteMember().supportsDBStats();
     }
 
     /**
      * Returns true if the context provides for native auth management, false otherwise.
      */
     supportsNativeAuth() {
-        return this.clusterMembers[0].supportsNativeAuth();
+        return this.getWriteMember().supportsNativeAuth();
     }
 
     /**
@@ -161,18 +161,18 @@ export default class HalinContext {
      * Neo4j >= 3.6.  False otherwise.
      */
     supportsSystemGraph() {
-        return this.clusterMembers[0].supportsSystemGraph();
+        return this.getWriteMember().supportsSystemGraph();
     }
 
     /**
      * Returns true if the context supports authorization overall.
      */
     supportsAuth() {
-        return this.clusterMembers[0].supportsAuth();
+        return this.getWriteMember().supportsAuth();
     }
 
     getVersion() {
-        return this.members()[0].getVersion();
+        return this.getWriteMember().getVersion();
     }
 
     /**
