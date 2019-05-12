@@ -1,7 +1,7 @@
 {
   "short_name": "Halin",
   "name": "Halin Neo4j Monitoring",
-  "homepage": ".",
+  "homepage": "https://github.com/moxious/halin/blob/master/README.md",
   "neo4jDesktop": {
     "apiVersion": "^1.2.0"
   },
