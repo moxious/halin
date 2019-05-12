@@ -142,7 +142,8 @@ export default {
                     const val = rec.get('value');
                     const valAsStr = `${val}`; // Coerce ['foo','bar']=>'foo,bar' if present
 
-                    if (valAsStr.indexOf('native') > -1) {
+                    if (valAsStr.indexOf('native') > -1 ||
+                        valAsStr.indexOf('system-graph') > -1) {
                         nativeAuth = true;
                     }
                 });
