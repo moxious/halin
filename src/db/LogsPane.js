@@ -11,8 +11,6 @@ import le from '../data/logs/LogEvent';
 import CSVDownload from '../data/download/CSVDownload';
 import moment from 'moment';
 
-console.log('LogEvent', le);
-
 const MAX_ROWS = 5000;
 
 const code = text => <span style={{ fontFamily: 'monospace' }}>{text}</span>;
@@ -117,14 +115,10 @@ class LogViewer extends Component {
             sentry.reportError('Failed to stream logfile', err);
         }
 
-        console.error('Failed to get log', err);
         this.setState({ err, loadOp: null, data: null });
     }
 
     load() {
-        console.log('LogViewer props', this.props);
-        console.log(this);
-
         let query = `
             CALL apoc.log.stream("${this.props.file}", { last: $n }) 
             YIELD lineNo, line 
@@ -147,8 +141,6 @@ class LogViewer extends Component {
         const params = { n, limit: MAX_ROWS };
         const promise = this.props.node.run(query, params)
             .then(results => {
-                console.log('data came back');
-
                 // Records are in reverse order to only get the last ones.  Re-reverse them.
                 const data = neo4j.unpackResults(results, {
                     required: ['lineNo', 'line'],
@@ -271,7 +263,7 @@ class LogViewer extends Component {
 
                 {this.state.data ?
                     <div className='LogViewerTable' style={{ paddingTop: '15px' }}><ReactTable
-                        defaultFilterMethod={(filter, row, column) => {
+                        defaultFilterMethod={(filter, row /*, column */) => {
                             const id = filter.pivotId || filter.id
                             return row[id] !== undefined ? String(row[id]).indexOf(filter.value) > -1 : true
                         }}

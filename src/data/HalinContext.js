@@ -164,7 +164,7 @@ export default class HalinContext {
         }, queryLibrary.CLUSTER_ROLE));
 
         const addr = clusterMember.getBoltAddress();
-        const onRoleData = (newData, dataFeed) => {
+        const onRoleData = (newData /* , dataFeed */) => {
             const newRole = newData.data[0].role;
 
             // Something in cluster topology just changed...
@@ -186,7 +186,7 @@ export default class HalinContext {
             }
         };
 
-        const onError = (err, dataFeed) => 
+        const onError = (err /*, dataFeed */) => 
             sentry.reportError(err, `HalinContext: failed to get cluster role for ${addr}`);
 
         roleFeed.addListener(onRoleData);
@@ -429,7 +429,7 @@ export default class HalinContext {
         // We return a promise that resolves the next time the data feed
         // comes back with a result.
         return new Promise((resolve, reject) => {
-            const onPingData = (newData, dataFeed) => {
+            const onPingData = (newData /* , dataFeed */) => {
                 return resolve({
                     clusterMember: clusterMember,
                     elapsedMs: _.get(newData, 'data[0]_sampleTime'),

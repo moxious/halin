@@ -57,4 +57,4 @@ export default class SettingsPane extends Component {
             </div>
         )
     }
-};
+}

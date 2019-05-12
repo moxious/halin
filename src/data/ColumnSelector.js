@@ -64,4 +64,4 @@ export default class ColumnSelector extends Component {
             </div> : 'Loading...'
         );
     }
-};
+}

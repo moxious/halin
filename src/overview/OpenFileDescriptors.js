@@ -12,14 +12,14 @@ class OpenFileDescriptors extends Component {
         displayProperty: 'fdUsed',
     };
 
-    onUpdate = (childQueryState) => {
-        // console.log('child query state',childQueryState);
-    };
+    // onUpdate = (childQueryState) => {
+    //     // console.log('child query state',childQueryState);
+    // };
 
     // JMX gives us maximum FDs and open FDs, but we want number of used FDs,
     // so we have to augment the data structure because the timeseries doesn't do math
     // for us.
-    augmentData = (node) => (data) => {
+    augmentData = (/* node */) => (data) => {
         const fdUsed = data.fdMax - data.fdOpen;
         return { fdUsed };
     };
@@ -68,7 +68,7 @@ class OpenFileDescriptors extends Component {
                 <ClusterTimeseries key={this.state.key}
                     width={this.state.width}
                     feedMaker={this.dataFeedMaker}
-                    onUpdate={this.onUpdate}
+                    // onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />
             </div>

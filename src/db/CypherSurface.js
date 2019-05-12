@@ -3,6 +3,7 @@ import Spinner from '../Spinner';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import CSVDownload from '../data/download/CSVDownload';
+import sentry from '../sentry/index';
 import moment from 'moment';
 
 class CypherSurface extends Component {
@@ -54,9 +55,7 @@ class CypherSurface extends Component {
             .then(surface => {
                 this.setState({ surface });
             })
-            .catch(err => {
-                console.error('Failed to get surface', err);
-            });
+            .catch(err => sentry.reportError('Failed to get surface', err));
     }
 
     render() {
@@ -80,7 +79,7 @@ class CypherSurface extends Component {
                 <ReactTable
                     // By default, filter only catches data if the value STARTS WITH
                     // the entered string.  This makes it less picky.
-                    defaultFilterMethod={(filter, row, column) => {
+                    defaultFilterMethod={(filter, row /* , column */) => {
                         const id = filter.pivotId || filter.id
                         return row[id] !== undefined ? String(row[id]).indexOf(filter.value) > -1 : true
                     }}

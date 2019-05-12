@@ -53,10 +53,6 @@ export default class SampleQueries extends Component {
         ].concat(queryLibrary.DB_QUERY_STATS.columns),
     };
 
-    plan(row) {
-        return 'FooPlan';
-    }
-
     help() {
         return (
             <div className='SampleQueriesHelp'>
@@ -157,7 +153,7 @@ export default class SampleQueries extends Component {
                     updateInterval: setInterval(() => {
                         const now = new Date().getTime();
                         const percent = (now - start) / this.state.interval;
-                        console.log(percent, 'percent complete');
+                        // console.log(percent, 'percent complete');
                         this.setState({ percent: percent >= 1 ? 0.99 : percent });
                     }, 100),
                 });
@@ -220,7 +216,7 @@ export default class SampleQueries extends Component {
         return this.state.interval && !Number.isNaN(v) && v > 0;
     }
 
-    handleChange = (meh, { name, value }) => {
+    handleChange = (meh, { /* name, */ value }) => {
         this.setState({
             interval: value,
         });
@@ -279,4 +275,4 @@ export default class SampleQueries extends Component {
             </div>
         );
     }
-};
+}

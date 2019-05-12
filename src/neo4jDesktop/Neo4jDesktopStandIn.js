@@ -91,7 +91,7 @@ class Neo4jDesktopStandIn extends Component {
             />
         )
     }
-};
+}
 
 Neo4jDesktopStandIn.buildFakeContext = buildFakeContext;
 

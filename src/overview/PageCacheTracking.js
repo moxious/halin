@@ -85,9 +85,6 @@ class PageCacheTracking extends Component {
         this.setState({ displayProperty: val });
     };
 
-    onUpdate = (data, feed) => {
-    };
-
     help() {
         return (
             <div className="PageCacheTrackingHelp">
@@ -123,7 +120,6 @@ class PageCacheTracking extends Component {
                 <ClusterTimeseries key={this.state.key}
                     width={this.state.width}
                     feedMaker={this.dataFeedMaker}
-                    onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />
             </div>

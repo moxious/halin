@@ -317,4 +317,4 @@ export default class ClusterMember {
                     .catch(e => sentry.fine('Pool release error', e));
             });
     }
-};
+}

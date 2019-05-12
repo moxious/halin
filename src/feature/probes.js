@@ -68,9 +68,7 @@ export default {
      */
     hasAPOC: node => {
         const apocProbePromise = node.run(queryLibrary.APOC_VERSION)
-            .then(results => {
-                return true;
-            })
+            .then(() => true)
             .catch(err => {
                 const str = `${err}`;
 

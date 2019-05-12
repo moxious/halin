@@ -34,7 +34,7 @@ export default class OSStats extends Component {
         setMyStateFromDataFeed(this.feed.currentState());
 
         // Setup listener to do the same thing as new data arrives.
-        const onDataListener = (newData, dataFeed) => setMyStateFromDataFeed(newData);
+        const onDataListener = (newData /* , dataFeed */) => setMyStateFromDataFeed(newData);
         this.feed.addListener(onDataListener);
     }
 
@@ -100,4 +100,4 @@ export default class OSStats extends Component {
             </div>
         ) : <Spinner active={true} />;
     }
-};
+}

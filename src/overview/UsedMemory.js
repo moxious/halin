@@ -12,11 +12,11 @@ class UsedMemory extends Component {
         displayProperty: 'physUsed',
     };
 
-    onUpdate = (childQueryState) => {
-        // console.log('child query state',childQueryState);
-    };
+    // onUpdate = (childQueryState) => {
+    //     // console.log('child query state',childQueryState);
+    // };
 
-    augmentData = (node) => (data) => {
+    augmentData = (/* node */) => (data) => {
         const physUsed = data.physTotal - data.physFree;
         return { physUsed };
     };
@@ -51,7 +51,7 @@ class UsedMemory extends Component {
                 <ClusterTimeseries key={this.state.key}
                     width={this.state.width}
                     feedMaker={this.dataFeedMaker}
-                    onUpdate={this.onUpdate}
+                    // onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />
             </div>

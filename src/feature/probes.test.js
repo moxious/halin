@@ -48,7 +48,7 @@ describe('Feature Probes', function () {
     });
 
     describe('Listing Metrics', () => {
-        const metrics = [ { name: 'a', lastUpdated: 'sss' } ];
+        // const metrics = [ { name: 'a', lastUpdated: 'sss' } ];
         it('can get metrics', () =>
             probes.getAvailableMetrics(fakes.ClusterMember())
                 .then(r => {

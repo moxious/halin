@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import CypherDataTable from '../data/CypherDataTable';
 import Explainer from '../Explainer';
 import queryLibrary from '../data/queries/query-library';

@@ -217,7 +217,7 @@ export default class DataFeed extends Metric {
     /**
      * Get the minmum value that occurs in the feed.
      */
-    min(cols=this.displayColumns, debug=false) {
+    min(cols=this.displayColumns) {
         if (!this.state.data || this.state.data.length === 0) { return 0; }
 
         const minObs = obs => {
@@ -237,7 +237,7 @@ export default class DataFeed extends Metric {
      * Get the maximum value that occurs in the feed.
      * @param cols find the max only considering the provided columns (defaults to all)
      */
-    max(cols=this.displayColumns, debug=false) {
+    max(cols=this.displayColumns) {
         if (!this.state.data || this.state.data.length === 0) { return 1; }
         
         const maxObs = obs => {

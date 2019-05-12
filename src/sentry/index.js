@@ -2,6 +2,7 @@
  * This module exists to centralize all uses of the Sentry external dependency, and to
  * provide a central place to do error handling/logging in Halin.
  */
+/* eslint-disable no-console */
 import * as Sentry from '@sentry/browser';
 import appPkg from '../../package.json';
 

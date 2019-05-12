@@ -1,6 +1,7 @@
 import HalinContext from '../data/HalinContext';
 import collection from '../diagnostic/collection/index';
 import sentry from '../sentry/index';
+/* eslint-disable no-console */
 
 const ctx = new HalinContext();
 

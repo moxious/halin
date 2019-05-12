@@ -16,15 +16,15 @@ class TransactionsOpen extends Component {
         displayProperty: 'open',
     };
 
-    onUpdate = (childQueryState) => {
-        // console.log('TransactionsOpen update',childQueryState);
-    };
+    // onUpdate = (childQueryState) => {
+    //     // console.log('TransactionsOpen update',childQueryState);
+    // };
 
     toggleView = (val) => {
         this.setState({ displayProperty: val });
     };
 
-    augmentData = (node) => (data) => {
+    augmentData = (/* node */) => (/* data */) => {
         // TBD -- we can use this to compute committed/sec if we want.
         return {};
     };
@@ -89,7 +89,7 @@ class TransactionsOpen extends Component {
                     query={this.state.query} 
                     width={this.state.width}
                     feedMaker={this.dataFeedMaker}
-                    onUpdate={this.onUpdate}
+                    // onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />
             </div>

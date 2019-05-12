@@ -32,7 +32,7 @@ class ClusterEventLog extends Component {
         const events = _.sortBy(
             _.clone(window.halinContext.getClusterManager().getEventLog()),
             'date').reverse();
-        console.log('CEV items', events);
+        // console.log('CEV items', events);
         return (
             <div className='ClusterEventLog'>
                 <h3>Cluster Event Log</h3>
@@ -47,6 +47,6 @@ class ClusterEventLog extends Component {
             </div>
         );
     }
-};
+}
 
 export default hoc.clusterOnlyComponent(ClusterEventLog);

@@ -43,8 +43,8 @@ class ClusterView extends Component {
 
     render() {
         const events = {
-            select: function(event) {
-                var { nodes, edges } = event;
+            select: function(/* event */) {
+                // var { nodes, edges } = event;
             }
         };
 

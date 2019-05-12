@@ -15,7 +15,7 @@ class TransactionMonitor extends Component {
         legendOnlyColumns: queryLibrary.JMX_TRANSACTIONS.legendOnlyColumns,
     };
 
-    onUpdate = (childQueryState) => {
+    onUpdate = (/* childQueryState */) => {
         // console.log('child query state',childQueryState);
     };
 

@@ -10,4 +10,4 @@ export default class Metric {
     isFresh() {
         throw new Error('Override me');
     }
-};
+}

@@ -1,6 +1,7 @@
 /**
  * Utilities around dealing with Neo4j Desktop
  */
+/* eslint-disable no-console */
 import sentry from '../sentry/index';
 
 /**

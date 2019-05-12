@@ -64,8 +64,8 @@ class Overview extends Component {
                 let roles = ['(none)'];
                 
                 // Community doesn't expose roles
-                try { roles = rec.get('roles'); }
-                catch (e) { ; }
+                try { roles = rec.get('roles'); }                
+                catch (e) { } // eslint-disable-line no-empty
 
                 const user = {
                     username: rec.get('username'),

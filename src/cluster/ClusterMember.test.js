@@ -46,7 +46,7 @@ describe('ClusterMember', function () {
             c.run('RETURN true AS value'),
             c.run('RETURN true AS value'),
             c.run('RETURN true AS value'),
-        ]).then(results => {
+        ]).then(() => {
             // Observations is a RingJS ring
             expect(c.getObservations().toArray().length).toEqual(3);
             c.getObservations().toArray().forEach(obs => {
