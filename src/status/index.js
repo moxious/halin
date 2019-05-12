@@ -33,8 +33,7 @@ export default {
 
     toastify: (component, options) => {
         const alwaysOptions = _.merge({
-            position: "top-right",
-            autoClose: false,
+            position: 'top-center',
             hideProgressBar: true,
             closeOnClick: true,
             pauseOnHover: true,
@@ -50,10 +49,10 @@ export default {
         };
 
         if (component.state.error) {
-            const message = 'Success ' + component.state.error.body;
+            const message = '☠️ Error ' + component.state.error.body;
             toast.error(message, _.merge(alwaysOptions, errorOptions, options));
         } else if(component.state.message) {
-            const message = 'Error ' + component.state.message.body;
+            const message = '👍 Success ' + component.state.message.body;
             toast.success(message, _.merge(alwaysOptions, successOptions, options));
         }
 

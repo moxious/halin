@@ -107,7 +107,8 @@ class Neo4jUsers extends Component {
                 message: null,
                 error: status.message('Error',
                     `Could not delete user ${row.username}: ${err}`),
-            }));
+            }))
+            .finally(() => status.toastify(this));
     }
 
     openAssign = (row) => {
@@ -170,7 +171,6 @@ class Neo4jUsers extends Component {
     }
 
     render() {
-        let message = status.formatStatusMessage(this);
         const enterprise = window.halinContext.isEnterprise();
 
         return (
@@ -180,7 +180,7 @@ class Neo4jUsers extends Component {
                 <Grid>
                     <Grid.Row columns={2}>
                         <Grid.Column>
-                            {message || 'Browse, filter, and delete users'}
+                            {'Browse, filter, and delete users'}
                         </Grid.Column>
                         <Grid.Column>
                             { enterprise ? 

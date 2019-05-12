@@ -52,7 +52,8 @@ class NewRoleForm extends Component {
                 message: null,
                 error: status.message('Error',
                     `Could not create role ${this.state.role}: ${err}`),
-            }));
+            }))
+            .finally(() => status.toastify(this));
     }
 
     formValid() {
@@ -79,13 +80,9 @@ class NewRoleForm extends Component {
     };
 
     render() {
-        let message = status.formatStatusMessage(this);
-
         return (
             <div className='NewRoleForm'>
                 <h3>Create Role</h3>
-
-                { message }
 
                 <Form>
                     <Form.Group widths='equal'>

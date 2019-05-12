@@ -94,7 +94,8 @@ class Neo4jRoles extends Component {
                 message: null,
                 error: status.message('Error',
                     `Could not delete role ${row.role}: ${err}`),
-            }));
+            }))
+            .finally(() => status.toastify(this));
     }
 
     open = (row) => {
@@ -121,8 +122,6 @@ class Neo4jRoles extends Component {
     }
 
     render() {
-        let message = status.formatStatusMessage(this);
-
         return (
             <div className="Neo4jRoles">
                 <h3>Roles</h3>
@@ -130,7 +129,7 @@ class Neo4jRoles extends Component {
                 <Grid>
                     <Grid.Row columns={2}>
                         <Grid.Column>
-                            {message || 'Browse, filter, and delete roles below'}
+                            {'Browse, filter, and delete roles below'}
                         </Grid.Column>
                         <Grid.Column>
                             <Button basic onClick={e => this.refresh()} icon="refresh"/>
