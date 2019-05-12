@@ -21,6 +21,7 @@ import status from './status/index';
 import AppFooter from './AppFooter';
 import './App.css';
 import 'semantic-ui-css/semantic.min.css';
+import HalinToast from './HalinToast';
 import HalinContext from './data/HalinContext';
 import Neo4jDesktopStandIn from './neo4jDesktop/Neo4jDesktopStandIn';
 import uuid from 'uuid';
@@ -201,6 +202,8 @@ class Halin extends Component {
 
     return (
       <div className="App" key="app">
+        <HalinToast/>
+
         { this.props.connected ? 
           <div className='MainBody'>
             {err ? err : this.renderCluster()}

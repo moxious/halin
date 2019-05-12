@@ -50,10 +50,10 @@ export default {
         };
 
         if (component.state.error) {
-            const message = component.state.error.body;
+            const message = 'Success ' + component.state.error.body;
             toast.error(message, _.merge(alwaysOptions, errorOptions, options));
         } else if(component.state.message) {
-            const message = component.state.message.body;
+            const message = 'Error ' + component.state.message.body;
             toast.success(message, _.merge(alwaysOptions, successOptions, options));
         }
 
