@@ -21,7 +21,7 @@ const toCsvString = obj => {
 
 export default class CSVDownload extends Component {
     getButtonText() {
-        return this.props.title ? this.props.title : 'Download CSV';
+        return this.props.title ? this.props.title : 'Download';
     }
 
     getFilename() {

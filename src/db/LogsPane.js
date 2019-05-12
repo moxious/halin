@@ -7,6 +7,11 @@ import Spinner from '../Spinner';
 import ReactTable from 'react-table';
 import neo4j from 'neo4j-driver';
 import sentry from '../sentry';
+import le from '../data/logs/LogEvent';
+import CSVDownload from '../data/download/CSVDownload';
+import moment from 'moment';
+
+console.log('LogEvent', le);
 
 const MAX_ROWS = 5000;
 
@@ -26,7 +31,7 @@ class LogViewer extends Component {
         data: null,
         lastN: 20,
         partial: true,
-        displayColumns: [
+        rawDisplayColumns: [
             { 
                 Header: 'Line', 
                 accessor: 'lineNo', 
@@ -36,6 +41,31 @@ class LogViewer extends Component {
             {
                 Header: 'Entry',
                 accessor: 'line',
+                style,
+            },
+        ],
+        parsedDisplayColumns: [
+            {
+                Header: 'Timestamp',
+                accessor: 'timestamp',
+                Cell: ({ row }) => row.timestamp.format(),
+                style,
+                // width: 150,
+            },
+            {
+                Header: 'Level',
+                accessor: 'logLevel',
+                style,
+                // width: 50,
+            },
+            {
+                Header: 'Class',
+                accessor: 'classDesignator',
+                style,
+            },
+            {
+                Header: 'Log',
+                accessor: 'text',
                 style,
             },
         ],
@@ -124,7 +154,8 @@ class LogViewer extends Component {
                     required: ['lineNo', 'line'],
                 }).reverse();
 
-                this.setState({ err: null, data, loadOp: null });
+                const events = le.parseLines(data.map(d => d.line));
+                this.setState({ err: null, data, events, loadOp: null });
             })
             .catch(err => this.promiseErrorHandler(err));
 
@@ -141,6 +172,21 @@ class LogViewer extends Component {
         }
     }
 
+    troubleshooting() {
+        return (
+            <div className='LogTroubleshooting'>
+                <p>Some installs of Neo4j may use journalctl to access logs, which may not be
+                    on disk in their usual locations.
+                </p>
+
+                <p>Additionally, to view query.log, please ensure that 
+                    <a href="https://neo4j.com/docs/operations-manual/current/monitoring/logging/query-logging/">
+                    query logging is enabled.</a>
+                </p>
+            </div>
+        );
+    }
+
     displayError() {
         if (!this.state.err) {
             throw new Error('Only call me when error is in state');
@@ -148,16 +194,23 @@ class LogViewer extends Component {
 
         const strError = `${this.state.err}`;
         const addendum = strError.indexOf('No log file exists by that name') > -1 ? 
-            'Some installs of Neo4j may use journalctl to access logs, which may not ' +
-            'be on disk in their usual location' : '';
+            this.troubleshooting() : '';
 
         return (
             <Message negative>
             <Message.Header>Error Fetching Log File</Message.Header>
                 <p>{strError}</p>
-                <p>{addendum}</p>
+                { addendum }
             </Message>
         );
+    }
+
+    getData() {
+        return this.state.parsed ? this.state.events : this.state.data;
+    }
+
+    getDisplayColumns() {
+        return this.state.parsed ? this.state.parsedDisplayColumns : this.state.rawDisplayColumns;
     }
 
     render() {
@@ -203,8 +256,13 @@ class LogViewer extends Component {
                             <Button icon
                                 onClick={() => this.download()}>
                                 <Icon name="download" />
-                                Download Entire File
+                                Download Raw File
                             </Button>
+                            { this.state.events ? 
+                            <CSVDownload title='Download as CSV'
+                                filename={`Halin-${this.props.file}-${moment.utc().format()}.csv`}
+                                data={this.state.events}
+                                displayColumns={this.state.parsedDisplayColumns} /> : '' }
                         </Form.Group>
                     </Form.Field>
                 </Form>
@@ -217,12 +275,12 @@ class LogViewer extends Component {
                             const id = filter.pivotId || filter.id
                             return row[id] !== undefined ? String(row[id]).indexOf(filter.value) > -1 : true
                         }}
-                        data={this.state.data}
+                        data={this.getData()}
                         sortable={true}
                         filterable={true}
                         defaultPageSize={Math.min(50, this.state.lastN)}
                         showPagination={!this.state.partial || (this.state.lastN >= 50)}
-                        columns={this.state.displayColumns}
+                        columns={this.getDisplayColumns()}
                     /></div>
                     : ''}
             </div>
@@ -264,6 +322,13 @@ class LogsPane extends Component {
                 menuItem: 'security.log',
                 render: () => {
                     const file = 'security.log';
+                    return this.viewerFor(file);
+                },
+            },
+            {
+                menuItem: 'query.log',
+                render: () => {
+                    const file = 'query.log';
                     return this.viewerFor(file);
                 },
             }
