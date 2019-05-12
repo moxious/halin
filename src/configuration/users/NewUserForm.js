@@ -6,7 +6,6 @@ import { Grid } from 'semantic-ui-react';
 import status from '../../status/index';
 import sentry from '../../sentry/index';
 import './NewUserForm.css';
-import { ToastContainer, toast } from 'react-toastify';
 
 class NewUserForm extends Component {
     state = {
@@ -87,8 +86,6 @@ class NewUserForm extends Component {
         return (
             <div className='NewUserForm'>
                 <h3>Create User</h3>
-
-                <ToastContainer />
 
                 <Form>
                     <Form.Group widths='equal'>
