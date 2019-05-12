@@ -1,9 +1,17 @@
 import React from 'react';
 import { Message } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import _ from 'lodash';
 
 const message = (header, body) => ({ header, body });
 
+/**
+ * This module makes it easier to format status messages across components.
+ * Components are expected to have an "error" object in their state if something
+ * is wrong, and a "message" object if the operation was successful.
+ */
 export default {
     message,
 
@@ -20,6 +28,36 @@ export default {
         } else {
             return message(`Error: ${action}`, errStrs);
         }
+    },
+
+
+    toastify: (component, options) => {
+        const alwaysOptions = _.merge({
+            position: "top-right",
+            autoClose: false,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,       
+        }, options);
+
+        const errorOptions = {
+            autoClose: false,
+        };
+
+        const successOptions = {
+            autoClose: true,
+        };
+
+        if (component.state.error) {
+            const message = component.state.error.body;
+            toast.error(message, _.merge(alwaysOptions, errorOptions, options));
+        } else if(component.state.message) {
+            const message = component.state.message.body;
+            toast.success(message, _.merge(alwaysOptions, successOptions, options));
+        }
+
+        return null;
     },
 
     formatStatusMessage: (component) => {

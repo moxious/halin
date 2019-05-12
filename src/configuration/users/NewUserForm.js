@@ -6,7 +6,7 @@ import { Grid } from 'semantic-ui-react';
 import status from '../../status/index';
 import sentry from '../../sentry/index';
 import './NewUserForm.css';
-
+import { ToastContainer, toast } from 'react-toastify';
 
 class NewUserForm extends Component {
     state = {
@@ -57,7 +57,8 @@ class NewUserForm extends Component {
                 message: null,
                 error: status.message('Error',
                     `Could not create ${user.username}: ${err}`),
-            }));
+            }))
+            .finally(() => status.toastify(this));
     }
 
     formValid() {
@@ -83,13 +84,11 @@ class NewUserForm extends Component {
     };
 
     render() {
-        let message = status.formatStatusMessage(this);
-
         return (
             <div className='NewUserForm'>
                 <h3>Create User</h3>
 
-                { message }
+                <ToastContainer />
 
                 <Form>
                     <Form.Group widths='equal'>

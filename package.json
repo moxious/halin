@@ -39,6 +39,7 @@
     "react-sortable-tree": "^2.2.0",
     "react-table": "^6.8.6",
     "react-timeseries-charts": "^0.15.3",
+    "react-toastify": "^5.1.0",
     "ringjs": "^0.0.1",
     "source-map-explorer": "^1.6.0",
     "uri-parser": "^1.0.1",
