@@ -10,6 +10,7 @@ import advisor from './advisor/index';
 import collection from './collection/index';
 import sentry from '../sentry/index';
 import hoc from '../higherOrderComponents';
+import JSONDownload from '../data/download/JSONDownload';
 
 const UPLOAD_DIAGNOSTICS_BY_DEFAULT = false;
 
@@ -66,18 +67,6 @@ class GeneratePackage extends Component {
         }
 
         sentry.info('Generating diagnostic package');
-    };
-
-    buildURI = data => {
-        const pretty = JSON.stringify(data, null, 2);
-        const blob = new Blob([pretty], { type: 'text/json' });
-        const dataURI = `data:text/json;chartset=utf-8,${pretty}`;
-
-        const URL = window.URL || window.webkitURL;
-
-        return (typeof URL.createObjectURL === 'undefined') ? 
-            dataURI :
-            URL.createObjectURL(blob);
     };
 
     renderDiagnosticAdvice() {
@@ -177,12 +166,11 @@ class GeneratePackage extends Component {
                 </Button>
 
                 { this.state.diagnosticData ? (
-                    <Button basic 
-                        download={`neo4j-diagnostics-${this.state.dataGenerated}.json`}
-                        href={this.buildURI(this.state.diagnosticData)}>
-                        <Icon name="download"/>
-                        Download Diagnostics
-                    </Button>
+                    <JSONDownload 
+                        data={this.state.diagnosticData}
+                        title="Download Diagnostics"
+                        filename={`neo4j-diagnostics-${this.state.dataGenerated}.json`}
+                    />
                 ) : '' }
 
                 <div style={{
