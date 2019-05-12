@@ -7,22 +7,22 @@ import fakes from '../testutils/fakes';
 describe('Cluster Timeseries', function() {
     const key = uuid.v4();
     const query = 'RETURN 1 as x, 2 as y';
-    const displayColumns = [
-        { Header: 'X', accessor: 'x' },
-        { Header: 'Y', accessor: 'y' },
-    ];
+    // const displayColumns = [
+    //     { Header: 'X', accessor: 'x' },
+    //     { Header: 'Y', accessor: 'y' },
+    // ];
     const rate = 11111;
     const returnData = [ 
         { x: 1, y: 2 },
         { x: 3, y: 4 },
     ];
 
-    let node;
+    // let node;
     let component;
     
     beforeEach(() => {
         window.halinContext = fakes.HalinContext(returnData);
-        node = fakes.ClusterMember(returnData);
+        // node = fakes.ClusterMember(returnData);
 
         const props = {
             key, query, width: 400, rate, displayProperty: 'x',
