@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
-import { Button, Form } from 'semantic-ui-react';
-import "semantic-ui-css/semantic.min.css";
-import * as PropTypes from "prop-types";
+import { Form, Message } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import './NewRoleForm.css';
-import { Grid } from 'semantic-ui-react';
 import status from '../../status/index';
 import hoc from '../../higherOrderComponents';
 import sentry from '../../sentry/index';
@@ -25,7 +22,7 @@ class NewRoleForm extends Component {
     createRole() {
         this.setState({ pending: true });
         sentry.info('Creating role with driver ', this.driver);
-        
+
         const mgr = window.halinContext.getClusterManager();
 
         return mgr.addRole(this.state.role)
@@ -65,7 +62,7 @@ class NewRoleForm extends Component {
         event.preventDefault();
         this.createRole();
     }
-    
+
     handleChange(field, event) {
         const mod = {};
         mod[field] = event.target.value;
@@ -79,47 +76,43 @@ class NewRoleForm extends Component {
         paddingBottom: '10px',
     };
 
+    valid() {
+        if (!this.state.role) { return true; }
+        return this.state.role.match(/^[A-Za-z0-9]+$/);
+    }
+
     render() {
         return (
             <div className='NewRoleForm'>
                 <h3>Create Role</h3>
 
-                <Form>
+                <Form error={!this.valid()} size="small" style={{ textAlign: 'left' }}>
                     <Form.Group widths='equal'>
-                    <Grid>
-                        <Grid.Row columns={1}>
-                            <Grid.Column>
-                                <Form.Input 
-                                    fluid 
-                                    style={this.inputStyle}
-                                    disabled={this.state.pending}
-                                    onChange={e => this.handleChange('role', e)} 
-                                    label='Role Name' 
-                                    placeholder='myCustomRole'
-                                />
-                            </Grid.Column>
-                        </Grid.Row>
-                        <Grid.Row columns={1}>
-                            <Grid.Column textAlign='left'>
-                                <Button positive
-                                        style={this.inputStyle}
-                                        disabled={this.state.pending || !this.formValid()} 
-                                        onClick={data => this.submit(data)} 
-                                        type='submit'>
-                                    <i className="icon add"/> Create
-                                </Button>
-                            </Grid.Column>
-                        </Grid.Row>
-                    </Grid>
+                        <Form.Input
+                            fluid                            
+                            style={this.inputStyle}
+                            disabled={this.state.pending}
+                            onChange={e => this.handleChange('role', e)}
+                            label='Role Name'
+                            placeholder='myCustomRole'
+                        />
                     </Form.Group>
+                    <Message
+                        error
+                        header='Invalid role name'
+                        content='Role names may consist only of simple letters and numbers'/>
+
+                    <Form.Button positive
+                        style={this.inputStyle}
+                        disabled={this.state.pending || !this.valid() || !this.state.role}
+                        onClick={data => this.submit(data)}
+                        type='submit'>
+                        <i className="icon add" /> Create
+                    </Form.Button>
                 </Form>
             </div>
         )
     }
 }
-
-NewRoleForm.contextTypes = {
-    driver: PropTypes.object,
-};
 
 export default hoc.enterpriseOnlyComponent(NewRoleForm, 'Create Roles');
