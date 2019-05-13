@@ -5,7 +5,6 @@ import kb from './knowledgebase';
 export default class Explainer extends Component {
     getContent() {
         if (this.props.knowledgebase) {
-            console.log('Returning explainer content by key', kb[this.props.knowledgebase]);
             return kb[this.props.knowledgebase];
         }
 
