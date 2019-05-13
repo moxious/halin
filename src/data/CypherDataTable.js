@@ -52,6 +52,7 @@ class CypherDataTable extends Component {
         this.sortable = _.isNil(props.sortable) ? true : props.sortable;
         this.filterable = _.isNil(props.filterable) ? true : props.filterable;
         this.pageSizeOptions = _.isNil(props.pageSizeOptions) ? [5, 10, 20, 25, 50, 100] : props.pageSizeOptions;
+        this.nodeLabel = props.hideNodeLabel ? false : true;
 
         // Callbacks
         const assignCallback = key => {
@@ -91,6 +92,12 @@ class CypherDataTable extends Component {
         }
     }
 
+    onUpdate = () => {
+        if (this.props.onUpdate) {
+            this.props.onUpdate(this.state.items, this);
+        }
+    };
+
     sampleData() {
         return this.props.node.run(this.query, this.parameters)
             .then(results => {
@@ -104,7 +111,7 @@ class CypherDataTable extends Component {
                 });
 
                 if (this.mounted) {
-                    this.setState({ items });
+                    this.setState({ items }, this.onUpdate);
 
                     if (this.rate > 0) {
                         setTimeout(() => this.sampleData(), this.rate);
@@ -113,7 +120,7 @@ class CypherDataTable extends Component {
             })
             .catch(err => {
                 sentry.reportError(err, `CypherDataTable: error executing ${this.query}`);
-                this.setState({ items: [] });
+                this.setState({ items: [] }, this.onUpdate);
             });
     }
 
@@ -188,7 +195,7 @@ class CypherDataTable extends Component {
                                 onExpandedChange={this.onExpandedChange}
                             />
 
-                            <NodeLabel node={this.props.node}/>
+                            { this.nodeLabel ? <NodeLabel node={this.props.node}/> : '' }
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>

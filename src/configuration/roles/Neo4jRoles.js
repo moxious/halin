@@ -173,6 +173,7 @@ class Neo4jRoles extends Component {
                                 refresh={this.state.childRefresh}
                                 displayColumns={this.displayColumns}
                                 onUpdate={this.onRecordsUpdate}
+                                hideNodeLabel={true}
                             />
                         </Grid.Column>
                     </Grid.Row>
