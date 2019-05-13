@@ -9,6 +9,7 @@ import _ from 'lodash';
 import moment from 'moment';
 import { Button, Popup, Modal, Header } from 'semantic-ui-react';
 import TaskDetail from './TaskDetail';
+import Explainer from '../../Explainer';
 
 const age = since => {
     const start = moment.utc(since);
@@ -173,10 +174,26 @@ class Tasks extends Component {
         );
     }
 
+    help() {
+        return (
+            <div className='TasksHelp'>
+                <p>Neo4j Tasks is a combination of three kinds of information:  connections,
+                 transactions, and queries.  This allows monitoring of what is currently 
+                 executing on a given Neo4j cluster member.</p>
+
+                <p>For more information, check the operations manual for the topics of 
+                    <a href="https://neo4j.com/docs/java-reference/current/transactions/">
+                    transaction management</a>
+                    and <a href="https://neo4j.com/docs/operations-manual/current/monitoring/connection-management/">
+                    connection management</a></p>
+            </div>
+        );
+    }
+
     render() {
         return (
             <div className="Tasks">
-                <h2>Tasks</h2>
+                <h3>Tasks <Explainer content={this.help()}/></h3>
                 <CypherDataTable
                     allowDownloadCSV={true}
                     node={this.props.node}
