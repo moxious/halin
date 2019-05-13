@@ -65,15 +65,13 @@ export default class CSVDownload extends Component {
         // console.log('csvData', csvData);
 
         return (
-            <div className='DownloadCSV'>
-                <CSVLink 
-                    filename={this.getFilename()}
-                    className="ui basic button"
-                    data={csvData}>
-                    <Icon name="download"/>
-                    { this.getButtonText() }
-                </CSVLink>
-            </div>
+            <CSVLink 
+                filename={this.getFilename()}
+                className="ui button DownloadCSV"
+                data={csvData}>
+                <Icon name="download"/>
+                { this.getButtonText() }
+            </CSVLink>
         );
     }
 };
