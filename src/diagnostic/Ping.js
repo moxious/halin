@@ -6,6 +6,7 @@ import { Button, Icon, Table } from 'semantic-ui-react';
 import SignalMeter from '../data/SignalMeter';
 import datautil from '../data/util';
 import sentry from '../sentry/index';
+import Explainer from '../Explainer';
 
 export default class Ping extends Component {
     state = {
@@ -22,6 +23,20 @@ export default class Ping extends Component {
 
     componentWillUnmount() {
         this.mounted = false;
+    }
+
+    help() {
+        return (
+            <div className='PingHelp'>
+                <p>Ping sends a trivial cypher query to the server and measures how 
+                    long it takes the response to come back.</p>
+
+                <p>This is useful when examining slow queries, because it shows
+                how much time network latency and basic cypher queries take, allowing
+                us to see how much of query performance is those factors, versus the
+                execution of the Cypher itself.</p>
+            </div>
+        );
     }
 
     ping() {
@@ -82,10 +97,7 @@ export default class Ping extends Component {
 
         return this.state.pingResults ? (
             <div className='Ping'>
-                <h2>Ping</h2>
-
-                Ping sends a trivial cypher query to the server and measures how long it takes the response
-                to come back.
+                <h3>Ping <Explainer content={this.help()}/></h3>
 
                 { message }
                 <Table celled>
