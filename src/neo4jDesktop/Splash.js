@@ -20,4 +20,4 @@ export default class Splash extends Component {
             </div>
         )
     }
-};
+}

@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import { Component } from 'react';
 import CypherDataTable from '../data/CypherDataTable';
 import Explainer from '../Explainer';
 import queryLibrary from '../data/queries/query-library';
@@ -14,28 +14,10 @@ class StorageCapacity extends Component {
         displayColumns: queryLibrary.APOC_STORAGE_METRIC.columns,
     };
 
-    help() {
-        return (
-            <div className='StorageCapacityHelp'>
-                <p>Neo4j allows you to configure different directory locations.</p>
-                <p>Often these will be on the same disk.</p>
-                <p>The table below shows the underlying disk free and available 
-                   in each directory specified in your neo4j.conf file.</p>
-                <p>If many statistics are the same, this probably means that most 
-                or all of your files reside on the same disk.</p>
-
-                <p><a target="docs" href="https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_dbms.directories.data">
-                    For more information, consult the configuration settings reference in the operations manual
-                    </a>
-                </p>
-            </div>
-        );
-    }
-
     render() {
         return (
             <div className='StorageCapacity'>
-                <h3>Storage Capacity <Explainer icon='info' content={this.help()}/></h3>
+                <h3>Storage Capacity <Explainer icon='info' knowledgebase='StorageCapacity'/></h3>
                 <CypherDataTable 
                     node={this.props.node}
                     query={this.state.query}

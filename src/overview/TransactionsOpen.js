@@ -16,15 +16,15 @@ class TransactionsOpen extends Component {
         displayProperty: 'open',
     };
 
-    onUpdate = (childQueryState) => {
-        // console.log('TransactionsOpen update',childQueryState);
-    };
+    // onUpdate = (childQueryState) => {
+    //     // console.log('TransactionsOpen update',childQueryState);
+    // };
 
     toggleView = (val) => {
         this.setState({ displayProperty: val });
     };
 
-    augmentData = (node) => (data) => {
+    augmentData = (/* node */) => (/* data */) => {
         // TBD -- we can use this to compute committed/sec if we want.
         return {};
     };
@@ -54,15 +54,6 @@ class TransactionsOpen extends Component {
         return feed;
     };
 
-    help() {
-        return (
-            <div className='TransactionsOpenHelp'>
-                <p>Any query that updates the graph will run in a transaction. An updating query will always either fully succeed, or not succeed at all.</p>
-                <p><a href="https://neo4j.com/docs/java-reference/current/transactions/">Read more about Transaction Management</a></p>
-            </div>
-        )
-    }
-
     render() {
         const buttons = [
             { label: 'Open', field: 'open' },
@@ -73,7 +64,7 @@ class TransactionsOpen extends Component {
 
         return (
             <div className="TransactionMonitor">
-                <h3>Transactions <Explainer content={this.help()}/></h3>
+                <h3>Transactions <Explainer knowledgebase='TransactionsOpen' /></h3>
                 
                 <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
                     buttons.map((b,idx) =>
@@ -89,7 +80,7 @@ class TransactionsOpen extends Component {
                     query={this.state.query} 
                     width={this.state.width}
                     feedMaker={this.dataFeedMaker}
-                    onUpdate={this.onUpdate}
+                    // onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />
             </div>

@@ -6,6 +6,7 @@ import { Button, Icon, Table } from 'semantic-ui-react';
 import SignalMeter from '../data/SignalMeter';
 import datautil from '../data/util';
 import sentry from '../sentry/index';
+import Explainer from '../Explainer';
 
 export default class Ping extends Component {
     state = {
@@ -82,10 +83,7 @@ export default class Ping extends Component {
 
         return this.state.pingResults ? (
             <div className='Ping'>
-                <h2>Ping</h2>
-
-                Ping sends a trivial cypher query to the server and measures how long it takes the response
-                to come back.
+                <h3>Ping <Explainer knowledgebase='Ping'/></h3>
 
                 { message }
                 <Table celled>

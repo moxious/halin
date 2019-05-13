@@ -26,7 +26,7 @@ class AssignRoleModal extends Component {
                     pending: false,
                     message: null,
                     error: status.message('Error', `Could not execute cypher: ${err}`),
-                });
+                }, () => status.toastify(this));
             });
     }
 
@@ -156,16 +156,11 @@ class AssignRoleModal extends Component {
     };
 
     render() {
-        const message = status.formatStatusMessage(this);
-
         return (
             <Modal className='AssignRoleModal'
                 open={this.state.open}>
                 <Modal.Header>Manage User Roles</Modal.Header>
-                <Modal.Content>
-                    
-                    { message }
-
+                <Modal.Content>                    
                     <Grid>
                         <Grid.Row columns={2}>
                             <Grid.Column>

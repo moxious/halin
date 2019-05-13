@@ -51,7 +51,7 @@ const queries = {
 
 export default {
     ...queries,
-    response: (query, params) => {
+    response: (query /* , params */) => {
         let queryText = query;
         if (query instanceof HalinQuery) {
             queryText = query.getQuery();
@@ -62,7 +62,7 @@ export default {
 
         Object.keys(queries).forEach(q => {
             if(found) { return; }
-            const qLower = q.toLowerCase();
+            // const qLower = q.toLowerCase();
             const re = new RegExp(q, 'im');
             if (input.match(re)) {                
                 found = queries[q];
@@ -70,7 +70,7 @@ export default {
         });
 
         if (_.isNil(found)) {
-            console.log('NO FAKE AVAILBLE FOR ', query);
+            // console.log('NO FAKE AVAILBLE FOR ', query);
         }
 
         // console.log('Found fake results', input, '=>', found);

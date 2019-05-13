@@ -33,6 +33,7 @@ class DetectedSettings extends Component {
                     <List.Item>{ this.lineItem(ctx.isCommunity(), 'Community Edition') }</List.Item>
                     <List.Item>{ this.lineItem(ctx.supportsAuth(), 'Supports authorization') }</List.Item>
                     <List.Item>{ this.lineItem(ctx.supportsNativeAuth(), 'Native Authorization') }</List.Item>
+                    <List.Item>{ this.lineItem(ctx.supportsSystemGraph(), 'System Graph') }</List.Item>
                     <List.Item>{ this.lineItem(ctx.supportsAPOC(), 'Supports APOC') }</List.Item>
                     <List.Item>{ this.lineItem(ctx.supportsLogStreaming(), 'Supports File Streaming') }</List.Item>
                     <List.Item>{ this.lineItem(ctx.supportsDBStats(), 'Supports DB Stats') } (only available Neo4j >= 3.5.2)</List.Item>
@@ -57,4 +58,4 @@ export default class SettingsPane extends Component {
             </div>
         )
     }
-};
+}

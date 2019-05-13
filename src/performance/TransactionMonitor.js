@@ -15,25 +15,12 @@ class TransactionMonitor extends Component {
         legendOnlyColumns: queryLibrary.JMX_TRANSACTIONS.legendOnlyColumns,
     };
 
-    onUpdate = (childQueryState) => {
+    onUpdate = (/* childQueryState */) => {
         // console.log('child query state',childQueryState);
     };
 
-    help() {
-        return (
-            <div className='TransactionMonitorHelp'>
-                <p>All database operations that access the graph, indexes, or the schema must be performed in a transaction</p>
-                <p>Open transactions are the number of active transactions Neo4j is running at any given moment.</p>
-                <p>Rolled back transactions are those who have failed, and whose intermediate effects were "rolled back" so that
-                    the entire transaction as a package either succeeds or fails.
-                </p>
-                <p><a href="https://neo4j.com/docs/java-reference/current/transactions/">Read more about Neo4j transaction management</a></p>
-            </div>
-        );
-    }
-
     render() {
-        const explainer = <Explainer content={this.help()}/>;
+        const explainer = <Explainer knowledgebase='Transactions' />;
         return (
             <div className="TransactionMonitor">
                 <CypherTimeseries key={this.state.key}

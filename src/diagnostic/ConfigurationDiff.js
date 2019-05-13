@@ -95,7 +95,7 @@ export default class ConfigurationDiff extends Component {
                 <ReactTable
                     // By default, filter only catches data if the value STARTS WITH
                     // the entered string.  This makes it less picky.
-                    defaultFilterMethod={(filter, row, column) => {
+                    defaultFilterMethod={(filter, row /* , column */) => {
                         const id = filter.pivotId || filter.id
                         return row[id] !== undefined ? String(row[id]).indexOf(filter.value) > -1 : true
                     }}

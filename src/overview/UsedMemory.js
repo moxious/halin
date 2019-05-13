@@ -12,11 +12,11 @@ class UsedMemory extends Component {
         displayProperty: 'physUsed',
     };
 
-    onUpdate = (childQueryState) => {
-        // console.log('child query state',childQueryState);
-    };
+    // onUpdate = (childQueryState) => {
+    //     // console.log('child query state',childQueryState);
+    // };
 
-    augmentData = (node) => (data) => {
+    augmentData = (/* node */) => (data) => {
         const physUsed = data.physTotal - data.physFree;
         return { physUsed };
     };
@@ -32,26 +32,15 @@ class UsedMemory extends Component {
         return feed;
     };
 
-    help() {
-        return (
-            <div className='UsedMemoryHelp'>
-                <p>This displays total physical memory / RAM available to the machine that Neo4j runs on.</p>
-                <p>This is <strong>not</strong> limited to what Neo4j uses, but covers all processes running on that machine</p>
-                <p><a href="https://neo4j.com/docs/java-reference/current/jmx-metrics/">
-                Read the docs on JMX monitoring of the operating system</a></p>
-            </div>
-        );
-    }
-
     render() {
         return (
             <div className="UsedMemory">
-                <h3>Used Physical Memory <Explainer content={this.help()}/></h3>
+                <h3>Used Physical Memory <Explainer knowledgebase='UsedMemory' /></h3>
                 
                 <ClusterTimeseries key={this.state.key}
                     width={this.state.width}
                     feedMaker={this.dataFeedMaker}
-                    onUpdate={this.onUpdate}
+                    // onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />
             </div>

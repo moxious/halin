@@ -39,7 +39,7 @@ export default class AllocationChart extends Component {
         this.setState(newState);
     }
 
-    tooltip = (label, value) => {
+    tooltip = (label /*, value */) => {
         let underlyingValue = 0;
         if (label.match(/alloc/i)) {
             underlyingValue = this.state.alloc;

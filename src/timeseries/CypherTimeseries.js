@@ -52,8 +52,8 @@ class CypherTimeseries extends Component {
         this.query = props.query;
         this.rate = props.rate || 1000;
         this.width = props.width || 800;
-        this.min = props.min || (data => this.state.minObservedValue);
-        this.max = props.max || (data => this.state.maxObservedValue);
+        this.min = props.min || (() => this.state.minObservedValue);
+        this.max = props.max || (() => this.state.maxObservedValue);
         this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 2;  // 2 min
         this.displayColumns = props.displayColumns;
         this.legendOnlyColumns = props.legendOnlyColumns || [];
@@ -127,7 +127,7 @@ class CypherTimeseries extends Component {
         this.mounted = false;
     }
 
-    onData(newData, dataFeed) {
+    onData(newData /*, dataFeed */) {
         if (this.mounted) {
             const computedMin = this.feed.min(this.displayColumns) * 0.85;
             const computedMax = this.feed.max(this.displayColumns) * 1.15;

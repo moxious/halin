@@ -31,7 +31,7 @@ export default class ClusterResponseGraph extends Component {
     }
 
     render() {
-        const tooltipScatter = (x, y, rest) => {
+        const tooltipScatter = (x, y /* , rest */) => {
             return `${x}: ${y}ms`;
         };
 

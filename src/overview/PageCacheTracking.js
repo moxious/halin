@@ -85,19 +85,6 @@ class PageCacheTracking extends Component {
         this.setState({ displayProperty: val });
     };
 
-    onUpdate = (data, feed) => {
-    };
-
-    help() {
-        return (
-            <div className="PageCacheTrackingHelp">
-                <p>The page cache is used to cache the Neo4j data as stored on disk. Ensuring that most of the graph data from disk is cached in memory will help avoid costly disk access.</p>
-
-                <p><a href="https://neo4j.com/developer/guide-performance-tuning/">Read more about performance tuning and the page cache</a></p>
-            </div>
-        )
-    }
-
     render() {
         const buttons = [
             { label: 'Usage Ratio', field: 'usageRatio' },
@@ -108,7 +95,7 @@ class PageCacheTracking extends Component {
 
         return (
             <div className="PageCacheTracking">
-                <h3>Page Cache <Explainer content={this.help()}/></h3>
+                <h3>Page Cache <Explainer knowledgebase='PageCache' /></h3>
 
                 <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
                     buttons.map((b,idx) =>
@@ -123,7 +110,6 @@ class PageCacheTracking extends Component {
                 <ClusterTimeseries key={this.state.key}
                     width={this.state.width}
                     feedMaker={this.dataFeedMaker}
-                    onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />
             </div>

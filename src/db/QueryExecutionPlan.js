@@ -47,12 +47,12 @@ export default class QueryExecutionPlan extends Component {
         });
     }
 
-    onVisibilityToggle = ({ treeData, node, expanded, path }) => {
-        console.log('toggle JMX',node);
-    };
+    // onVisibilityToggle = ({ treeData, node, expanded, path }) => {
+    //     console.log('toggle JMX',node);
+    // };
 
     handleTreeOnChange = treeData => {
-        console.log('TreeData', treeData);
+        // console.log('TreeData', treeData);
         this.setState({ treeData });
         // treeData[0].expanded = !treeData[0].expanded;
     };
@@ -65,7 +65,7 @@ export default class QueryExecutionPlan extends Component {
                         canDrag={() => false}
                         canDrop={() => false}
                         treeData={this.state.treeData}
-                        onVisibilityToggle={this.onVisibilityToggle}
+                        // onVisibilityToggle={this.onVisibilityToggle}
                         onChange={this.handleTreeOnChange} />
                 </div>
 

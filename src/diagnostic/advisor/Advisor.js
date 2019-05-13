@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import ReactTable from 'react-table';
 import { Icon } from 'semantic-ui-react';
+import CSVDownload from '../../data/download/CSVDownload';
+import moment from 'moment';
 import './Advisor.css';
 import _ from 'lodash';
 
@@ -127,6 +129,12 @@ export default class Advisor extends Component {
                 <h3>Advisor Results</h3>
 
                 <p>We had a look at your configuration, and have some feedback.</p>
+
+                <CSVDownload 
+                    title="Download Results as CSV"
+                    data={this.props.data}
+                    displayColumns={this.state.displayColumns}
+                    filename={`Halin-diagnostic-results-${moment.utc().format()}.csv`} />
 
                 <ReactTable
                     defaultFilterMethod={(filter, row, column) => {

@@ -2,21 +2,33 @@ import React, { Component } from 'react';
 import uuid from 'uuid';
 import hoc from '../higherOrderComponents';
 import _ from 'lodash';
-import { Tab, Button, Icon, Form, Radio, Message } from 'semantic-ui-react';
+import { Tab, Button, Icon, Form, Radio, Message, Checkbox } from 'semantic-ui-react';
 import Spinner from '../Spinner';
 import ReactTable from 'react-table';
 import neo4j from 'neo4j-driver';
 import sentry from '../sentry';
+import le from '../data/logs/LogEvent';
+import CSVDownload from '../data/download/CSVDownload';
+import moment from 'moment';
+import kb from '../knowledgebase';
+import Explainer from '../Explainer';
 
 const MAX_ROWS = 5000;
 
 const code = text => <span style={{ fontFamily: 'monospace' }}>{text}</span>;
 
 const style = {
-    whitespace: 'unset',
     textAlign: 'left',
     fontFamily: 'monospace',
     fontSize: '0.8em',
+};
+
+const logLineStyle = {
+    textAlign: 'left',
+    fontFamily: 'monospace',
+    fontSize: '0.8em',
+    overflowWrap: 'anywhere',
+    'white-space': 'unset',
 };
 
 class LogViewer extends Component {
@@ -26,7 +38,9 @@ class LogViewer extends Component {
         data: null,
         lastN: 20,
         partial: true,
-        displayColumns: [
+        classDesignators: [],
+        parsed: true,
+        rawDisplayColumns: [
             { 
                 Header: 'Line', 
                 accessor: 'lineNo', 
@@ -36,7 +50,70 @@ class LogViewer extends Component {
             {
                 Header: 'Entry',
                 accessor: 'line',
+                style: logLineStyle,
+            },
+        ],
+        parsedDisplayColumns: [
+            {
+                Header: 'Timestamp',
+                accessor: 'timestamp',
+                Cell: ({ row }) => row.timestamp.format(),
+                width: 160,
+                maxWidth: 200,
                 style,
+            },
+            {
+                Header: 'Level',
+                accessor: 'logLevel',
+                filterMethod: (filter, row) => {
+                    if (filter.value === "all") {
+                        return true;
+                    }
+
+                    return row[filter.id] === filter.value;
+                },
+                Filter: ({ filter, onChange }) =>
+                    <select
+                        onChange={event => onChange(event.target.value)}
+                        value={filter ? filter.value : "all"}
+                    >
+                        <option value="all">All</option>
+                        <option value="INFO">INFO</option>
+                        <option value="WARN">WARN</option>
+                        <option value="ERROR">ERROR</option>
+                    </select>,
+                maxWidth: 100,
+                width: 90,
+                style,
+            },
+            {
+                Header: 'Class',
+                accessor: 'classDesignator',
+                filterMethod: (filter, row) => {
+                    if (filter.value === "all") {
+                        return true;
+                    }
+
+                    return row[filter.id] === filter.value;
+                },
+                Filter: ({ filter, onChange}) => 
+                    <select
+                        onChange={event => onChange(event.target.value)}
+                        value={filter ? filter.value : "all"}
+                    >
+                        <option value='all'>All</option>
+                        { this.state.classDesignators.map((cd, idx) => 
+                            <option value={cd} key={idx}>{cd}</option>
+                        )}
+                    </select>,
+                maxWidth: 200,
+                width: 120,                
+                style,
+            },
+            {
+                Header: 'Log',
+                accessor: 'text',
+                style: logLineStyle,
             },
         ],
     }
@@ -87,14 +164,10 @@ class LogViewer extends Component {
             sentry.reportError('Failed to stream logfile', err);
         }
 
-        console.error('Failed to get log', err);
         this.setState({ err, loadOp: null, data: null });
     }
 
     load() {
-        console.log('LogViewer props', this.props);
-        console.log(this);
-
         let query = `
             CALL apoc.log.stream("${this.props.file}", { last: $n }) 
             YIELD lineNo, line 
@@ -117,14 +190,20 @@ class LogViewer extends Component {
         const params = { n, limit: MAX_ROWS };
         const promise = this.props.node.run(query, params)
             .then(results => {
-                console.log('data came back');
-
                 // Records are in reverse order to only get the last ones.  Re-reverse them.
                 const data = neo4j.unpackResults(results, {
                     required: ['lineNo', 'line'],
                 }).reverse();
 
-                this.setState({ err: null, data, loadOp: null });
+                const events = le.parseLines(data.map(d => d.line));
+                const classDesignators = _.uniq(events.map(e => e.classDesignator)).sort();
+                this.setState({ 
+                    err: null, 
+                    data, 
+                    events, 
+                    classDesignators,
+                    loadOp: null,
+                });
             })
             .catch(err => this.promiseErrorHandler(err));
 
@@ -148,24 +227,50 @@ class LogViewer extends Component {
 
         const strError = `${this.state.err}`;
         const addendum = strError.indexOf('No log file exists by that name') > -1 ? 
-            'Some installs of Neo4j may use journalctl to access logs, which may not ' +
-            'be on disk in their usual location' : '';
+            kb.LogTroubleshooting : '';
 
         return (
             <Message negative>
             <Message.Header>Error Fetching Log File</Message.Header>
                 <p>{strError}</p>
-                <p>{addendum}</p>
+                { addendum }
             </Message>
         );
     }
+
+    getData() {
+        return this.state.parsed ? this.state.events : this.state.data;
+    }
+
+    getDisplayColumns() {
+        if (this.state.parsed) {
+            const cols = this.state.parsedDisplayColumns;
+
+            // For some log files, we can't extract any class designators, because the file
+            // doesn't parse that way.  In that case, save screen space by not showing the column.
+            if (this.state.classDesignators.length === 0 || (
+                this.state.classDesignators.length === 1 && 
+                !this.state.classDesignators[0])) {
+                return cols.filter(c => c.accessor !== 'classDesignator');
+            }
+
+            return cols;
+        }
+
+        return this.state.rawDisplayColumns;
+    }
+
+    toggleCheckBox = () => {
+        const parsed = !(this.state.parsed);
+        this.setState({ parsed }); 
+    };    
 
     render() {
         const spacer = () => <div style={{ paddingLeft: '15px', paddingRight: '15px' }}>&nbsp;</div>;
 
         return (
             <div className='LogViewer' key={this.state.key}>
-                <h3>{this.props.file}</h3>
+                <h3>{this.props.file} <Explainer knowledgebase={this.props.file} /></h3>
 
                 { this.state.err ? this.displayError() : '' }
 
@@ -194,17 +299,27 @@ class LogViewer extends Component {
                                 style={{ width: '100px' }}
                                 value={this.state.lastN} />
                             {spacer()}
-                            <Button icon labelPosition='left'
+                            <Button primary icon labelPosition='left'
                                 onClick={() => this.load()}
                                 disabled={!_.isNil(this.state.loadOp)}>
                                 <Icon name='feed' />
                                 Load
                             </Button>
-                            <Button icon
+                            <Button icon secondary
                                 onClick={() => this.download()}>
                                 <Icon name="download" />
-                                Download Entire File
+                                Download Raw File
                             </Button>
+                            { this.state.events ? 
+                            <CSVDownload title='Download as CSV'
+                                filename={`Halin-${this.props.file}-${moment.utc().format()}.csv`}
+                                data={this.state.events}
+                                displayColumns={this.state.parsedDisplayColumns} /> : '' }
+                            
+                            <Checkbox 
+                                checked={this.state.parsed}
+                                onChange={this.toggleCheckBox}
+                                label='Parse logs'/>
                         </Form.Group>
                     </Form.Field>
                 </Form>
@@ -213,16 +328,17 @@ class LogViewer extends Component {
 
                 {this.state.data ?
                     <div className='LogViewerTable' style={{ paddingTop: '15px' }}><ReactTable
-                        defaultFilterMethod={(filter, row, column) => {
+                        defaultFilterMethod={(filter, row /*, column */) => {
                             const id = filter.pivotId || filter.id
                             return row[id] !== undefined ? String(row[id]).indexOf(filter.value) > -1 : true
                         }}
-                        data={this.state.data}
+                        data={this.getData()}
                         sortable={true}
                         filterable={true}
-                        defaultPageSize={Math.min(50, this.state.lastN)}
+                        resizable={true}
+                        defaultPageSize={Math.min(20, this.state.lastN)}
                         showPagination={!this.state.partial || (this.state.lastN >= 50)}
-                        columns={this.state.displayColumns}
+                        columns={this.getDisplayColumns()}
                     /></div>
                     : ''}
             </div>
@@ -245,7 +361,24 @@ class LogsPane extends Component {
     }
 
     render() {
-        const panes = [
+        const enterpriseOnly = [
+            {
+                menuItem: 'security.log',
+                render: () => {
+                    const file = 'security.log';
+                    return this.viewerFor(file);
+                },
+            },
+            {
+                menuItem: 'query.log',
+                render: () => {
+                    const file = 'query.log';
+                    return this.viewerFor(file);
+                },
+            }
+        ];
+
+        let panes = [
             {
                 menuItem: 'neo4j.log',
                 render: () => {
@@ -260,14 +393,11 @@ class LogsPane extends Component {
                     return this.viewerFor(file);
                 },
             },
-            {
-                menuItem: 'security.log',
-                render: () => {
-                    const file = 'security.log';
-                    return this.viewerFor(file);
-                },
-            }
         ];
+
+        if (window.halinContext.isEnterprise()) {
+            panes = panes.concat(enterpriseOnly);
+        }
 
         return (
             <div className='LogsPane'>

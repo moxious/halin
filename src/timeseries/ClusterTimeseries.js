@@ -426,7 +426,7 @@ class ClusterTimeseries extends Component {
                                         type="linear" />
                                     <Charts>
                                         {
-                                            this.nodes.map((addr, idx) =>
+                                            this.nodes.map((addr /* , idx */) =>
                                                 <LineChart
                                                     key={ClusterTimeseries.keyFor(addr, this.state.displayProperty)}
                                                     axis="y"

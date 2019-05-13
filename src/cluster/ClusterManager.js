@@ -19,6 +19,12 @@ import ql from '../data/queries/query-library';
  * 
  * For example, if you wanted to make a dynamic config change,
  * add a user, and so on.
+ * 
+ * This is complicated by issue #72, neo4j system graph support.
+ * Prior to the system graph, some administrative queries need
+ * to be mapped across the entire cluster to hold for all members.
+ * Neo4j's which support the system graph dont' have this limitation,
+ * so we need to be able to detect and do the right thing.
  */
 const clusterOpSuccess = (node, results) => ({
     success: true, node, addr: node.getBoltAddress(), results,
@@ -68,7 +74,14 @@ export default class ClusterManager {
     }
 
     /**
-     * Map a query across all cluster members in parallel.
+     * Cluster Wide Query.
+     * 
+     * For non-system-graph supporting Neo4js, this 
+     * maps a query across all cluster members in parallel.
+     * 
+     * For system-graph supporting Neo4js, this is equivalent
+     * to running the query against the leader of the cluster.
+     * See https://github.com/moxious/halin/issues/72
      * 
      * @param query the cypher query
      * @param params cypher query params.
@@ -78,8 +91,12 @@ export default class ClusterManager {
      * Results is an array of result objects from each individual
      * query.  
      */
-    mapQueryAcrossCluster(query, params) {
-        const promises = this.ctx.members().map(node => {
+    clusterWideQuery(query, params) {
+        const membersToRunAgainst = this.ctx.supportsSystemGraph() ? 
+            [ this.ctx.getWriteMember() ] : 
+            this.ctx.members();
+
+        const promises = membersToRunAgainst.map(node => {
             // Guarantee that promise resolves.
             // it resolves to an object that indicates success
             // or failure.
@@ -98,7 +115,7 @@ export default class ClusterManager {
             throw new Error('Call with object containing keys username, password');
         }
 
-        return this.mapQueryAcrossCluster(
+        return this.clusterWideQuery(
             'CALL dbms.security.createUser({username}, {password}, false)',
             { username, password }
         )
@@ -118,7 +135,7 @@ export default class ClusterManager {
             throw new Error('Call with an object containing keys username');
         }
 
-        return this.mapQueryAcrossCluster(
+        return this.clusterWideQuery(
             'CALL dbms.security.deleteUser({username})',
             { username }
         )
@@ -135,7 +152,7 @@ export default class ClusterManager {
     addRole(role) {
         if (!role) { throw new Error('Must provide role'); }
 
-        return this.mapQueryAcrossCluster(
+        return this.clusterWideQuery(
             'CALL dbms.security.createRole({role})',
             { role }
         )
@@ -152,7 +169,7 @@ export default class ClusterManager {
     deleteRole(role) {
         if (!role) throw new Error('Must provide role');
 
-        return this.mapQueryAcrossCluster(
+        return this.clusterWideQuery(
             'CALL dbms.security.deleteRole({role})',
             { role }
         )

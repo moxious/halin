@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../data/CypherDataTable';
 import queryLibrary from '../data/queries/query-library';
+import Explainer from '../Explainer';
 
 class GCMonitor extends Component {
     query = queryLibrary.JMX_GARBAGE_COLLECTOR.query;
@@ -9,7 +10,7 @@ class GCMonitor extends Component {
     render() {
         return (
             <div className="GCMonitor">
-                <h3>Last Garbage Collection</h3>
+                <h3>Last Garbage Collection <Explainer knowledgebase='GarbageCollection'/></h3>
 
                 <CypherDataTable 
                     node={this.props.node}

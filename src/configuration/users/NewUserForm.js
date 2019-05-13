@@ -1,12 +1,9 @@
 import React, { Component } from 'react';
-import { Button, Form } from 'semantic-ui-react';
-import "semantic-ui-css/semantic.min.css";
+import { Form, Message } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
-import { Grid } from 'semantic-ui-react';
 import status from '../../status/index';
 import sentry from '../../sentry/index';
 import './NewUserForm.css';
-
 
 class NewUserForm extends Component {
     state = {
@@ -57,11 +54,20 @@ class NewUserForm extends Component {
                 message: null,
                 error: status.message('Error',
                     `Could not create ${user.username}: ${err}`),
-            }));
+            }))
+            .finally(() => status.toastify(this));
     }
 
-    formValid() {
-        return this.state.username && this.state.password;
+    valid() {
+        // Usernames must be strictly ASCII and have the weird quirk that they
+        // can't contain , : or whitespace.
+        if (this.state.username && (this.state.username.match(/[,:\s]/) || 
+            // eslint-disable-next-line no-control-regex
+            this.state.username.match(/[^\x00-\x7F]/))) {
+            return false;
+        }
+
+        return true;
     }
 
     submit(event) {
@@ -83,51 +89,41 @@ class NewUserForm extends Component {
     };
 
     render() {
-        let message = status.formatStatusMessage(this);
-
         return (
             <div className='NewUserForm'>
                 <h3>Create User</h3>
 
-                { message }
-
-                <Form>
+                <Form size="small" error={!this.valid()} style={{textAlign: 'left'}}>
                     <Form.Group widths='equal'>
-                    <Grid>
-                        <Grid.Row columns={2}>
-                            <Grid.Column>
-                                <Form.Input 
-                                    fluid 
-                                    style={this.inputStyle}
-                                    disabled={this.state.pending}
-                                    onChange={e => this.handleChange('username', e)} 
-                                    label='Username' 
-                                    placeholder='username'
-                                />
-                            </Grid.Column>
-                            <Grid.Column>
-                                <Form.Input 
-                                    fluid
-                                    style={this.inputStyle}
-                                    disabled={this.state.pending}
-                                    onChange={e => this.handleChange('password', e)} 
-                                    label='Password' 
-                                    type='password'/>
-                            </Grid.Column>
-                        </Grid.Row>
-                        <Grid.Row columns={1}>
-                            <Grid.Column textAlign='left'>
-                                <Button positive
-                                    style={this.inputStyle}
-                                    disabled={this.state.pending || !this.formValid()} 
-                                    onClick={data => this.submit(data)} 
-                                    type='submit'>
-                                    <i className="icon add user"/> Create
-                                </Button>
-                            </Grid.Column>
-                        </Grid.Row>
-                    </Grid>
+                        <Form.Input 
+                            fluid 
+                            style={this.inputStyle}
+                            disabled={this.state.pending}
+                            onChange={e => this.handleChange('username', e)} 
+                            label='Username' 
+                            placeholder='username'
+                        />
+                        <Form.Input 
+                            fluid
+                            style={this.inputStyle}
+                            disabled={this.state.pending}
+                            onChange={e => this.handleChange('password', e)} 
+                            label='Password' 
+                            type='password'/>
                     </Form.Group>
+
+                    <Message
+                        error
+                        header='Invalid username'
+                        content='Usernames must be ASCII and cannot contain , : or whitespace'/>
+
+                    <Form.Button positive
+                            style={this.inputStyle}
+                            disabled={this.state.pending || !this.valid() || !this.state.username || !this.state.password}
+                            onClick={data => this.submit(data)} 
+                            type='submit'>
+                            <i className="icon add user"/> Create
+                    </Form.Button>
                 </Form>
             </div>
         )

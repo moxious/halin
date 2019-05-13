@@ -4,6 +4,9 @@ import { Grid, Button, Confirm } from 'semantic-ui-react';
 import status from '../../status/index';
 import hoc from '../../higherOrderComponents';
 import sentry from '../../sentry/index';
+import CSVDownload from '../../data/download/CSVDownload';
+import moment from 'moment';
+import Explainer from '../../Explainer';
 import './Neo4jRoles.css';
 
 class Neo4jRoles extends Component {
@@ -94,7 +97,8 @@ class Neo4jRoles extends Component {
                 message: null,
                 error: status.message('Error',
                     `Could not delete role ${row.role}: ${err}`),
-            }));
+            }))
+            .finally(() => status.toastify(this));
     }
 
     open = (row) => {
@@ -120,20 +124,37 @@ class Neo4jRoles extends Component {
         this.setState({ confirmOpen: false });
     }
 
-    render() {
-        let message = status.formatStatusMessage(this);
+    onRecordsUpdate = (records /*, component */) => {
+        this.setState({ data: records });
+    };
+
+    downloadCSVButton() {
+        if (!this.state.data || this.state.data.length === 0) {
+            return '';
+        }
 
         return (
+            <CSVDownload 
+                title='Download Users as CSV'
+                filename={`Halin-neo4j-roles-${moment.utc().format()}.csv`}
+                data={this.state.data}
+                displayColumns={this.displayColumns}
+            />
+        );
+    }
+
+    render() {
+        return (
             <div className="Neo4jRoles">
-                <h3>Roles</h3>
+                <h3>Roles <Explainer knowledgebase='Roles'/></h3>
 
                 <Grid>
-                    <Grid.Row columns={2}>
+                    <Grid.Row columns={1}>                    
                         <Grid.Column>
-                            {message || 'Browse, filter, and delete roles below'}
-                        </Grid.Column>
-                        <Grid.Column>
-                            <Button basic onClick={e => this.refresh()} icon="refresh"/>
+                            <Button.Group basic>
+                                { this.downloadCSVButton() }
+                                <Button onClick={e => this.refresh()} icon="refresh"/>
+                            </Button.Group>                            
                         </Grid.Column>
                     </Grid.Row>
 
@@ -152,6 +173,8 @@ class Neo4jRoles extends Component {
                                 showPagination={true}
                                 refresh={this.state.childRefresh}
                                 displayColumns={this.displayColumns}
+                                onUpdate={this.onRecordsUpdate}
+                                hideNodeLabel={true}
                             />
                         </Grid.Column>
                     </Grid.Row>

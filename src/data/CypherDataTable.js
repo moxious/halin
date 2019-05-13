@@ -9,6 +9,7 @@ import NodeLabel from '../NodeLabel';
 import Spinner from '../Spinner';
 import neo4j from '../driver';
 import sentry from '../sentry/index';
+import CSVDownload from '../data/download/CSVDownload';
 
 import './CypherDataTable.css';
 
@@ -34,6 +35,7 @@ class CypherDataTable extends Component {
         this.params = props.params || {};
 
         this.allowColumnSelect = _.isNil(props.allowColumnSelect) ? false : props.allowColumnSelect;
+        this.allowDownloadCSV = _.isNil(props.allowDownloadCSV) ? false : props.allowDownloadCSV;
 
         // Immutable original display columns.  In the state, we will modify columns
         // as needed, but parent's won't be modified.
@@ -50,6 +52,7 @@ class CypherDataTable extends Component {
         this.sortable = _.isNil(props.sortable) ? true : props.sortable;
         this.filterable = _.isNil(props.filterable) ? true : props.filterable;
         this.pageSizeOptions = _.isNil(props.pageSizeOptions) ? [5, 10, 20, 25, 50, 100] : props.pageSizeOptions;
+        this.nodeLabel = props.hideNodeLabel ? false : true;
 
         // Callbacks
         const assignCallback = key => {
@@ -89,6 +92,12 @@ class CypherDataTable extends Component {
         }
     }
 
+    onUpdate = () => {
+        if (this.props.onUpdate) {
+            this.props.onUpdate(this.state.items, this);
+        }
+    };
+
     sampleData() {
         return this.props.node.run(this.query, this.parameters)
             .then(results => {
@@ -102,7 +111,7 @@ class CypherDataTable extends Component {
                 });
 
                 if (this.mounted) {
-                    this.setState({ items });
+                    this.setState({ items }, this.onUpdate);
 
                     if (this.rate > 0) {
                         setTimeout(() => this.sampleData(), this.rate);
@@ -111,7 +120,7 @@ class CypherDataTable extends Component {
             })
             .catch(err => {
                 sentry.reportError(err, `CypherDataTable: error executing ${this.query}`);
-                this.setState({ items: [] });
+                this.setState({ items: [] }, this.onUpdate);
             });
     }
 
@@ -131,28 +140,44 @@ class CypherDataTable extends Component {
         return this.setState({ displayColumns: newColumns });
     };
 
+    renderColumnSelector() {
+        return (
+            <Grid.Row columns={1}>
+                <Grid.Column>
+                    <ColumnSelector
+                        onSelect={this.updateColumns}
+                        displayColumns={this.state.displayColumns} /> 
+                </Grid.Column>
+            </Grid.Row>
+        );
+    }
+
+    renderDownloadCSV() {
+        return (
+            <Grid.Row columns={1}>
+                <Grid.Column>
+                    <CSVDownload 
+                        includeHidden={true}
+                        data={this.state.items} 
+                        displayColumns={this.state.displayColumns} />
+                </Grid.Column>
+            </Grid.Row>
+        );
+    }
+
     render() {
         return this.state.items ? (
             <div className='CypherDataTable'>
                 <Grid>
-                {
-                    this.allowColumnSelect ?
-                        <Grid.Row columns={1}>
-                            <Grid.Column>
-                                <ColumnSelector
-                                    onSelect={this.updateColumns}
-                                    displayColumns={this.state.displayColumns} /> 
-                            </Grid.Column>
-                        </Grid.Row>:
-                        ''
-                }
+                    { this.allowColumnSelect ? this.renderColumnSelector() : '' }
+                    { this.allowDownloadCSV ? this.renderDownloadCSV() : '' } 
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <ReactTable className='-striped -highlight'
                                 // By default, filter only catches data if the value STARTS WITH
                                 // the entered string.  This makes it less picky.
-                                defaultFilterMethod={(filter, row, column) => {
+                                defaultFilterMethod={(filter, row /* , column */) => {
                                     const id = filter.pivotId || filter.id
                                     return row[id] !== undefined ? String(row[id]).indexOf(filter.value) > -1 : true
                                 }}
@@ -170,7 +195,7 @@ class CypherDataTable extends Component {
                                 onExpandedChange={this.onExpandedChange}
                             />
 
-                            <NodeLabel node={this.props.node}/>
+                            { this.nodeLabel ? <NodeLabel node={this.props.node}/> : '' }
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>

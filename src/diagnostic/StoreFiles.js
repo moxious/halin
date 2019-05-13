@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import fields from '../data/fields';
 import CypherDataTable from '../data/CypherDataTable';
 import queryLibrary from '../data/queries/query-library';
+import Explainer from '../Explainer';
 
 class StoreFiles extends Component {
     state = {
@@ -23,7 +24,7 @@ class StoreFiles extends Component {
     render() {
         return (
             <div className='StoreFiles'>
-                <h3>Store File Sizes</h3>
+                <h3>Store File Sizes <Explainer knowledgebase='StoreFiles'/></h3>
                 <CypherDataTable
                     node={this.props.node}
                     query={this.state.query}

@@ -40,15 +40,28 @@ describe('Feature Probes', function () {
     describe('Native Auth Check', () => {
         it('returns true when type is native', () => 
             probes.supportsNativeAuth(fakes.ClusterMember([ { value: ['native'] }]))
-                .then(r => expect(r).toEqual(true)));
+                .then(r => {
+                    expect(r.nativeAuth).toEqual(true);
+                    expect(r.systemGraph).toEqual(false);
+                }));
 
         it('returns false when type is not native', () =>
             probes.supportsNativeAuth(fakes.ClusterMember([ { value: ['ldap'] }]))
-                .then(r => expect(r).toEqual(false)));
+                .then(r => {
+                    expect(r.nativeAuth).toEqual(false);
+                    expect(r.systemGraph).toEqual(false);
+                }));
+
+        it('knows that system-graph counts as native', () =>
+            probes.supportsNativeAuth(fakes.ClusterMember([ { value: ['system-graph'] }]))
+                .then(r => {
+                    expect(r.nativeAuth).toEqual(true);
+                    expect(r.systemGraph).toEqual(true);
+                }));
     });
 
     describe('Listing Metrics', () => {
-        const metrics = [ { name: 'a', lastUpdated: 'sss' } ];
+        // const metrics = [ { name: 'a', lastUpdated: 'sss' } ];
         it('can get metrics', () =>
             probes.getAvailableMetrics(fakes.ClusterMember())
                 .then(r => {

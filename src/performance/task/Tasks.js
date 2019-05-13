@@ -9,12 +9,22 @@ import _ from 'lodash';
 import moment from 'moment';
 import { Button, Popup, Modal, Header } from 'semantic-ui-react';
 import TaskDetail from './TaskDetail';
+import Explainer from '../../Explainer';
 
 const age = since => {
     const start = moment.utc(since);
     const now = moment.utc();
     const duration = moment.duration(now.diff(start));
     return duration.asSeconds() + ' sec';
+};
+
+const createHiddenColumnFromSubfield = (section, subfield) => {
+    const accessor = `${section}.${subfield}`;
+    return {
+        Header: accessor,
+        show: false,
+        accessor,
+    };
 };
 
 class Tasks extends Component {
@@ -80,24 +90,54 @@ class Tasks extends Component {
                 accessor: 'transaction.waitTimeMillis',
                 Cell: fields.numField,
             },
+
             { 
                 Header: 'Connection', 
                 accessor: 'connection', 
                 show: false,
+                excludeFromCSV: true,
                 Cell: fields.jsonField,
             },
             {
                 Header: 'Transaction',
                 accessor: 'transaction',
                 show: false,
+                excludeFromCSV: true,
                 Cell: fields.jsonField,
             },
             {
                 Header: 'QueryDetails',
                 accessor: 'query',
                 show: false,
+                excludeFromCSV: true,
                 Cell: fields.jsonField,
-            },
+            },            
+
+            // All fields below this are hidden by default and not
+            // shown to the user, but destructured in this way so
+            // that saving as CSV works for this nested structure.
+
+            // CONNECTION PROPERTIES
+            ...[
+                'id', 'connectTime', 'connector',
+                'userAgent', 'serverAddress',
+                'clientAddress',
+            ].map(sf => createHiddenColumnFromSubfield('connection', sf)),
+
+            // TRANSACTION PROPERTIES
+            ...[
+                'metaData', 'startTime', 'protocol', 
+                'clientAddress', 'requestUri', 'currentQueryId',
+                'currentQuery', 'activeLockCount', 'status',
+                'resourceInformation', 'elapsedTimeMillis',
+                'cpuTimeMillis', 'waitTimeMillis', 'idleTimeMillis',
+            ].map(sf => createHiddenColumnFromSubfield('transaction', sf)),
+
+            ...[
+                'id', 'parameters', 'planner', 'runtime', 
+                'indexes', 'startTime',
+                'allocatedBytes', 'pageHits', 'pageFaults',
+            ].map(sf => createHiddenColumnFromSubfield('query', sf)),
         ],
         rate: 1000,
     };
@@ -137,8 +177,9 @@ class Tasks extends Component {
     render() {
         return (
             <div className="Tasks">
-                <h2>Tasks</h2>
+                <h3>Tasks <Explainer knowledgebase='Tasks'/></h3>
                 <CypherDataTable
+                    allowDownloadCSV={true}
                     node={this.props.node}
                     query={this.state.query}
                     allowColumnSelect={false}

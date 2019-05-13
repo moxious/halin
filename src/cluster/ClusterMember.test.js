@@ -39,6 +39,12 @@ describe('ClusterMember', function () {
         expect(prots).toContain('bolt');
     });
 
+    it('knows its role', () => {
+        expect(c.isLeader()).toEqual(true);
+        expect(c.isFollower()).toEqual(false);
+        expect(c.canWrite()).toEqual(true);
+    });
+
     it('keeps stats in observations', () => {
         c.setDriver(fakes.Driver());
 
@@ -46,7 +52,7 @@ describe('ClusterMember', function () {
             c.run('RETURN true AS value'),
             c.run('RETURN true AS value'),
             c.run('RETURN true AS value'),
-        ]).then(results => {
+        ]).then(() => {
             // Observations is a RingJS ring
             expect(c.getObservations().toArray().length).toEqual(3);
             c.getObservations().toArray().forEach(obs => {

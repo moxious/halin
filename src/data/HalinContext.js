@@ -38,6 +38,19 @@ export default class HalinContext {
         return this.clusterMembers;
     }
 
+    getWriteMember() {
+        const writer = this.clusterMembers.filter(cm => cm.canWrite())[0];
+
+        if (!writer) {
+            throw new Error(`
+                Cluster has no write members! This could mean that it is broken,
+                or is currently undergoing a leader election.
+            `);
+        }
+
+        return writer;
+    }
+
     getPollRate() {
         return this.pollRate;
     }
@@ -113,7 +126,7 @@ export default class HalinContext {
      * false otherwise.
      */
     isEnterprise() {
-        return this.clusterMembers[0].isEnterprise();
+        return this.getWriteMember().isEnterprise();
     }
 
     isCommunity() {
@@ -121,37 +134,45 @@ export default class HalinContext {
     }
 
     supportsAPOC() {
-        return this.clusterMembers[0].supportsAPOC();
+        return this.getWriteMember().supportsAPOC();
     }
 
     supportsLogStreaming() {
-        return this.clusterMembers[0].supportsLogStreaming();
+        return this.getWriteMember().supportsLogStreaming();
     }
 
     supportsMetrics() {
-        return this.clusterMembers[0].metrics && this.clusterMembers[0].metrics.length > 0;
+        return this.getWriteMember().metrics && this.clusterMembers[0].metrics.length > 0;
     }
 
     supportsDBStats() {
-        return this.clusterMembers[0].supportsDBStats();
+        return this.getWriteMember().supportsDBStats();
     }
 
     /**
      * Returns true if the context provides for native auth management, false otherwise.
      */
     supportsNativeAuth() {
-        return this.clusterMembers[0].supportsNativeAuth();
+        return this.getWriteMember().supportsNativeAuth();
+    }
+
+    /**
+     * Returns true if context provides for the system graph, which is generally
+     * Neo4j >= 3.6.  False otherwise.
+     */
+    supportsSystemGraph() {
+        return this.getWriteMember().supportsSystemGraph();
     }
 
     /**
      * Returns true if the context supports authorization overall.
      */
     supportsAuth() {
-        return this.clusterMembers[0].supportsAuth();
+        return this.getWriteMember().supportsAuth();
     }
 
     getVersion() {
-        return this.members()[0].getVersion();
+        return this.getWriteMember().getVersion();
     }
 
     /**
@@ -164,7 +185,7 @@ export default class HalinContext {
         }, queryLibrary.CLUSTER_ROLE));
 
         const addr = clusterMember.getBoltAddress();
-        const onRoleData = (newData, dataFeed) => {
+        const onRoleData = (newData /* , dataFeed */) => {
             const newRole = newData.data[0].role;
 
             // Something in cluster topology just changed...
@@ -186,7 +207,7 @@ export default class HalinContext {
             }
         };
 
-        const onError = (err, dataFeed) => 
+        const onError = (err /*, dataFeed */) => 
             sentry.reportError(err, `HalinContext: failed to get cluster role for ${addr}`);
 
         roleFeed.addListener(onRoleData);
@@ -429,7 +450,7 @@ export default class HalinContext {
         // We return a promise that resolves the next time the data feed
         // comes back with a result.
         return new Promise((resolve, reject) => {
-            const onPingData = (newData, dataFeed) => {
+            const onPingData = (newData /* , dataFeed */) => {
                 return resolve({
                     clusterMember: clusterMember,
                     elapsedMs: _.get(newData, 'data[0]_sampleTime'),

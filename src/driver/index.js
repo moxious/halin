@@ -127,14 +127,15 @@ const getSessionPool = (id, driver, poolSize=15) => {
         },
         validate: session =>
             session.run('RETURN 1;', {})
-                .then(results => true)
-                .catch(err => false),
+                .then(() => true)
+                .catch(() => false),
     };
 
     const sessionPoolOpts = { min: 1, max: poolSize };
     const sessionPool = genericPool.createPool(factory, sessionPoolOpts);
-    sessionPool.on('factoryCreateError', err => console.log('SESSION POOL ERROR', err));
-    sessionPool.on('factoryDestroyError', err => console.error('SESSION POOL DESTROY ERROR', err));
+    
+    sessionPool.on('factoryCreateError', err => sentry.reportError('SESSION POOL ERROR', err));
+    sessionPool.on('factoryDestroyError', err => sentry.reportError('SESSION POOL DESTROY ERROR', err));
     sessionPool.start();
 
     pools[id] = sessionPool;
