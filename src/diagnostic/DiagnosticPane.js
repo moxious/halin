@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import 'semantic-ui-css/semantic.min.css';
-import { Grid, Icon, Popup } from 'semantic-ui-react';
+import { Grid } from 'semantic-ui-react';
 import './DiagnosticPane.css';
 import GeneratePackage from './GeneratePackage';
 import ClusterEventLog from './ClusterEventLog';
