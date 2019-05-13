@@ -1,9 +1,9 @@
-import React from 'react';
+// import React from 'react';
 import ReactDOM from 'react-dom';
 import kb from './index';
 
 describe('Knowledge Base', function() {
-    let component, node;
+    let component;
     
     it('exposes links', () => {
         expect(kb.links).toBeInstanceOf(Object);
