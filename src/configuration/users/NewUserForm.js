@@ -62,6 +62,7 @@ class NewUserForm extends Component {
         // Usernames must be strictly ASCII and have the weird quirk that they
         // can't contain , : or whitespace.
         if (this.state.username && (this.state.username.match(/[,:\s]/) || 
+            // eslint-disable-next-line no-control-regex
             this.state.username.match(/[^\x00-\x7F]/))) {
             return false;
         }
