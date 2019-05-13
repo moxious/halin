@@ -3,36 +3,59 @@ import _ from 'lodash';
 
 let k = 0;
 
+class KBLink {
+    constructor(title, url) {
+        this.title = title;
+        this.url = url;
+    }
+
+    render() {
+        return (
+            <p key={`kb${k++}`}>For more information, see&nbsp;
+            <a target='halindocs' href={this.url}>{this.title}</a></p>
+        );
+    }
+}
+
 const render = lines =>
     <div className='KnowledgeBase'>
-        {lines.map(l => _.isString(l) ? <p key={`kb${k++}`}>{l}</p> : l)}
+        {
+            lines.map(l => {
+                if (_.isString(l)) {
+                    return <p key={`kb${k++}`}>{l}</p>;
+                } else if (l instanceof KBLink) {
+                    return l.render();
+                }
+
+                return l;
+            })
+        }
     </div>;
 
-const moreinfo = (title, link) =>
-    <p key={`kb${k++}`}>For more information, see <a target='halindocs' href={link}>{title}</a></p>;
-
 const links = {
-    configReference: moreinfo('Neo4j Configuration Reference',
+    configReference: new KBLink('Neo4j Configuration Reference',
         'https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/'),
-    txManagement: moreinfo('transaction management', 'https://neo4j.com/docs/java-reference/current/transactions/'),
-    connectionManagement: moreinfo('connection management', 'https://neo4j.com/docs/operations-manual/current/monitoring/connection-management/'),
-    jmxMonitoring: moreinfo('JMX monitoring of the operating system', 'https://neo4j.com/docs/java-reference/current/jmx-metrics/'),
-    usersAndRoles: moreinfo('Native User and role management', 'https://neo4j.com/docs/operations-manual/current/authentication-authorization/native-user-role-management/'),
-    understandingDataOnDisk: moreinfo("Understanding Neo4j's Data on Disk",
+    txManagement: new KBLink('transaction management', 'https://neo4j.com/docs/java-reference/current/transactions/'),
+    connectionManagement: new KBLink('connection management', 'https://neo4j.com/docs/operations-manual/current/monitoring/connection-management/'),
+    jmxMonitoring: new KBLink('JMX monitoring of the operating system', 'https://neo4j.com/docs/java-reference/current/jmx-metrics/'),
+    usersAndRoles: new KBLink('Native User and role management', 'https://neo4j.com/docs/operations-manual/current/authentication-authorization/native-user-role-management/'),
+    understandingDataOnDisk: new KBLink("Understanding Neo4j's Data on Disk",
         'https://neo4j.com/developer/kb/understanding-data-on-disk/'),
-    dbStats: moreinfo('db.stats procedures', 'https://neo4j.com/docs/operations-manual/current/reference/procedures/'),
-    configuringDataOnDisk: moreinfo('configuration settings reference', 'https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_dbms.directories.data'),
-    openFiles: moreinfo('number of open files', 'https://neo4j.com/developer/kb/number-of-open-files/'),
-    fsTuning: moreinfo('linux filesystem tuning', 'https://neo4j.com/docs/operations-manual/current/performance/linux-file-system-tuning/'),
-    performanceTuning: moreinfo('performance tuning and the page cache', 'https://neo4j.com/developer/guide-performance-tuning/'),
-    understandingMemoryConsumption: moreinfo('understanding memory consumption', 'https://neo4j.com/developer/kb/understanding-memory-consumption/'),
-    memoryConfiguration: moreinfo('memory configuration and performance', 'https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuration/'),
-    tuningGC: moreinfo('memory configuration and performance', 'https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuration/'),
-    proceduresAndFunctions: moreinfo('procedures and functions', 'https://neo4j.com/docs/java-reference/current/extending-neo4j/procedures-and-functions/procedures/'),
+    dbStats: new KBLink('db.stats procedures', 'https://neo4j.com/docs/operations-manual/current/reference/procedures/'),
+    configuringDataOnDisk: new KBLink('configuration settings reference', 'https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_dbms.directories.data'),
+    openFiles: new KBLink('number of open files', 'https://neo4j.com/developer/kb/number-of-open-files/'),
+    fsTuning: new KBLink('linux filesystem tuning', 'https://neo4j.com/docs/operations-manual/current/performance/linux-file-system-tuning/'),
+    performanceTuning: new KBLink('performance tuning and the page cache', 'https://neo4j.com/developer/guide-performance-tuning/'),
+    understandingMemoryConsumption: new KBLink('understanding memory consumption', 'https://neo4j.com/developer/kb/understanding-memory-consumption/'),
+    memoryConfiguration: new KBLink('memory configuration and performance', 'https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuration/'),
+    tuningGC: new KBLink('memory configuration and performance', 'https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuration/'),
+    proceduresAndFunctions: new KBLink('procedures and functions', 'https://neo4j.com/docs/java-reference/current/extending-neo4j/procedures-and-functions/procedures/'),
+    troubleshootingConnections: new KBLink('Troubleshooting Connection Issues', 'https://community.neo4j.com/t/troubleshooting-connection-issues-in-neo4j-browser-and-cypher-shell/129'),
 };
 
 export default {
     links,
+    render,
     CypherSurface: render([
         'Neo4j has built in procedures and functions which can be called from Cypher',
         `Some are provided for by the system, while others (such as APOC) may be separately
@@ -161,5 +184,26 @@ export default {
         `Rolled back transactions are those who have failed, and whose intermediate effects were "rolled back" so that
             the entire transaction as a package either succeeds or fails.`,
         links.txManagement,
+    ]),
+    FailedToEstablishConnection: render([
+        `This error can mean that your database instance is under heavy load or is
+            not currently responsive`,
+    ]),
+    BrowserSecurityConstraints: render([
+        `This error can mean that you have untrusted SSL certificates on your server.
+        Either install trusted certificates, or try again without encryption.`,
+        'This error can also mean that you have provided an incorrect DNS name or address for the database',
+        'If you are using Neo4j Desktop and running on your local machine, de-select encryption.',
+        'Double check your host and try again',
+    ]),
+    Unauthorized: render([
+        'Double check your username and password and try again'
+    ]),
+    UnknownError: render([
+        `Unfortunately, no troubleshooting is available for this particular error. 
+        Consider checking the Neo4j community site for more information.`
+    ]),
+    NoActiveDatabase: render([
+        'Check to make sure you have activated a database in Neo4j Desktop before launching Halin',
     ]),
 };
