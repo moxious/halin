@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import uuid from 'uuid';
 import hoc from '../higherOrderComponents';
 import _ from 'lodash';
-import { Tab, Button, Icon, Form, Radio, Message } from 'semantic-ui-react';
+import { Tab, Button, Icon, Form, Radio, Message, Checkbox } from 'semantic-ui-react';
 import Spinner from '../Spinner';
 import ReactTable from 'react-table';
 import neo4j from 'neo4j-driver';
@@ -10,16 +10,25 @@ import sentry from '../sentry';
 import le from '../data/logs/LogEvent';
 import CSVDownload from '../data/download/CSVDownload';
 import moment from 'moment';
+import kb from '../knowledgebase';
+import Explainer from '../Explainer';
 
 const MAX_ROWS = 5000;
 
 const code = text => <span style={{ fontFamily: 'monospace' }}>{text}</span>;
 
 const style = {
-    whitespace: 'unset',
     textAlign: 'left',
     fontFamily: 'monospace',
     fontSize: '0.8em',
+};
+
+const logLineStyle = {
+    textAlign: 'left',
+    fontFamily: 'monospace',
+    fontSize: '0.8em',
+    overflowWrap: 'anywhere',
+    'white-space': 'unset',
 };
 
 class LogViewer extends Component {
@@ -29,6 +38,8 @@ class LogViewer extends Component {
         data: null,
         lastN: 20,
         partial: true,
+        classDesignators: [],
+        parsed: true,
         rawDisplayColumns: [
             { 
                 Header: 'Line', 
@@ -39,7 +50,7 @@ class LogViewer extends Component {
             {
                 Header: 'Entry',
                 accessor: 'line',
-                style,
+                style: logLineStyle,
             },
         ],
         parsedDisplayColumns: [
@@ -47,24 +58,62 @@ class LogViewer extends Component {
                 Header: 'Timestamp',
                 accessor: 'timestamp',
                 Cell: ({ row }) => row.timestamp.format(),
+                width: 160,
+                maxWidth: 200,
                 style,
-                // width: 150,
             },
             {
                 Header: 'Level',
                 accessor: 'logLevel',
+                filterMethod: (filter, row) => {
+                    if (filter.value === "all") {
+                        return true;
+                    }
+
+                    return row[filter.id] === filter.value;
+                },
+                Filter: ({ filter, onChange }) =>
+                    <select
+                        onChange={event => onChange(event.target.value)}
+                        value={filter ? filter.value : "all"}
+                    >
+                        <option value="all">All</option>
+                        <option value="INFO">INFO</option>
+                        <option value="WARN">WARN</option>
+                        <option value="ERROR">ERROR</option>
+                    </select>,
+                maxWidth: 100,
+                width: 90,
                 style,
-                // width: 50,
             },
             {
                 Header: 'Class',
                 accessor: 'classDesignator',
+                filterMethod: (filter, row) => {
+                    if (filter.value === "all") {
+                        return true;
+                    }
+
+                    return row[filter.id] === filter.value;
+                },
+                Filter: ({ filter, onChange}) => 
+                    <select
+                        onChange={event => onChange(event.target.value)}
+                        value={filter ? filter.value : "all"}
+                    >
+                        <option value='all'>All</option>
+                        { this.state.classDesignators.map((cd, idx) => 
+                            <option value={cd} key={idx}>{cd}</option>
+                        )}
+                    </select>,
+                maxWidth: 200,
+                width: 120,                
                 style,
             },
             {
                 Header: 'Log',
                 accessor: 'text',
-                style,
+                style: logLineStyle,
             },
         ],
     }
@@ -147,7 +196,14 @@ class LogViewer extends Component {
                 }).reverse();
 
                 const events = le.parseLines(data.map(d => d.line));
-                this.setState({ err: null, data, events, loadOp: null });
+                const classDesignators = _.uniq(events.map(e => e.classDesignator)).sort();
+                this.setState({ 
+                    err: null, 
+                    data, 
+                    events, 
+                    classDesignators,
+                    loadOp: null,
+                });
             })
             .catch(err => this.promiseErrorHandler(err));
 
@@ -164,21 +220,6 @@ class LogViewer extends Component {
         }
     }
 
-    troubleshooting() {
-        return (
-            <div className='LogTroubleshooting'>
-                <p>Some installs of Neo4j may use journalctl to access logs, which may not be
-                    on disk in their usual locations.
-                </p>
-
-                <p>Additionally, to view query.log, please ensure that 
-                    <a href="https://neo4j.com/docs/operations-manual/current/monitoring/logging/query-logging/">
-                    query logging is enabled.</a>
-                </p>
-            </div>
-        );
-    }
-
     displayError() {
         if (!this.state.err) {
             throw new Error('Only call me when error is in state');
@@ -186,7 +227,7 @@ class LogViewer extends Component {
 
         const strError = `${this.state.err}`;
         const addendum = strError.indexOf('No log file exists by that name') > -1 ? 
-            this.troubleshooting() : '';
+            kb.LogTroubleshooting : '';
 
         return (
             <Message negative>
@@ -202,15 +243,34 @@ class LogViewer extends Component {
     }
 
     getDisplayColumns() {
-        return this.state.parsed ? this.state.parsedDisplayColumns : this.state.rawDisplayColumns;
+        if (this.state.parsed) {
+            const cols = this.state.parsedDisplayColumns;
+
+            // For some log files, we can't extract any class designators, because the file
+            // doesn't parse that way.  In that case, save screen space by not showing the column.
+            if (this.state.classDesignators.length === 0 || (
+                this.state.classDesignators.length === 1 && 
+                !this.state.classDesignators[0])) {
+                return cols.filter(c => c.accessor !== 'classDesignator');
+            }
+
+            return cols;
+        }
+
+        return this.state.rawDisplayColumns;
     }
+
+    toggleCheckBox = () => {
+        const parsed = !(this.state.parsed);
+        this.setState({ parsed }); 
+    };    
 
     render() {
         const spacer = () => <div style={{ paddingLeft: '15px', paddingRight: '15px' }}>&nbsp;</div>;
 
         return (
             <div className='LogViewer' key={this.state.key}>
-                <h3>{this.props.file}</h3>
+                <h3>{this.props.file} <Explainer knowledgebase={this.props.file} /></h3>
 
                 { this.state.err ? this.displayError() : '' }
 
@@ -239,13 +299,13 @@ class LogViewer extends Component {
                                 style={{ width: '100px' }}
                                 value={this.state.lastN} />
                             {spacer()}
-                            <Button icon labelPosition='left'
+                            <Button primary icon labelPosition='left'
                                 onClick={() => this.load()}
                                 disabled={!_.isNil(this.state.loadOp)}>
                                 <Icon name='feed' />
                                 Load
                             </Button>
-                            <Button icon
+                            <Button icon secondary
                                 onClick={() => this.download()}>
                                 <Icon name="download" />
                                 Download Raw File
@@ -255,6 +315,11 @@ class LogViewer extends Component {
                                 filename={`Halin-${this.props.file}-${moment.utc().format()}.csv`}
                                 data={this.state.events}
                                 displayColumns={this.state.parsedDisplayColumns} /> : '' }
+                            
+                            <Checkbox 
+                                checked={this.state.parsed}
+                                onChange={this.toggleCheckBox}
+                                label='Parse logs'/>
                         </Form.Group>
                     </Form.Field>
                 </Form>
@@ -270,7 +335,8 @@ class LogViewer extends Component {
                         data={this.getData()}
                         sortable={true}
                         filterable={true}
-                        defaultPageSize={Math.min(50, this.state.lastN)}
+                        resizable={true}
+                        defaultPageSize={Math.min(20, this.state.lastN)}
                         showPagination={!this.state.partial || (this.state.lastN >= 50)}
                         columns={this.getDisplayColumns()}
                     /></div>
@@ -295,21 +361,7 @@ class LogsPane extends Component {
     }
 
     render() {
-        const panes = [
-            {
-                menuItem: 'neo4j.log',
-                render: () => {
-                    const file = 'neo4j.log';
-                    return this.viewerFor(file);
-                },
-            },
-            {
-                menuItem: 'debug.log',
-                render: () => {
-                    const file = 'debug.log';
-                    return this.viewerFor(file);
-                },
-            },
+        const enterpriseOnly = [
             {
                 menuItem: 'security.log',
                 render: () => {
@@ -325,6 +377,27 @@ class LogsPane extends Component {
                 },
             }
         ];
+
+        let panes = [
+            {
+                menuItem: 'neo4j.log',
+                render: () => {
+                    const file = 'neo4j.log';
+                    return this.viewerFor(file);
+                },
+            },
+            {
+                menuItem: 'debug.log',
+                render: () => {
+                    const file = 'debug.log';
+                    return this.viewerFor(file);
+                },
+            },
+        ];
+
+        if (window.halinContext.isEnterprise()) {
+            panes = panes.concat(enterpriseOnly);
+        }
 
         return (
             <div className='LogsPane'>
