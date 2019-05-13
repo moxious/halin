@@ -51,11 +51,34 @@ const links = {
     tuningGC: new KBLink('memory configuration and performance', 'https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuration/'),
     proceduresAndFunctions: new KBLink('procedures and functions', 'https://neo4j.com/docs/java-reference/current/extending-neo4j/procedures-and-functions/procedures/'),
     troubleshootingConnections: new KBLink('Troubleshooting Connection Issues', 'https://community.neo4j.com/t/troubleshooting-connection-issues-in-neo4j-browser-and-cypher-shell/129'),
+    queryLogging: new KBLink('query logging', 'https://neo4j.com/docs/operations-manual/current/monitoring/logging/query-logging/'),
+    logFiles: new KBLink('log file locations', 'https://neo4j.com/docs/operations-manual/current/configuration/file-locations/#file-locations-log-files'),
 };
 
 export default {
     links,
     render,
+    'neo4j.log': render([
+        'The standard log, where general information about Neo4j is written. Not written for Debian and RPM packages. See relevant sections.',
+        links.logFiles,
+    ]),
+    'debug.log': render([
+        'Information useful when debugging problems with Neo4j',
+        links.logFiles,
+    ]),
+    'query.log': render([
+        'Log of executed queries that takes longer than a specified threshold. (Enterprise Edition only.)',
+        links.logFiles,
+    ]),
+    'security.log': render([
+        'Log of security events. (Enterprise Edition only.)',
+        links.logFiles,
+    ]),
+    LogTroubleshooting: render([
+        `Some installs of Neo4j may use journalctl to access logs, which may not be
+        on disk in their usual locations.`,
+        links.queryLogging,
+    ]),
     CypherSurface: render([
         'Neo4j has built in procedures and functions which can be called from Cypher',
         `Some are provided for by the system, while others (such as APOC) may be separately
