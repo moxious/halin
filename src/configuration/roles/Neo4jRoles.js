@@ -143,23 +143,10 @@ class Neo4jRoles extends Component {
         );
     }
 
-    help() {
-        return (
-            <div className='Neo4jRolesHelp'>
-                <p>Roles permit further identifying users and associating them
-                    with certain permissions.</p>
-
-                <p>For more information, see 
-                    <a href="https://neo4j.com/docs/operations-manual/current/authentication-authorization/native-user-role-management/">
-                    native user and role management in Neo4j</a></p>
-            </div>
-        );
-    }
-
     render() {
         return (
             <div className="Neo4jRoles">
-                <h3>Roles <Explainer content={this.help()}/></h3>
+                <h3>Roles <Explainer knowledgebase='Roles'/></h3>
 
                 <Grid>
                     <Grid.Row columns={1}>                    

@@ -53,23 +53,6 @@ export default class SampleQueries extends Component {
         ].concat(queryLibrary.DB_QUERY_STATS.columns),
     };
 
-    help() {
-        return (
-            <div className='SampleQueriesHelp'>
-                <p>Neo4j includes built-in procedures that let us monitor query execution plan and
-                execution times for queries that run on the system.</p>
-
-                <p>Halin allows temporary sampling of this data for inspecting what is running on
-                    the system at any given time.</p>
-
-                <p>All times are given in microseconds (one millionth of a second)</p>
-
-                <p>For more information, read about the <strong>db.stats.*</strong>&nbsp;
-                <a href="https://neo4j.com/docs/operations-manual/current/reference/procedures/">procedures here</a></p>
-            </div>
-        );
-    }
-
     stopAsync() {
         if (this.state.updateInterval) {
             clearInterval(this.state.updateInterval);
@@ -229,7 +212,7 @@ export default class SampleQueries extends Component {
     render() {
         return (
             <div className='SampleQueries'>
-                <h3>Sample Query Performance <Explainer content={this.help()} /></h3>
+                <h3>Sample Query Performance <Explainer knowledgebase='SampleQueries' /></h3>
 
                 {this.progressBar()}
 

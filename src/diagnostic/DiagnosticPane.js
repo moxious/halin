@@ -13,19 +13,6 @@ class DiagnosticPane extends Component {
         key: uuid.v4(),
     };
 
-    help() {
-        return (
-            <div className="DiagnosticsHelp">
-                <p>This function runs a suite of tests and can provide advice on how
-                to improve your configuration.</p>
-
-                <p>A file will be generated with all
-                    diagnostics, which you can send to Neo4j to help
-                    troubleshoot issues.</p>
-            </div>
-        );
-    }
-
     render() {
         return (
             <div className="DiagnosticPane" key={this.state.key}>
@@ -38,7 +25,7 @@ class DiagnosticPane extends Component {
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <h3>Run Diagnostics <Explainer content={this.help()}/></h3>
+                            <h3>Run Diagnostics <Explainer knowledgebase='Diagnostics'/></h3>
 
                             <GeneratePackage
                                 key={this.state.key}

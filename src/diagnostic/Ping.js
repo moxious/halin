@@ -25,20 +25,6 @@ export default class Ping extends Component {
         this.mounted = false;
     }
 
-    help() {
-        return (
-            <div className='PingHelp'>
-                <p>Ping sends a trivial cypher query to the server and measures how 
-                    long it takes the response to come back.</p>
-
-                <p>This is useful when examining slow queries, because it shows
-                how much time network latency and basic cypher queries take, allowing
-                us to see how much of query performance is those factors, versus the
-                execution of the Cypher itself.</p>
-            </div>
-        );
-    }
-
     ping() {
         if (!this.mounted) { return false; }
         const ctx = window.halinContext;
@@ -97,7 +83,7 @@ export default class Ping extends Component {
 
         return this.state.pingResults ? (
             <div className='Ping'>
-                <h3>Ping <Explainer content={this.help()}/></h3>
+                <h3>Ping <Explainer knowledgebase='Ping'/></h3>
 
                 { message }
                 <Table celled>

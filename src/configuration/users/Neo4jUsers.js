@@ -210,23 +210,10 @@ class Neo4jUsers extends Component {
         );
     }
 
-    help() {
-        return (
-            <div className='Neo4jUsersHelp'>
-                <p>User management allows creating new accounts that others can  use
-                   to access bolt connections in Neo4j.
-                </p>
-                <p>For more information, see 
-                    <a href="https://neo4j.com/docs/operations-manual/current/authentication-authorization/native-user-role-management/">
-                    native user and role management in Neo4j</a></p>
-            </div>
-        )
-    }
-
     render() {
         return (
             <div className="Neo4jUsers">
-                <h3>Users <Explainer content={this.help()}/></h3>
+                <h3>Users <Explainer knowledgebase='Users'/></h3>
 
                 <Grid>
                     <Grid.Row columns={1}>

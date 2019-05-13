@@ -19,20 +19,10 @@ class GCPauseTime extends Component {
         return feed;
     };
 
-    help() {
-        return (
-            <div className="GCPauseTimeHelp">
-                <p>To gain good performance, we want to make sure the JVM is not spending too much time performing garbage collection. The goal is to have a large enough heap to make sure that heavy/peak load will not result in so called GC-trashing. Performance can drop as much as two orders of magnitude when GC-trashing happens. Having too large heap may also hurt performance so you may have to try some different heap sizes.</p>
-
-                <p><a href="https://neo4j.com/docs/operations-manual/current/performance/gc-tuning/">Read more about how to tune the garbage collector</a></p>
-            </div>
-        );
-    }
-
     render() {
         return (
             <div className="GCPauseTime">
-                <h3>Last GC Pause Time <Explainer content={this.help()}/></h3>
+                <h3>Last GC Pause Time <Explainer knowledgebase='GarbageCollection'/></h3>
                 <ClusterTimeseries key={this.state.key}
                     query={this.state.query} 
                     width={this.state.width}

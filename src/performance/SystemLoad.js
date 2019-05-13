@@ -13,21 +13,8 @@ class SystemLoad extends Component {
         displayColumns: queryLibrary.OS_LOAD_STATS.columns,
     };
 
-    help() {
-        return (
-            <div className='SystemLoadHelp'>
-                <p>The system load is a measure of the amount of computational work that a computer system performs.</p>
-                <p>System load represents overall load, while process load shows how much load is caused by
-                    the Neo4j process itself.
-                </p>
-
-                <p><a href="https://neo4j.com/docs/operations-manual/current/performance/">Read more about Neo4j performance tuning</a></p>
-            </div>
-        );
-    }
-
     render() {
-        const explainer = <Explainer content={this.help()}/>;
+        const explainer = <Explainer knowledgebase='SystemLoad' />;
 
         return (
             <div className="SystemLoad">
