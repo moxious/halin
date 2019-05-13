@@ -5,6 +5,7 @@ import 'react-table/react-table.css';
 import CSVDownload from '../data/download/CSVDownload';
 import sentry from '../sentry/index';
 import moment from 'moment';
+import Explainer from '../Explainer';
 
 class CypherSurface extends Component {
     state = {
@@ -69,7 +70,9 @@ class CypherSurface extends Component {
 
         return (
             <div className='CypherSurface'>
-                <h3>Installed Functions &amp; Procedures</h3>
+                <h3>Installed Functions &amp; Procedures 
+                    <Explainer knowledgebase='CypherSurface' />
+                </h3>
 
                 <CSVDownload 
                     filename={`Cypher-surface-${this.props.node.getLabel()}-${moment.utc().format()}.csv`}

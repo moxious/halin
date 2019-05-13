@@ -28,11 +28,17 @@ const links = {
     understandingMemoryConsumption: moreinfo('understanding memory consumption', 'https://neo4j.com/developer/kb/understanding-memory-consumption/'),
     memoryConfiguration: moreinfo('memory configuration and performance', 'https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuration/'),
     tuningGC: moreinfo('memory configuration and performance', 'https://neo4j.com/docs/operations-manual/3.5/performance/memory-configuration/'),
+    proceduresAndFunctions: moreinfo('procedures and functions', 'https://neo4j.com/docs/java-reference/current/extending-neo4j/procedures-and-functions/procedures/'),
 };
 
 export default {
     links,
-
+    CypherSurface: render([
+        'Neo4j has built in procedures and functions which can be called from Cypher',
+        `Some are provided for by the system, while others (such as APOC) may be separately
+        installed as plugins`,
+        links.proceduresAndFunctions,
+    ]),
     StoreFiles: render([
         `Store file sizes allow you to track how much disk space Neo4j is using.
          Neo4j uses a file for each kind of information it manages.  Total disk
