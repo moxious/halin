@@ -16,7 +16,7 @@ const toCsvString = obj => {
     // you CSV escape the " characters, which is done with double "" and
     // NOT with \"
     // https://stackoverflow.com/questions/46637955/write-a-string-containing-commas-and-double-quotes-to-csv
-    return asString.replace(/"/g, '""');
+    return !_.isNil(asString) ? asString.replace(/"/g, '""') : null;
 };
 
 export default class CSVDownload extends Component {
