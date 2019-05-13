@@ -121,28 +121,33 @@ class Neo4jUsers extends Component {
     confirmRoleAssignment = (component, clusterOpResult) => {
         this.refresh();
         sentry.fine('ClusterOpResult', clusterOpResult);
-        const action = `Assign roles`;
+        const action = `Assigning roles`;
+
+        let newState = {};
 
         if (clusterOpResult instanceof Error) {
-            this.setState({
+            newState = {
                 assignOpen: false,
                 message: null,
                 error: status.message(`Error on ${action}`,
                     `${clusterOpResult}`),
-            });
+            };
         } else if (clusterOpResult.success) {
-            this.setState({
+            newState = {
                 assignOpen: false,
                 message: status.fromClusterOp(action, clusterOpResult),
                 error: false,
-            });
+            };
         } else {
-            this.setState({
+            newState = {
                 assignOpen: false,
                 message: null,
                 error: status.fromClusterOp(action, clusterOpResult),
-            });
+            };
         }
+
+        // Fire the toast message after update is complete.
+        this.setState(newState, () => status.toastify(this));
     }
 
     closeAssign = () => {

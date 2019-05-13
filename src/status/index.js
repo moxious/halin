@@ -3,14 +3,24 @@ import { Message } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import sentry from '../sentry/index';
 import _ from 'lodash';
 
 const message = (header, body) => ({ header, body });
+
+const toastContent = messageObject => 
+    <div className='HalinToast'>
+        <h4>{messageObject.header}</h4>
+        <p>{messageObject.body}</p>
+    </div>;
 
 /**
  * This module makes it easier to format status messages across components.
  * Components are expected to have an "error" object in their state if something
  * is wrong, and a "message" object if the operation was successful.
+ * 
+ * The content of those objects is a "message" object in the function above, which
+ * has a "header" and "body" component.
  */
 export default {
     message,
@@ -30,15 +40,21 @@ export default {
         }
     },
 
+    toastContent,
 
-    toastify: (component, options) => {
+    toastify: (component, overrideOptions) => {
+        if (!_.get(component, 'state.error') && !_.get(component, 'state.message')) {
+            sentry.warn('Toastify called on a component with nothing to say');
+            return null;
+        }
+
         const alwaysOptions = _.merge({
             position: 'top-center',
             hideProgressBar: true,
             closeOnClick: true,
             pauseOnHover: true,
             draggable: true,       
-        }, options);
+        });
 
         const errorOptions = {
             autoClose: false,
@@ -48,17 +64,27 @@ export default {
             autoClose: true,
         };
 
-        if (component.state.error) {
-            const message = '☠️ Error ' + component.state.error.body;
-            toast.error(message, _.merge(alwaysOptions, errorOptions, options));
-        } else if(component.state.message) {
-            const message = '👍 Success ' + component.state.message.body;
-            toast.success(message, _.merge(alwaysOptions, successOptions, options));
-        }
+        const toastBody = (component.state.error ? 
+            toastContent(component.state.error) : 
+            toastContent(component.state.message));
+        const thisToastOptions = component.state.error ? errorOptions : successOptions;
 
-        return null;
+        const finalOptions = _.merge(alwaysOptions, thisToastOptions, overrideOptions);
+
+        if (component.state.error) {
+            console.log('error toast', toastBody, finalOptions);
+            return toast.error(toastBody, finalOptions);
+        } else {
+            console.log('Success toast', toastBody, finalOptions);
+            return toast.success(toastBody, finalOptions);
+        }
     },
 
+    /*
+     * This is used for block status messages that are main elements on screen, not 
+     * ephemeral notifications like toast.  Example is when you try to connnect to a
+     * database and fail
+     */
     formatStatusMessage: (component) => {
         let message = '';
 

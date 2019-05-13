@@ -9,8 +9,7 @@ export default class HalinToast extends Component {
     render() {
         return (
             <ToastContainer
-                position="top-center"
-                autoClose={false}
+                position='top-center'
                 newestOnTop={false}
                 closeOnClick
                 rtl={false}
