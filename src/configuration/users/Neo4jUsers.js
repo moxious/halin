@@ -7,6 +7,8 @@ import AssignRoleModal from '../roles/AssignRoleModal';
 import uuid from 'uuid';
 import sentry from '../../sentry/index';
 import './Neo4jUsers.css';
+import moment from 'moment';
+import CSVDownload from '../../data/download/CSVDownload';
 
 class Neo4jUsers extends Component {
     key = uuid.v4();
@@ -175,25 +177,51 @@ class Neo4jUsers extends Component {
         this.setState({ confirmOpen: false });
     }
 
-    render() {
-        const enterprise = window.halinContext.isEnterprise();
+    onRecordsUpdate = (records /*, component */) => {
+        this.setState({ data: records });
+    };
 
+    downloadCSVButton() {
+        if (!this.state.data || this.state.data.length === 0) {
+            return '';
+        }
+
+        return (
+            <CSVDownload 
+                title='Download Users as CSV'
+                filename={`Halin-neo4j-users-${moment.utc().format()}.csv`}
+                data={this.state.data}
+                displayColumns={this.displayColumns}
+            />
+        );
+    }
+
+    manageRolesButton() {
+        if(!window.halinContext.isEnterprise()) {
+            // Does not apply.
+            return '';
+        }
+
+        return (
+            <Button onClick={e => this.openAssign()}>
+                <i className="icon user"></i> Manage Roles
+            </Button>            
+        );
+    }
+
+    render() {
         return (
             <div className="Neo4jUsers">
                 <h3>Users</h3>
 
                 <Grid>
-                    <Grid.Row columns={2}>
+                    <Grid.Row columns={1}>
                         <Grid.Column>
-                            {'Browse, filter, and delete users'}
-                        </Grid.Column>
-                        <Grid.Column>
-                            { enterprise ? 
-                                <Button basic onClick={e => this.openAssign()}>
-                                    <i className="icon user"></i> Manage Roles
-                                </Button> : '' }
-                            
-                            <Button basic onClick={e => this.refresh()} icon="refresh"/>
+                            <Button.Group basic>
+                                { this.manageRolesButton() }                            
+                                { this.downloadCSVButton() }
+                                <Button onClick={e => this.refresh()} icon="refresh"/>
+                            </Button.Group>
                         </Grid.Column>
                     </Grid.Row>
 
@@ -219,11 +247,11 @@ class Neo4jUsers extends Component {
                         <Grid.Column>
                             <CypherDataTable
                                 node={this.props.node}
+                                onUpdate={this.onRecordsUpdate}
                                 showPagination={true}
                                 query={this.query}
                                 refresh={this.state.childRefresh}
                                 displayColumns={this.displayColumns}
-                                allowDownloadCSV={true}
                             />
                         </Grid.Column>
                     </Grid.Row>
