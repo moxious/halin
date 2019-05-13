@@ -9,6 +9,7 @@
 - Several improvements to the UI for managing users/roles (#82)
 - Support for auth methods used by Neo4j Cloud EAP (#72)
 - Put linting in place codebase wide, integrated into CI build (#83)
+- Expanded use of explainers, with more content for users.
 
 ## 0.9
 
