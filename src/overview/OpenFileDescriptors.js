@@ -4,6 +4,7 @@ import { Button } from 'semantic-ui-react';
 import queryLibrary from '../data/queries/query-library';
 import uuid from 'uuid';
 import _ from 'lodash';
+import Explainer from '../Explainer';
 
 class OpenFileDescriptors extends Component {
     state = {
@@ -44,6 +45,20 @@ class OpenFileDescriptors extends Component {
         this.setState({ displayProperty: val });
     };
 
+    help() {
+        return (
+            <div className='OpenFileDescriptorsHelp'>
+                <p>Operating systems place limits on how many files may be open at once.
+                    In some cases, the usual limits may be too low.</p>
+                <p>For more information, see <a href="https://neo4j.com/developer/kb/number-of-open-files/">
+                    number of open files</a>&nbsp;
+                    and <a href="https://neo4j.com/docs/operations-manual/current/performance/linux-file-system-tuning/">
+                    linux filesystem tuning</a>
+                </p>
+            </div>
+        )
+    }
+
     render() {
         const buttons = [
             { label: 'Used', field: 'fdUsed' },
@@ -53,7 +68,7 @@ class OpenFileDescriptors extends Component {
 
         return (
             <div className="OpenFileDescriptors">
-                <h3>File Descriptors</h3>
+                <h3>File Descriptors <Explainer content={this.help()}/></h3>
                 
                 <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
                     buttons.map((b,idx) =>
