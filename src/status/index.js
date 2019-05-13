@@ -72,10 +72,8 @@ export default {
         const finalOptions = _.merge(alwaysOptions, thisToastOptions, overrideOptions);
 
         if (component.state.error) {
-            console.log('error toast', toastBody, finalOptions);
             return toast.error(toastBody, finalOptions);
         } else {
-            console.log('Success toast', toastBody, finalOptions);
             return toast.success(toastBody, finalOptions);
         }
     },
