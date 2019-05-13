@@ -1,5 +1,15 @@
 # Halin Release Notes
 
+## 0.10.0
+
+- Enabled CSV download of query stats, and active tasks (#78)
+- Log view screen allows inspecting query.log if it exists (#77)
+- Enabled log parsing for some logs, downloadable as CSV (#77)
+- Permitted downloading certain tables (configuration, plugins, others) as CSV
+- Several improvements to the UI for managing users/roles (#82)
+- Support for auth methods used by Neo4j Cloud EAP (#72)
+- Put linting in place codebase wide, integrated into CI build (#83)
+
 ## 0.9
 
 - Logs pane added to individual nodes, so that you can see the content of debug.log, neo4j.log, and security.log, if you are using a recent APOC distribution
