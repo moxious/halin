@@ -41,6 +41,8 @@ class Halin extends Component {
     halin: null,
     initPromise: null,
     error: null,
+
+    // eslint-disable-next-line no-unused-vars
     panes: (driver = null, node = null, key = uuid.v4()) => ([
       // Because panes get reused across cluster nodes, we have to 
       // give them all a unique key so that as we recreate panes, we're passing down
@@ -240,7 +242,7 @@ const App = () => {
       <GraphAppBase
         driverFactory={neo4j}
         integrationPoint={window.neo4jDesktopApi}
-        render={({ connectionState, connectionDetails, setCredentials }) => {
+        render={({ connectionState /*, connectionDetails, setCredentials */ }) => {
           return (
             <Halin key="app" connected={connectionState === CONNECTED} />
           );

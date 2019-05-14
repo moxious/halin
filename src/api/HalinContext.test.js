@@ -1,7 +1,8 @@
+import sinon from 'sinon';
+
 import HalinContext from './HalinContext';
 import ClusterManager from './cluster/ClusterManager';
-import neo4j from '../driver/index';
-import sinon from 'sinon';
+import neo4j from './driver/index';
 import fakes from '../testutils/fakes';
 
 describe('Halin Context', function () {

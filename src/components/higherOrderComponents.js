@@ -98,6 +98,8 @@ const csvMetricsComponent = (WrappedComponent,  heading) => {
         operations manual section on exposing metrics</a>
         to configure this for your database.
     </div>;
+
+    // eslint-disable-next-line no-unused-vars
     const compatCheck = ctx => Promise.resolve(this.props.node && this.props.node.csvMetricsEnabled());
 
     return compatibilityCheckableComponent(

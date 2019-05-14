@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import MetricDescription from './MetricDescription';
-import fakes from '../../testutils/fakes';
+import fakes from '../../../testutils/fakes';
 
 describe('Metric Description', function() {
     let component, node;

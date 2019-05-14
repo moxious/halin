@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import ClusterEventLog from './ClusterEventLog';
-import fakes from '../testutils/fakes';
+import fakes from '../../testutils/fakes';
 
 describe('Cluster Event Log', function() {
     let component;

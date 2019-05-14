@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Neo4jConfiguration from './Neo4jConfiguration';
-import ql from '../../data/queries/query-library';
+import ql from '../../api/data/queries/query-library';
 import fakes from '../../testutils/fakes';
 import uuid from 'uuid';
 

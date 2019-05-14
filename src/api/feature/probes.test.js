@@ -1,6 +1,6 @@
 import probes from './probes';
-import fakes from '../testutils/fakes';
-import sentry from '../sentry/index';
+import fakes from '../../testutils/fakes';
+import sentry from '../../api/sentry/index';
 
 sentry.disable();
 

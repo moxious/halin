@@ -1,5 +1,5 @@
 import ClusterMember from './ClusterMember';
-import fakes from '../testutils/fakes';
+import fakes from '../../testutils/fakes';
 import Ring from 'ringjs';
 
 describe('ClusterMember', function () {

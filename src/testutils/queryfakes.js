@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import neo4j from '../driver/index';
+import neo4j from '../api/driver/index';
 import HalinQuery from '../api/data/queries/HalinQuery';
 
 const queries = {

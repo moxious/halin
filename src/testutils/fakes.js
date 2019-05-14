@@ -2,11 +2,13 @@ import sinon from 'sinon';
 import Ring from 'ringjs';
 import { TimeEvent } from 'pondjs';
 import moment from 'moment';
-import Neo4jDesktopApiStandIn from '../components/neo4jDesktop/Neo4jDesktopStandIn';
-import queryFakes from './queryfakes';
 import uuid from 'uuid';
 import _ from 'lodash';
-import sentry from '../sentry/index';
+
+import sentry from '../api/sentry/index';
+
+import queryFakes from './queryfakes';
+import Neo4jDesktopApiStandIn from '../components/neo4jDesktop/Neo4jDesktopStandIn';
 
 sentry.disable();
 
