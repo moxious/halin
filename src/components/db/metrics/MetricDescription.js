@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Breadcrumb } from 'semantic-ui-react';
-import metricsReference from './reference.json';
+import kb from '../../../api/knowledgebase';
 
 export default class MetricDescription extends Component {
     render() {
@@ -17,7 +17,7 @@ export default class MetricDescription extends Component {
                     }
 
                     <Breadcrumb.Section>
-                        {metricsReference[this.props.metric] || 'No description available'}
+                        {kb.metricsReference[this.props.metric] || 'No description available'}
                     </Breadcrumb.Section>
                 </Breadcrumb>
             </div>

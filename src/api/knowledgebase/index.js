@@ -1,5 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
+import metricsReference from './reference.json';
 
 let k = 0;
 
@@ -56,6 +57,7 @@ const links = {
 };
 
 export default {
+    metricsReference,
     links,
     render,
     'neo4j.log': render([
