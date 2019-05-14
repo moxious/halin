@@ -43,8 +43,8 @@ jobs:
       - run:
           name: Run tests
           command: |
-            ls src/components/
-            ls src/components/neo4jDesktop 
+            ls -l src/components/
+            ls -l src/components/neo4jDesktop 
             yarn test
       - run: 
           name: Deploy to S3 (Build Branch)
