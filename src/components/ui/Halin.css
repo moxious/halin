@@ -1,4 +1,4 @@
-.App {
+.Halin {
   text-align: center;
 }
 
@@ -28,15 +28,15 @@
   border-bottom: 1px solid #d4d4d5; */
 }
 
-.App-logo {
-  /* animation: App-logo-spin infinite 20s linear; */
+.Halin-logo {
+  /* animation:.Halin-logo-spin infinite 20s linear; */
   /* height: 80px; */
   display: block;
   margin-left: auto;
   margin-right: auto;
 }
 
-.App-header {
+.Halin-header {
   padding-top: 5px;
   /* background-color: #222; */
   /* height: 70px; */
@@ -44,11 +44,11 @@
   /* color: white; */
 }
 
-.App-title {
+.Halin-title {
   font-size: 1.3em;
 }
 
-.App-intro {
+.Halin-intro {
   font-size: large;
 }
 
@@ -57,7 +57,7 @@ div.ui.grid {
   padding-right: 15px;
 }
 
-@keyframes App-logo-spin {
+@keyframes.Halin-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }

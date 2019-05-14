@@ -10,11 +10,17 @@ import _ from 'lodash';
 import sentry from '../../api/sentry/index';
 import neo4j from '../../api/driver';
 
-import './App.css';
-
 import Neo4jDesktopStandIn from '../neo4jDesktop/Neo4jDesktopStandin';
 import Halin from './Halin';
 
+/**
+ * Wrapper function for deciding what main "run mode" Halin is in, and doing the
+ * right thing.  Down one path, we're a stand-alone webapp and the user gets a 
+ * connect modal.  Down the other path, we're a graph app.
+ * 
+ * Irrespective which, the Halin component is the real app shell, and it expects
+ * the same environment either way.
+ */
 const App = () => {
   sentry.init();
   

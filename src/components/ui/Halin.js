@@ -27,6 +27,8 @@ import AppFooter from './AppFooter';
 import HalinToast from '../HalinToast';
 import Troubleshooting from '../neo4jDesktop/Troubleshooting';
 
+import './Halin.css';
+
 export default class Halin extends Component {
   state = {
     cTag: 1,
@@ -192,7 +194,7 @@ export default class Halin extends Component {
 
     if (!this.state.halin) {
       return (
-        <div className='App' key='app' style={{ marginTop: '50px' }}>
+        <div className='Halin' key='app' style={{ marginTop: '50px' }}>
           <h2>Initializing Halin...</h2>
 
           <Spinner/>
@@ -201,7 +203,7 @@ export default class Halin extends Component {
     }
 
     return (
-      <div className="App" key="app">
+      <div className="Halin" key="app">
         <HalinToast/>
 
         { this.props.connected ? 
