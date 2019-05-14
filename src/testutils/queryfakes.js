@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import neo4j from '../driver/index';
-import HalinQuery from '../data/queries/HalinQuery';
+import HalinQuery from '../api/data/queries/HalinQuery';
 
 const queries = {
     'RETURN true AS value': [

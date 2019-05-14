@@ -2,7 +2,7 @@ import sinon from 'sinon';
 import Ring from 'ringjs';
 import { TimeEvent } from 'pondjs';
 import moment from 'moment';
-import Neo4jDesktopApiStandIn from '../neo4jDesktop/Neo4jDesktopStandIn';
+import Neo4jDesktopApiStandIn from '../components/neo4jDesktop/Neo4jDesktopStandIn';
 import queryFakes from './queryfakes';
 import uuid from 'uuid';
 import _ from 'lodash';
