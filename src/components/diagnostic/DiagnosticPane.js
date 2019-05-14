@@ -6,7 +6,7 @@ import GeneratePackage from './GeneratePackage';
 import ClusterEventLog from './ClusterEventLog';
 import Ping from './Ping';
 import uuid from 'uuid';
-import Explainer from '../Explainer';
+import Explainer from '../ui/Explainer';
 
 class DiagnosticPane extends Component {
     state = {

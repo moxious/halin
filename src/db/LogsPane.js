@@ -1,19 +1,17 @@
 import React, { Component } from 'react';
 import uuid from 'uuid';
+import hoc from '../components/higherOrderComponents';
 import _ from 'lodash';
 import { Tab, Button, Icon, Form, Radio, Message, Checkbox } from 'semantic-ui-react';
+import Spinner from '../components/ui/Spinner';
 import ReactTable from 'react-table';
-import moment from 'moment';
-
-import sentry from '../../api/sentry';
-import kb from '../../api/knowledgebase';
-
-import hoc from '../higherOrderComponents';
-import Spinner from '../ui/Spinner';
-import Explainer from '../ui/Explainer';
 import neo4j from 'neo4j-driver';
-import le from '../data/logs/LogEvent';
-import CSVDownload from '../data/download/CSVDownload';
+import sentry from '../sentry';
+import le from '../components/data/logs/LogEvent';
+import CSVDownload from '../components/data/download/CSVDownload';
+import moment from 'moment';
+import kb from '../api/knowledgebase';
+import Explainer from '../components/Explainer';
 
 const MAX_ROWS = 5000;
 

@@ -5,7 +5,7 @@ import { Button } from 'semantic-ui-react';
 import queryLibrary from '../../api/data/queries/query-library';
 import _ from 'lodash';
 import hoc from '../higherOrderComponents';
-import Explainer from '../Explainer';
+import Explainer from '../ui/Explainer';
 
 class TransactionsOpen extends Component {
     state = {

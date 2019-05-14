@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../../api/data/queries/query-library';
-import Explainer from '../Explainer';
+import Explainer from '../ui/Explainer';
 
 class ClusterMemory extends Component {
     state = {

@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
 import CypherTimeseries from '../timeseries/CypherTimeseries';
 import uuid from 'uuid';
+
 import queryLibrary from '../../api/data/queries/query-library';
+
 import hoc from '../higherOrderComponents';
-import Explainer from '../Explainer';
+import Explainer from '../ui/Explainer';
 
 class TransactionMonitor extends Component {
     state = {

@@ -1,15 +1,17 @@
 import React, { Component } from "react";
-import 'semantic-ui-css/semantic.min.css';
-import hoc from '../../higherOrderComponents';
-import queryLibrary from '../../../api/data/queries/query-library';
-import CypherDataTable from '../../data/CypherDataTable';
-import fields from '../../../api/data/fields';
+import { Button, Popup, Modal, Header } from 'semantic-ui-react';
 import 'react-table/react-table.css';
+import 'semantic-ui-css/semantic.min.css';
 import _ from 'lodash';
 import moment from 'moment';
-import { Button, Popup, Modal, Header } from 'semantic-ui-react';
+
+import queryLibrary from '../../../api/data/queries/query-library';
+import fields from '../../../api/data/fields';
+
+import hoc from '../../higherOrderComponents';
+import CypherDataTable from '../../data/CypherDataTable';
 import TaskDetail from './TaskDetail';
-import Explainer from '../../Explainer';
+import Explainer from '../../ui/Explainer';
 
 const age = since => {
     const start = moment.utc(since);

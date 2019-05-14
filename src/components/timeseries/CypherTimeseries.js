@@ -8,12 +8,12 @@ import {
     Stream,
 } from 'pondjs';
 import uuid from 'uuid';
-import Spinner from '../Spinner';
+import Spinner from '../ui/Spinner';
 import datautil from '../../api/data/util';
 import timewindow from '../../api/timeseries/timewindow';
 import sentry from '../../api/sentry/index';
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
-import NodeLabel from '../NodeLabel';
+import NodeLabel from '../ui/NodeLabel';
 
 const DEFAULT_PALETTE = [
     '#f68b24', 'steelblue', '#619F3A', '#dfecd7', '#e14594', '#7045af', '#2b3595',

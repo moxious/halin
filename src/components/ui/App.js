@@ -9,31 +9,31 @@ import uuid from 'uuid';
 import _ from 'lodash';
 
 // API imports
-import sentry from '../api/sentry/index';
-import status from '../api/status/index';
-import neo4j from '../api/driver';
-import HalinContext from '../api/HalinContext';
+import sentry from '../../api/sentry/index';
+import status from '../../api/status/index';
+import neo4j from '../../api/driver';
+import HalinContext from '../../api/HalinContext';
 
 // Component imports
-import Neo4jConfiguration from './configuration/Neo4jConfiguration';
-import PerformancePane from './performance/PerformancePane';
-import OSPane from './performance/OSPane';
-import PluginPane from './db/PluginPane';
-import SampleQueryPane from './db/SampleQueryPane';
-import LogsPane from './db/LogsPane';
+import Neo4jConfiguration from '../configuration/Neo4jConfiguration';
+import PerformancePane from '../performance/PerformancePane';
+import OSPane from '../performance/OSPane';
+import PluginPane from '../db/PluginPane';
+import SampleQueryPane from '../db/SampleQueryPane';
+import LogsPane from '../db/LogsPane';
 // import MetricsPane from './db/metrics/MetricsPane';
-import PermissionsPane from './configuration/PermissionsPane';
-import ClusterOverviewPane from './overview/ClusterOverviewPane';
+import PermissionsPane from '../configuration/PermissionsPane';
+import ClusterOverviewPane from '../overview/ClusterOverviewPane';
 import ClusterMemberTabHeader from './ClusterMemberTabHeader';
-import DiagnosticPane from './diagnostic/DiagnosticPane';
+import DiagnosticPane from '../diagnostic/DiagnosticPane';
 import Spinner from './Spinner';
 
 import AppFooter from './AppFooter';
 import './App.css';
 
-import Neo4jDesktopStandIn from './neo4jDesktop/Neo4jDesktopStandin';
-import HalinToast from './HalinToast';
-import Troubleshooting from './neo4jDesktop/Troubleshooting';
+import Neo4jDesktopStandIn from '../neo4jDesktop/Neo4jDesktopStandin';
+import HalinToast from '../HalinToast';
+import Troubleshooting from '../neo4jDesktop/Troubleshooting';
 
 class Halin extends Component {
   state = {

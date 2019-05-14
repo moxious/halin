@@ -3,7 +3,7 @@ import uuid from 'uuid';
 import moment from 'moment';
 import hoc from '../../higherOrderComponents';
 import _ from 'lodash';
-import Spinner from '../../Spinner';
+import Spinner from '../../ui/Spinner';
 import sentry from '../../api/sentry';
 import queryLibrary from '../../data/queries/query-library';
 import { Grid, Dropdown, Message, Form } from 'semantic-ui-react';

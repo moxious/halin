@@ -1,11 +1,13 @@
 import React, { Component } from 'react';
-import Spinner from '../Spinner';
 import _ from 'lodash';
 import { Grid } from 'semantic-ui-react';
 import uuid from 'uuid';
-import AllocationChart from './AllocationChart';
+
 import datautil from '../../api/data/util';
 import queryLibrary from '../../api/data/queries/query-library';
+
+import Spinner from '../ui/Spinner';
+import AllocationChart from './AllocationChart';
 
 export default class OSStats extends Component {
     state = {

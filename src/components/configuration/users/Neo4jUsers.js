@@ -2,14 +2,16 @@ import React, { Component } from 'react';
 import CypherDataTable from '../../data/CypherDataTable';
 import { Button, Confirm, Grid } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
-import status from '../../../api/status/index';
-import AssignRoleModal from '../roles/AssignRoleModal';
 import uuid from 'uuid';
-import sentry from '../../../api/sentry/index';
-import './Neo4jUsers.css';
 import moment from 'moment';
+
+import sentry from '../../../api/sentry/index';
+import status from '../../../api/status/index';
+
+import AssignRoleModal from '../roles/AssignRoleModal';
+import './Neo4jUsers.css';
 import CSVDownload from '../../data/download/CSVDownload';
-import Explainer from '../../Explainer';
+import Explainer from '../../ui/Explainer';
 
 class Neo4jUsers extends Component {
     key = uuid.v4();

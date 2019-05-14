@@ -1,16 +1,14 @@
 import React, { Component } from 'react';
-import moment from 'moment';
-
-import queryLibrary from '../../api/data/queries/query-library';
-import HalinQuery from '../../api/data/queries/HalinQuery';
-import sentry from '../../api/sentry';
-
+import Explainer from '../components/Explainer';
 import DBStats from '../dbstats/DBStats';
-import Spinner from '../ui/Spinner';
-import Explainer from '../ui/Explainer';
+import sentry from '../sentry';
+import queryLibrary from '../api/data/queries/query-library';
+import HalinQuery from '../api/data/queries/HalinQuery';
+import Spinner from '../components/ui/Spinner';
 import QueryExecutionPlan from './QueryExecutionPlan';
 import QueryStatTable from './queries/QueryStatTable';
-import CSVDownload from '../data/download/CSVDownload';
+import CSVDownload from '../components/data/download/CSVDownload';
+import moment from 'moment';
 
 import {
     Button,

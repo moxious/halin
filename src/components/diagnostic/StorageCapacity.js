@@ -1,6 +1,6 @@
 import { Component } from 'react';
 import CypherDataTable from '../data/CypherDataTable';
-import Explainer from '../Explainer';
+import Explainer from '../ui/Explainer';
 import queryLibrary from '../data/queries/query-library';
 import { Message } from 'semantic-ui-react';
 import hoc from '../higherOrderComponents';

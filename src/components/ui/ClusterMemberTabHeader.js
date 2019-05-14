@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Menu, Icon, Popup } from 'semantic-ui-react'
-import util from '../api/data/util.js';
-import score from '../api/cluster/health/score';
+import util from '../../api/data/util.js';
+import score from '../../api/cluster/health/score';
 
 export default class ClusterMemberTabHeader extends Component {
     state = {

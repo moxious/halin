@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import CypherDataTable from '../data/CypherDataTable';
 import hoc from '../higherOrderComponents';
-import Explainer from '../Explainer';
+import Explainer from '../ui/Explainer';
 import 'react-table/react-table.css';
 import './Neo4jConfiguration.css';
 import queryLibrary from '../../api/data/queries/query-library';

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { Button, Modal, Header } from 'semantic-ui-react'
 
-import appPkg from '../package.json';
+import appPkg from '../../package.json';
 import './AppFooter.css';
-import SettingsPane from './settings/SettingsPane';
+import SettingsPane from '../settings/SettingsPane';
 
 export default class AppFooter extends Component {
     render() {

@@ -10,7 +10,7 @@
 import React, { Component } from 'react';
 import { Icon, Message } from 'semantic-ui-react';
 
-import Spinner from './Spinner';
+import Spinner from './ui/Spinner';
 import sentry from '../api/sentry';
 
 const smallCentered = { maxWidth: 300, margin: 'auto' };

@@ -3,7 +3,7 @@ import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../../api/data/queries/query-library';
 import _ from 'lodash';
-import Explainer from '../Explainer';
+import Explainer from '../ui/Explainer';
 
 class GCPauseTime extends Component {
     state = {

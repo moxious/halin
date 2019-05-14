@@ -8,11 +8,13 @@ import {
     Stream,
 } from 'pondjs';
 import uuid from 'uuid';
-import Spinner from '../Spinner';
-import queryLibrary from '../../api/data/queries/query-library';
+
 import datautil from '../../api/data/util';
 import timewindow from '../../api/timeseries/timewindow';
+import queryLibrary from '../../api/data/queries/query-library';
 import sentry from '../../api/sentry/index';
+
+import Spinner from '../ui/Spinner';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 

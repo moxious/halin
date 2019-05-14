@@ -6,7 +6,7 @@ import _ from 'lodash';
 import datautil from '../../api/data/util';
 import queryLibrary from '../../api/data/queries/query-library';
 
-import NodeLabel from '../NodeLabel';
+import NodeLabel from '../ui/NodeLabel';
 
 const simpleLabel = (key, value) => 
     <Label>
