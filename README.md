@@ -1,3 +1,8 @@
+---
+title: Halin: Neo4j Monitoring Made Easy
+layout: post
+---
+
 [![CircleCI](https://circleci.com/gh/moxious/halin.svg?style=svg)](https://circleci.com/gh/moxious/halin)
 
 ## Halin Neo4j Monitoring
@@ -37,6 +42,8 @@ check the `.circleci/config.yml` file, and look for the "Deploy to S3" step.
 
 ### Running in Docker
 
+All Halin docker images can be found on [Docker Hub](https://cloud.docker.com/u/mdavidallen/repository/docker/mdavidallen/halin)
+
 ```
 docker run -d -p 127.0.0.1:3000:3000 --rm -t mdavidallen/halin:latest 
 ```
@@ -59,11 +66,11 @@ point to your running copy of Halin
 
 ## FAQ
 
-1. Does it support Neo4j Enterprise or Community?
+- Does it support Neo4j Enterprise or Community?
 
 Both.  Some features must be disabled for community (such as user management) because community does not support them.  For a comparison of features between Neo4j Enterprise and Community, [see this link](https://neo4j.com/subscriptions/#editions)
 
-2. Does Halin capture any data about my database?
+- Does Halin capture any data about my database?
 
 Halin runs purely in your browser and does not share details of your database outside of
 your machine.  Even when you generate a diagnostic package, this is not shared.  Halin 
@@ -72,13 +79,13 @@ software, but nothing about your configuration is sent back to me.  You may opti
 tick a box in the diagnostics pane to "opt-in" share your diagnostic package, which helps
 us improve Halin & Neo4j.
 
-3. What versions of Neo4j does Halin support?
+- What versions of Neo4j does Halin support?
 
 *Supported*:  3.4.* and 3.5.*; causal cluster and stand-alone, enterprise and community.
 
 *Unsupported*: Neo4j < 3.4, embedded deployments, and HA deployments.
 
-4. How does Halin work?
+- How does Halin work?
 
 Halin uses pure cypher/bolt connections to nodes in your cluster, and uses Neo4j's existing
 management interfaces and queries, including things like JMX, to obtain all statistics.  This approach will work on any Neo4j instance with zero modification or configuration.
@@ -87,13 +94,13 @@ If you'd like to see what kinds of queries Halin is running, click on the gear i
 the very bottom and you'll get a pop-up showing all of the queries and their response
 times.
 
-5. Do I have to run Halin as an admin user?
+- Do I have to run Halin as an admin user?
 
 No, but some types of data (for example your configuration) are not available unless you
 are an administrator.  If you run halin with a low privileged user, some features may not
 be available or work as expected.  An admin user is highly recommended.
 
-6. Why doesn't (this feature) appear in Halin?  Why can't I use User administration?
+- Why doesn't (this feature) appear in Halin?  Why can't I use User administration?
 
 Depending on how your database is configured, some options are not available.  For example,
 active running query monitoring requires procedures that are only available in Neo4j
@@ -104,7 +111,7 @@ Additionally, there are some special circumstances. For example if you use an LD
 authorization provider, Halin will not permit adding users because Neo4j itself is not
 the authority on the user set.
 
-7. Why is it called Halin?
+- Why is it called Halin?
 
 The application is named for [Rudolf Halin](https://en.wikipedia.org/wiki/Rudolf_Halin) an
 influential German graph theorist, who came up with (among many other things) [Halin graphs](https://en.wikipedia.org/wiki/Halin_graph).
