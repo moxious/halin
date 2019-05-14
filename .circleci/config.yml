@@ -42,7 +42,10 @@ jobs:
           command: yarn run lint
       - run:
           name: Run tests
-          command: yarn test
+          command: |
+            ls src/components/
+            ls src/components/neo4jDesktop 
+            yarn test
       - run: 
           name: Deploy to S3 (Build Branch)
           command: |
