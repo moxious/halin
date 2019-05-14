@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import ShimConnectModal from './ShimConnectModal';
 import uuid from 'uuid';
+
+import ShimConnectModal from './ShimConnectModal';
 
 const buildFakeContext = (data) => {
     const { host, port, username, password, name, encrypted } = data;
