@@ -9,6 +9,11 @@ div#root {
   background-color: black;
 }
 
+/** Mmmmmm.....toast..... */
+div.Toastify > div > div {
+  border-radius: 20px;
+}
+
 /*
  * Wrapper that's placed around most main content panes
  */
@@ -18,6 +23,7 @@ div.ContentPaneComponent {
   padding-left: 14px;
   padding-right: 14px;
   height: 100%;
+  overflow-y: scroll;
 }
 
 .MainBody {
