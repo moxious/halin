@@ -69,7 +69,9 @@ export default class ClusterMemberMenuItem extends Component {
 
     render() {
         return (
-            <Menu.Item as='a' onClick={() => this.props.onSelect(this.props.member, this)}>
+            <Menu.Item as='a' 
+                active={this.props.active} 
+                onClick={() => this.props.onSelect(this.props.member, this)}>
                 <Popup
                     key={this.props.member.getBoltAddress()}
                     trigger={this.statusIcon(this.props.member)}

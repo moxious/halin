@@ -68,7 +68,7 @@ export default class MainLeftNav extends Component {
 
     hoverPopup(text, trigger, key) {
         return (
-            <Popup key={key}
+            <Popup inverted key={key}
                 on='hover' 
                 position='right center'
                 trigger={trigger} 
@@ -119,7 +119,7 @@ export default class MainLeftNav extends Component {
                     {
                         selections.map((selection, index) => 
                             this.hoverPopup(selection.text, 
-                                <Menu.Item
+                                <Menu.Item active={this.state.section === selection.section}
                                     index={index} as='a' 
                                     onClick={() => this.section(selection.section)}>
                                     { selection.icon }
