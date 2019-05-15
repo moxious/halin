@@ -6,7 +6,8 @@ import GeneratePackage from './GeneratePackage';
 import ClusterEventLog from './ClusterEventLog';
 import Ping from './Ping';
 import uuid from 'uuid';
-import Explainer from '../ui/Explainer';
+import Explainer from '../ui/scaffold/Explainer/Explainer';
+import hoc from '../higherOrderComponents';
 
 class DiagnosticPane extends Component {
     state = {
@@ -46,4 +47,4 @@ class DiagnosticPane extends Component {
     }
 }
 
-export default DiagnosticPane;
+export default hoc.contentPaneComponent(DiagnosticPane);

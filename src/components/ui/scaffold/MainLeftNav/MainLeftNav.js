@@ -4,6 +4,7 @@ import { Sidebar, Segment, Menu, Icon, Image, Popup } from 'semantic-ui-react';
 import ClusterOverviewPane from '../../../overview/ClusterOverviewPane';
 import PermissionsPane from '../../../configuration/PermissionsPane';
 import SettingsPane from '../../../settings/SettingsPane';
+import DiagnosticsPane from '../../../diagnostic/DiagnosticPane';
 import MemberSelector from '../MemberSelector/MemberSelector';
 import AppFooter from '../AppFooter/AppFooter';
 
@@ -61,6 +62,8 @@ export default class MainLeftNav extends Component {
             return this.segmentWrap(<PermissionsPane node={this.state.clusterMember}/>);
         } else if (this.state.section === 'settings') {
             return this.segmentWrap(<SettingsPane/>);
+        } else if (this.state.section === 'diagnostics') {
+            return this.segmentWrap(<DiagnosticsPane/>);
         }
 
         return 'No child tab';
@@ -92,6 +95,11 @@ export default class MainLeftNav extends Component {
                 section: 'users',
                 text: 'User Management',
                 icon: <Icon name='group' />,
+            },
+            {
+                section: 'diagnostics',
+                text: 'Cluster Diagnostic Tools',
+                icon: <Icon name='wrench'/>,
             },
             {
                 section: 'settings',
