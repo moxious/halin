@@ -1,15 +1,14 @@
 import React, { Component } from 'react';
-import { Sidebar, Segment, Menu, Icon, Popup, Tab } from 'semantic-ui-react';
+import { Sidebar, Segment, Menu, Tab } from 'semantic-ui-react';
 import uuid from 'uuid';
 
-import score from '../../../../api/cluster/health/score';
-import util from '../../../../api/data/util.js';
 import PerformancePane from '../../../performance/PerformancePane';
 import Neo4jConfiguration from '../../../configuration/Neo4jConfiguration';
 import OSPane from '../../../performance/OSPane';
 import PluginPane from '../../../db/PluginPane';
 import SampleQueryPane from '../../../db/SampleQueryPane';
 import LogsPane from '../../../db/LogsPane';
+import ClusterMemberMenuItem from '../ClusterMemberMenuItem/ClusterMemberMenuItem';
 
 export default class MemberSelector extends Component {
     state = {
@@ -17,12 +16,6 @@ export default class MemberSelector extends Component {
         visible: true,
         direction: 'left',
         member: window.halinContext.members()[0],
-
-        score: 1,
-        total: 1,
-        fresh: 1,
-        notFresh: 0,
-        performance: { observations: [] },
 
         panes: (member = null, key = uuid.v4()) => ([
             // Because panes get reused across cluster nodes, we have to 
@@ -74,56 +67,9 @@ export default class MemberSelector extends Component {
             <div className={`PaneWrapper ${cls}`}>{obj}</div>
         </Tab.Pane>;
 
-    sampleFeeds() {
-        if (!this.mounted) { return null; }
-        const currentState = score.feedFreshness(window.halinContext, this.state.member);
-        this.setState(currentState);
-    }
-
-    componentDidMount() {
-        this.mounted = true;
-        this.interval = setInterval(() => this.sampleFeeds(), 500);
-    }
-
-    componentWillUnmount() {
-        this.mounted = false;
-        clearInterval(this.interval);
-    }
-
     select = (member) => {
         console.log("member selected", member);
         this.setState({ member });
-    }
-
-    popupContent = () => {
-        return (
-            <div className='PopupContent'>
-                <h4>Data</h4>
-                <p>{`${this.state.fresh} of ${this.state.total} fresh`}</p>
-
-                <p>{this.state.performance.observations.length} observations; mean response time
-                &nbsp;{util.roundToPlaces(this.state.performance.mean, 0)}ms with a standard deviation of
-                &nbsp;{util.roundToPlaces(this.state.performance.stdev, 0)}ms</p>
-
-                <p>When most/all feeds are fresh, this indicates responsiveness.  When performance
-                degrades, data feeds slow, stop, or error.</p>
-            </div>
-        );
-    };
-
-    menuItem(member, key) {
-        return (
-            <Menu.Item as='a' key={key} onClick={() => this.select(member)}>
-                <Popup
-                    key={member.getBoltAddress()}
-                    trigger={this.statusIcon(member)}
-                    header={member.role}
-                    content={this.popupContent()}
-                    position='bottom left'
-                />
-                {member.getLabel()}
-            </Menu.Item>
-        );
     }
 
     renderChildContent() {
@@ -139,27 +85,6 @@ export default class MemberSelector extends Component {
             />
         );
     }
-
-    statusIcon = (member) => {
-        const role = member.role.toLowerCase();
-
-        let iconName;
-        if (role === 'leader') { iconName = 'star'; }
-        else if (role === 'read_replica') { iconName = 'copy'; }
-        else { iconName = 'circle'; }  // Follower
-
-        const color = this.colorFor(this.state.score);
-
-        return (
-            <Icon name={iconName} color={color} />
-        );
-    }
-
-    colorFor = (score) => {
-        if (score >= 0.8) { return 'green'; }
-        if (score >= 0.6) { return 'yellow'; }
-        return 'red';
-    };
 
     render() {
         return (
@@ -184,7 +109,9 @@ export default class MemberSelector extends Component {
                 >
                     {
                         window.halinContext.members().map((member, key) =>
-                            this.menuItem(member, key))
+                            <ClusterMemberMenuItem 
+                                member={member} key={key}
+                                onSelect={this.select} />)
                     }
                 </Sidebar>
                 <Sidebar.Pusher dimmed={false}>
