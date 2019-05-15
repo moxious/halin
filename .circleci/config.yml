@@ -41,15 +41,15 @@ jobs:
           name: Lint
           command: yarn run lint
       - run:
+          name: Generate build metadata
+          command: |
+            echo "{\"build\":\""$CIRCLE_BUILD_NUM"\",\"branch\":\""$CIRCLE_BRANCH"\",\"date\":\""$(date +%s)000"\"}" > src/build.json
+      - run:
           name: Run tests
           command: |
             ls -l src/components/
             ls -l src/components/neo4jDesktop 
             yarn test
-      - run:
-          name: Generate build metadata
-          command: |
-            echo "{\"build\":\""$CIRCLE_BUILD_NUM"\",\"branch\":\""$CIRCLE_BRANCH"\",\"date\":\""$(date +%s)000"\"}" > src/build.json
       - run: 
           name: Deploy to S3 (Build Branch)
           command: |
