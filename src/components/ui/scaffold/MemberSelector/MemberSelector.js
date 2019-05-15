@@ -123,7 +123,7 @@ export default class MemberSelector extends Component {
                                 onSelect={this.select} />)
                     }
                 </Sidebar>
-                <Sidebar.Pusher dimmed={false}>
+                <Sidebar.Pusher id="MemberPane" dimmed={false}>
                     {this.renderChildContent()}
                 </Sidebar.Pusher>
             </Sidebar.Pushable>

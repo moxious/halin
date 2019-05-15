@@ -49,7 +49,7 @@ export default class MainLeftNav extends Component {
 
     segmentWrap(content) {
         return (
-            <Segment basic style={segmentStyle}>{content}</Segment>
+            <Segment className="MainContent" basic style={segmentStyle}>{content}</Segment>
         );
     }
 
