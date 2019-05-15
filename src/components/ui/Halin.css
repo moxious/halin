@@ -5,6 +5,16 @@
   background-color: black;
 }
 
+/*
+ * Wrapper that's placed around most main content panes
+ */
+div.ContentPaneComponent {
+  padding-top: 14px;
+  padding-bottom: 14px;
+  padding-left: 14px;
+  padding-right: 14px;
+}
+
 .MainBody {
   padding-top: 15px;
   padding-left: 15px;
