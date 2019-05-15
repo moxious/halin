@@ -3,10 +3,10 @@ import { Accordion, Label } from 'semantic-ui-react';
 import { LineChart } from 'react-d3-components';
 import _ from 'lodash';
 
-import datautil from '../../api/data/util';
-import queryLibrary from '../../api/data/queries/query-library';
+import datautil from '../../../api/data/util';
+import queryLibrary from '../../../api/data/queries/query-library';
 
-import NodeLabel from '../ui/scaffold/NodeLabel/NodeLabel';
+import NodeLabel from '../../ui/scaffold/NodeLabel/NodeLabel';
 
 const simpleLabel = (key, value) => 
     <Label>

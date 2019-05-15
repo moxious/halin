@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import DataFeedStats from '../DataFeedStats';
+import DataFeedStats from '../DataFeedStats/DataFeedStats';
 import ClusterResponseGraph from '../ClusterResponseGraph/ClusterResponseGraph';
 import { List, Icon } from 'semantic-ui-react'
 import './SettingsPane.css';
