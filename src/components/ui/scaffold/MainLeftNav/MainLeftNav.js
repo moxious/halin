@@ -3,7 +3,9 @@ import './MainLeftNav.css';
 import { Sidebar, Segment, Menu, Icon } from 'semantic-ui-react';
 import ClusterOverviewPane from '../../../overview/ClusterOverviewPane';
 import PermissionsPane from '../../../configuration/PermissionsPane';
+import SettingsPane from '../../../settings/SettingsPane';
 import MemberSelector from '../MemberSelector/MemberSelector';
+import AppFooter from '../AppFooter/AppFooter';
 
 const segmentStyle = {
     height: '100%',
@@ -55,14 +57,10 @@ export default class MainLeftNav extends Component {
         } else if (this.state.section === 'users') {
             return this.segmentWrap(<PermissionsPane node={this.state.clusterMember}/>);
         } else if (this.state.section === 'settings') {
-            return (
-                <Segment basic style={segmentStyle}>
-                    Settings
-            </Segment>
-            );
+            return this.segmentWrap(<SettingsPane/>);
         }
 
-        return 'WTF';
+        return 'No child tab';
     }
 
     render() {
@@ -95,8 +93,11 @@ export default class MainLeftNav extends Component {
                         User Management
                     </Menu.Item>
                     <Menu.Item as='a' onClick={() => this.section('settings')}>
-                        <Icon name='cog' />
+                        <Icon name='cogs' />
                         Settings
+                    </Menu.Item>
+                    <Menu.Item as='span'>
+                        <AppFooter />
                     </Menu.Item>
                 </Sidebar>
                 <Sidebar.Pusher dimmed={false}>
