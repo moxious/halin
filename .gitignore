@@ -27,3 +27,4 @@ grafana
 cluster-credentials.json
 reports
 code-signing
+build.json
