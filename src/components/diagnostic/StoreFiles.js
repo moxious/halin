@@ -4,6 +4,9 @@ import CypherDataTable from '../data/CypherDataTable/CypherDataTable';
 import queryLibrary from '../../api/data/queries/query-library';
 import Explainer from '../ui/scaffold/Explainer/Explainer';
 
+/**
+ * @deprecated in favor of CypherPieChart using JMX_STORAGE_ALLOCATION
+ */
 class StoreFiles extends Component {
     state = {
         rate: (1000 * 60), // Once per minute
