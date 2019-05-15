@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import CypherDataTable from './CypherDataTable';
 import uuid from 'uuid';
-import fakes from '../../testutils/fakes';
+import fakes from '../../../testutils/fakes';
 
 describe('Cypher Data Table', function() {
     const key = uuid.v4();
