@@ -13,6 +13,7 @@ div.ContentPaneComponent {
   padding-bottom: 14px;
   padding-left: 14px;
   padding-right: 14px;
+  height: 100%;
 }
 
 .MainBody {
@@ -66,8 +67,8 @@ div.ContentPaneComponent {
 }
 
 div.ui.grid {
-  padding-left: 15px;
-  padding-right: 15px;
+  /* padding-left: 15px;
+  padding-right: 15px; */
 }
 
 @keyframes.Halin-logo-spin {
