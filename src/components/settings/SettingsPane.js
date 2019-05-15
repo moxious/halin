@@ -3,6 +3,7 @@ import DataFeedStats from './DataFeedStats';
 import ClusterResponseGraph from './ClusterResponseGraph';
 import { List, Icon } from 'semantic-ui-react'
 import './SettingsPane.css';
+import hoc from '../higherOrderComponents';
 
 const debug = false;
 
@@ -19,7 +20,7 @@ class DetectedSettings extends Component {
         const ctx = window.halinContext;
 
         return (
-            <div className='DetectedSettings' style={{ paddingTop: '15px', paddingBottom: '15px' }}>
+            <div className='DetectedSettings' style={{ textAlign: 'left' }}>
                 <List>
                     <List.Item style={{ fontFamily: 'monospace' }}>
                         <Icon name='home' color='green'/>
@@ -45,7 +46,7 @@ class DetectedSettings extends Component {
     }
 }
 
-export default class SettingsPane extends Component {
+class SettingsPane extends Component {
     render() {
         // const style = {textAlign:'left'};
         return (
@@ -59,3 +60,5 @@ export default class SettingsPane extends Component {
         )
     }
 }
+
+export default hoc.contentPaneComponent(SettingsPane);
