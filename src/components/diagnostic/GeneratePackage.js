@@ -8,7 +8,7 @@ import collection from '../../api/diagnostic/collection/index';
 import sentry from '../../api/sentry/index';
 import status from '../../api/status/index';
 
-import Spinner from '../ui/Spinner';
+import Spinner from '../ui/scaffold/Spinner/Spinner';
 import Advisor from './advisor/Advisor';
 import ConfigurationDiff from './ConfigurationDiff';
 import hoc from '../higherOrderComponents';

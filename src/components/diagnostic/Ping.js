@@ -6,9 +6,9 @@ import datautil from '../../api/data/util';
 import sentry from '../../api/sentry/index';
 
 import SignalMeter from '../data/SignalMeter';
-import Spinner from '../ui/Spinner';
-import NodeLabel from '../ui/NodeLabel';
-import Explainer from '../ui/Explainer';
+import Spinner from '../ui/scaffold/Spinner/Spinner';
+import NodeLabel from '../ui/scaffold/NodeLabel/NodeLabel';
+import Explainer from '../ui/scaffold/Explainer/Explainer';
 
 export default class Ping extends Component {
     state = {
