@@ -3,6 +3,11 @@ div#MemberSelector {
     width: 100%;
 }
 
+div#MemberSelector > div#MemberSelectorSidebar {
+    /* height: 100% !important;
+    overflow-y: hidden !important; */
+}
+
 div#MemberPane.pusher {
     /* Subtracting 150px for the width of the push navbar in MemberPane */
     width: -webkit-calc(100% - 150px);

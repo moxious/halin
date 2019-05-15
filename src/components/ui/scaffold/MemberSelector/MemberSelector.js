@@ -105,7 +105,7 @@ export default class MemberSelector extends Component {
                     borderTop: 'none',
                     borderBottom: 'none',
                 }}>
-                <Sidebar
+                <Sidebar id='MemberSelectorSidebar'
                     as={Menu}
                     animation={this.state.animation}
                     direction={this.state.direction}
