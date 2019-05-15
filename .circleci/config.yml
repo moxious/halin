@@ -43,7 +43,7 @@ jobs:
       - run:
           name: Generate build metadata
           command: |
-            echo "{\"build\":\""$CIRCLE_BUILD_NUM"\",\"branch\":\""$CIRCLE_BRANCH"\",\"date\":\""$(date +%s)000"\"}" > src/build.json
+            echo "{\"build\":\""$CIRCLE_BUILD_NUM"\",\"branch\":\""$CIRCLE_BRANCH"\",\"date\":"$(date +%s)000"}" > src/build.json
       - run:
           name: Run tests
           command: |
