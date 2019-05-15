@@ -5,7 +5,7 @@ import status from '../../api/status/index';
 import datautil from '../../api/data/util';
 import sentry from '../../api/sentry/index';
 
-import SignalMeter from '../data/SignalMeter';
+import SignalMeter from '../data/SignalMeter/SignalMeter';
 import Spinner from '../ui/scaffold/Spinner/Spinner';
 import NodeLabel from '../ui/scaffold/NodeLabel/NodeLabel';
 import Explainer from '../ui/scaffold/Explainer/Explainer';
