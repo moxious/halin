@@ -31,7 +31,7 @@ export default class AppFooter extends Component {
                 </Divider>
 
                 <p style={linkStyle}>
-                    Build <a href={`https://circleci.com/gh/moxious/halin/${build.build}`}></a>{build.build}<br/>{buildDate}
+                    Build <a href={`https://circleci.com/gh/moxious/halin/${build.build}`}>{build.build} on {buildDate}</a>
                 </p>
             </div>
         );
