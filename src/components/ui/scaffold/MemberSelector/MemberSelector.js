@@ -8,6 +8,7 @@ import OSPane from '../../../performance/OSPane';
 import PluginPane from '../../../db/PluginPane';
 import SampleQueryPane from '../../../db/SampleQueryPane';
 import LogsPane from '../../../db/LogsPane';
+import Tasks from '../../../performance/task/Tasks';
 import ClusterMemberMenuItem from '../ClusterMemberMenuItem/ClusterMemberMenuItem';
 import './MemberSelector.css';
 
@@ -28,6 +29,12 @@ export default class MemberSelector extends Component {
                 menuItem: 'Performance',
                 render: () => this.paneWrapper(
                     <PerformancePane key={key} node={member} />),
+            },
+            {
+                menuItem: 'Queries',
+                render: () => this.paneWrapper(
+                    <Tasks key={key} node={member} />
+                ),
             },
             {
                 menuItem: 'Configuration',
