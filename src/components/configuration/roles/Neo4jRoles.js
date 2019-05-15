@@ -137,7 +137,7 @@ class Neo4jRoles extends Component {
 
         return (
             <CSVDownload 
-                title='Download Users as CSV'
+                title='Download'
                 filename={`Halin-neo4j-roles-${moment.utc().format()}.csv`}
                 data={this.state.data}
                 displayColumns={this.displayColumns}
