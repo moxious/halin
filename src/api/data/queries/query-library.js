@@ -6,6 +6,7 @@ import OS_MEMORY_STATS from './jmx/osMemoryStats';
 import OS_OPEN_FDS from './jmx/osOpenFDs';
 import JMX_PAGE_CACHE from './jmx/pageCache';
 import JMX_STORE_SIZES from './jmx/storeSizes';
+import JMX_DISK_UTILIZATION from './jmx/diskUtilization';
 import JMX_TRANSACTIONS from './jmx/transactions';
 
 import PING from './basic/ping';
@@ -54,6 +55,7 @@ export default {
     
     JMX_ALL,
     JMX_STORE_SIZES,
+    JMX_DISK_UTILIZATION,
     JMX_PAGE_CACHE,
     JMX_MEMORY_STATS,
     JMX_GARBAGE_COLLECTOR,
