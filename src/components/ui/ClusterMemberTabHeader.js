@@ -3,6 +3,7 @@ import { Menu, Icon, Popup } from 'semantic-ui-react'
 import util from '../../api/data/util.js';
 import score from '../../api/cluster/health/score';
 
+/* @deprecated by new layout, and ClusterMemberMenuItem */
 export default class ClusterMemberTabHeader extends Component {
     state = {
         score: 1,
