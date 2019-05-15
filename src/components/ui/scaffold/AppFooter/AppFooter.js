@@ -20,13 +20,13 @@ export default class AppFooter extends Component {
             <div className='AppFooter' style={{float:'bottom'}}>               
                 <Divider horizontal inverted>
                     <Header as='h4' style={linkStyle}>
-                        <a target='halin' href='https://neo4j.com/docs/operations-manual/current/'>Operations Manual</a>
+                        <a target='halindocs' href='https://neo4j.com/docs/operations-manual/current/'>Operations Manual</a>
                     </Header>                    
                 </Divider>
                 
                 <Divider horizontal inverted>
                     <Header as='h4' style={linkStyle}>
-                        <a target='halin' href='https://github.com/moxious/halin'>Halin v{appPkg.version}</a>
+                        <a target='halindocs' href='https://github.com/moxious/halin'>Halin v{appPkg.version}</a>
                     </Header>                    
                 </Divider>
 
