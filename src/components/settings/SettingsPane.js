@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import DataFeedStats from './DataFeedStats';
-import ClusterResponseGraph from './ClusterResponseGraph';
+import ClusterResponseGraph from './ClusterResponseGraph/ClusterResponseGraph';
 import { List, Icon } from 'semantic-ui-react'
 import './SettingsPane.css';
 import hoc from '../higherOrderComponents';
