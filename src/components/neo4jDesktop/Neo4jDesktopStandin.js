@@ -1,53 +1,6 @@
 import React, { Component } from 'react';
-import uuid from 'uuid';
-
 import ShimConnectModal from './ShimConnectModal';
-
-const buildFakeContext = (data) => {
-    const { host, port, username, password, name, encrypted } = data;
-    const fakeContext = {
-        implementation: 'Halin.Neo4jDesktopStandIn',
-        global: {
-            online: true,
-            settings: {
-                allowSendReports: true,
-                allowSendStats: true,
-                allowStoreCredentials: true
-            }
-        },
-        projects: [
-            {
-                name,
-                graphs: [
-                    {
-                        name,
-                        status: 'ACTIVE',
-                        databaseStatus: 'RUNNING',
-                        databaseType: 'neo4j',
-                        id: uuid.v4(),
-                        connection: {
-                            configuration: {
-                                path: '.',
-                                protocols: {
-                                    'bolt': {
-                                        host,
-                                        port,
-                                        username,
-                                        password,
-                                        enabled: true,
-                                        tlsLevel: encrypted ? 'REQUIRED' : 'OPTIONAL',
-                                    },
-                                },
-                            },
-                        },
-                    },
-                ],
-            },
-        ],
-    };
-
-    return fakeContext;
-};
+import neo4jDesktop from '../../api/neo4jDesktop';
 
 class Neo4jDesktopStandIn extends Component {
     state = {
@@ -65,7 +18,7 @@ class Neo4jDesktopStandIn extends Component {
     onSubmit = ({ username, password, host, port, encrypted }) => {
         window.neo4jDesktopApi = {
             getContext: () =>
-                Promise.resolve(buildFakeContext({
+                Promise.resolve(neo4jDesktop.buildFakeContext({
                     host,
                     port,
                     username,
@@ -93,7 +46,5 @@ class Neo4jDesktopStandIn extends Component {
         )
     }
 }
-
-Neo4jDesktopStandIn.buildFakeContext = buildFakeContext;
 
 export default Neo4jDesktopStandIn;
