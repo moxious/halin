@@ -5,7 +5,7 @@ import uuid from 'uuid';
 import queryLibrary from '../../api/data/queries/query-library';
 
 import hoc from '../higherOrderComponents';
-import Explainer from '../ui/Explainer';
+import Explainer from '../ui/scaffold/Explainer/Explainer';
 
 class TransactionMonitor extends Component {
     state = {

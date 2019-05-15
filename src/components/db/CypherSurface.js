@@ -5,7 +5,7 @@ import 'react-table/react-table.css';
 import CSVDownload from '../data/download/CSVDownload';
 import sentry from '../../api/sentry/index';
 import moment from 'moment';
-import Explainer from '../ui/Explainer';
+import Explainer from '../ui/scaffold/Explainer/Explainer';
 
 class CypherSurface extends Component {
     state = {

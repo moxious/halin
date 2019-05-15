@@ -4,7 +4,7 @@ import uuid from 'uuid';
 import { Button } from 'semantic-ui-react';
 import queryLibrary from '../../api/data/queries/query-library';
 import hoc from '../higherOrderComponents';
-import Explainer from '../ui/Explainer';
+import Explainer from '../ui/scaffold/Explainer/Explainer';
 import _ from 'lodash';
 
 class PageCacheTracking extends Component {

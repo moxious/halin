@@ -11,7 +11,7 @@ import fields from '../../../api/data/fields';
 import hoc from '../../higherOrderComponents';
 import CypherDataTable from '../../data/CypherDataTable';
 import TaskDetail from './TaskDetail';
-import Explainer from '../../ui/Explainer';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
 const age = since => {
     const start = moment.utc(since);

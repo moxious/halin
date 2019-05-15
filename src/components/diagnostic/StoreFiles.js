@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import fields from '../../api/data/fields';
 import CypherDataTable from '../data/CypherDataTable';
 import queryLibrary from '../../api/data/queries/query-library';
-import Explainer from '../ui/Explainer';
+import Explainer from '../ui/scaffold/Explainer/Explainer';
 
 class StoreFiles extends Component {
     state = {

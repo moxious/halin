@@ -4,7 +4,7 @@ import { Button } from 'semantic-ui-react';
 import queryLibrary from '../../api/data/queries/query-library';
 import uuid from 'uuid';
 import _ from 'lodash';
-import Explainer from '../ui/Explainer';
+import Explainer from '../ui/scaffold/Explainer/Explainer';
 
 class OpenFileDescriptors extends Component {
     state = {

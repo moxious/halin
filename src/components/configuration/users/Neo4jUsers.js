@@ -11,7 +11,7 @@ import status from '../../../api/status/index';
 import AssignRoleModal from '../roles/AssignRoleModal';
 import './Neo4jUsers.css';
 import CSVDownload from '../../data/download/CSVDownload';
-import Explainer from '../../ui/Explainer';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
 class Neo4jUsers extends Component {
     key = uuid.v4();

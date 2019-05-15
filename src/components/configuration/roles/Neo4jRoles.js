@@ -9,7 +9,7 @@ import sentry from '../../../api/sentry/index';
 import CSVDownload from '../../data/download/CSVDownload';
 import './Neo4jRoles.css';
 import hoc from '../../higherOrderComponents';
-import Explainer from '../../ui/Explainer';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
 class Neo4jRoles extends Component {
     query = 'call dbms.security.listRoles()';

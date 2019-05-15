@@ -7,7 +7,7 @@ import sentry from '../../api/sentry';
 
 import DBStats from '../dbstats/DBStats';
 import Spinner from '../ui/scaffold/Spinner/Spinner';
-import Explainer from '../ui/Explainer';
+import Explainer from '../ui/scaffold/Explainer/Explainer';
 import QueryExecutionPlan from './QueryExecutionPlan';
 import QueryStatTable from './queries/QueryStatTable';
 import CSVDownload from '../data/download/CSVDownload';
