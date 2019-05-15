@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './MainLeftNav.css';
-import { Sidebar, Segment, Menu, Icon } from 'semantic-ui-react';
+import { Sidebar, Segment, Menu, Icon, Image, Divider } from 'semantic-ui-react';
 import ClusterOverviewPane from '../../../overview/ClusterOverviewPane';
 import PermissionsPane from '../../../configuration/PermissionsPane';
 import SettingsPane from '../../../settings/SettingsPane';
@@ -81,7 +81,7 @@ export default class MainLeftNav extends Component {
                     width='thin'
                 >
                     <Menu.Item index='0' as='a' onClick={() => this.section('home')}>
-                        <Icon name='home' />
+                        <Image className='icon' style={{ filter:'invert(100%)' }} src='favicon-32x32.png'/>
                         Overview
                     </Menu.Item>
 
@@ -94,6 +94,8 @@ export default class MainLeftNav extends Component {
                         <Icon name='group' />
                         User Management
                     </Menu.Item>
+
+                    {/* <Divider clearing={true}/> */}
 
                     <Menu.Item index='3' as='a' onClick={() => this.section('settings')}>
                         <Icon name='cogs' />
