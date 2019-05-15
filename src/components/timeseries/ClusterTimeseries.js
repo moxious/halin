@@ -14,7 +14,7 @@ import timewindow from '../../api/timeseries/timewindow';
 import queryLibrary from '../../api/data/queries/query-library';
 import sentry from '../../api/sentry/index';
 
-import Spinner from '../ui/Spinner';
+import Spinner from '../ui/scaffold/Spinner/Spinner';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import './CypherTimeseries.css';

@@ -9,7 +9,7 @@ import sentry from '../../api/sentry';
 import kb from '../../api/knowledgebase';
 
 import hoc from '../higherOrderComponents';
-import Spinner from '../ui/Spinner';
+import Spinner from '../ui/scaffold/Spinner/Spinner';
 import Explainer from '../ui/Explainer';
 import neo4j from 'neo4j-driver';
 import le from '../data/logs/LogEvent';

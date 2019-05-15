@@ -8,7 +8,7 @@ import {
     Stream,
 } from 'pondjs';
 import uuid from 'uuid';
-import Spinner from '../ui/Spinner';
+import Spinner from '../ui/scaffold/Spinner/Spinner';
 import datautil from '../../api/data/util';
 import timewindow from '../../api/timeseries/timewindow';
 import sentry from '../../api/sentry/index';

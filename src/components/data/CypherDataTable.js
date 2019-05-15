@@ -10,7 +10,7 @@ import sentry from '../../api/sentry/index';
 
 import ColumnSelector from './ColumnSelector';
 import NodeLabel from '../ui/NodeLabel';
-import Spinner from '../ui/Spinner';
+import Spinner from '../ui/scaffold/Spinner/Spinner';
 import CSVDownload from './download/CSVDownload';
 import './CypherDataTable.css';
 

@@ -6,7 +6,7 @@ import HalinQuery from '../../api/data/queries/HalinQuery';
 import sentry from '../../api/sentry';
 
 import DBStats from '../dbstats/DBStats';
-import Spinner from '../ui/Spinner';
+import Spinner from '../ui/scaffold/Spinner/Spinner';
 import Explainer from '../ui/Explainer';
 import QueryExecutionPlan from './QueryExecutionPlan';
 import QueryStatTable from './queries/QueryStatTable';

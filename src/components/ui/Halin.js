@@ -7,7 +7,7 @@ import sentry from '../../api/sentry/index';
 import status from '../../api/status/index';
 import HalinContext from '../../api/HalinContext';
 
-import Spinner from './Spinner';
+import Spinner from './scaffold/Spinner/Spinner';
 import HalinToast from './scaffold/HalinToast/HalinToast';
 import Troubleshooting from '../neo4jDesktop/Troubleshooting';
 

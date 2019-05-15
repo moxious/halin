@@ -3,7 +3,7 @@ import { PieChart } from 'react-d3-components';
 import d3 from 'd3';
 import './AllocationChart.css';
 import datautil from '../../api/data/util';
-import Spinner from '../ui/Spinner';
+import Spinner from '../ui/scaffold/Spinner/Spinner';
 
 const defaultHeight = 200;
 const defaultWidth = 400;

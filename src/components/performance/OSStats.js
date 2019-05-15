@@ -6,7 +6,7 @@ import uuid from 'uuid';
 import datautil from '../../api/data/util';
 import queryLibrary from '../../api/data/queries/query-library';
 
-import Spinner from '../ui/Spinner';
+import Spinner from '../ui/scaffold/Spinner/Spinner';
 import AllocationChart from './AllocationChart';
 
 export default class OSStats extends Component {
