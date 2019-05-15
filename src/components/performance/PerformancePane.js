@@ -3,12 +3,14 @@ import 'semantic-ui-css/semantic.min.css';
 import { Grid } from 'semantic-ui-react';
 import uuid from 'uuid';
 
+import api from '../../api/';
+
 import MemoryMonitor from './MemoryMonitor';
 import SystemLoad from './SystemLoad';
-import GCMonitor from './GCMonitor';
 import TransactionMonitor from './TransactionMonitor';
 import Tasks from './task/Tasks';
 import StoreFiles from '../diagnostic/StoreFiles';
+import CypherPieChart from '../data/CypherPieChart/CypherPieChart';
 
 export default class PerformancePane extends Component {
     render() {
@@ -31,8 +33,14 @@ export default class PerformancePane extends Component {
                         <Grid.Column>
                             <TransactionMonitor key={key} node={this.props.node} />
                         </Grid.Column>
+
                         <Grid.Column>
-                            <GCMonitor key={key} node={this.props.node} />
+                            <CypherPieChart
+                                query={api.queryLibrary.JMX_DISK_UTILIZATION.query}
+                                member={this.props.node}
+                                title="Title"
+                                label="Disk Utilization"
+                                units="GB" />
                         </Grid.Column>
                     </Grid.Row>
 
