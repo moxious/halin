@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Divider, Header } from 'semantic-ui-react';
-
+import api from '../../../../api/';
 import appPkg from '../../../../package.json';
 import build from '../../../../build.json';
 import moment from 'moment';
@@ -14,7 +14,7 @@ const linkStyle = {
 
 export default class AppFooter extends Component {
     render() {
-        console.log('build',build);
+        api.sentry.fine('build', build);
         const buildDate = moment.utc(build.date).format("YYYY-MM-DD");
         return (
             <div className='AppFooter'>               
