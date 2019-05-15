@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './MainLeftNav.css';
-import { Sidebar, Segment, Menu, Icon, Image } from 'semantic-ui-react';
+import { Sidebar, Segment, Menu, Icon, Image, Popup } from 'semantic-ui-react';
 import ClusterOverviewPane from '../../../overview/ClusterOverviewPane';
 import PermissionsPane from '../../../configuration/PermissionsPane';
 import SettingsPane from '../../../settings/SettingsPane';
@@ -66,14 +66,47 @@ export default class MainLeftNav extends Component {
         return 'No child tab';
     }
 
+    hoverPopup(text, trigger, key) {
+        return (
+            <Popup key={key}
+                on='hover' 
+                position='right center'
+                trigger={trigger} 
+                content={text}/>
+        );
+    }
+
     render() {
+        const selections = [
+            {
+                section: 'home',
+                text: 'Overview',
+                icon: <Image className='icon' style={{ filter:'invert(100%)' }} src='favicon-32x32.png'/>,
+            },
+            {
+                section: 'members',
+                text: 'Cluster Members',
+                icon: <Icon name='computer' />,
+            },
+            {
+                section: 'users',
+                text: 'User Management',
+                icon: <Icon name='group' />,
+            },
+            {
+                section: 'settings',
+                text: 'Settings',
+                icon: <Icon name='cogs' />,
+            },
+        ];
+
         return (
             <Sidebar.Pushable as={Segment}
                 style={{
                     marginTop: 0,
                     marginBottom: 0,
                 }}>
-                <Sidebar
+                <Sidebar id='MainLeftNav'
                     as={Menu}
                     animation={this.state.animation}
                     direction={this.state.direction}
@@ -83,29 +116,18 @@ export default class MainLeftNav extends Component {
                     visible={this.state.visible}
                     width='thin'
                 >
-                    <Menu.Item index={0} as='a' onClick={() => this.section('home')}>
-                        <Image className='icon' style={{ filter:'invert(100%)' }} src='favicon-32x32.png'/>
-                        Overview
-                    </Menu.Item>
-
-                    <Menu.Item index={1} as='a' onClick={() => this.section('members')}>
-                        <Icon name='computer' />
-                        Members
-                    </Menu.Item>
-                    
-                    <Menu.Item index={2} as='a' onClick={() => this.section('users')}>
-                        <Icon name='group' />
-                        User Management
-                    </Menu.Item>
-
-                    <Menu.Item index={3} as='a' onClick={() => this.section('settings')}>
-                        <Icon name='cogs' />
-                        Settings
-                    </Menu.Item>
-                    
+                    {
+                        selections.map((selection, index) => 
+                            this.hoverPopup(selection.text, 
+                                <Menu.Item
+                                    index={index} as='a' 
+                                    onClick={() => this.section(selection.section)}>
+                                    { selection.icon }
+                                </Menu.Item>, index))
+                    }                    
                     <AppFooter />
                 </Sidebar>
-                <Sidebar.Pusher dimmed={false}>
+                <Sidebar.Pusher id='MainContent' dimmed={false}>
                     { this.renderChildContent() }
                 </Sidebar.Pusher>
             </Sidebar.Pushable>

@@ -1,6 +1,12 @@
-span#MainLeftNav {
-    max-width: 100px;
-    height: 100%;
-    overflow-x: 'hide';
-    float: left;
+div#MainLeftNav {
+    /* max-width: 100px; */
 }
+
+div#MainContent {
+    /* width: 100%; */
+}
+
+/* div#MainLeftNav > a.item {
+    padding-left: 0px;
+    padding-right: 0px;
+} */
