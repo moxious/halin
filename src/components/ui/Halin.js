@@ -22,15 +22,12 @@ import ClusterMemberTabHeader from './ClusterMemberTabHeader';
 import DiagnosticPane from '../diagnostic/DiagnosticPane';
 import Spinner from './Spinner';
 
-import AppFooter from './AppFooter';
-
 import HalinToast from '../HalinToast';
 import Troubleshooting from '../neo4jDesktop/Troubleshooting';
 
 import './Halin.css';
 
 import MainLeftNav from './scaffold/MainLeftNav/MainLeftNav';
-import MainContent from './scaffold/MainContent/MainContent';
 
 export default class Halin extends Component {
   state = {
@@ -208,18 +205,7 @@ export default class Halin extends Component {
     return (
       <div className="Halin" key="app">
         <HalinToast />
-        {this.props.connected ?
-          <MainLeftNav>
-            <MainContent>
-
-              <div className='MainBody'>
-                {err ? err : this.renderCluster()}
-              </div>
-
-            </MainContent>
-          </MainLeftNav>
-          : ''}
-        <AppFooter />
+        { this.props.connected ? <MainLeftNav /> : '' }
       </div>
     );
   }
