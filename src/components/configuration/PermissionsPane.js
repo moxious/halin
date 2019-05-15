@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './PermissionsPane.css';
-import { Grid, Message, Icon } from 'semantic-ui-react';
+import { Grid } from 'semantic-ui-react';
 import Neo4jUsers from './users/Neo4jUsers';
 import NewUserForm from './users/NewUserForm';
 import sentry from '../../api/sentry/index';

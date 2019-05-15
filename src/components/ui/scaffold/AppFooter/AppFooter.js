@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Divider, Icon, Header, Segment } from 'semantic-ui-react';
+import { Divider, Header } from 'semantic-ui-react';
 
 import appPkg from '../../../../package.json';
 import build from '../../../../build.json';
