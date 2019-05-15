@@ -108,6 +108,13 @@ export default {
         to access bolt connections in Neo4j.`,
         links.usersAndRoles,
     ]),
+    UserManagement: render([
+        `Neo4j typically manages users on a per-machine basis.`,
+        `Features here will apply changes across all machines in your cluster`,
+        `To check if your users and roles are consistent across all of your machines,
+        run the advisor in the diagnostics area.`,
+        links.usersAndRoles,
+    ]),
     SampleQueries: render([
         `Neo4j includes built-in procedures that let us monitor query execution plan and
         execution times for queries that run on the system.`,

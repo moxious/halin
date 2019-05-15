@@ -6,27 +6,11 @@ import NewUserForm from './users/NewUserForm';
 import sentry from '../../api/sentry/index';
 import Neo4jRoles from './roles/Neo4jRoles';
 import NewRoleForm from './roles/NewRoleForm';
+import Explainer from '../ui/scaffold/Explainer/Explainer';
 import uuid from 'uuid';
 
 import 'semantic-ui-css/semantic.min.css';
 import hoc from '../higherOrderComponents';
-
-class PermsWarning extends Component {
-    render() {
-        return (
-            <Message warning icon>
-                <Icon name='warning' />
-                <Message.Content>
-                    Neo4j typically manages users on a per-machine basis.
-                    <br/><strong color='red'>Features here will apply changes 
-                    across all machines in your cluster</strong>.
-                    <br/>To check if your users and roles are consistent across all of your machines,
-                    run the advisor in the diagnostics area.
-                </Message.Content>
-            </Message>
-        );
-    }
-}
 
 class PermissionsPane extends Component {
     state = {
@@ -51,14 +35,13 @@ class PermissionsPane extends Component {
         return (
             <div className="PermissionsPane">
                 <Grid divided='vertically'>
-                    { 
-                        (window.halinContext && 
-                         window.halinContext.members().length > 1) ? 
-                            <Grid.Row columns={1}>
-                                <Grid.Column><PermsWarning/></Grid.Column>
-                            </Grid.Row>
-                        : ''
-                    }
+                    <Grid.Row columns={1}>
+                        <Grid.Column>
+                            <h3>User Management
+                                <Explainer knowledgebase='UserManagement'/>
+                            </h3>
+                        </Grid.Column>
+                    </Grid.Row>
 
                     <Grid.Row columns={columns}>
                         <Grid.Column>
