@@ -80,25 +80,27 @@ export default class MainLeftNav extends Component {
                     visible={this.state.visible}
                     width='thin'
                 >
-                    <Menu.Item as='a' onClick={() => this.section('home')}>
+                    <Menu.Item index='0' as='a' onClick={() => this.section('home')}>
                         <Icon name='home' />
                         Overview
                     </Menu.Item>
-                    <Menu.Item as='a' onClick={() => this.section('members')}>
+
+                    <Menu.Item index='1' as='a' onClick={() => this.section('members')}>
                         <Icon name='computer' />
                         Members
                     </Menu.Item>
-                    <Menu.Item as='a' onClick={() => this.section('users')}>
+                    
+                    <Menu.Item index='2' as='a' onClick={() => this.section('users')}>
                         <Icon name='group' />
                         User Management
                     </Menu.Item>
-                    <Menu.Item as='a' onClick={() => this.section('settings')}>
+
+                    <Menu.Item index='3' as='a' onClick={() => this.section('settings')}>
                         <Icon name='cogs' />
                         Settings
                     </Menu.Item>
-                    <Menu.Item as='span'>
-                        <AppFooter />
-                    </Menu.Item>
+                    
+                    <AppFooter />
                 </Sidebar>
                 <Sidebar.Pusher dimmed={false}>
                     { this.renderChildContent() }
