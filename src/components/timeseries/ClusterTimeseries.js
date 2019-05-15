@@ -17,6 +17,7 @@ import sentry from '../../api/sentry/index';
 import Spinner from '../ui/Spinner';
 
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
+import './CypherTimeseries.css';
 
 const LEADER_COLOR = '#000000';
 
@@ -392,7 +393,7 @@ class ClusterTimeseries extends Component {
         return (this.mounted && hasData) ? (
             <div className="CypherTimeseries">
                 <Grid>
-                    <Grid.Row columns={1}>
+                    <Grid.Row columns={1} className='CypherTimeseriesLegend'>
                         <Grid.Column>
                             <Legend type="swatch"
                                 style={style}
@@ -407,7 +408,7 @@ class ClusterTimeseries extends Component {
                             />
                         </Grid.Column>
                     </Grid.Row>
-                    <Grid.Row columns={1}>
+                    <Grid.Row columns={1} className='CypherTimeseriesContent'>
                         <Grid.Column textAlign='left'>
                             <ChartContainer
                                 showGrid={this.showGrid}

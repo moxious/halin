@@ -14,6 +14,7 @@ import timewindow from '../../api/timeseries/timewindow';
 import sentry from '../../api/sentry/index';
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import NodeLabel from '../ui/NodeLabel';
+import './CypherTimeseries.css';
 
 const DEFAULT_PALETTE = [
     '#f68b24', 'steelblue', '#619F3A', '#dfecd7', '#e14594', '#7045af', '#2b3595',
@@ -324,7 +325,7 @@ class CypherTimeseries extends Component {
         return (this.state.data && this.mounted) ? (
             <div className="CypherTimeseries">
                 <Grid>
-                    <Grid.Row columns={1}>
+                    <Grid.Row columns={1} className='CypherTimeseriesLegend'>
                         <Grid.Column>
                             <Legend type="swatch"
                                 style={style}
@@ -356,7 +357,7 @@ class CypherTimeseries extends Component {
                         ) : null}
                         </Grid.Column>
                     </Grid.Row> */}
-                    <Grid.Row columns={1}>
+                    <Grid.Row columns={1} className='CypherTimeseriesContent'>
                         <Grid.Column textAlign='left'>
                             <ChartContainer 
                                 showGrid={this.showGrid}

@@ -1,0 +1,8 @@
+.ui.grid > div.row.CypherTimeseriesLegend {
+    padding-bottom: 0px;
+}
+
+.ui.grid > div.row.CypherTimeseriesContent {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
