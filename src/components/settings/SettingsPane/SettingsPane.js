@@ -51,9 +51,13 @@ class SettingsPane extends Component {
         // const style = {textAlign:'left'};
         return (
             <div className='SettingsPane'>
+                <h3>Settings</h3>
+
                 <DetectedSettings/>
 
                 { debug ? <ClusterResponseGraph/> : '' }
+
+                <h3>Data Feed Statistics</h3>
 
                 <DataFeedStats />
             </div>
