@@ -17,7 +17,7 @@ export default class AppFooter extends Component {
         console.log('build',build);
         const buildDate = moment.utc(build.date).format("YYYY-MM-DD");
         return (
-            <div className='AppFooter' style={{float:'bottom'}}>               
+            <div className='AppFooter'>               
                 <Divider horizontal inverted>
                     <Header as='h4' style={linkStyle}>
                         <a target='halindocs' href='https://neo4j.com/docs/operations-manual/current/'>Operations Manual</a>
