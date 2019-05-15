@@ -86,6 +86,13 @@ export default class MemberSelector extends Component {
         );
     }
 
+    componentWillReceiveProps(props) {
+        // Menu click counter from the nav above us acts as a toggle for
+        // the left-hand slide-out menu.
+        const visible = props.clickCount % 2 === 0;
+        this.setState({ visible });
+    }
+
     render() {
         return (
             <Sidebar.Pushable as={Segment}

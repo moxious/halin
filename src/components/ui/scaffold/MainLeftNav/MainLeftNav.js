@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './MainLeftNav.css';
-import { Sidebar, Segment, Menu, Icon, Image, Divider } from 'semantic-ui-react';
+import { Sidebar, Segment, Menu, Icon, Image } from 'semantic-ui-react';
 import ClusterOverviewPane from '../../../overview/ClusterOverviewPane';
 import PermissionsPane from '../../../configuration/PermissionsPane';
 import SettingsPane from '../../../settings/SettingsPane';
@@ -23,23 +23,26 @@ export default class MainLeftNav extends Component {
         direction: 'left',
         section: 'home',
         lastSection: 'home',
+        toggleCounter: 0,
         clusterMember: window.halinContext.members()[0],
     };
 
     section = section => {
         console.log('SECTION', section);
 
-        if (section === 'members' && this.state.section === 'members') {
-            // Toggle members off, go to previous state.
+        if (section === this.state.section) {
+            // Tracking a counter of how many times this menu item has been
+            // clicked allows us to propagate toggle state to child.
             return this.setState({
-                section: this.state.lastSection,
+                toggleCounter: this.state.toggleCounter + 1,
             });
         }
 
         // Set new state.
         this.setState({ 
             section, 
-            lastSection: this.state.section, 
+            lastSection: this.state.section,
+            toggleCounter: 0,
         });
     };
 
@@ -53,7 +56,7 @@ export default class MainLeftNav extends Component {
         if (this.state.section === 'home') {
             return this.segmentWrap(<ClusterOverviewPane />);
         } else if (this.state.section === 'members') {
-            return this.segmentWrap(<MemberSelector/>);
+            return this.segmentWrap(<MemberSelector clickCount={this.state.toggleCounter} />);
         } else if (this.state.section === 'users') {
             return this.segmentWrap(<PermissionsPane node={this.state.clusterMember}/>);
         } else if (this.state.section === 'settings') {
@@ -80,24 +83,22 @@ export default class MainLeftNav extends Component {
                     visible={this.state.visible}
                     width='thin'
                 >
-                    <Menu.Item index='0' as='a' onClick={() => this.section('home')}>
+                    <Menu.Item index={0} as='a' onClick={() => this.section('home')}>
                         <Image className='icon' style={{ filter:'invert(100%)' }} src='favicon-32x32.png'/>
                         Overview
                     </Menu.Item>
 
-                    <Menu.Item index='1' as='a' onClick={() => this.section('members')}>
+                    <Menu.Item index={1} as='a' onClick={() => this.section('members')}>
                         <Icon name='computer' />
                         Members
                     </Menu.Item>
                     
-                    <Menu.Item index='2' as='a' onClick={() => this.section('users')}>
+                    <Menu.Item index={2} as='a' onClick={() => this.section('users')}>
                         <Icon name='group' />
                         User Management
                     </Menu.Item>
 
-                    {/* <Divider clearing={true}/> */}
-
-                    <Menu.Item index='3' as='a' onClick={() => this.section('settings')}>
+                    <Menu.Item index={3} as='a' onClick={() => this.section('settings')}>
                         <Icon name='cogs' />
                         Settings
                     </Menu.Item>
