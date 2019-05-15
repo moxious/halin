@@ -13,7 +13,7 @@ import datautil from '../../api/data/util';
 import timewindow from '../../api/timeseries/timewindow';
 import sentry from '../../api/sentry/index';
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
-import NodeLabel from '../ui/NodeLabel';
+import NodeLabel from '../ui/scaffold/NodeLabel/NodeLabel';
 import './CypherTimeseries.css';
 
 const DEFAULT_PALETTE = [

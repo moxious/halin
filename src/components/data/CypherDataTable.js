@@ -9,7 +9,7 @@ import neo4j from '../../api/driver';
 import sentry from '../../api/sentry/index';
 
 import ColumnSelector from './ColumnSelector';
-import NodeLabel from '../ui/NodeLabel';
+import NodeLabel from '../ui/scaffold/NodeLabel/NodeLabel';
 import Spinner from '../ui/scaffold/Spinner/Spinner';
 import CSVDownload from './download/CSVDownload';
 import './CypherDataTable.css';
