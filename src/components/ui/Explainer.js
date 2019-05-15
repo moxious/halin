@@ -13,7 +13,7 @@ export default class Explainer extends Component {
 
     render() {        
         return (
-            <Popup on='click' wide='very'
+            <Popup on='hover' wide='very'
                position={this.props.position || 'bottom left'}
                trigger={
                   <Icon name={(this.props.icon || 'info') + ' circle'} color='green'/>
