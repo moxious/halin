@@ -8,8 +8,6 @@ import api from '../../api/';
 import MemoryMonitor from './MemoryMonitor';
 import SystemLoad from './SystemLoad';
 import TransactionMonitor from './TransactionMonitor';
-import Tasks from './task/Tasks';
-import StoreFiles from '../diagnostic/StoreFiles';
 import CypherPieChart from '../data/CypherPieChart/CypherPieChart';
 
 export default class PerformancePane extends Component {
@@ -41,18 +39,6 @@ export default class PerformancePane extends Component {
                                 title="Title"
                                 label="Disk Utilization"
                                 units="GB" />
-                        </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={1}>
-                        <Grid.Column>
-                            <Tasks key={key} node={this.props.node}/>
-                        </Grid.Column>
-                    </Grid.Row>
-
-                    <Grid.Row columns={1}>
-                        <Grid.Column>
-                            <StoreFiles key={key} node={this.props.node} />
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>  
