@@ -3,7 +3,11 @@ div#MainLeftNav {
 }
 
 div#MainContent {
-    /* width: 100%; */
+    height: 100%;
+    /* Subtracting 150px for the width of the push navbar in MainLeftNav */
+    width: -webkit-calc(100% - 150px);
+    width:    -moz-calc(100% - 150px);
+    width:         calc(100% - 150px);
 }
 
 /* div#MainLeftNav > a.item {
