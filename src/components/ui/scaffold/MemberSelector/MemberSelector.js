@@ -9,6 +9,7 @@ import PluginPane from '../../../db/PluginPane';
 import SampleQueryPane from '../../../db/SampleQueryPane';
 import LogsPane from '../../../db/LogsPane';
 import ClusterMemberMenuItem from '../ClusterMemberMenuItem/ClusterMemberMenuItem';
+import './MemberSelector.css';
 
 export default class MemberSelector extends Component {
     state = {
@@ -95,7 +96,7 @@ export default class MemberSelector extends Component {
 
     render() {
         return (
-            <Sidebar.Pushable as={Segment}
+            <Sidebar.Pushable id='MemberSelector' as={Segment}
                 style={{
                     marginTop: 0,
                     marginBottom: 0,
@@ -118,6 +119,7 @@ export default class MemberSelector extends Component {
                         window.halinContext.members().map((member, key) =>
                             <ClusterMemberMenuItem 
                                 member={member} key={key}
+                                active={this.state.member === member}
                                 onSelect={this.select} />)
                     }
                 </Sidebar>
