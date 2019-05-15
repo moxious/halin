@@ -1,0 +1,6 @@
+span#MainLeftNav {
+    max-width: 100px;
+    height: 100%;
+    overflow-x: 'hide';
+    float: left;
+}

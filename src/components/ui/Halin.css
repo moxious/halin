@@ -1,5 +1,8 @@
 .Halin {
   text-align: center;
+  width: 100%;
+  display: inline;
+  background-color: black;
 }
 
 .MainBody {

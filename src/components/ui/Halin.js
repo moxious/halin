@@ -29,6 +29,9 @@ import Troubleshooting from '../neo4jDesktop/Troubleshooting';
 
 import './Halin.css';
 
+import MainLeftNav from './scaffold/MainLeftNav/MainLeftNav';
+import MainContent from './scaffold/MainContent/MainContent';
+
 export default class Halin extends Component {
   state = {
     cTag: 1,
@@ -46,7 +49,7 @@ export default class Halin extends Component {
       {
         menuItem: 'Performance',
         render: () => this.paneWrapper(
-          <PerformancePane key={key} node={node}/>),
+          <PerformancePane key={key} node={node} />),
       },
       {
         menuItem: 'Configuration',
@@ -56,17 +59,17 @@ export default class Halin extends Component {
       {
         menuItem: 'OS',
         render: () => this.paneWrapper(
-          <OSPane key={key} node={node}/>),
+          <OSPane key={key} node={node} />),
       },
       {
         menuItem: 'Plugins',
         render: () => this.paneWrapper(
-          <PluginPane key={key} node={node}/>),
+          <PluginPane key={key} node={node} />),
       },
       {
         menuItem: 'Query Performance',
         render: () => this.paneWrapper(
-          <SampleQueryPane key={key} node={node}/>),
+          <SampleQueryPane key={key} node={node} />),
       },
       // {
       //   menuItem: 'Metrics',
@@ -77,7 +80,7 @@ export default class Halin extends Component {
       {
         menuItem: 'Logs',
         render: () => this.paneWrapper(
-          <LogsPane key={key} node={node}/>),
+          <LogsPane key={key} node={node} />),
       }
     ]),
   };
@@ -115,7 +118,7 @@ export default class Halin extends Component {
     const nodePanes = this.state.halin.clusterMembers.map((node, key) => ({
       menuItem: {
         key: `node-${key}`,
-        content: <ClusterMemberTabHeader key={key} node={node}/>,
+        content: <ClusterMemberTabHeader key={key} node={node} />,
       },
       render: () =>
         this.paneWrapper(
@@ -128,7 +131,7 @@ export default class Halin extends Component {
       render: () => {
         const clusterMember = this.state.halin.members()[0];
         return this.paneWrapper(
-          <PermissionsPane node={clusterMember}/>,
+          <PermissionsPane node={clusterMember} />,
           'primary'
         );
       },
@@ -148,7 +151,7 @@ export default class Halin extends Component {
 
     const overviewPane = {
       menuItem: {
-        key: 'overview', 
+        key: 'overview',
         content: 'Overview',
       },
       render: () => this.paneWrapper(<ClusterOverviewPane />, 'primary'),
@@ -172,21 +175,21 @@ export default class Halin extends Component {
     const err = (this.state.error ? status.formatStatusMessage(this) : null);
 
     if (err) {
-      return (        
+      return (
         <div className='MainBodyError'>
-          { err }
+          {err}
 
-          <Troubleshooting error={this.state.error}/>
+          <Troubleshooting error={this.state.error} />
 
-          <Button 
-            basic 
+          <Button
+            basic
             style={{
               display: 'block',
               marginLeft: 'auto',
               marginRight: 'auto',
             }}
             onClick={() => window.location.reload()}>
-            <i className="icon refresh"/> Try Again
+            <i className="icon refresh" /> Try Again
           </Button>
         </div>
       )
@@ -197,21 +200,25 @@ export default class Halin extends Component {
         <div className='Halin' key='app' style={{ marginTop: '50px' }}>
           <h2>Initializing Halin...</h2>
 
-          <Spinner/>
+          <Spinner />
         </div>
       );
     }
 
     return (
       <div className="Halin" key="app">
-        <HalinToast/>
+        <HalinToast />
+        {this.props.connected ?
+          <MainLeftNav>
+            <MainContent>
 
-        { this.props.connected ? 
-          <div className='MainBody'>
-            {err ? err : this.renderCluster()}
-          </div>
-          : '' }
+              <div className='MainBody'>
+                {err ? err : this.renderCluster()}
+              </div>
 
+            </MainContent>
+          </MainLeftNav>
+          : ''}
         <AppFooter />
       </div>
     );
