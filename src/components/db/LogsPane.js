@@ -30,7 +30,7 @@ const logLineStyle = {
     fontFamily: 'monospace',
     fontSize: '0.8em',
     overflowWrap: 'anywhere',
-    'white-space': 'unset',
+    whiteSpace: 'unset',
 };
 
 class LogViewer extends Component {
