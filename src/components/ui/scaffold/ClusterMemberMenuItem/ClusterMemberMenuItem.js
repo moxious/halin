@@ -4,6 +4,8 @@ import { Menu, Icon, Popup } from 'semantic-ui-react';
 import score from '../../../../api/cluster/health/score';
 import util from '../../../../api/data/util.js';
 
+import SignalMeter from '../../../data/SignalMeter/SignalMeter';
+
 export default class ClusterMemberMenuItem extends Component {
     state = {
         currentState: null,
@@ -54,7 +56,8 @@ export default class ClusterMemberMenuItem extends Component {
     popupContent = () => {
         return (
             <div className='PopupContent'>
-                <h4>Data</h4>
+                <SignalMeter strength={util.signalStrengthFromFreshRatio(this.state.fresh, this.state.total) } />
+
                 <p>{`${this.state.fresh} of ${this.state.total} fresh`}</p>
 
                 <p>{this.state.performance.observations.length} observations; mean response time
@@ -75,7 +78,7 @@ export default class ClusterMemberMenuItem extends Component {
                 <Popup
                     key={this.props.member.getBoltAddress()}
                     trigger={this.statusIcon(this.props.member)}
-                    header={this.props.member.role}
+                    header={`Role: ${this.props.member.role}`}
                     content={this.popupContent()}
                     position='bottom left'
                 />
