@@ -19,7 +19,26 @@ export default class CypherPieChart extends Component {
         units: '(Units unknown)',
     };
 
-    refreshData() {
+    componentDidMount() {
+        this.mounted = true;
+        this.sampleData();
+        this.interval = setInterval(() => this.sampleData(), this.props.rate || 60 * 1000);
+    }
+
+    componentWillUnmount() {
+        this.mounted = false;
+        this.cancelPoll();
+    }
+
+    cancelPoll() {
+        if (this.interval) {
+            clearTimeout(this.interval);
+        }
+    }
+
+    sampleData() {
+        if (!this.mounted) { return null; } 
+
         return this.props.member.run(this.props.query, this.props.parameters || {})
             .then(results => {
                 const values = api.driver.unpackResults(results, {
@@ -68,10 +87,6 @@ export default class CypherPieChart extends Component {
         // let underlyingValue = 0;
         return label + ' (' + this.formatNumberWithUnits(value) + ')';
     };
-
-    componentWillMount() {
-        return this.refreshData();
-    }
 
     render() {
         const tot = this.formatNumberWithUnits(this.state.total);
