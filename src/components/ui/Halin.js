@@ -22,7 +22,7 @@ import ClusterMemberTabHeader from './ClusterMemberTabHeader';
 import DiagnosticPane from '../diagnostic/DiagnosticPane';
 import Spinner from './Spinner';
 
-import HalinToast from '../HalinToast';
+import HalinToast from './scaffold/HalinToast/HalinToast';
 import Troubleshooting from '../neo4jDesktop/Troubleshooting';
 
 import './Halin.css';
