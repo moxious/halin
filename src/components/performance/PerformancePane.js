@@ -1,18 +1,16 @@
 import React, { Component } from 'react';
-import "semantic-ui-css/semantic.min.css";
+import 'semantic-ui-css/semantic.min.css';
 import { Grid } from 'semantic-ui-react';
+import uuid from 'uuid';
+
 import MemoryMonitor from './MemoryMonitor';
 import SystemLoad from './SystemLoad';
 import GCMonitor from './GCMonitor';
 import TransactionMonitor from './TransactionMonitor';
-// import ActiveQueries from './ActiveQueries';
-// import ActiveTransactions from './ActiveTransactions';
-// import Connections from './Connections';
 import Tasks from './task/Tasks';
 import StoreFiles from '../diagnostic/StoreFiles';
-import uuid from 'uuid';
 
-class PerformancePane extends Component {
+export default class PerformancePane extends Component {
     render() {
         const key = uuid.v4();
 
@@ -54,5 +52,3 @@ class PerformancePane extends Component {
         );
     }
 }
-
-export default PerformancePane;
