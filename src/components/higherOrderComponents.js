@@ -147,7 +147,19 @@ const dbStatsOnlyComponent = (WrappedComponent, heading) => {
     );
 };
 
+/**
+ * Used as a wapper to exhibit content panes around *Pane components.
+ * @param {Component} WrappedComponent 
+ */
+const contentPaneComponent = (WrappedComponent) => {
+    return props => 
+        <div className='ContentPaneComponent'>
+            <WrappedComponent {...props} />
+        </div>;
+};
+
 export default {
+    contentPaneComponent,
     adminOnlyComponent,
     enterpriseOnlyComponent,
     clusterOnlyComponent,

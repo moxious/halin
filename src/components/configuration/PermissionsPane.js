@@ -9,7 +9,7 @@ import NewRoleForm from './roles/NewRoleForm';
 import uuid from 'uuid';
 
 import 'semantic-ui-css/semantic.min.css';
-
+import hoc from '../higherOrderComponents';
 
 class PermsWarning extends Component {
     render() {
@@ -101,4 +101,4 @@ class PermissionsPane extends Component {
     }
 }
 
-export default PermissionsPane;
+export default hoc.contentPaneComponent(PermissionsPane);
