@@ -12,7 +12,7 @@ import hoc from '../higherOrderComponents';
 import Spinner from '../ui/scaffold/Spinner/Spinner';
 import Explainer from '../ui/scaffold/Explainer/Explainer';
 import neo4j from 'neo4j-driver';
-import le from '../data/logs/LogEvent';
+import le from '../../api/logs/LogEvent';
 import CSVDownload from '../data/download/CSVDownload';
 
 const MAX_ROWS = 5000;
