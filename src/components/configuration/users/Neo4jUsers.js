@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import CypherDataTable from '../../data/CypherDataTable';
+import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
 import { Button, Confirm, Grid } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import uuid from 'uuid';

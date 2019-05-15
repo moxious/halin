@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import CypherDataTable from '../data/CypherDataTable';
+import CypherDataTable from '../data/CypherDataTable/CypherDataTable';
 import queryLibrary from '../../api/data/queries/query-library';
 import hoc from '../higherOrderComponents';
 

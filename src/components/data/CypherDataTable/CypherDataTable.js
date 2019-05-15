@@ -5,13 +5,13 @@ import _ from 'lodash';
 import { Grid } from 'semantic-ui-react';
 import uuid from 'uuid';
 
-import neo4j from '../../api/driver';
-import sentry from '../../api/sentry/index';
+import neo4j from '../../../api/driver';
+import sentry from '../../../api/sentry/index';
 
-import ColumnSelector from './ColumnSelector';
-import NodeLabel from '../ui/scaffold/NodeLabel/NodeLabel';
-import Spinner from '../ui/scaffold/Spinner/Spinner';
-import CSVDownload from './download/CSVDownload';
+import ColumnSelector from '../ColumnSelector';
+import NodeLabel from '../../ui/scaffold/NodeLabel/NodeLabel';
+import Spinner from '../../ui/scaffold/Spinner/Spinner';
+import CSVDownload from '../download/CSVDownload';
 import './CypherDataTable.css';
 
 class CypherDataTable extends Component {

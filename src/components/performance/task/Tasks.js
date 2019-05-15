@@ -9,7 +9,7 @@ import queryLibrary from '../../../api/data/queries/query-library';
 import fields from '../../../api/data/fields';
 
 import hoc from '../../higherOrderComponents';
-import CypherDataTable from '../../data/CypherDataTable';
+import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
 import TaskDetail from './TaskDetail';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
 

@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import CypherDataTable from '../data/CypherDataTable';
+import CypherDataTable from '../data/CypherDataTable/CypherDataTable';
 import hoc from '../higherOrderComponents';
 import Explainer from '../ui/scaffold/Explainer/Explainer';
 import 'react-table/react-table.css';

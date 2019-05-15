@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import CypherDataTable from '../../data/CypherDataTable';
+import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
 import { Grid, Button, Confirm } from 'semantic-ui-react';
 import moment from 'moment';
 
