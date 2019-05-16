@@ -13,8 +13,11 @@ class ClusterMemory extends Component {
     };
 
     render() {
+        const header = 'Heap Size (max=' + 
+            (window.halinContext.getWriteMember().dbms.maxHeap || 'unknown') + ')';
+
         return (
-            <HalinCard header='Heap Size' knowledgebase='ClusterMemory' owner={this}>
+            <HalinCard header={header} knowledgebase='ClusterMemory' owner={this}>
                 <ClusterTimeseries key={this.state.key}
                     query={this.state.query} 
                     width={this.state.width}
