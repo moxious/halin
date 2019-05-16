@@ -307,7 +307,7 @@ class CypherTimeseries extends Component {
                 { this.props.explainer || '' }
 
                 <Popup on='click' wide='very'
-                    trigger={<Icon name='database circle'/>}
+                    trigger={<Icon name='database'/>}
                     content={content}
                     />
             </div>
