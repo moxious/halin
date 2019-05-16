@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Menu, Icon, Popup } from 'semantic-ui-react';
+import { Menu, Icon, Popup, Grid } from 'semantic-ui-react';
 
 import score from '../../../../api/cluster/health/score';
 import util from '../../../../api/data/util.js';
@@ -56,34 +56,39 @@ export default class ClusterMemberMenuItem extends Component {
     popupContent = () => {
         return (
             <div className='PopupContent'>
-                <SignalMeter strength={util.signalStrengthFromFreshRatio(this.state.fresh, this.state.total) } />
-
-                <p>{`${this.state.fresh} of ${this.state.total} fresh`}</p>
-
-                <p>{this.state.performance.observations.length} observations; mean response time
-                &nbsp;{util.roundToPlaces(this.state.performance.mean, 0)}ms with a standard deviation of
-                &nbsp;{util.roundToPlaces(this.state.performance.stdev, 0)}ms</p>
-
-                <p>When most/all feeds are fresh, this indicates responsiveness.  When performance
-                degrades, data feeds slow, stop, or error.</p>
+                <Grid>
+                    <Grid.Column width={2}>
+                        <SignalMeter strength={util.signalStrengthFromFreshRatio(this.state.fresh, this.state.total)} />
+                    </Grid.Column>
+                    <Grid.Column width={14}>
+                        <p>{`${this.state.fresh} of ${this.state.total} fresh`};&nbsp;
+                            {this.state.performance.observations.length} observations; mean response 
+                            &nbsp;{util.roundToPlaces(this.state.performance.mean, 0)}ms with stdev {util.roundToPlaces(this.state.performance.stdev, 0)}ms</p>
+                    </Grid.Column>
+                </Grid>
             </div>
         );
     };
 
     render() {
         return (
-            <Menu.Item as='a' 
-                active={this.props.active} 
-                onClick={() => this.props.onSelect(this.props.member, this)}>
-                <Popup
-                    key={this.props.member.getBoltAddress()}
-                    trigger={this.statusIcon(this.props.member)}
-                    header={`Role: ${this.props.member.role}`}
-                    content={this.popupContent()}
-                    position='bottom left'
-                />
-                {this.props.member.getLabel()}
-            </Menu.Item>
+            <Popup
+                inverted
+                position='right center'
+                wide='very'
+                key={this.props.member.getBoltAddress()}
+                trigger={
+                    <Menu.Item as='a'
+                        active={this.props.active}
+                        onClick={() => this.props.onSelect(this.props.member, this)}>
+                        {this.statusIcon(this.props.member)}
+                        {this.props.member.getLabel()}
+                    </Menu.Item>
+                }
+                header={`Role: ${this.props.member.role}`}
+                content={this.popupContent()}
+            />
+
         );
     }
 }
