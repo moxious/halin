@@ -280,11 +280,15 @@ class ClusterTimeseries extends Component {
     }
 
     getChartMin() {
+        if (this.props.min) { return this.props.min; } 
+
         const allMins = this.getObservedMins();
         return Math.min(Math.min(...allMins), this.state.chartLowLimit);
     }
 
     getChartMax() {
+        if (this.props.max) { return this.props.max; }
+
         const allMaxes = this.getObservedMaxes();
         // return Math.max(Math.max(...allMaxes), this.state.chartHighLimit);
         return Math.max(...allMaxes);
@@ -425,6 +429,7 @@ class ClusterTimeseries extends Component {
                                         min={this.getChartMin()}
                                         max={this.getChartMax()}
                                         width="70"
+                                        format={this.props.yAxisFormat}
                                         showGrid={true}
                                         type="linear" />
                                     <Charts>
