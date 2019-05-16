@@ -1,10 +1,20 @@
-.HalinCard.fluid.card {
-    /* border: 1px solid red; */
+div.ui.fluid.card.HalinCard {
+    border: none;
     min-width: 350px;
+    max-width: 460px;
+    min-height: 280px;
+    max-height: 350px;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
-button.ui.tiny.button {
-    padding-left: 10px;
-    padding-right: 10px;
+div.ui.fluid.card.HalinCard > div.header {
+    padding-top: 10px;
 }
-    
+
+div.ui.fluid.card.HalinCard > div.HalinCardContent {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
