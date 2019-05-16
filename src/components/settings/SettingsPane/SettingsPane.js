@@ -3,9 +3,6 @@ import DataFeedStats from '../DataFeedStats/DataFeedStats';
 import ClusterResponseGraph from '../ClusterResponseGraph/ClusterResponseGraph';
 import './SettingsPane.css';
 import hoc from '../../higherOrderComponents';
-import DetectedSettings from '../DetectedSettings/DetectedSettings';
-
-const debug = false;
 
 class SettingsPane extends Component {
     render() {
@@ -13,10 +10,8 @@ class SettingsPane extends Component {
         return (
             <div className='SettingsPane'>
                 <h3>Settings</h3>
-
-                <DetectedSettings/>
-
-                { debug ? <ClusterResponseGraph/> : '' }
+                
+                <ClusterResponseGraph/>
 
                 <h3>Data Feed Statistics</h3>
 
