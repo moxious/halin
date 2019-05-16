@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import CypherTimeseries from '../timeseries/CypherTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../../api/data/queries/query-library';
+import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
 import Explainer from '../ui/scaffold/Explainer/Explainer';
 
 class SystemLoad extends Component {
@@ -17,7 +18,7 @@ class SystemLoad extends Component {
         const explainer = <Explainer knowledgebase='SystemLoad' />;
 
         return (
-            <div className="SystemLoad">
+            <HalinCard owner={this}>
                 <CypherTimeseries key={this.state.key}
                     explainer={explainer}
                     node={this.props.node}
@@ -26,7 +27,7 @@ class SystemLoad extends Component {
                     rate={this.state.rate}
                     displayColumns={this.state.displayColumns}
                 />
-            </div>
+            </HalinCard>
         )
     }
 }

@@ -3,6 +3,7 @@ import CypherTimeseries from '../timeseries/CypherTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../../api/data/queries/query-library';
 import Explainer from '../ui/scaffold/Explainer/Explainer';
+import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
 
 class MemoryMonitor extends Component {
     state = {
@@ -17,7 +18,7 @@ class MemoryMonitor extends Component {
         const explainer = <Explainer knowledgebase='Memory' />;
 
         return (
-            <div className="MemoryMonitor">
+            <HalinCard owner={this}>
                 <CypherTimeseries key={this.state.key}
                     node={this.props.node}
                     explainer={explainer}
@@ -27,8 +28,8 @@ class MemoryMonitor extends Component {
                     startingEnabled={[this.state.displayColumns[1]]}
                     displayColumns={this.state.displayColumns}
                 />
-            </div>
-        )
+            </HalinCard>
+        );
     }
 }
 

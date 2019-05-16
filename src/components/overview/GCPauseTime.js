@@ -3,7 +3,7 @@ import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../../api/data/queries/query-library';
 import _ from 'lodash';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
+import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
 
 class GCPauseTime extends Component {
     state = {
@@ -21,15 +21,14 @@ class GCPauseTime extends Component {
 
     render() {
         return (
-            <div className="GCPauseTime">
-                <h3>Last GC Pause Time <Explainer knowledgebase='GarbageCollection'/></h3>
+            <HalinCard header='Last GC Pause Time' knowledgebase='GarbageCollection' owner={this}>
                 <ClusterTimeseries key={this.state.key}
                     query={this.state.query} 
                     width={this.state.width}
                     rate={this.state.rate}
                     displayProperty='duration'
                 />
-            </div>
+            </HalinCard>
         )
     }
 }

@@ -5,7 +5,7 @@ import { Button } from 'semantic-ui-react';
 import queryLibrary from '../../api/data/queries/query-library';
 import _ from 'lodash';
 import hoc from '../higherOrderComponents';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
+import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
 
 class TransactionsOpen extends Component {
     state = {
@@ -63,9 +63,7 @@ class TransactionsOpen extends Component {
         ];
 
         return (
-            <div className="TransactionMonitor">
-                <h3>Transactions <Explainer knowledgebase='TransactionsOpen' /></h3>
-                
+            <HalinCard header='Transactions' knowledgebase='TransactionsOpen' owner={this}>
                 <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
                     buttons.map((b,idx) =>
                         <Button size='tiny'
@@ -83,7 +81,7 @@ class TransactionsOpen extends Component {
                     // onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />
-            </div>
+            </HalinCard>
         )
     }
 }

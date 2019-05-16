@@ -5,6 +5,7 @@ import { Button } from 'semantic-ui-react';
 import queryLibrary from '../../api/data/queries/query-library';
 import hoc from '../higherOrderComponents';
 import Explainer from '../ui/scaffold/Explainer/Explainer';
+import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
 import _ from 'lodash';
 
 class PageCacheTracking extends Component {
@@ -94,9 +95,7 @@ class PageCacheTracking extends Component {
         ];
 
         return (
-            <div className="PageCacheTracking">
-                <h3>Page Cache <Explainer knowledgebase='PageCache' /></h3>
-
+            <HalinCard header='Page Cache' knowledgebase='PageCache' owner={this}>
                 <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
                     buttons.map((b,idx) =>
                         <Button size='tiny'
@@ -112,7 +111,7 @@ class PageCacheTracking extends Component {
                     feedMaker={this.dataFeedMaker}
                     displayProperty={this.state.displayProperty}
                 />
-            </div>
+            </HalinCard>
         )
     }
 }

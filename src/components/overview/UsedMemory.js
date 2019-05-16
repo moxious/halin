@@ -3,7 +3,7 @@ import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../../api/data/queries/query-library';
 import _ from 'lodash';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
+import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
 
 class UsedMemory extends Component {
     state = {
@@ -34,16 +34,14 @@ class UsedMemory extends Component {
 
     render() {
         return (
-            <div className="UsedMemory">
-                <h3>Used Physical Memory <Explainer knowledgebase='UsedMemory' /></h3>
-                
+            <HalinCard header='Used Physical Memory' knowledgebase="Memory" owner={this}>
                 <ClusterTimeseries key={this.state.key}
                     width={this.state.width}
                     feedMaker={this.dataFeedMaker}
                     // onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />
-            </div>
+            </HalinCard>
         )
     }
 }

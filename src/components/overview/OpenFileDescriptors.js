@@ -4,7 +4,7 @@ import { Button } from 'semantic-ui-react';
 import queryLibrary from '../../api/data/queries/query-library';
 import uuid from 'uuid';
 import _ from 'lodash';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
+import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
 
 class OpenFileDescriptors extends Component {
     state = {
@@ -53,9 +53,7 @@ class OpenFileDescriptors extends Component {
         ];
 
         return (
-            <div className="OpenFileDescriptors">
-                <h3>File Descriptors <Explainer knowledgebase='FileDescriptors'/></h3>
-                
+            <HalinCard header='File Descriptors' knowledgebase='FileDescriptors' owner={this}>
                 <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
                     buttons.map((b,idx) =>
                         <Button size='tiny'
@@ -72,7 +70,7 @@ class OpenFileDescriptors extends Component {
                     // onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />
-            </div>
+            </HalinCard>
         )
     }
 }

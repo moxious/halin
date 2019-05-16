@@ -6,6 +6,7 @@ import queryLibrary from '../../api/data/queries/query-library';
 
 import hoc from '../higherOrderComponents';
 import Explainer from '../ui/scaffold/Explainer/Explainer';
+import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
 
 class TransactionMonitor extends Component {
     state = {
@@ -24,7 +25,7 @@ class TransactionMonitor extends Component {
     render() {
         const explainer = <Explainer knowledgebase='Transactions' />;
         return (
-            <div className="TransactionMonitor">
+            <HalinCard owner={this}>
                 <CypherTimeseries key={this.state.key}
                     node={this.props.node}
                     query={this.state.query} 
@@ -36,7 +37,7 @@ class TransactionMonitor extends Component {
                     displayColumns={this.state.displayColumns}
                     legendOnlyColumns={this.state.legendOnlyColumns}
                 />
-            </div>
+            </HalinCard>
         )
     }
 }
