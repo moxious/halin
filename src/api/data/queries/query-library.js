@@ -27,6 +27,7 @@ import DB_QUERY_STATS_STOP from './dbStats/stopCollection';
 import DBMS_COMPONENTS from './dbms/components';
 import DBMS_AUTH_ENABLED from './dbms/authEnabled';
 import DBMS_GET_AUTH_PROVIDER from './dbms/getAuthProvider';
+import DBMS_GET_MAX_HEAP from './dbms/getMaxHeap';
 import DBMS_FUNCTIONS from './dbms/functions';
 import DBMS_PROCEDURES from './dbms/procedures';
 import DBMS_LIST_CONFIG from './dbms/listConfig';
@@ -79,6 +80,7 @@ export default {
     DBMS_COMPONENTS,
     DBMS_AUTH_ENABLED,
     DBMS_GET_AUTH_PROVIDER,
+    DBMS_GET_MAX_HEAP,
     DBMS_FUNCTIONS,
     DBMS_PROCEDURES,
     DBMS_LIST_CONFIG,
