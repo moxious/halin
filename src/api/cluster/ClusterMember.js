@@ -8,7 +8,7 @@ import queryLibrary from '../data/queries/query-library';
 import sentry from '../sentry';
 import HalinQuery from '../data/queries/HalinQuery';
 
-const MAX_OBSERVATIONS = 500;
+const MAX_OBSERVATIONS = 100;
 
 /**
  * Abstraction that captures details and information about a node in a cluster.
