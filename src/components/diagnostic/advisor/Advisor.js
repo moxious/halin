@@ -131,7 +131,7 @@ export default class Advisor extends Component {
                 <p>We had a look at your configuration, and have some feedback.</p>
 
                 <CSVDownload 
-                    title="Download Results as CSV"
+                    title="Results"
                     data={this.props.data}
                     displayColumns={this.state.displayColumns}
                     filename={`Halin-diagnostic-results-${moment.utc().format()}.csv`} />
