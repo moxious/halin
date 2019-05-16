@@ -218,6 +218,14 @@ export default class ClusterMember {
         };
     }
 
+    getMaxHeap() {
+        return this.run(queryLibrary.DBMS_GET_MAX_HEAP)
+            .then(results => {
+                const rec = results.records[0];
+                return rec.get('value');
+            });
+    }
+
     checkComponents() {
         if (!this.driver) {
             throw new Error('ClusterMember has no driver');
@@ -245,6 +253,9 @@ export default class ClusterMember {
                 .then(metrics => { this.metrics = metrics; }),
             featureProbes.hasDBStats(this)
                 .then(result => { this.dbms.hasDBStats = result }),
+            this.getMaxHeap().then(maxHeap => {
+                this.dbms.maxHeap = maxHeap;
+            }),
         ];
 
         return Promise.all(allProbes)
