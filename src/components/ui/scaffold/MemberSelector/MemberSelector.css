@@ -8,6 +8,10 @@ div#MemberSelector > div#MemberSelectorSidebar {
     overflow-y: hidden !important; */
 }
 
+div#MemberPane {
+    height: 100%;
+}
+
 div#MemberPane.pusher {
     /* Subtracting 150px for the width of the push navbar in MemberPane */
     width: -webkit-calc(100% - 150px);
