@@ -16,7 +16,7 @@ import sentry from '../../api/sentry/index';
 
 import Spinner from '../ui/scaffold/Spinner/Spinner';
 
-import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
+import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart, ScatterChart } from 'react-timeseries-charts';
 import './CypherTimeseries.css';
 
 const LEADER_COLOR = '#000000';
@@ -434,15 +434,20 @@ class ClusterTimeseries extends Component {
                                         type="linear" />
                                     <Charts>
                                         {
-                                            this.nodes.map((addr /* , idx */) =>
-                                                <LineChart
-                                                    key={ClusterTimeseries.keyFor(addr, this.state.displayProperty)}
-                                                    axis="y"
-                                                    style={style}
-                                                    columns={[ClusterTimeseries.keyFor(addr, this.state.displayProperty)]}
-                                                    series={this.dataSeries[addr]}
-                                                />
-                                            )
+                                            this.nodes.map((addr /* , idx */) => {
+                                                const chartProps = {
+                                                    key: ClusterTimeseries.keyFor(addr, this.state.displayProperty),
+                                                    axis: 'y',
+                                                    style,
+                                                    columns: [ClusterTimeseries.keyFor(addr, this.state.displayProperty)],
+                                                    series: this.dataSeries[addr]
+                                                };
+
+                                                if (this.props.chartType === 'scatter') {
+                                                    return <ScatterChart {...chartProps} />;
+                                                }
+                                                return <LineChart {...chartProps} />
+                                            })
                                         }
                                     </Charts>
                                 </ChartRow>
