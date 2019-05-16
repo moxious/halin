@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Sidebar, Segment, Menu, Tab } from 'semantic-ui-react';
+import { Sidebar, Segment, Menu, Tab, Divider } from 'semantic-ui-react';
 import uuid from 'uuid';
 
 import PerformancePane from '../../../performance/PerformancePane';
@@ -10,6 +10,8 @@ import SampleQueryPane from '../../../db/SampleQueryPane';
 import LogsPane from '../../../db/LogsPane';
 import Tasks from '../../../performance/task/Tasks';
 import ClusterMemberMenuItem from '../ClusterMemberMenuItem/ClusterMemberMenuItem';
+import DetectedSettings from '../../../settings/DetectedSettings/DetectedSettings';
+
 import './MemberSelector.css';
 
 export default class MemberSelector extends Component {
@@ -129,6 +131,10 @@ export default class MemberSelector extends Component {
                                 active={this.state.member === member}
                                 onSelect={this.select} />)
                     }
+
+                    <Divider horizontal inverted />
+
+                    <DetectedSettings className='ClusterSettings'/>
                 </Sidebar>
                 <Sidebar.Pusher id="MemberPane" dimmed={false}>
                     {this.renderChildContent()}
