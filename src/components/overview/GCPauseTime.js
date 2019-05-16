@@ -27,6 +27,7 @@ class GCPauseTime extends Component {
                     width={this.state.width}
                     rate={this.state.rate}
                     displayProperty='duration'
+                    chartType='scatter'
                 />
             </HalinCard>
         )
