@@ -25,6 +25,9 @@ const queries = {
     'CALL dbms.listConfig.*dbms.security.auth_provider.*': [
         { value: ['native'] },
     ],
+    'WHERE name=\'dbms.memory.heap.max_size\'': [
+        { value: '1G' },
+    ],
     'CALL dbms.procedures.*apoc.log.stream': [ { n: neo4j.int(0) } ],
     'CALL dbms.components': [
         { name: 'some-name', versions: ['3.5.0'], edition: 'enterprise' },
