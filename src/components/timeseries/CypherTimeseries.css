@@ -6,3 +6,9 @@
     padding-top: 0px;
     padding-bottom: 0px;
 }
+
+div.one.column.row.CypherTimeseriesLegend > div.column > div > div > div > div > svg {
+    border: 1px solid gainsboro;
+    background-color: gainsboro;
+    border-radius: 5px;
+}
