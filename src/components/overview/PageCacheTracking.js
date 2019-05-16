@@ -4,7 +4,6 @@ import uuid from 'uuid';
 import { Button } from 'semantic-ui-react';
 import queryLibrary from '../../api/data/queries/query-library';
 import hoc from '../higherOrderComponents';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
 import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
 import _ from 'lodash';
 

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, Card } from 'semantic-ui-react';
+import { Card } from 'semantic-ui-react';
 
 import ClusterMemory from './ClusterMemory';
 import GCPauseTime from './GCPauseTime';
