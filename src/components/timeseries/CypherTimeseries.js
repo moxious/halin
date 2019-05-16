@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import 'semantic-ui-css/semantic.min.css';
-import { Grid, Label } from 'semantic-ui-react';
+import { Grid, Label, Popup, Icon } from 'semantic-ui-react';
 import {
     TimeSeries,
     TimeRange,
@@ -283,21 +283,33 @@ class CypherTimeseries extends Component {
 
     renderChartMetadata() {
         if (!this.state.metadata) { return ''; }
+
+        const content = 
+            <Grid>
+                <Grid.Row columns={1}>
+                    <Label>
+                    Max
+                        <Label.Detail>{datautil.roundToPlaces(this.getChartMax(), 2)}</Label.Detail>
+                    </Label>
+
+                    <Label>
+                        Min
+                        <Label.Detail>{datautil.roundToPlaces(this.getChartMin(), 2)}</Label.Detail>
+                    </Label>
+
+                    <NodeLabel node={this.props.node}/>
+                </Grid.Row>
+                { this.renderLegendOnlyColumns() }
+            </Grid>;
+
         return (
             <div className='ChartMetadata'>
                 { this.props.explainer || '' }
 
-                <Label>
-                    Max
-                    <Label.Detail>{datautil.roundToPlaces(this.getChartMax(), 2)}</Label.Detail>
-                </Label>
-
-                <Label>
-                    Min
-                    <Label.Detail>{datautil.roundToPlaces(this.getChartMin(), 2)}</Label.Detail>
-                </Label>
-
-                <NodeLabel node={this.props.node}/>
+                <Popup on='click' wide='very'
+                    trigger={<Icon name='database circle'/>}
+                    content={content}
+                    />
             </div>
         );
     }
@@ -391,7 +403,6 @@ class CypherTimeseries extends Component {
                             </ChartContainer>
                         </Grid.Column>
                     </Grid.Row>
-                    { this.renderLegendOnlyColumns() }
                     { this.renderChartMetadata() }                    
                 </Grid>
             </div>
