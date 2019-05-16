@@ -14,6 +14,14 @@ div.Toastify > div > div {
   border-radius: 20px;
 }
 
+#MemberPane > div > div.ui.bottom.attached.segment.active.tab {
+  border: none;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
 /*
  * Wrapper that's placed around most main content panes
  */
