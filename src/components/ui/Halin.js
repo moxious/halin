@@ -21,13 +21,22 @@ export default class Halin extends Component {
     halin: null,
     initPromise: null,
     error: null,
+    initializeProgress: [],
+  };
+
+  initializeProgressCallback = (update) => {
+    const newArr = this.state.initializeProgress.concat([update]);
+
+    this.setState({
+      initializeProgress: newArr,
+    })
   };
 
   componentDidMount() {
     try {
       window.halinContext = new HalinContext();
 
-      const initPromise = window.halinContext.initialize()
+      const initPromise = window.halinContext.initialize(this.initializeProgressCallback)
         .catch(err => {
           sentry.reportError(err, 'Error initializing halin context');
           this.setState({ error: err });
@@ -77,6 +86,9 @@ export default class Halin extends Component {
           <h2>Initializing Halin...</h2>
 
           <Spinner />
+
+          {/* As component notifies us of updates, post them.... */}
+          {this.state.initializeProgress.map((text, i) => <p key={i}>{text}</p>)}
         </div>
       );
     }
@@ -84,7 +96,7 @@ export default class Halin extends Component {
     return (
       <div className="Halin" key="app">
         <HalinToast />
-        { this.props.connected ? <MainLeftNav /> : '' }
+        {this.props.connected ? <MainLeftNav /> : ''}
       </div>
     );
   }
