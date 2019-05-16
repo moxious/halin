@@ -36,7 +36,10 @@ export default class ClusterResponseGraph extends Component {
         };
 
         return (
-            <div className='ClusterResponseGraph'>{ this.state.dataSeries ? 
+            <div className='ClusterResponseGraph'>
+                <h3>Cluster Response</h3>
+                <p>Each data point measures total response time to a Halin query</p>
+            { this.state.dataSeries ? 
                 <ScatterPlot 
                     data={this.state.dataSeries}
                     width={600}
