@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
-import { Button, Confirm, Grid } from 'semantic-ui-react';
+import { Button, Confirm, Grid, Modal, Icon } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import uuid from 'uuid';
 import moment from 'moment';
@@ -12,6 +12,7 @@ import AssignRoleModal from '../roles/AssignRoleModal';
 import './Neo4jUsers.css';
 import CSVDownload from '../../data/download/CSVDownload';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
+import NewUserForm from './NewUserForm';
 
 class Neo4jUsers extends Component {
     key = uuid.v4();
@@ -199,6 +200,25 @@ class Neo4jUsers extends Component {
         );
     }
 
+    addUserButton() {
+        return (
+            <Modal closeIcon
+                trigger={
+                    <Button primary>
+                        <Icon name='add' color='green'/> Add User
+                    </Button>
+                }>
+                <Modal.Header>Create New User</Modal.Header>
+
+                <Modal.Content>
+                    <NewUserForm 
+                        node={this.props.node}
+                        onUserCreate={() => this.refresh()} />
+                </Modal.Content>
+            </Modal>
+        );
+    }
+
     manageRolesButton() {
         if(!window.halinContext.isEnterprise()) {
             // Does not apply.
@@ -207,7 +227,7 @@ class Neo4jUsers extends Component {
 
         return (
             <Button onClick={e => this.openAssign()}>
-                <i className="icon user"></i> Manage Roles
+                <i className="icon user"></i> Manage
             </Button>            
         );
     }
@@ -221,6 +241,7 @@ class Neo4jUsers extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <Button.Group basic>
+                                { this.addUserButton() }
                                 { this.manageRolesButton() }                            
                                 { this.downloadCSVButton() }
                                 <Button onClick={e => this.refresh()} icon="refresh"/>
