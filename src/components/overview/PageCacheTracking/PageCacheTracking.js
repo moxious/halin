@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import ClusterTimeseries from '../timeseries/ClusterTimeseries';
+import ClusterTimeseries from '../../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import { Dropdown } from 'semantic-ui-react';
-import queryLibrary from '../../api/data/queries/query-library';
-import hoc from '../higherOrderComponents';
-import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
+import queryLibrary from '../../../api/data/queries/query-library';
+import hoc from '../../higherOrderComponents';
+import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 import _ from 'lodash';
 
 class PageCacheTracking extends Component {

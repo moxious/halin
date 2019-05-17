@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './MainLeftNav.css';
 import { Sidebar, Segment, Menu, Icon, Image, Popup } from 'semantic-ui-react';
-import ClusterOverviewPane from '../../../overview/ClusterOverviewPane';
+import ClusterOverviewPane from '../../../overview/ClusterOverviewPane/ClusterOverviewPane';
 import PermissionsPane from '../../../configuration/PermissionsPane/PermissionsPane';
 import SettingsPane from '../../../settings/SettingsPane/SettingsPane';
 import DiagnosticsPane from '../../../diagnostic/DiagnosticPane';

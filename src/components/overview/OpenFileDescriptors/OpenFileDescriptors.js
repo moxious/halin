@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import ClusterTimeseries from '../timeseries/ClusterTimeseries';
+import ClusterTimeseries from '../../timeseries/ClusterTimeseries';
 import { Dropdown } from 'semantic-ui-react';
-import queryLibrary from '../../api/data/queries/query-library';
+import queryLibrary from '../../../api/data/queries/query-library';
 import uuid from 'uuid';
 import _ from 'lodash';
-import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
+import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 
 class OpenFileDescriptors extends Component {
     state = {

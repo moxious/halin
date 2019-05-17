@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import { Card } from 'semantic-ui-react';
 
-import ClusterMemory from './ClusterMemory';
-import GCPauseTime from './GCPauseTime';
-import PageCacheTracking from './PageCacheTracking';
-import TransactionsOpen from './TransactionsOpen';
-import UsedMemory from './UsedMemory';
-import OpenFileDescriptors from './OpenFileDescriptors';
+import ClusterMemory from '../ClusterMemory/ClusterMemory';
+import GCPauseTime from '../GCPauseTime/GCPauseTime';
+import PageCacheTracking from '../PageCacheTracking/PageCacheTracking';
+import TransactionsOpen from '../TransactionsOpen/TransactionsOpen';
+import UsedMemory from '../UsedMemory/UsedMemory';
+import OpenFileDescriptors from '../OpenFileDescriptors/OpenFileDescriptors';
 
-import hoc from '../higherOrderComponents';
+import hoc from '../../higherOrderComponents';
 
 class ClusterOverviewPane extends Component {
     render() {

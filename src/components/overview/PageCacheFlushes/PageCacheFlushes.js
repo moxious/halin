@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ClusterTimeseries from '../timeseries/ClusterTimeseries';
+import ClusterTimeseries from '../../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../data/queries/query-library';
 import _ from 'lodash';

@@ -3,11 +3,11 @@ import { Dropdown } from 'semantic-ui-react';
 import _ from 'lodash';
 import uuid from 'uuid';
 
-import queryLibrary from '../../api/data/queries/query-library';
+import queryLibrary from '../../../api/data/queries/query-library';
 
-import hoc from '../higherOrderComponents';
-import ClusterTimeseries from '../timeseries/ClusterTimeseries';
-import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
+import hoc from '../../higherOrderComponents';
+import ClusterTimeseries from '../../timeseries/ClusterTimeseries';
+import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 
 class TransactionsOpen extends Component {
     state = {

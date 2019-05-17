@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import hoc from '../higherOrderComponents';
+import hoc from '../../higherOrderComponents';
 import Graph from 'react-graph-vis';
 import _ from 'lodash';
 

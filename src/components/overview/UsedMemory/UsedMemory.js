@@ -1,10 +1,10 @@
 import React, { Component } from 'react';
-import ClusterTimeseries from '../timeseries/ClusterTimeseries';
+import ClusterTimeseries from '../../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
-import queryLibrary from '../../api/data/queries/query-library';
-import datautil from '../../api/data/util';
+import queryLibrary from '../../../api/data/queries/query-library';
+import datautil from '../../../api/data/util';
 import _ from 'lodash';
-import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
+import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 
 class UsedMemory extends Component {
     state = {
