@@ -3,7 +3,7 @@ import ReactTable from 'react-table';
 import 'react-table/react-table.css';
 import _ from 'lodash';
 import moment from 'moment';
-import hoc from '../higherOrderComponents';
+import hoc from '../../higherOrderComponents';
 
 class ClusterEventLog extends Component {
     state = {
