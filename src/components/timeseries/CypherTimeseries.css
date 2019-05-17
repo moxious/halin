@@ -7,6 +7,11 @@
     padding-bottom: 0px;
 }
 
+.ui.grid > div.row.CypherTimeseriesContent > div.column {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
 div.one.column.row.CypherTimeseriesLegend > div.column > div > div > div > div > svg {
     border: 1px solid gainsboro;
     background-color: gainsboro;
