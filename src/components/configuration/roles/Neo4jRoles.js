@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
-import { Grid, Button, Confirm } from 'semantic-ui-react';
+import { Grid, Button, Confirm, Modal, Icon } from 'semantic-ui-react';
 import moment from 'moment';
 
 import status from '../../../api/status/index';
@@ -10,6 +10,7 @@ import CSVDownload from '../../data/download/CSVDownload';
 import './Neo4jRoles.css';
 import hoc from '../../higherOrderComponents';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
+import NewRoleForm from './NewRoleForm';
 
 class Neo4jRoles extends Component {
     query = 'call dbms.security.listRoles()';
@@ -68,6 +69,25 @@ class Neo4jRoles extends Component {
             message: null,
             error: null,
         });
+    }
+
+    addRoleButton() {
+        return (
+            <Modal closeIcon
+                trigger={
+                    <Button primary>
+                        <Icon name='add' color='green'/> Add Role
+                    </Button>
+                }>
+                <Modal.Header>Create New Role</Modal.Header>
+
+                <Modal.Content>
+                    <NewRoleForm 
+                        node={this.props.node}
+                        onUserCreate={() => this.refresh()} />
+                </Modal.Content>
+            </Modal>
+        );
     }
 
     deleteRole(row) {
@@ -154,6 +174,7 @@ class Neo4jRoles extends Component {
                     <Grid.Row columns={1}>                    
                         <Grid.Column>
                             <Button.Group basic>
+                                { this.addRoleButton() } 
                                 { this.downloadCSVButton() }
                                 <Button onClick={e => this.refresh()} icon="refresh"/>
                             </Button.Group>                            
