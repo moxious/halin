@@ -10,7 +10,11 @@ export default new HalinQuery({
         pass: ctx.supportsMetrics(),
         description: 'Requires CSV Metrics Support (present in recent APOC releases)',
     }),
-    query: 'CALL apoc.metrics.storage(null)',
+    query: `
+        CALL apoc.metrics.storage(null)
+        YIELD setting, freeSpaceBytes, totalSpaceBytes, usableSpaceBytes, percentFree
+        RETURN setting, freeSpaceBytes, totalSpaceBytes, usableSpaceBytes, percentFree
+    `,
     columns: [
         { 
             Header: 'Location', 
