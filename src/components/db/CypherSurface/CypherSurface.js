@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import Spinner from '../ui/scaffold/Spinner/Spinner';
+import Spinner from '../../ui/scaffold/Spinner/Spinner';
 import ReactTable from 'react-table';
 import 'react-table/react-table.css';
-import CSVDownload from '../data/download/CSVDownload';
-import sentry from '../../api/sentry/index';
+import CSVDownload from '../../data/download/CSVDownload';
+import sentry from '../../../api/sentry/index';
 import moment from 'moment';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
 class CypherSurface extends Component {
     state = {

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import CypherSurface from './CypherSurface';
-import fakes from '../../testutils/fakes';
+import fakes from '../../../testutils/fakes';
 
 describe('Cypher Surface', function() {
     let component, node;
