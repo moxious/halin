@@ -7,7 +7,6 @@ import queryLibrary from '../../api/data/queries/query-library';
 class DiskUsage extends Component {
     state = {
         key: uuid.v4(),
-        width: 400,
     };
 
     render() {
@@ -18,7 +17,6 @@ class DiskUsage extends Component {
                 <CypherTimeseries key={this.state.key}
                     node={this.props.node}
                     query={q.query}
-                    width={this.state.width}
                     rate={q.rate}
                     displayColumns={q.columns}
                     startingEnabled={[

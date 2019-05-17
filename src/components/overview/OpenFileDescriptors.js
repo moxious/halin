@@ -9,7 +9,6 @@ import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
 class OpenFileDescriptors extends Component {
     state = {
         key: uuid.v4(),
-        width: 400,
         displayProperty: 'fdUsed',
         options: [
             { text: 'Used', value: 'fdUsed' },
@@ -65,7 +64,6 @@ class OpenFileDescriptors extends Component {
                 />
 
                 <ClusterTimeseries key={this.state.key}
-                    width={this.state.width}
                     feedMaker={this.dataFeedMaker}
                     // onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}

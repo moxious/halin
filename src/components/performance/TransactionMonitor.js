@@ -12,7 +12,6 @@ class TransactionMonitor extends Component {
     state = {
         key: uuid.v4(),
         rate: 1000,
-        width: 400,
         query: queryLibrary.JMX_TRANSACTIONS.query,
         displayColumns: queryLibrary.JMX_TRANSACTIONS.columns,
         legendOnlyColumns: queryLibrary.JMX_TRANSACTIONS.legendOnlyColumns,
@@ -31,7 +30,6 @@ class TransactionMonitor extends Component {
                     node={this.props.node}
                     query={this.state.query} 
                     explainer={explainer}
-                    width={this.state.width}
                     rate={this.state.rate}
                     onUpdate={this.onUpdate}
                     startingEnabled={[this.state.displayColumns[1]]}

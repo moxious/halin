@@ -7,7 +7,6 @@ import _ from 'lodash';
 class PageCacheFaults extends Component {
     state = {
         key: uuid.v4(),
-        width: 400,
         displayProperty: 'faultsPerSecond',
     };
 
@@ -72,7 +71,6 @@ class PageCacheFaults extends Component {
             <div className="PageCacheFaults">
                 <h3>Page Cache Faults/sec</h3>
                 <ClusterTimeseries key={this.state.key}
-                    width={this.state.width}
                     feedMaker={this.dataFeedMaker}
                     debug={false}
                     displayProperty={this.state.displayProperty}

@@ -9,7 +9,6 @@ import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
 class UsedMemory extends Component {
     state = {
         key: uuid.v4(),
-        width: 400,
         displayProperty: 'physUsed',
         maxMemory: 0,
     };
@@ -46,7 +45,6 @@ class UsedMemory extends Component {
         return (
             <HalinCard header={header} knowledgebase="Memory" owner={this}>
                 <ClusterTimeseries key={this.state.key}
-                    width={this.state.width}
                     feedMaker={this.dataFeedMaker}
                     max={this.state.maxMemory}
                     // onUpdate={this.onUpdate}

@@ -8,7 +8,6 @@ class ClusterMemory extends Component {
     state = {
         key: uuid.v4(),
         rate: 1000,
-        width: 400,
         query: queryLibrary.JMX_MEMORY_STATS.query,
     };
 
@@ -20,7 +19,6 @@ class ClusterMemory extends Component {
             <HalinCard header={header} knowledgebase='ClusterMemory' owner={this}>
                 <ClusterTimeseries key={this.state.key}
                     query={this.state.query} 
-                    width={this.state.width}
                     rate={this.state.rate}
                     displayProperty='heapUsed'
                 />

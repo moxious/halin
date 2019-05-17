@@ -8,7 +8,7 @@ import datautil from '../../../api/data/util';
 import Spinner from '../../ui/scaffold/Spinner/Spinner';
 
 const defaultHeight = 200;
-const defaultWidth = 400;
+const defaultWidth = 380;
 
 export default class CypherPieChart extends Component {
     state = {

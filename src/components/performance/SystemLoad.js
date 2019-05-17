@@ -9,7 +9,6 @@ class SystemLoad extends Component {
     state = {
         key: uuid.v4(),
         rate: 1000,
-        width: 400,
         query: queryLibrary.OS_LOAD_STATS.query, 
         displayColumns: queryLibrary.OS_LOAD_STATS.columns,
     };
@@ -24,7 +23,6 @@ class SystemLoad extends Component {
                     explainer={explainer}
                     node={this.props.node}
                     query={this.state.query}
-                    width={this.state.width}
                     rate={this.state.rate}
                     displayColumns={this.state.displayColumns}
                 />

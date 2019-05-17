@@ -9,7 +9,6 @@ class GCPauseTime extends Component {
     state = {
         key: uuid.v4(),
         rate: 1000,
-        width: 400,
         query: queryLibrary.JMX_GARBAGE_COLLECTOR.query,
     };
 
@@ -24,7 +23,6 @@ class GCPauseTime extends Component {
             <HalinCard header='Last GC Pause Time' knowledgebase='GarbageCollection' owner={this}>
                 <ClusterTimeseries key={this.state.key}
                     query={this.state.query} 
-                    width={this.state.width}
                     rate={this.state.rate}
                     displayProperty='duration'
                     chartType='scatter'

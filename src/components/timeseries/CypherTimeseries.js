@@ -52,7 +52,7 @@ class CypherTimeseries extends Component {
 
         this.query = props.query;
         this.rate = props.rate || 1000;
-        this.width = props.width || 800;
+        this.width = props.width || 380;
         this.min = props.min || (() => this.state.minObservedValue);
         this.max = props.max || (() => this.state.maxObservedValue);
         this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 2;  // 2 min

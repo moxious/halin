@@ -61,7 +61,7 @@ class ClusterTimeseries extends Component {
         this.state.displayProperty = props.displayProperty;
         this.query = props.query;
         this.rate = props.rate || 2000;
-        this.width = props.width || 800;
+        this.width = props.width || 380;
         this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 5;  // 5 min
         this.palette = props.palette || DEFAULT_PALETTE;
         this.showGrid = _.isNil(props.showGrid) ? false : props.showGrid;

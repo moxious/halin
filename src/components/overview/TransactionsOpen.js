@@ -13,7 +13,6 @@ class TransactionsOpen extends Component {
     state = {
         key: uuid.v4(),
         rate: 2000,
-        width: 400,
         query: queryLibrary.JMX_TRANSACTIONS.query,
         displayProperty: 'open',
         options: [
@@ -74,7 +73,6 @@ class TransactionsOpen extends Component {
 
                 <ClusterTimeseries key={this.state.key}
                     query={this.state.query} 
-                    width={this.state.width}
                     feedMaker={this.dataFeedMaker}
                     // onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}

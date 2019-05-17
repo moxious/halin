@@ -10,7 +10,6 @@ import _ from 'lodash';
 class PageCacheTracking extends Component {
     state = {
         key: uuid.v4(),
-        width: 400,
         displayProperty: 'usageRatio',
         min: 0,
         max: 1,
@@ -113,7 +112,6 @@ class PageCacheTracking extends Component {
                     />
 
                 <ClusterTimeseries key={this.state.key}
-                    width={this.state.width}
                     min={this.state.min} 
                     max={this.state.max} 
                     yAxisFormat={this.state.yAxisFormat}

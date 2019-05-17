@@ -151,7 +151,6 @@ class Tasks extends Component {
     }
 
     open = (row) => {
-        console.log('Clicked row',row);
         this.setState({ selected: row });
     };
 
