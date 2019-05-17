@@ -93,7 +93,7 @@ export default class MainLeftNav extends Component {
             },
             {
                 section: 'users',
-                text: 'User Management',
+                text: 'Permissions Management',
                 icon: <Icon name='group' />,
             },
             {

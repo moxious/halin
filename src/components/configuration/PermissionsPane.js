@@ -35,7 +35,7 @@ class PermissionsPane extends Component {
                 <Grid divided='vertically'>
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <h3>User Management
+                            <h3>Permissions Management
                                 <Explainer knowledgebase='UserManagement'/>
                             </h3>
                         </Grid.Column>
