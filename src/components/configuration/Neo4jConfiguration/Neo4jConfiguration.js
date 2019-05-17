@@ -1,11 +1,13 @@
-import React, { Component } from "react";
-import CypherDataTable from '../data/CypherDataTable/CypherDataTable';
-import hoc from '../higherOrderComponents';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
+import React, { Component } from 'react';
+import _ from 'lodash';
+
+import queryLibrary from '../../../api/data/queries/query-library';
+
+import hoc from '../../higherOrderComponents';
+import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
 import 'react-table/react-table.css';
 import './Neo4jConfiguration.css';
-import queryLibrary from '../../api/data/queries/query-library';
-import _ from 'lodash';
 
 class Neo4jConfiguration extends Component {
     // URL path to where a config item can be looked up.

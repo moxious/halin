@@ -3,7 +3,7 @@ import { Sidebar, Segment, Menu, Tab, Divider } from 'semantic-ui-react';
 import uuid from 'uuid';
 
 import PerformancePane from '../../../performance/PerformancePane';
-import Neo4jConfiguration from '../../../configuration/Neo4jConfiguration';
+import Neo4jConfiguration from '../../../configuration/Neo4jConfiguration/Neo4jConfiguration';
 import OSPane from '../../../performance/OSPane';
 import PluginPane from '../../../db/PluginPane';
 import SampleQueryPane from '../../../db/SampleQueryPane';
