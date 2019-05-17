@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import "semantic-ui-css/semantic.min.css";
 import { Grid } from 'semantic-ui-react';
-import PageCache from '../diagnostic/PageCache';
-import StorageCapacity from '../diagnostic/StorageCapacity';
-import OSStats from './OSStats';
+import PageCache from '../../diagnostic/PageCache';
+import StorageCapacity from '../../diagnostic/StorageCapacity';
+import OSStats from '../OSStats/OSStats';
 import uuid from 'uuid';
 
 class OSPane extends Component {

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import CypherTimeseries from '../timeseries/CypherTimeseries';
+import CypherTimeseries from '../../timeseries/CypherTimeseries';
 import uuid from 'uuid';
-import queryLibrary from '../../api/data/queries/query-library';
+import queryLibrary from '../../../api/data/queries/query-library';
 
 /* @deprecated by DiskUtilizationPieChart */
 class DiskUsage extends Component {

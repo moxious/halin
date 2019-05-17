@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { Card } from 'semantic-ui-react';
 
-import MemoryMonitor from './MemoryMonitor';
-import SystemLoad from './SystemLoad';
-import TransactionMonitor from './TransactionMonitor';
-import DiskUtilizationPieChart from './DiskUtilizationPieChart/DiskUtilizationPieChart';
+import MemoryMonitor from '../MemoryMonitor/MemoryMonitor';
+import SystemLoad from '../SystemLoad/SystemLoad';
+import TransactionMonitor from '../TransactionMonitor/TransactionMonitor';
+import DiskUtilizationPieChart from '../DiskUtilizationPieChart/DiskUtilizationPieChart';
 
 export default class PerformancePane extends Component {
     render() {

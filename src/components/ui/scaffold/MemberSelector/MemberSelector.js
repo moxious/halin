@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import { Sidebar, Segment, Menu, Tab, Divider } from 'semantic-ui-react';
 import uuid from 'uuid';
 
-import PerformancePane from '../../../performance/PerformancePane';
+import PerformancePane from '../../../performance/PerformancePane/PerformancePane';
 import Neo4jConfiguration from '../../../configuration/Neo4jConfiguration/Neo4jConfiguration';
-import OSPane from '../../../performance/OSPane';
+import OSPane from '../../../performance/OSPane/OSPane';
 import PluginPane from '../../../db/PluginPane';
 import SampleQueryPane from '../../../db/SampleQueryPane';
 import LogsPane from '../../../db/LogsPane';

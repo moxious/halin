@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import CypherDataTable from '../data/CypherDataTable/CypherDataTable';
-import queryLibrary from '../../api/data/queries/query-library';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
+import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
+import queryLibrary from '../../../api/data/queries/query-library';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
 /**
  * @deprecated by the GC monitor on the overview dashboard, and by the fact

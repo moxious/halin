@@ -3,11 +3,11 @@ import _ from 'lodash';
 import { Grid } from 'semantic-ui-react';
 import uuid from 'uuid';
 
-import datautil from '../../api/data/util';
-import queryLibrary from '../../api/data/queries/query-library';
+import datautil from '../../../api/data/util';
+import queryLibrary from '../../../api/data/queries/query-library';
 
-import Spinner from '../ui/scaffold/Spinner/Spinner';
-import AllocationChart from './AllocationChart/AllocationChart';
+import Spinner from '../../ui/scaffold/Spinner/Spinner';
+import AllocationChart from '../AllocationChart/AllocationChart';
 
 export default class OSStats extends Component {
     state = {

@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import CypherTimeseries from '../timeseries/CypherTimeseries';
+import CypherTimeseries from '../../timeseries/CypherTimeseries';
 import uuid from 'uuid';
-import queryLibrary from '../../api/data/queries/query-library';
-import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
+import queryLibrary from '../../../api/data/queries/query-library';
+import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
 class SystemLoad extends Component {
     state = {

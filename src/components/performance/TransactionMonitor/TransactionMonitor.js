@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
-import CypherTimeseries from '../timeseries/CypherTimeseries';
+import CypherTimeseries from '../../timeseries/CypherTimeseries';
 import uuid from 'uuid';
 
-import queryLibrary from '../../api/data/queries/query-library';
+import queryLibrary from '../../../api/data/queries/query-library';
 
-import hoc from '../higherOrderComponents';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
-import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
+import hoc from '../../higherOrderComponents';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
+import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 
 class TransactionMonitor extends Component {
     state = {

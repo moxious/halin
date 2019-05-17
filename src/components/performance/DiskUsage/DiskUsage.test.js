@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import DiskUsage from './DiskUsage';
-import sentry from '../../api/sentry/index';
-import fakes from '../../testutils/fakes';
-import ql from '../../api/data/queries/query-library';
+import sentry from '../../../api/sentry/index';
+import fakes from '../../../testutils/fakes';
+import ql from '../../../api/data/queries/query-library';
 
 sentry.disable();
 
