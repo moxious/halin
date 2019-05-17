@@ -7,7 +7,7 @@ import datautil from '../../api/data/util';
 import queryLibrary from '../../api/data/queries/query-library';
 
 import Spinner from '../ui/scaffold/Spinner/Spinner';
-import AllocationChart from './AllocationChart';
+import AllocationChart from './AllocationChart/AllocationChart';
 
 export default class OSStats extends Component {
     state = {
