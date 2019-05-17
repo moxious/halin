@@ -267,11 +267,11 @@ export default class HalinContext {
                     throw err;
                 }
             })
-            .then(() => report('Checking components/features for each cluster member...'))
-            .then(() => Promise.all(this.clusterMembers.map(cn => cn.checkComponents())))
             .then(() => report('Verifying connectivity with members...'))
             .then(() => 
                 Promise.all(this.clusterMembers.map(cn => this.ping(cn))))
+            .then(() => report('Checking components/features for each cluster member...'))
+            .then(() => Promise.all(this.clusterMembers.map(cn => cn.checkComponents())))
             .finally(() => session.close());
     }
 
