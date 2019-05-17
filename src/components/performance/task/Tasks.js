@@ -50,10 +50,6 @@ class Tasks extends Component {
             { 
                 Header: 'Query', 
                 accessor: 'query.query',
-                Cell: row => 
-                    <Popup trigger={<span>{row.value}</span>} content={
-                        <div><pre>{row.value}</pre></div>
-                    }/>,
                 style: { textAlign: 'left' },
                 show: true,
             },
