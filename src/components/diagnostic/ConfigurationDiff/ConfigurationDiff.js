@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import diffutil from '../../api/data/diff/index';
+import diffutil from '../../../api/data/diff/index';
 import ReactTable from 'react-table';
 import { Icon } from 'semantic-ui-react';
-import sentry from '../../api/sentry/index';
+import sentry from '../../../api/sentry/index';
 import _ from 'lodash';
 
 export default class ConfigurationDiff extends Component {

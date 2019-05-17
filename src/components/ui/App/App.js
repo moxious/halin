@@ -7,11 +7,11 @@ import {
 import _ from 'lodash';
 
 // API imports
-import sentry from '../../api/sentry/index';
-import neo4j from '../../api/driver';
+import sentry from '../../../api/sentry/index';
+import neo4j from '../../../api/driver';
 
-import Neo4jDesktopStandIn from '../neo4jDesktop/Neo4jDesktopStandin';
-import Halin from './Halin';
+import Neo4jDesktopStandIn from '../../neo4jDesktop/Neo4jDesktopStandin';
+import Halin from '../Halin/Halin';
 
 /**
  * Wrapper function for deciding what main "run mode" Halin is in, and doing the

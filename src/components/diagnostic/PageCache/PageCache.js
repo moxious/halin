@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import CypherDataTable from '../data/CypherDataTable/CypherDataTable';
-import queryLibrary from '../../api/data/queries/query-library';
-import hoc from '../higherOrderComponents';
+import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
+import queryLibrary from '../../../api/data/queries/query-library';
+import hoc from '../../higherOrderComponents';
 
 class PageCache extends Component {
     state = {

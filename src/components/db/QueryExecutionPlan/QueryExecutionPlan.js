@@ -3,7 +3,7 @@ import SortableTree from 'react-sortable-tree';
 import 'react-sortable-tree/style.css';
 import _ from 'lodash';
 
-import neo4j from '../../api/driver/';
+import neo4j from '../../../api/driver';
 
 const preWrap = {
     width: '100%',

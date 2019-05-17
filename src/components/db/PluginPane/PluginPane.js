@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import CypherSurface from './CypherSurface/CypherSurface';
+import CypherSurface from '../CypherSurface/CypherSurface';
 import uuid from 'uuid';
 
 export default class PluginPane extends Component {

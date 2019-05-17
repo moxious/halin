@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import fields from '../../api/data/fields';
-import CypherDataTable from '../data/CypherDataTable/CypherDataTable';
-import queryLibrary from '../../api/data/queries/query-library';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
+import fields from '../../../api/data/fields';
+import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
+import queryLibrary from '../../../api/data/queries/query-library';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
 /**
  * @deprecated in favor of CypherPieChart using JMX_STORAGE_ALLOCATION

@@ -5,15 +5,15 @@ import { Tab, Button, Icon, Form, Radio, Message, Checkbox } from 'semantic-ui-r
 import ReactTable from 'react-table';
 import moment from 'moment';
 
-import sentry from '../../api/sentry';
-import kb from '../../api/knowledgebase';
+import sentry from '../../../api/sentry';
+import kb from '../../../api/knowledgebase';
 
-import hoc from '../higherOrderComponents';
-import Spinner from '../ui/scaffold/Spinner/Spinner';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
+import hoc from '../../higherOrderComponents';
+import Spinner from '../../ui/scaffold/Spinner/Spinner';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
 import neo4j from 'neo4j-driver';
-import le from '../../api/logs/LogEvent';
-import CSVDownload from '../data/download/CSVDownload';
+import le from '../../../api/logs/LogEvent';
+import CSVDownload from '../../data/download/CSVDownload';
 
 const MAX_ROWS = 5000;
 

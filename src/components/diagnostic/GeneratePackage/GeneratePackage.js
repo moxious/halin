@@ -3,16 +3,16 @@ import { Button, Icon, Tab, Checkbox, Message } from 'semantic-ui-react';
 import uuid from 'uuid';
 import moment from 'moment';
 
-import advisor from '../../api/diagnostic/advisor/index';
-import collection from '../../api/diagnostic/collection/index';
-import sentry from '../../api/sentry/index';
-import status from '../../api/status/index';
+import advisor from '../../../api/diagnostic/advisor/index';
+import collection from '../../../api/diagnostic/collection/index';
+import sentry from '../../../api/sentry/index';
+import status from '../../../api/status/index';
 
-import Spinner from '../ui/scaffold/Spinner/Spinner';
-import Advisor from './advisor/Advisor';
-import ConfigurationDiff from './ConfigurationDiff';
-import hoc from '../higherOrderComponents';
-import JSONDownload from '../data/download/JSONDownload';
+import Spinner from '../../ui/scaffold/Spinner/Spinner';
+import Advisor from '../advisor/Advisor';
+import ConfigurationDiff from '../ConfigurationDiff/ConfigurationDiff';
+import hoc from '../../higherOrderComponents';
+import JSONDownload from '../../data/download/JSONDownload';
 
 const UPLOAD_DIAGNOSTICS_BY_DEFAULT = false;
 

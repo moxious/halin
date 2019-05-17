@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 import 'semantic-ui-css/semantic.min.css';
 import { Grid } from 'semantic-ui-react';
 import './DiagnosticPane.css';
-import GeneratePackage from './GeneratePackage';
-import ClusterEventLog from './ClusterEventLog/ClusterEventLog';
-import Ping from './Ping';
+import GeneratePackage from '../GeneratePackage/GeneratePackage';
+import ClusterEventLog from '../ClusterEventLog/ClusterEventLog';
+import Ping from '../Ping/Ping';
 import uuid from 'uuid';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
-import hoc from '../higherOrderComponents';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
+import hoc from '../../higherOrderComponents';
 
 class DiagnosticPane extends Component {
     state = {

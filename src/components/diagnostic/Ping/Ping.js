@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import { Button, Icon, Table } from 'semantic-ui-react';
 
-import status from '../../api/status/index';
-import datautil from '../../api/data/util';
-import sentry from '../../api/sentry/index';
+import status from '../../../api/status/index';
+import datautil from '../../../api/data/util';
+import sentry from '../../../api/sentry/index';
 
-import SignalMeter from '../data/SignalMeter/SignalMeter';
-import Spinner from '../ui/scaffold/Spinner/Spinner';
-import NodeLabel from '../ui/scaffold/NodeLabel/NodeLabel';
-import Explainer from '../ui/scaffold/Explainer/Explainer';
+import SignalMeter from '../../data/SignalMeter/SignalMeter';
+import Spinner from '../../ui/scaffold/Spinner/Spinner';
+import NodeLabel from '../../ui/scaffold/NodeLabel/NodeLabel';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
 export default class Ping extends Component {
     state = {

@@ -3,17 +3,17 @@ import 'semantic-ui-css/semantic.min.css';
 import { Button } from 'semantic-ui-react';
 
 // API imports
-import sentry from '../../api/sentry/index';
-import status from '../../api/status/index';
-import HalinContext from '../../api/HalinContext';
+import sentry from '../../../api/sentry/index';
+import status from '../../../api/status/index';
+import HalinContext from '../../../api/HalinContext';
 
-import Spinner from './scaffold/Spinner/Spinner';
-import HalinToast from './scaffold/HalinToast/HalinToast';
-import Troubleshooting from '../neo4jDesktop/Troubleshooting';
+import Spinner from '../scaffold/Spinner/Spinner';
+import HalinToast from '../scaffold/HalinToast/HalinToast';
+import Troubleshooting from '../../neo4jDesktop/Troubleshooting';
 
 import './Halin.css';
 
-import MainLeftNav from './scaffold/MainLeftNav/MainLeftNav';
+import MainLeftNav from '../scaffold/MainLeftNav/MainLeftNav';
 
 export default class Halin extends Component {
   state = {

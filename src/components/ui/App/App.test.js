@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
-import sentry from '../../api/sentry/index';
+import sentry from '../../../api/sentry/index';
 
 sentry.disable();
 

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import uuid from 'uuid';
-import SampleQueries from './SampleQueries';
-import hoc from '../higherOrderComponents';
+import SampleQueries from '../SampleQueries/SampleQueries';
+import hoc from '../../higherOrderComponents';
 
 class SampleQueryPane extends Component {
     state = {
