@@ -1,7 +1,7 @@
-import { Component } from 'react';
-import CypherDataTable from '../data/CypherDataTable';
-import Explainer from '../ui/Explainer';
-import queryLibrary from '../data/queries/query-library';
+import React, { Component } from 'react';
+import CypherDataTable from '../data/CypherDataTable/CypherDataTable';
+import Explainer from '../ui/scaffold/Explainer/Explainer';
+import queryLibrary from '../../api/data/queries/query-library';
 import { Message } from 'semantic-ui-react';
 import hoc from '../higherOrderComponents';
 
