@@ -3,6 +3,7 @@ import CypherTimeseries from '../timeseries/CypherTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../../api/data/queries/query-library';
 
+/* @deprecated by DiskUtilizationPieChart */
 class DiskUsage extends Component {
     state = {
         key: uuid.v4(),
