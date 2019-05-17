@@ -218,6 +218,14 @@ export default class ClusterMember {
         };
     }
 
+    getMaxPhysicalMemory() {
+        return this.run(queryLibrary.OS_MEMORY_STATS)
+            .then(results => {
+                const rec = results.records[0];
+                return neo4j.handleNeo4jInt(rec.get('physTotal'));
+            });
+    }
+
     getMaxHeap() {
         return this.run(queryLibrary.DBMS_GET_MAX_HEAP)
             .then(results => {
@@ -255,6 +263,9 @@ export default class ClusterMember {
                 .then(result => { this.dbms.hasDBStats = result }),
             this.getMaxHeap().then(maxHeap => {
                 this.dbms.maxHeap = maxHeap;
+            }),
+            this.getMaxPhysicalMemory().then(maxPhysMemory => {
+                this.dbms.physicalMemory = maxPhysMemory;
             }),
         ];
 
