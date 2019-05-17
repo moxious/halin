@@ -280,14 +280,14 @@ class ClusterTimeseries extends Component {
     }
 
     getChartMin() {
-        if (this.props.min) { return this.props.min; } 
+        if (!_.isNil(this.props.min)) { return this.props.min; } 
 
         const allMins = this.getObservedMins();
         return Math.min(Math.min(...allMins), this.state.chartLowLimit);
     }
 
     getChartMax() {
-        if (this.props.max) { return this.props.max; }
+        if (!_.isNil(this.props.max)) { return this.props.max; }
 
         const allMaxes = this.getObservedMaxes();
         // return Math.max(Math.max(...allMaxes), this.state.chartHighLimit);
