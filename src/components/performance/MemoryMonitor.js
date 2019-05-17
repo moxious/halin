@@ -20,6 +20,7 @@ class MemoryMonitor extends Component {
         return (
             <HalinCard owner={this}>
                 <CypherTimeseries key={this.state.key}
+                    heading="Memory Monitor"
                     node={this.props.node}
                     explainer={explainer}
                     query={this.state.query} 

@@ -20,6 +20,7 @@ class SystemLoad extends Component {
         return (
             <HalinCard owner={this}>
                 <CypherTimeseries key={this.state.key}
+                    heading="Load"
                     explainer={explainer}
                     node={this.props.node}
                     query={this.state.query}
