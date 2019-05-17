@@ -6,7 +6,8 @@ import Splash from './Splash';
 
 let privateLocalCreds = {};
 // try {    
-//     privateLocalCreds = require('./cluster-credentials.json');
+//     const env = 'localhost';
+//     privateLocalCreds = require(`../../creds/${env}.json`);
 // } catch (e) {
 //     sentry.fine('No pre-configured halin credentials were found, but that\'s OK', e);
 // }
