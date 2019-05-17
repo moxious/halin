@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Button, Popup, Modal, Header } from 'semantic-ui-react';
+import { Button, Modal, Header } from 'semantic-ui-react';
 import 'react-table/react-table.css';
 import 'semantic-ui-css/semantic.min.css';
 import _ from 'lodash';
