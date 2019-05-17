@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import 'semantic-ui-css/semantic.min.css';
-import { Grid, Label, Popup, Icon } from 'semantic-ui-react';
+import { Grid, Label, Popup, Icon, List } from 'semantic-ui-react';
 import {
     TimeSeries,
     TimeRange,
@@ -265,12 +265,13 @@ class CypherTimeseries extends Component {
         return (
             <Grid.Row columns={1}>
                 <Grid.Column>
+                    <List>
                     {this.legendOnlyColumns.map((col, i)=>
-                        <Label key={i}>
-                            {col.Header}
-                            <Label.Detail>{_.get(this.state.data[0], col.accessor)}</Label.Detail>
-                        </Label>
+                        <List.Item key={i}>
+                            {col.Header}: {_.get(this.state.data[0], col.accessor)}
+                        </List.Item>
                     )}
+                    </List>
                 </Grid.Column>
             </Grid.Row>
         );
@@ -303,15 +304,25 @@ class CypherTimeseries extends Component {
             </Grid>;
 
         return (
-            <div className='ChartMetadata'>
-                { this.props.explainer || '' }
-
-                <Popup on='click' wide='very'
-                    trigger={<Icon name='database'/>}
-                    content={content}
-                    />
-            </div>
+            <Popup on='click' wide='very'
+                trigger={<Icon name='database'/>}
+                content={content}
+                />
         );
+    }
+
+    heading() {
+        if (!this.props.heading) {
+            return '';
+        }
+
+        return (
+            <h3>
+                {this.props.heading}
+                {this.props.explainer || ''}
+                {this.renderChartMetadata()}
+            </h3>
+        )
     }
 
     render() {
@@ -336,6 +347,7 @@ class CypherTimeseries extends Component {
 
         return (this.state.data && this.mounted) ? (
             <div className="CypherTimeseries">
+                { this.heading() }
                 <Grid>
                     <Grid.Row columns={1} className='CypherTimeseriesLegend'>
                         <Grid.Column>
@@ -403,7 +415,6 @@ class CypherTimeseries extends Component {
                             </ChartContainer>
                         </Grid.Column>
                     </Grid.Row>
-                    { this.renderChartMetadata() }                    
                 </Grid>
             </div>
         ) : <Spinner active={true}/>;
