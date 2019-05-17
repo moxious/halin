@@ -23,10 +23,10 @@ class OSPane extends Component {
                         </Grid.Column>
                     </Grid.Row>
 
-                    <Grid.Row columns={2}>
-                        <Grid.Column>
-                            <DiskUsage key={key} node={this.props.node} />
-                        </Grid.Column>
+                    <Grid.Row>
+                        <Grid.Row>
+                            <PageCache key={`${key}1`} node={this.props.node} />
+                        </Grid.Row>
                     
                         {/* 
                             TODO
@@ -38,10 +38,6 @@ class OSPane extends Component {
                                 <StorageCapacity key={key} node={this.props.node} />
                             </Grid.Column> 
                         */}
-
-                        <Grid.Column>
-                            <PageCache key={`${key}1`} node={this.props.node} />
-                        </Grid.Column>
                     </Grid.Row>
                     <Grid.Row columns={1}>
                     </Grid.Row>
