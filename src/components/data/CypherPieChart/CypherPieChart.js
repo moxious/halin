@@ -92,9 +92,7 @@ export default class CypherPieChart extends Component {
         const tot = this.formatNumberWithUnits(this.state.total);
 
         return (
-        <div className='CypherPieChart'>
-            <h3>{this.props.label}</h3>
-            
+        <div className='CypherPieChart'>           
             <h5>Total: {tot}</h5>
             
             {this.state.data ?
