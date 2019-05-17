@@ -96,6 +96,10 @@ export default {
          space is also impacted by things such as transaction logs.`,
         links.understandingDataOnDisk,
     ]),
+    DiskUtilization: render([
+        'Shows the breakdown of actual files on disk and how much storage they require',
+        links.understandingDataOnDisk,
+    ]),
     Neo4jConfiguration: render([
         `The following table displays the contents of the neo4j.conf file, which details
          how the system is configured.`,
