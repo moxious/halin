@@ -1,8 +1,3 @@
----
-title: Halin: Neo4j Monitoring Made Easy
-layout: post
----
-
 [![CircleCI](https://circleci.com/gh/moxious/halin.svg?style=svg)](https://circleci.com/gh/moxious/halin)
 
 ## Halin Neo4j Monitoring
