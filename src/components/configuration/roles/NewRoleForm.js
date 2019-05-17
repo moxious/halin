@@ -84,8 +84,6 @@ class NewRoleForm extends Component {
     render() {
         return (
             <div className='NewRoleForm'>
-                <h3>Create Role</h3>
-
                 <Form error={!this.valid()} size="small" style={{ textAlign: 'left' }}>
                     <Form.Group widths='equal'>
                         <Form.Input

@@ -91,8 +91,6 @@ class NewUserForm extends Component {
     render() {
         return (
             <div className='NewUserForm'>
-                <h3>Create User</h3>
-
                 <Form size="small" error={!this.valid()} style={{textAlign: 'left'}}>
                     <Form.Group widths='equal'>
                         <Form.Input 
