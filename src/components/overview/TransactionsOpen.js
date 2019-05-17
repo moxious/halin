@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
-import ClusterTimeseries from '../timeseries/ClusterTimeseries';
-import uuid from 'uuid';
-import { Button } from 'semantic-ui-react';
-import queryLibrary from '../../api/data/queries/query-library';
+import { Dropdown } from 'semantic-ui-react';
 import _ from 'lodash';
+import uuid from 'uuid';
+
+import queryLibrary from '../../api/data/queries/query-library';
+
 import hoc from '../higherOrderComponents';
+import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
 
 class TransactionsOpen extends Component {
@@ -14,14 +16,12 @@ class TransactionsOpen extends Component {
         width: 400,
         query: queryLibrary.JMX_TRANSACTIONS.query,
         displayProperty: 'open',
-    };
-
-    // onUpdate = (childQueryState) => {
-    //     // console.log('TransactionsOpen update',childQueryState);
-    // };
-
-    toggleView = (val) => {
-        this.setState({ displayProperty: val });
+        options: [
+            { text: 'Open', value: 'open' },
+            { text: 'Committed', value: 'committed' },
+            { text: 'Rolled Back', value: 'rolledBack' },
+            { text: 'Peak Concurrent', value: 'concurrent' },
+        ],
     };
 
     augmentData = (/* node */) => (/* data */) => {
@@ -54,25 +54,23 @@ class TransactionsOpen extends Component {
         return feed;
     };
 
-    render() {
-        const buttons = [
-            { label: 'Open', field: 'open' },
-            { label: 'Committed', field: 'committed' },
-            { label: 'Rolled Back', field: 'rolledBack' },
-            { label: 'Peak Concurrent', field: 'concurrent' },
-        ];
+    onChange = (e, data) => {
+        const a = {
+            displayProperty: data.value,
+        };
+        this.setState(a);
+    };
 
+    render() {
         return (
             <HalinCard header='Transactions' knowledgebase='TransactionsOpen' owner={this}>
-                <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
-                    buttons.map((b,idx) =>
-                        <Button size='tiny'
-                            key={idx}
-                            active={this.state.displayProperty===b.field}
-                            onClick={() => this.toggleView(b.field)}>
-                            { b.label }
-                        </Button>)
-                }</Button.Group>
+                <Dropdown style={{paddingBottom: 10}}
+                    placeholder='Show:'
+                    fluid defaultValue='open'
+                    onChange={this.onChange}
+                    selection
+                    options={this.state.options}
+                />
 
                 <ClusterTimeseries key={this.state.key}
                     query={this.state.query} 

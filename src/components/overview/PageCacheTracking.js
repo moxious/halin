@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ClusterTimeseries from '../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
-import { Button } from 'semantic-ui-react';
+import { Dropdown } from 'semantic-ui-react';
 import queryLibrary from '../../api/data/queries/query-library';
 import hoc from '../higherOrderComponents';
 import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
@@ -12,6 +12,15 @@ class PageCacheTracking extends Component {
         key: uuid.v4(),
         width: 400,
         displayProperty: 'usageRatio',
+        min: 0,
+        max: 1,
+        yAxisFormat: ',.2f',
+        options: [
+            { format: ',.2f', min: 0, max: 1, key: 'usageRatio', text: 'Usage Ratio', value: 'usageRatio' },
+            { format: ',.2f', min: 0, max: 1, key: 'hitRatio', text: 'Hit Ratio', value: 'hitRatio' },
+            { format: null, min: null, max: null, key: 'faultsPerSecond', text: 'Faults/sec', value: 'faultsPerSecond' },
+            { format: null, min: null, max: null, key: 'flushesPerSecond', text: 'Flushes/sec', value: 'flushesPerSecond' },
+        ],
     };
 
     componentWillMount() {
@@ -81,33 +90,33 @@ class PageCacheTracking extends Component {
         return feed;
     };
 
-    toggleView = (val) => {
-        this.setState({ displayProperty: val });
+    onChange = (e, data) => {
+        const option = this.state.options.filter(o => o.value === data.value)[0];
+        const a = {
+            displayProperty: data.value,
+            min: option.min,
+            max: option.max,
+            yAxisFormat: option.format,
+        };
+        this.setState(a);
     };
 
     render() {
-        const buttons = [
-            { label: 'Usage Ratio', field: 'usageRatio' },
-            { label: 'Hit Ratio', field: 'hitRatio' },
-            { label: 'Faults/sec', field: 'faultsPerSecond' },
-            { label: 'Flushes/sec', field: 'flushesPerSecond' },
-        ];
-
         return (
             <HalinCard header='Page Cache' knowledgebase='PageCache' owner={this}>
-                <Button.Group size='tiny' style={{paddingBottom: '15px'}}>{
-                    buttons.map((b,idx) =>
-                        <Button size='tiny'
-                            key={idx}
-                            active={this.state.displayProperty===b.field}
-                            onClick={() => this.toggleView(b.field)}>
-                            { b.label }
-                        </Button>)
-                }</Button.Group>
+                  <Dropdown style={{paddingBottom: 10}}
+                        placeholder='Show:'
+                        fluid defaultValue='usageRatio'
+                        onChange={this.onChange}
+                        selection
+                        options={this.state.options}
+                    />
 
                 <ClusterTimeseries key={this.state.key}
                     width={this.state.width}
-                    min={0} max={1} yAxisFormat=",.2f"
+                    min={this.state.min} 
+                    max={this.state.max} 
+                    yAxisFormat={this.state.yAxisFormat}
                     feedMaker={this.dataFeedMaker}
                     displayProperty={this.state.displayProperty}
                 />
