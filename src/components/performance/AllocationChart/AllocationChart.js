@@ -39,6 +39,8 @@ export default class AllocationChart extends Component {
         this.setState(newState);
     }
 
+    // Deprecated because the d3 pie chart seems to have CSS
+    // bugs that display the tooltip in a remote position relative to the chart
     tooltip = (label /*, value */) => {
         let underlyingValue = 0;
         if (label.match(/alloc/i)) {
@@ -75,7 +77,6 @@ export default class AllocationChart extends Component {
                     ((this.state.total && this.state.total > 0) ? 
                     <PieChart
                         data={this.makeData()}
-                        tooltipHtml={this.tooltip}
                         width={this.state.width}
                         height={this.state.height}
                         colorScale={d3.scale.category20()}

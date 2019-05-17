@@ -47,20 +47,18 @@ export default class CypherPieChart extends Component {
 
                 const total = values.map(v => v.value).reduce((a, b) => a + b, 0);
 
+                const units = _.uniq(values.map(r => r.units))[0];
                 const data = {
                     label: this.props.title || 'CypherPieChart',
 
                     // Modify from label/value to x/y according to what
                     // piechart needs
                     values: values.map(rec => ({
-                        x: rec.label,
+                        x: rec.label + ' (' + this.formatNumberWithUnits(rec.value, units) + ')',
                         y: rec.value,
                     })),
                 };
 
-                const units = _.uniq(values.map(r => r.units))[0];
-
-                console.log('Found data', data);
                 this.setState({ 
                     data,
                     error: null,
@@ -78,15 +76,10 @@ export default class CypherPieChart extends Component {
             });
     }
 
-    formatNumberWithUnits(n) {
+    formatNumberWithUnits(n, units = this.state.units) {
         return datautil.roundToPlaces(n, 2).toString()
-            .replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' ' + this.state.units;
+            .replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' ' + units;
     }
-
-    tooltip = (label, value) => {
-        // let underlyingValue = 0;
-        return label + ' (' + this.formatNumberWithUnits(value) + ')';
-    };
 
     render() {
         const tot = this.formatNumberWithUnits(this.state.total);
@@ -99,7 +92,6 @@ export default class CypherPieChart extends Component {
                 ((this.state.total && this.state.total > 0) ?
                     <PieChart
                         data={this.state.data}
-                        tooltipHtml={this.tooltip}
                         width={this.state.width}
                         height={this.state.height}
                         colorScale={d3.scale.category20()}
