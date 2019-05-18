@@ -40,7 +40,7 @@ class UsedMemory extends Component {
     };
 
     render() {
-        const header = 'Physical Memory (max=' + datautil.humanDataSize(this.state.maxMemory, true) + ')';
+        const header = 'Physical Memory (' + datautil.humanDataSize(this.state.maxMemory, true) + ' total)';
 
         return (
             <HalinCard header={header} knowledgebase="Memory" owner={this}>
