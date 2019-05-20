@@ -253,4 +253,10 @@ export default {
     NoActiveDatabase: render([
         'Check to make sure you have activated a database in Neo4j Desktop before launching Halin',
     ]),
+    ClusterResponseGraph: render([
+        `Each data point represents the timing of a query returned by the Neo4j cluster, showing
+        evolving performance over time.`,
+        `This is simply used for diagnostic reasons to check if the cluster is responding slowly, or
+        if network factors are interfering`,
+    ]),
 };
