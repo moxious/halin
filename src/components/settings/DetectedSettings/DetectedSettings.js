@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { List, Icon } from 'semantic-ui-react'
+import { List, Icon, Grid } from 'semantic-ui-react'
 import './DetectedSettings.css';
+import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 
 export default class DetectedSettings extends Component {
     lineItem(value, name) {
@@ -18,35 +19,39 @@ export default class DetectedSettings extends Component {
     render() {
         const ctx = window.halinContext;
 
+        const items = [
+            this.item(ctx.getBaseURI(), 'home'),
+            this.item(ctx.getCurrentUser().username, 'user circle'),
+            this.item((ctx.getCurrentUser().roles || []).join(', '), 'lock'),
+            ctx.isCommunity() ? this.lineItem(true, 'Community') : this.lineItem(true, 'Enterprise'),
+            this.lineItem(ctx.supportsAuth(), 'Authorization'),
+            this.lineItem(ctx.supportsNativeAuth(), 'Native Auth'),
+            this.lineItem(ctx.supportsSystemGraph(), 'System Graph'),
+            this.lineItem(ctx.supportsAPOC(), 'APOC'),
+            this.lineItem(ctx.supportsLogStreaming(), 'File Streaming'),
+            this.lineItem(ctx.supportsDBStats(), 'DB Stats'),
+            this.lineItem(ctx.supportsMetrics(), 'Metrics'),
+            this.lineItem(ctx.isCluster(), 'Clustered'),
+        ];
+
+        const listify = someStuff =>
+            <List style={{textAlign: 'left'}}>
+                { someStuff.map((item, key) => <List.Item key={key}>{item}</List.Item>) }
+            </List>;
+
         return (
-            <div className='DetectedSettings'>
-                <List>
-                    <List.Item style={{ fontFamily: 'monospace' }}>
-                        { this.item(ctx.getBaseURI(), 'home') }
-                    </List.Item>
-                    <List.Item>
-                        { this.item(ctx.getCurrentUser().username, 'user circle') }
-                    </List.Item>
-                    <List.Item>
-                        { this.item((ctx.getCurrentUser().roles || []).join(', '), 'lock') }
-                    </List.Item>
-                    
-                    { ctx.isCommunity() ? 
-                        <List.Item>{ this.lineItem(true, 'Community') }</List.Item>
-                        : 
-                        <List.Item>{ this.lineItem(true, 'Enterprise') }</List.Item>
-                    }
-                    <List.Item>{ this.lineItem(ctx.supportsAuth(), 'Authorization') }</List.Item>
-                    
-                    <List.Item>{ this.lineItem(ctx.supportsNativeAuth(), 'Native Auth') }</List.Item>
-                    <List.Item>{ this.lineItem(ctx.supportsSystemGraph(), 'System Graph') }</List.Item>
-                    <List.Item>{ this.lineItem(ctx.supportsAPOC(), 'APOC') }</List.Item>
-                    <List.Item>{ this.lineItem(ctx.supportsLogStreaming(), 'File Streaming') }</List.Item>
-                    <List.Item>{ this.lineItem(ctx.supportsDBStats(), 'DB Stats') }</List.Item>
-                    <List.Item>{ this.lineItem(ctx.supportsMetrics(), 'Metrics') }</List.Item>
-                    <List.Item>{ this.lineItem(ctx.isCluster(), 'Clustered') }</List.Item>                    
-                </List>
-            </div>
+            <HalinCard header='Detected Settings' className='DetectedSettings'>
+                <Grid>
+                    <Grid.Row columns={2}>
+                        <Grid.Column>
+                            { listify(items.slice(0, Math.floor(items.length / 2))) }
+                        </Grid.Column>
+                        <Grid.Column>
+                            { listify(items.slice(Math.floor(items.length / 2), items.length)) }
+                        </Grid.Column>
+                    </Grid.Row>
+                </Grid>
+            </HalinCard>
         );
     }
 }
