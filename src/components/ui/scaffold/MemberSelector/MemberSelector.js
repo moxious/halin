@@ -133,8 +133,6 @@ export default class MemberSelector extends Component {
                     }
 
                     <Divider horizontal inverted />
-
-                    <DetectedSettings className='ClusterSettings'/>
                 </Sidebar>
                 <Sidebar.Pusher id="MemberPane" dimmed={false}>
                     {this.renderChildContent()}

@@ -6,7 +6,6 @@ import PermissionsPane from '../../../configuration/PermissionsPane/PermissionsP
 import SettingsPane from '../../../settings/SettingsPane/SettingsPane';
 import DiagnosticsPane from '../../../diagnostic/DiagnosticPane/DiagnosticPane';
 import MemberSelector from '../MemberSelector/MemberSelector';
-import AppFooter from '../AppFooter/AppFooter';
 
 const segmentStyle = {
     height: '100%',
@@ -60,7 +59,7 @@ export default class MainLeftNav extends Component {
             return this.segmentWrap(<MemberSelector clickCount={this.state.toggleCounter} />);
         } else if (this.state.section === 'users') {
             return this.segmentWrap(<PermissionsPane node={this.state.clusterMember}/>);
-        } else if (this.state.section === 'settings') {
+        } else if (this.state.section === 'about') {
             return this.segmentWrap(<SettingsPane/>);
         } else if (this.state.section === 'diagnostics') {
             return this.segmentWrap(<DiagnosticsPane/>);
@@ -80,6 +79,8 @@ export default class MainLeftNav extends Component {
     }
 
     render() {
+        const size = 'large';
+
         const selections = [
             {
                 section: 'home',
@@ -89,22 +90,22 @@ export default class MainLeftNav extends Component {
             {
                 section: 'members',
                 text: 'Cluster Members',
-                icon: <Icon name='computer' />,
+                icon: <Icon size={size} name='computer' />,
             },
             {
                 section: 'users',
                 text: 'Permissions Management',
-                icon: <Icon name='group' />,
+                icon: <Icon size={size} name='group' />,
             },
             {
                 section: 'diagnostics',
                 text: 'Cluster Diagnostic Tools',
-                icon: <Icon name='wrench'/>,
+                icon: <Icon size={size} name='wrench'/>,
             },
             {
-                section: 'settings',
-                text: 'Settings',
-                icon: <Icon name='cogs' />,
+                section: 'about',
+                text: 'About',
+                icon: <Image className='icon' src='img/neo4j_logo_globe.png' />
             },
         ];
 
@@ -127,13 +128,15 @@ export default class MainLeftNav extends Component {
                     {
                         selections.map((selection, index) => 
                             this.hoverPopup(selection.text, 
-                                <Menu.Item active={this.state.section === selection.section}
-                                    index={index} as='a' 
+                                <Menu.Item 
+                                    active={this.state.section === selection.section}
+                                    index={index} 
+                                    as='a'
+                                    style={selection.style || {}}
                                     onClick={() => this.section(selection.section)}>
                                     { selection.icon }
                                 </Menu.Item>, index))
                     }                    
-                    <AppFooter />
                 </Sidebar>
                 <Sidebar.Pusher id='MainContent' dimmed={false}>
                     { this.renderChildContent() }

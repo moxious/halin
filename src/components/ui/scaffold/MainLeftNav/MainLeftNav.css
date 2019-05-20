@@ -9,8 +9,3 @@ div#MainContent {
     width:    -moz-calc(100% - 150px);
     width:         calc(100% - 150px);
 }
-
-/* div#MainLeftNav > a.item {
-    padding-left: 0px;
-    padding-right: 0px;
-} */
