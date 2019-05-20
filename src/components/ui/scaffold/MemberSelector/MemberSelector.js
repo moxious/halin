@@ -10,7 +10,6 @@ import SampleQueryPane from '../../../db/SampleQueryPane/SampleQueryPane';
 import LogsPane from '../../../db/LogsPane/LogsPane';
 import Tasks from '../../../performance/task/Tasks';
 import ClusterMemberMenuItem from '../ClusterMemberMenuItem/ClusterMemberMenuItem';
-import DetectedSettings from '../../../settings/DetectedSettings/DetectedSettings';
 
 import './MemberSelector.css';
 

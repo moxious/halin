@@ -9,11 +9,6 @@ import './AppFooter.css';
 
 import HalinCard from '../../scaffold/HalinCard/HalinCard';
 
-const linkStyle = {
-    // color: 'white',
-    // fontSize: '10px',
-};
-
 export default class AppFooter extends Component {
     render() {
         api.sentry.fine('build', build);
