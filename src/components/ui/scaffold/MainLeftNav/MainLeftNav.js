@@ -90,7 +90,7 @@ export default class MainLeftNav extends Component {
             {
                 section: 'members',
                 text: 'Cluster Members',
-                icon: <Icon size={size} name='computer' />,
+                icon: <Icon size={size} name='database' />,
             },
             {
                 section: 'users',
