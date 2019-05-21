@@ -28,7 +28,7 @@ export default class HalinContext {
         this.pollRate = 1000;
         this.clusterMembers = null;
         this.driverOptions = {
-            connectionTimeout: 10000,
+            connectionTimeout: 15000,
             trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
         };
         this.debug = false;
