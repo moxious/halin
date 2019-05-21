@@ -35,7 +35,7 @@ export default class DetectedSettings extends Component {
         ];
 
         const listify = someStuff =>
-            <List style={{textAlign: 'left'}}>
+            <List style={{textAlign: 'left', wordBreak: 'break-all' }}>
                 { someStuff.map((item, key) => <List.Item key={key}>{item}</List.Item>) }
             </List>;
 
