@@ -133,7 +133,10 @@ export default class MemberSelector extends Component {
 
                     <Divider horizontal inverted />
                 </Sidebar>
-                <Sidebar.Pusher id="MemberPane" dimmed={false}>
+                <Sidebar.Pusher id="MemberPane" dimmed={false} className={
+                    /* Width needs to adjust dynamically; see CSS */
+                    this.state.visible ? 'sidebarVisible' : 'sidebarClosed'
+                }>
                     {this.renderChildContent()}
                 </Sidebar.Pusher>
             </Sidebar.Pushable>

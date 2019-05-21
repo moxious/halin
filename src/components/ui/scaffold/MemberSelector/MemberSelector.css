@@ -13,9 +13,14 @@ div#MemberPane {
     overflow-y: scroll;
 }
 
-div#MemberPane.pusher {
+div#MemberPane.pusher.sidebarClosed {
     /* Subtracting 150px for the width of the push navbar in MemberPane */
-    /* width: -webkit-calc(100% - 150px);
+    width: 100%;
+}
+
+div#MemberPane.pusher.sidebarVisible {
+    /* Subtracting 150px for the width of the push navbar in MemberPane */
+    width: -webkit-calc(100% - 150px);
     width:    -moz-calc(100% - 150px);
-    width:         calc(100% - 150px); */
+    width:         calc(100% - 150px);
 }
