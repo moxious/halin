@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
-import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
+import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
 import { Grid, Button, Confirm, Modal, Icon } from 'semantic-ui-react';
 import moment from 'moment';
 
-import status from '../../../api/status/index';
-import sentry from '../../../api/sentry/index';
+import status from '../../../../api/status/index';
+import sentry from '../../../../api/sentry/index';
 
-import CSVDownload from '../../data/download/CSVDownload';
+import CSVDownload from '../../../data/download/CSVDownload';
 import './Neo4jRoles.css';
-import hoc from '../../higherOrderComponents';
-import Explainer from '../../ui/scaffold/Explainer/Explainer';
-import NewRoleForm from './NewRoleForm';
+import hoc from '../../../higherOrderComponents';
+import Explainer from '../../../ui/scaffold/Explainer/Explainer';
+import NewRoleForm from '../NewRoleForm/NewRoleForm';
 
 class Neo4jRoles extends Component {
     query = 'call dbms.security.listRoles()';

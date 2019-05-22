@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { Form, Message } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
-import status from '../../../api/status/index';
-import sentry from '../../../api/sentry/index';
+import status from '../../../../api/status/index';
+import sentry from '../../../../api/sentry/index';
 import './NewUserForm.css';
 
 class NewUserForm extends Component {

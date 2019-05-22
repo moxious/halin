@@ -2,9 +2,9 @@ import React, { Component } from 'react';
 import { Form, Message } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import './NewRoleForm.css';
-import status from '../../../api/status/index';
-import hoc from '../../higherOrderComponents';
-import sentry from '../../../api/sentry/index';
+import status from '../../../../api/status/index';
+import hoc from '../../../higherOrderComponents';
+import sentry from '../../../../api/sentry/index';
 
 class NewRoleForm extends Component {
     state = {

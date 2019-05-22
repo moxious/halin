@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import './PermissionsPane.css';
 import { Grid } from 'semantic-ui-react';
-import Neo4jUsers from '../users/Neo4jUsers';
+import Neo4jUsers from '../users/Neo4jUsers/Neo4jUsers';
 import sentry from '../../../api/sentry/index';
-import Neo4jRoles from '../roles/Neo4jRoles';
+import Neo4jRoles from '../roles/Neo4jRoles/Neo4jRoles';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
 import uuid from 'uuid';
 

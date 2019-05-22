@@ -1,18 +1,18 @@
 import React, { Component } from 'react';
-import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
+import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
 import { Button, Confirm, Grid, Modal, Icon } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import uuid from 'uuid';
 import moment from 'moment';
 
-import sentry from '../../../api/sentry/index';
-import status from '../../../api/status/index';
+import sentry from '../../../../api/sentry/index';
+import status from '../../../../api/status/index';
 
-import AssignRoleModal from '../roles/AssignRoleModal';
+import AssignRoleModal from '../../roles/AssignRoleModal/AssignRoleModal';
 import './Neo4jUsers.css';
-import CSVDownload from '../../data/download/CSVDownload';
-import Explainer from '../../ui/scaffold/Explainer/Explainer';
-import NewUserForm from './NewUserForm';
+import CSVDownload from '../../../data/download/CSVDownload';
+import Explainer from '../../../ui/scaffold/Explainer/Explainer';
+import NewUserForm from '../NewUserForm/NewUserForm';
 
 class Neo4jUsers extends Component {
     key = uuid.v4();

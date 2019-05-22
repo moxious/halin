@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import { Button, Modal, Dropdown, Grid } from 'semantic-ui-react';
-import status from '../../../api/status/index';
+import status from '../../../../api/status/index';
 import _ from 'lodash';
-import sentry from '../../../api/sentry/index';
+import sentry from '../../../../api/sentry/index';
 
 class AssignRoleModal extends Component {
     state = {
