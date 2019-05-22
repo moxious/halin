@@ -433,7 +433,12 @@ const notSupported = () => {
     );
 };
 
-export default hoc.compatibilityCheckableComponent(
+/**
+ * Logs viewing must be an admin only component, because logs can contain sensitive 
+ * information.  Read-only viewers (who might be able to see page cache details)
+ * should not see system logs.
+ */
+export default hoc.adminOnlyComponent(hoc.compatibilityCheckableComponent(
     LogsPane,
     compatCheckFn,
-    notSupported);
+    notSupported));
