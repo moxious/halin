@@ -4,6 +4,7 @@ import math from 'mathjs';
 import Ring from 'ringjs';
 import featureProbes from '../feature/probes';
 import neo4j from '../driver/index';
+import neo4jErrors from '../driver/errors';
 import queryLibrary from '../data/queries/query-library';
 import sentry from '../sentry';
 import HalinQuery from '../data/queries/HalinQuery';
@@ -223,6 +224,12 @@ export default class ClusterMember {
             .then(results => {
                 const rec = results.records[0];
                 return neo4j.handleNeo4jInt(rec.get('physTotal'));
+            })
+            .catch(err => {
+                if (neo4jErrors.permissionDenied(err)) {
+                    return 'unknown';
+                }
+                throw err;
             });
     }
 
@@ -231,7 +238,13 @@ export default class ClusterMember {
             .then(results => {
                 const rec = results.records[0];
                 return rec.get('value');
-            });
+            })
+            .catch(err => {
+                if (neo4jErrors.permissionDenied(err)) {
+                    return 'unknown';
+                }
+                throw err;
+            })
     }
 
     checkComponents() {

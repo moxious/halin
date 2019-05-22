@@ -96,6 +96,10 @@ export default {
                 }
             })
             .catch(err => {
+                if (neo4jErrors.permissionDenied(err)) {
+                    return false;
+                }
+
                 sentry.fine('Error on CSV metrics enabled probe', err);
                 return false;
             });
