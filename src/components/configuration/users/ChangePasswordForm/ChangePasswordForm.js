@@ -11,10 +11,14 @@ export default class ChangePasswordForm extends Component {
         pending: false,
     }
 
-    valid() {
+    passwordsMatch() {
         return (this.state.password1 === this.state.password2);
     }
     
+    filledOut() {
+        return this.state.password1 && this.state.password2;
+    }
+
     handleChange(field, event) {
         const mod = {};
         mod[field] = event.target.value;
@@ -70,14 +74,14 @@ export default class ChangePasswordForm extends Component {
     render() {
         return (
             <div className='ChangePasswordForm'>
-                <Form size="small" error={!this.valid()} style={{textAlign: 'left'}}>
+                <Form size="small" error={this.filledOut() && !this.passwordsMatch()} style={{textAlign: 'left'}}>
                     <Form.Group widths='equal'>
-                        <Form.Field>
+                        {/* <Form.Field>
                             <Form.Input 
                                 label='Username' 
                                 value={this.props.username} 
                                 disabled />
-                        </Form.Field>                        
+                        </Form.Field>                         */}
                         <Form.Input 
                             style={this.inputStyle}
                             disabled={this.state.pending}
@@ -95,14 +99,18 @@ export default class ChangePasswordForm extends Component {
                     <Message
                         error
                         header='Passwords must match'
-                        content='Both password fields must be filled out, and must match'/>
+                        content='Please try again'/>
 
                     <Form.Button positive
                             style={this.inputStyle}
-                            disabled={this.state.pending || !this.valid() || !this.state.password1 || !this.state.password2}
+                            disabled={
+                                this.state.pending || 
+                                !this.passwordsMatch() ||
+                                !this.filledOut()
+                            }
                             onClick={data => this.submit(data)} 
                             type='submit'>
-                            <i className="icon add user"/> Create
+                            <i className="icon key"/> Change Password
                     </Form.Button>
                 </Form>
             </div>
