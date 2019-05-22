@@ -10,7 +10,7 @@ export default class DiskUtilizationPieChart extends Component {
     render() {
         return (
             <HalinCard>
-                <h3>Disk Utilization <Explainer knowledgebase='DiskUtilization' /></h3>
+                <h3>Data on Disk <Explainer knowledgebase='DiskUtilization' /></h3>
 
                 <CypherPieChart
                     query={api.queryLibrary.JMX_DISK_UTILIZATION.query}
