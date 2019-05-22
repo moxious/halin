@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
-import { Button, Confirm, Grid, Modal, Icon } from 'semantic-ui-react';
+import { Button, Confirm, Grid, Modal, Icon, Popup } from 'semantic-ui-react';
 import 'semantic-ui-css/semantic.min.css';
 import uuid from 'uuid';
 import moment from 'moment';
@@ -13,22 +13,22 @@ import './Neo4jUsers.css';
 import CSVDownload from '../../../data/download/CSVDownload';
 import Explainer from '../../../ui/scaffold/Explainer/Explainer';
 import NewUserForm from '../NewUserForm/NewUserForm';
+import ChangePasswordForm from '../ChangePasswordForm/ChangePasswordForm';
 
 class Neo4jUsers extends Component {
     key = uuid.v4();
     query = 'call dbms.security.listUsers()';
     displayColumns = [
         {
-            Header: 'Delete',
+            Header: 'Actions',
             id: 'delete',
             minWidth: 70,
             maxWidth: 100,
             Cell: ({ row }) => (
-                <Button compact negative
-                    // Don't let people delete neo4j or admins for now.
-                    disabled={row.username === 'neo4j' || (row.roles || []).indexOf('admin') > -1}
-                    onClick={e => this.open(row)}
-                    type='submit' icon="cancel"/>
+                <span>
+                    {this.deleteUserButton(row)}
+                    {this.changeUserPasswordButton(row)}
+                </span>
             ),
         },
         {
@@ -62,6 +62,44 @@ class Neo4jUsers extends Component {
         message: null,
         error: null,
     };
+
+    deleteUserButton(row) {
+        return (
+            <Popup content='Delete User'
+                trigger={
+                    <Button compact negative
+                        // Don't let people delete neo4j or admins for now.
+                        disabled={row.username === 'neo4j' || (row.roles || []).indexOf('admin') > -1}
+                        onClick={e => this.open(row)}
+                        type='submit' icon="cancel" />
+                } />
+        );
+    }
+
+    changeUserPasswordButton(row) {
+        // const button = (
+        //     <Popup content='Change Password'
+        //         trigger={<Button compact type='submit' icon='key' />}
+        //     />
+        // );
+
+        const button = <Button compact type='submit' icon='key' />;
+
+        return (
+            <Modal closeIcon
+                trigger={button}>
+                <Modal.Header>Change Password for User {row.username}</Modal.Header>
+
+                <Modal.Content>
+                    <ChangePasswordForm {...row} />
+                </Modal.Content>
+            </Modal>
+        );
+    }
+
+    changePassword(row) {
+        console.log('Change Password', row);
+    }
 
     refresh(val = (this.state.refresh + 1)) {
         // These are passed by state to child components, updating it, 
@@ -191,7 +229,7 @@ class Neo4jUsers extends Component {
         }
 
         return (
-            <CSVDownload 
+            <CSVDownload
                 title='Download'
                 filename={`Halin-neo4j-users-${moment.utc().format()}.csv`}
                 data={this.state.data}
@@ -205,13 +243,13 @@ class Neo4jUsers extends Component {
             <Modal closeIcon
                 trigger={
                     <Button primary>
-                        <Icon name='add' color='green'/> Add User
+                        <Icon name='add' color='green' /> Add User
                     </Button>
                 }>
                 <Modal.Header>Create New User</Modal.Header>
 
                 <Modal.Content>
-                    <NewUserForm 
+                    <NewUserForm
                         node={this.props.node}
                         onUserCreate={() => this.refresh()} />
                 </Modal.Content>
@@ -220,7 +258,7 @@ class Neo4jUsers extends Component {
     }
 
     manageRolesButton() {
-        if(!window.halinContext.isEnterprise()) {
+        if (!window.halinContext.isEnterprise()) {
             // Does not apply.
             return '';
         }
@@ -228,32 +266,32 @@ class Neo4jUsers extends Component {
         return (
             <Button onClick={e => this.openAssign()}>
                 <i className="icon user"></i> Manage
-            </Button>            
+            </Button>
         );
     }
 
     render() {
         return (
             <div className="Neo4jUsers">
-                <h3>Users <Explainer knowledgebase='Users'/></h3>
+                <h3>Users <Explainer knowledgebase='Users' /></h3>
 
                 <Grid>
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <Button.Group basic>
-                                { this.addUserButton() }
-                                { this.manageRolesButton() }                            
-                                { this.downloadCSVButton() }
-                                <Button onClick={e => this.refresh()} icon="refresh"/>
+                                {this.addUserButton()}
+                                {this.manageRolesButton()}
+                                {this.downloadCSVButton()}
+                                <Button onClick={e => this.refresh()} icon="refresh" />
                             </Button.Group>
                         </Grid.Column>
                     </Grid.Row>
 
-                    { window.halinContext.isEnterprise() ? <AssignRoleModal key={this.key}
+                    {window.halinContext.isEnterprise() ? <AssignRoleModal key={this.key}
                         node={this.props.node}
                         open={this.state.assignOpen}
                         onCancel={this.closeAssign}
-                        onConfirm={this.confirmRoleAssignment} /> : '' }
+                        onConfirm={this.confirmRoleAssignment} /> : ''}
 
                     {/* <Confirm open={this.state.assignOpen} 
                     content='Not yet implemented.  Getting there!'
