@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
-import { PieChart } from 'react-d3-components';
+import PieChart from 'react-minimal-pie-chart';
 import _ from 'lodash';
-import d3 from 'd3';
 import api from '../../../api/';
 import datautil from '../../../api/data/util';
 
@@ -9,6 +8,10 @@ import Spinner from '../../ui/scaffold/Spinner/Spinner';
 
 const defaultHeight = 200;
 const defaultWidth = 380;
+
+const DEFAULT_PALETTE = [
+    '#f68b24', 'steelblue', '#619F3A', '#dfecd7', '#e14594', '#7045af', '#2b3595',
+];
 
 export default class CypherPieChart extends Component {
     state = {
@@ -37,7 +40,7 @@ export default class CypherPieChart extends Component {
     }
 
     sampleData() {
-        if (!this.mounted) { return null; } 
+        if (!this.mounted) { return null; }
 
         return this.props.member.run(this.props.query, this.props.parameters || {})
             .then(results => {
@@ -48,18 +51,16 @@ export default class CypherPieChart extends Component {
                 const total = values.map(v => v.value).reduce((a, b) => a + b, 0);
 
                 const units = _.uniq(values.map(r => r.units))[0];
-                const data = {
-                    label: this.props.title || 'CypherPieChart',
+                const data = _.sortBy(
+                    values.map((rec, idx) => ({
+                        title: rec.label + ' (' + this.formatNumberWithUnits(rec.value, units) + ')',
+                        value: rec.value,
+                        color: DEFAULT_PALETTE[idx % DEFAULT_PALETTE.length],
+                        pct: total > 0 ? rec.value / total : 0,
+                    })), 
+                    ['value']);
 
-                    // Modify from label/value to x/y according to what
-                    // piechart needs
-                    values: values.map(rec => ({
-                        x: rec.label + ' (' + this.formatNumberWithUnits(rec.value, units) + ')',
-                        y: rec.value,
-                    })),
-                };
-
-                this.setState({ 
+                this.setState({
                     data,
                     error: null,
                     total,
@@ -68,8 +69,8 @@ export default class CypherPieChart extends Component {
             })
             .catch(err => {
                 api.sentry.reportError('Error getting pie chart data', err);
-                this.setState({ 
-                    error: err, 
+                this.setState({
+                    error: err,
                     total: 1,
                     data: null,
                 });
@@ -81,25 +82,50 @@ export default class CypherPieChart extends Component {
             .replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' ' + units;
     }
 
+    assignLabel = props => {
+        const dataItem = props.data[props.dataIndex];
+        
+        // If it's a very small amount, don't give it a label at all.
+        // This prevents a visual traffic jam of labels for lots of small
+        // categories.  User can still hover.
+        if (dataItem.pct < 0.08) {
+            return '';
+        }
+        return dataItem.title;
+    }
+
+    renderPieChart() {
+        return (
+            <PieChart
+                data={this.state.data}
+                label={this.assignLabel}
+                labelStyle={{
+                    fontSize: '5px',
+                    fontFamily: 'sans-serif',
+                    fill: 'black'
+                }}
+                radius={42}
+                labelPosition={112}
+                style={{
+                    height: this.state.height,
+                    width: this.state.width,
+                }}
+            />
+        );
+    }
+
     render() {
         const tot = this.formatNumberWithUnits(this.state.total);
 
         return (
-        <div className='CypherPieChart'>           
-            <h5>Total: {tot}</h5>
-            
-            {this.state.data ?
-                ((this.state.total && this.state.total > 0) ?
-                    <PieChart
-                        data={this.state.data}
-                        width={this.state.width}
-                        height={this.state.height}
-                        colorScale={d3.scale.category20()}
-                        margin={{ top: 10, bottom: 10, left: 100, right: 100 }}
-                        sort={this.state.sort}
-                    /> : <h5>None/Not Enabled</h5>)
-                : <Spinner active={true} />}
-        </div>
+            <div className='CypherPieChart'>
+                <h5>Total: {tot}</h5>
+
+                {this.state.data ?
+                    ((this.state.total && this.state.total > 0) ?
+                        this.renderPieChart() : <h5>None/Not Enabled</h5>)
+                    : <Spinner active={true} />}
+            </div>
         );
     }
 };

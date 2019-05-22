@@ -9702,6 +9702,13 @@ react-lifecycles-compat@^3.0.2, react-lifecycles-compat@^3.0.4:
   resolved "https://neo.jfrog.io/neo/api/npm/npm/react-lifecycles-compat/-/react-lifecycles-compat-3.0.4.tgz#4f1a273afdfc8f3488a8c516bfda78f872352362"
   integrity sha1-TxonOv38jzSIqMUWv9p4+HI1I2I=
 
+react-minimal-pie-chart@^4.0.0:
+  version "4.0.0"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-minimal-pie-chart/-/react-minimal-pie-chart-4.0.0.tgz#fa56cf4acd20e77e499fc57c8aa9482867b1bb5b"
+  integrity sha1-+lbPSs0g535Jn8V8iqlIKGexu1s=
+  dependencies:
+    prop-types "^15.5.7"
+
 react-scripts@^2.1.5:
   version "2.1.5"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/react-scripts/-/react-scripts-2.1.5.tgz#0740507db0a06d518c231caa1ef4e908bd8ebce5"
