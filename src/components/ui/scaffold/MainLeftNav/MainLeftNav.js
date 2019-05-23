@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import './MainLeftNav.css';
-import { Sidebar, Segment, Menu, Icon, Image, Popup } from 'semantic-ui-react';
+import { Sidebar, Segment, Menu, Icon, Image, Popup, Confirm } from 'semantic-ui-react';
 import ClusterOverviewPane from '../../../overview/ClusterOverviewPane/ClusterOverviewPane';
 import PermissionsPane from '../../../configuration/PermissionsPane/PermissionsPane';
 import SettingsPane from '../../../settings/SettingsPane/SettingsPane';
 import DiagnosticsPane from '../../../diagnostic/DiagnosticPane/DiagnosticPane';
 import MemberSelector from '../MemberSelector/MemberSelector';
+import sentry from '../../../../api/sentry';
 
 const segmentStyle = {
     height: '100%',
@@ -16,6 +17,13 @@ const segmentStyle = {
     paddingRight: 0,
 };
 
+const hoverPopup = (text, trigger, key) =>
+    <Popup inverted key={key}
+        on='hover'
+        position='right center'
+        trigger={trigger}
+        content={text} />;
+
 export default class MainLeftNav extends Component {
     state = {
         animation: 'push',
@@ -25,6 +33,7 @@ export default class MainLeftNav extends Component {
         lastSection: 'home',
         toggleCounter: 0,
         clusterMember: window.halinContext.members()[0],
+        logoutConfirmOpen: false,
     };
 
     section = section => {
@@ -39,8 +48,8 @@ export default class MainLeftNav extends Component {
         }
 
         // Set new state.
-        this.setState({ 
-            section, 
+        this.setState({
+            section,
             lastSection: this.state.section,
             toggleCounter: 0,
         });
@@ -58,25 +67,22 @@ export default class MainLeftNav extends Component {
         } else if (this.state.section === 'members') {
             return this.segmentWrap(<MemberSelector clickCount={this.state.toggleCounter} />);
         } else if (this.state.section === 'users') {
-            return this.segmentWrap(<PermissionsPane node={this.state.clusterMember}/>);
+            return this.segmentWrap(<PermissionsPane node={this.state.clusterMember} />);
         } else if (this.state.section === 'about') {
-            return this.segmentWrap(<SettingsPane/>);
+            return this.segmentWrap(<SettingsPane />);
         } else if (this.state.section === 'diagnostics') {
-            return this.segmentWrap(<DiagnosticsPane/>);
+            return this.segmentWrap(<DiagnosticsPane />);
         }
 
         return 'No child tab';
     }
 
-    hoverPopup(text, trigger, key) {
-        return (
-            <Popup inverted key={key}
-                on='hover' 
-                position='right center'
-                trigger={trigger} 
-                content={text}/>
-        );
-    }
+    logout = () => {
+        sentry.fine('Logging out');
+        window.halinContext.shutdown();
+        window.halinContext = undefined;
+        window.location.reload();
+    };
 
     render() {
         const size = 'large';
@@ -85,7 +91,7 @@ export default class MainLeftNav extends Component {
             {
                 section: 'home',
                 text: 'Overview',
-                icon: <Image className='icon' style={{ filter:'invert(100%)' }} src='favicon-32x32.png'/>,
+                icon: <Image className='icon' style={{ filter: 'invert(100%)' }} src='favicon-32x32.png' />,
             },
             {
                 section: 'members',
@@ -100,7 +106,7 @@ export default class MainLeftNav extends Component {
             {
                 section: 'diagnostics',
                 text: 'Cluster Diagnostic Tools',
-                icon: <Icon size={size} name='wrench'/>,
+                icon: <Icon size={size} name='wrench' />,
             },
             {
                 section: 'about',
@@ -126,20 +132,37 @@ export default class MainLeftNav extends Component {
                     width='thin'
                 >
                     {
-                        selections.map((selection, index) => 
-                            this.hoverPopup(selection.text, 
-                                <Menu.Item 
+                        selections.map((selection, index) =>
+                            hoverPopup(selection.text,
+                                <Menu.Item
                                     active={this.state.section === selection.section}
-                                    index={index} 
+                                    index={index}
                                     as='a'
                                     style={selection.style || {}}
                                     onClick={() => this.section(selection.section)}>
-                                    { selection.icon }
+                                    {selection.icon}
                                 </Menu.Item>, index))
-                    }                    
+                    }
+
+                    {
+                        hoverPopup('Log Out',
+                            <Menu.Item index={99} as='a'
+                                onClick={() => {
+                                    this.setState({ logoutConfirmOpen: true });
+                                }}>
+                                <Icon name='log out' />
+                            </Menu.Item>, 99)
+                    }
+
+                    <Confirm open={this.state.logoutConfirmOpen}
+                        header='Disconnect from Database'
+                        onCancel={() => {
+                            this.setState({ logoutConfirmOpen: false });
+                        }}
+                        onConfirm={this.logout} />
                 </Sidebar>
                 <Sidebar.Pusher id='MainContent' dimmed={false}>
-                    { this.renderChildContent() }
+                    {this.renderChildContent()}
                 </Sidebar.Pusher>
             </Sidebar.Pushable>
         );
