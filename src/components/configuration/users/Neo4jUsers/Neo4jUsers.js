@@ -313,6 +313,7 @@ class Neo4jUsers extends Component {
                                 showPagination={true}
                                 query={this.query}
                                 refresh={this.state.childRefresh}
+                                defaultPageSize={10}
                                 displayColumns={this.displayColumns}
                                 hideNodeLabel={true}
                             />

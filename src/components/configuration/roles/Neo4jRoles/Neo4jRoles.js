@@ -196,6 +196,7 @@ class Neo4jRoles extends Component {
                                 showPagination={true}
                                 refresh={this.state.childRefresh}
                                 displayColumns={this.displayColumns}
+                                defaultPageSize={10}
                                 onUpdate={this.onRecordsUpdate}
                                 hideNodeLabel={true}
                             />
