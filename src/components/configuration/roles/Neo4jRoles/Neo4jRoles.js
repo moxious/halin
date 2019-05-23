@@ -24,7 +24,7 @@ class Neo4jRoles extends Component {
 
     displayColumns = [
         {
-            Header: 'Delete',
+            Header: 'Actions',
             id: 'delete',
             minWidth: 70,
             maxWidth: 100,
