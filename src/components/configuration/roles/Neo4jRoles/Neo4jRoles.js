@@ -173,7 +173,7 @@ class Neo4jRoles extends Component {
                 <Grid>
                     <Grid.Row columns={1}>                    
                         <Grid.Column>
-                            <Button.Group basic>
+                            <Button.Group size='small'>
                                 { this.addRoleButton() } 
                                 { this.downloadCSVButton() }
                                 <Button onClick={e => this.refresh()} icon="refresh"/>

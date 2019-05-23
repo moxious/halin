@@ -278,7 +278,7 @@ class Neo4jUsers extends Component {
                 <Grid>
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <Button.Group basic>
+                            <Button.Group size='small'>
                                 {this.addUserButton()}
                                 {this.manageRolesButton()}
                                 {this.downloadCSVButton()}
