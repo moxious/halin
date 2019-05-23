@@ -19,7 +19,7 @@ class Neo4jDesktopStandIn extends Component {
         window.neo4jDesktopApi = {
             getContext: () =>
                 Promise.resolve(neo4jDesktop.buildFakeContext({
-                    host,
+                    host: host.trim(),
                     port,
                     username,
                     password,
