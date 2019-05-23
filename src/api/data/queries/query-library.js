@@ -8,6 +8,7 @@ import JMX_PAGE_CACHE from './jmx/pageCache';
 import JMX_STORE_SIZES from './jmx/storeSizes';
 import JMX_DISK_UTILIZATION from './jmx/diskUtilization';
 import JMX_TRANSACTIONS from './jmx/transactions';
+import JMX_LAST_TRANSACTION_ID from './jmx/lastCommittedTx';
 
 import PING from './basic/ping';
 import CLUSTER_ROLE from './cluster/role';
@@ -61,6 +62,7 @@ export default {
     JMX_MEMORY_STATS,
     JMX_GARBAGE_COLLECTOR,
     JMX_TRANSACTIONS,
+    JMX_LAST_TRANSACTION_ID,
     
     OS_OPEN_FDS,
     OS_LOAD_STATS,
