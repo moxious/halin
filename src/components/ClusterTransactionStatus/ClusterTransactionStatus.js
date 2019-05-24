@@ -3,6 +3,7 @@ import queryLibrary from '../../api/data/queries/query-library';
 import HalinCard from '../ui/scaffold/HalinCard/HalinCard';
 import _ from 'lodash';
 import { Chart } from 'react-google-charts';
+import api from '../../api';
 import sentry from '../../api/sentry';
 // import { List } from 'semantic-ui-react';
 
@@ -127,14 +128,10 @@ export default class ClusterTransactionStatus extends Component {
     }
 
     render() {
-        const DEFAULT_PALETTE = [
-            '#f68b24', 'steelblue', '#619F3A', '#dfecd7', '#e14594', '#7045af', '#2b3595',
-        ];
-
         const bars = window.halinContext.members().map((m, i) => {
             const value = this.state.lastTxIds[m.getBoltAddress()];
             const label = m.getLabel();
-            const color = DEFAULT_PALETTE[m % DEFAULT_PALETTE.length];
+            const color = api.palette.chooseColor(i),
             return [label, value, color, null];
         });
 

@@ -9,6 +9,7 @@ import {
 } from 'pondjs';
 import uuid from 'uuid';
 
+import palette from '../../api/palette';
 import datautil from '../../api/data/util';
 import timewindow from '../../api/timeseries/timewindow';
 import queryLibrary from '../../api/data/queries/query-library';
@@ -20,10 +21,6 @@ import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart, Sca
 import './CypherTimeseries.css';
 
 const LEADER_COLOR = '#000000';
-
-const DEFAULT_PALETTE = [
-    '#f68b24', 'steelblue', '#619F3A', '#dfecd7', '#e14594', '#7045af', '#2b3595',
-];
 
 /**
  * Repeatedly executes the same cypher query in a loop on a given timeline,
@@ -63,7 +60,6 @@ class ClusterTimeseries extends Component {
         this.rate = props.rate || 2000;
         this.width = props.width || 380;
         this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 5;  // 5 min
-        this.palette = props.palette || DEFAULT_PALETTE;
         this.showGrid = _.isNil(props.showGrid) ? false : props.showGrid;
         this.showGridPosition = _.isNil(props.showGridPosition) ? 'over' : props.showGridPosition;
         this.feedMaker = props.feedMaker;
@@ -296,7 +292,7 @@ class ClusterTimeseries extends Component {
 
     chooseColor(idx) {
         if (_.isNil(idx)) {
-            return this.palette[0];
+            return palette.chooseColor(0);
         }
 
         const addr = this.nodes[idx];
@@ -310,7 +306,7 @@ class ClusterTimeseries extends Component {
             return LEADER_COLOR;
         }
 
-        return this.palette[idx % this.palette.length];
+        return palette.chooseColor(idx);
     }
 
     legendClick = data => {

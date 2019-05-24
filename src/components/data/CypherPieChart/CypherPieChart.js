@@ -9,10 +9,6 @@ import Spinner from '../../ui/scaffold/Spinner/Spinner';
 const defaultHeight = 200;
 const defaultWidth = 380;
 
-const DEFAULT_PALETTE = [
-    '#f68b24', 'steelblue', '#619F3A', '#dfecd7', '#e14594', '#7045af', '#2b3595',
-];
-
 export default class CypherPieChart extends Component {
     state = {
         height: defaultHeight,
@@ -55,7 +51,7 @@ export default class CypherPieChart extends Component {
                     values.map((rec, idx) => ({
                         title: rec.label + ' (' + this.formatNumberWithUnits(rec.value, units) + ')',
                         value: rec.value,
-                        color: DEFAULT_PALETTE[idx % DEFAULT_PALETTE.length],
+                        color: api.palette.chooseColor(idx),
                         pct: total > 0 ? rec.value / total : 0,
                     })), 
                     ['value']);
