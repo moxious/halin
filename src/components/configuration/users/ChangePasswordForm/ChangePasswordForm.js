@@ -32,7 +32,7 @@ export default class ChangePasswordForm extends Component {
     }
 
     changePassword() {
-        if (!this.valid() || _.isNil(this.state.password1)) {
+        if (!this.filledOut() || !this.passwordsMatch()) {
             throw new Error('This should never occur; cannot change password with invalid form');
         }
 
