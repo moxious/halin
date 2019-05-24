@@ -20,4 +20,4 @@ class SampleQueryPane extends Component {
     }
 }
 
-export default hoc.dbStatsOnlyComponent(SampleQueryPane);
+export default hoc.dbStatsOnlyComponent(SampleQueryPane, 'Query Performance', false);
