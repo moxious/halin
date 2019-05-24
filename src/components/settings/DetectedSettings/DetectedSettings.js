@@ -18,11 +18,16 @@ export default class DetectedSettings extends Component {
 
     render() {
         const ctx = window.halinContext;
+        
+        let roles = ctx.getCurrentUser().roles;
+        if (roles.length === 0) {
+            roles = ['(no roles)'];
+        }
 
         const items = [
             this.item(ctx.getBaseURI(), 'home'),
             this.item(ctx.getCurrentUser().username, 'user circle'),
-            this.item((ctx.getCurrentUser().roles || []).join(', '), 'lock'),
+            this.item(roles.join(', '), 'lock'),
             ctx.isCommunity() ? this.lineItem(true, 'Community') : this.lineItem(true, 'Enterprise'),
             this.lineItem(ctx.supportsAuth(), 'Authorization'),
             this.lineItem(ctx.supportsNativeAuth(), 'Native Auth'),
