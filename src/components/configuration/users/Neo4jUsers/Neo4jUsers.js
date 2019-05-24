@@ -77,11 +77,11 @@ class Neo4jUsers extends Component {
     }
 
     changeUserPasswordButton(row) {
-        // const button = (
-        //     <Popup content='Change Password'
-        //         trigger={<Button compact type='submit' icon='key' />}
-        //     />
-        // );
+        // This is lame, but the necessary stored procedure isn't present in 
+        // Community.
+        if (!window.halinContext.isEnterprise()) {
+            return '';
+        }
 
         const button = <Button compact type='submit' icon='key' />;
 
