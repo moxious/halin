@@ -105,10 +105,7 @@ export default class MemberSelector extends Component {
             <div className={`PaneWrapper ${cls}`}>{obj}</div>
         </Tab.Pane>;
 
-    select = (member) => {
-        console.log("member selected", member);
-        this.setState({ member });
-    }
+    select = (member) => this.setState({ member });
 
     renderChildContent() {
         return (
