@@ -5,12 +5,13 @@ import sentry from '../../api/sentry/index';
 import Splash from './Splash';
 
 let privateLocalCreds = {};
-// try {    
-//     const env = 'localhost';
-//     privateLocalCreds = require(`../../creds/${env}.json`);
-// } catch (e) {
-//     sentry.fine('No pre-configured halin credentials were found, but that\'s OK', e);
-// }
+try {
+    // In local dev, this file can exist with local creds not checked into git.
+    privateLocalCreds = require(`../../creds/`).default;
+} catch (e) {
+    console.log(e);
+    sentry.fine('No pre-configured halin credentials were found, but that\'s OK', e);
+}
 
 class ConnectForm extends Component {
     state = {
