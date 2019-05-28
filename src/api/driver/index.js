@@ -109,7 +109,7 @@ const unpackResults = (results, schema) => results.records.map((record, index) =
  */
 const pools = {};
 const getSessionPool = (id, driver, poolSize=15) => {
-    sentry.fine('POOL FOR', id);
+    // sentry.fine('POOL FOR', id);
     if (pools[id]) {
         sentry.fine('RECYCLE pool for ', id);
         return pools[id];
