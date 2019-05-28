@@ -244,7 +244,10 @@ export default {
         'Double check your host and try again',
     ]),
     Unauthorized: render([
-        'Double check your username and password and try again'
+        'Double check your username and password and try again.',
+        `Halin assumes that when you log in as a user, the password for that user is
+        the same across all members in the cluster.  Please double check and ensure this
+        is the case as well`,
     ]),
     UnknownError: render([
         `Unfortunately, no troubleshooting is available for this particular error. 

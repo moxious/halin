@@ -438,9 +438,13 @@ export default class HalinContext {
                     });
                     report('Initialization complete');
                     return this;
-                })
+                });
         } catch (e) {
             sentry.reportError(e, 'General Halin Context Error');
+            try { this.shutdown(); }
+            catch (err) {
+                sentry.reportError(err, 'Failure to shut down post halin context error');
+            }
             return Promise.reject(new Error('General Halin Context error', e));
         }
     }
