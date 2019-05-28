@@ -131,7 +131,7 @@ export default class ClusterTransactionStatus extends Component {
         const bars = window.halinContext.members().map((m, i) => {
             const value = this.state.lastTxIds[m.getBoltAddress()];
             const label = m.getLabel();
-            const color = api.palette.chooseColor(i),
+            const color = api.palette.chooseColor(i);
             return [label, value, color, null];
         });
 
