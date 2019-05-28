@@ -56,6 +56,7 @@ const links = {
     logFiles: new KBLink('log file locations', 'https://neo4j.com/docs/operations-manual/current/configuration/file-locations/#file-locations-log-files'),
     systemLoadAverage: new KBLink('JMX system load average', 'https://docs.oracle.com/javase/7/docs/api/java/lang/management/OperatingSystemMXBean.html#getSystemLoadAverage()'),
     systemService: new KBLink('Neo4j as a system service', 'https://neo4j.com/docs/operations-manual/current/installation/linux/systemd/#linux-service-log'),
+    authMaxFailedAttempts: new KBLink('Configuring maximum failed authorization attempts', 'https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_dbms.security.auth_max_failed_attempts'),
 };
 
 export default {
@@ -248,6 +249,11 @@ export default {
         `Halin assumes that when you log in as a user, the password for that user is
         the same across all members in the cluster.  Please double check and ensure this
         is the case as well`,
+    ]),
+    RepeatedAuthFailure: render([
+        `This error occurs when the client has tried to log in with the wrong password
+        too many times`,
+        links.authMaxFailedAttempts,
     ]),
     UnknownError: render([
         `Unfortunately, no troubleshooting is available for this particular error. 

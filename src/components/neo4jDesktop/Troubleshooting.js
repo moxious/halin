@@ -26,6 +26,10 @@ export default class Troubleshooting extends Component {
             suggestions: kb.NoActiveDatabase,
         },
         {
+            detector: neo4jErrors.repeatedAuthFailure,
+            suggestions: kb.RepeatedAuthFailure,
+        },
+        {
             detector: err => `${err}`.match(/./),
             suggestions: kb.UnknownError,
         },
