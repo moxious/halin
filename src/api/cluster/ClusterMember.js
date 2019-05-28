@@ -65,6 +65,7 @@ export default class ClusterMember {
             address: this.getBoltAddress(),
             procotols: this.protocols(),
             role: this.role,
+            writer: this.canWrite(),
             database: this.database,
             id: this.id,
             label: this.getLabel(),
@@ -112,6 +113,10 @@ export default class ClusterMember {
     isLeader() { return this.role === 'LEADER'; }
     isFollower() { return this.role === 'FOLLOWER'; }
     isSingle() { return this.role === 'SINGLE'; }
+    isReadReplica() { return this.role === 'READ_REPLICA'; }
+    isCore() { 
+        return this.isLeader() || this.isSingle();
+    }
     canWrite() { 
         return this.isLeader() || this.isSingle();
     }
