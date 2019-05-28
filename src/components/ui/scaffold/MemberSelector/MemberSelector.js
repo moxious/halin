@@ -13,6 +13,35 @@ import ClusterMemberMenuItem from '../ClusterMemberMenuItem/ClusterMemberMenuIte
 
 import './MemberSelector.css';
 
+// Defines how cluster members are sorted and ordered.
+// Rules:
+// - Display the leader first.
+// - Display core members next
+// - Display read replicas last.
+// - Within a section, core or read replica, order by label.
+// In case mode=SINGLE, we don't really have to care about ordering
+// because there will only be one.
+const memberOrdering = (a, b) => {
+    if (a.isLeader()) { return -1; }
+    if (b.isLeader()) { return 1; }
+
+    const aMode = a.isCore() ? 'core' : 'replica';
+    const bMode = b.isCore() ? 'core' : 'replica';
+
+    if (aMode === bMode) {
+        // Mode the same, compare by label
+        return a.getLabel() < b.getLabel();
+    }
+
+    // A wins, it's core.
+    if (aMode === 'core') {
+        return -1;
+    }
+
+    // B wins.
+    return 1;
+};
+
 export default class MemberSelector extends Component {
     state = {
         animation: 'push',
@@ -124,7 +153,7 @@ export default class MemberSelector extends Component {
                     width='thin'
                 >
                     {
-                        window.halinContext.members().map((member, key) =>
+                        window.halinContext.members().sort(memberOrdering).map((member, key) =>
                             <ClusterMemberMenuItem 
                                 member={member} key={key}
                                 active={this.state.member === member}
