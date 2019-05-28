@@ -94,7 +94,7 @@ export default class ClusterMember {
     }
 
     getLabel() {
-        const addr = this.getAddress();
+        const addr = this.getAddress() || 'NO_ADDRESS';
         if (addr.match(/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/)) {
             // IP address
             return addr;
@@ -215,7 +215,7 @@ export default class ClusterMember {
             sentry.warn("This ClusterMember has more than one version installed; only using the first");
         }
 
-        const v = this.dbms.versions[0];
+        const v = this.dbms.versions[0] || '';
         const parts = v.split('.');
         return {
             major: parts[0] || 'unknown',
