@@ -50,7 +50,7 @@ const missingFeatureMessage = (heading, message, halinCard) => {
  * @param {*} onFailFn a function which returns an alternate view if the compatibility check
  * fails.
  */
-const compatibilityCheckableComponent = (WrappedComponent, compatibilityCheckFn, onFailFn, halinCard) => {
+const compatibilityCheckableComponent = (WrappedComponent, compatibilityCheckFn, onFailFn) => {
     return class extends Component {
         state = { 
             compatible: false,
@@ -79,7 +79,7 @@ const compatibilityCheckableComponent = (WrappedComponent, compatibilityCheckFn,
             return onFailFn();
         }
     }
-}
+};
 
 const apocOnlyComponent = (WrappedComponent, heading, halinCard=true) => {
     const failMsg = 'This feature is only available for databases that have APOC installed.';
