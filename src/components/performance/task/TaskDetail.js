@@ -3,6 +3,7 @@ import { Card, List } from 'semantic-ui-react';
 import neo4j from '../../../api/driver/index';
 import _ from 'lodash';
 import moment from 'moment';
+import './TaskDetail.css';
 
 const cardWrapper = (header, content) =>
     <Card>
@@ -27,13 +28,7 @@ const age = since => {
 };
 
 const displayQuery = q => 
-    <div style={{
-        maxHeight: 400,
-        width: '100%',
-        overflowY: 'scroll',
-        overflowX: 'auto',
-        textAlign: 'left',
-    }}><pre>{q}</pre></div>
+    <div className='QueryBox'><pre>{q}</pre></div>;
 
 const connection = task => {
     const fields = [
@@ -92,12 +87,12 @@ export default class TaskDetail extends Component {
             <div className='TaskDetail'>
                 {this.props.task ? 
                 <div>
-                    { query(this.props.task) }
                     <Card.Group>                    
                         { _.isNil(_.get(this.props.task, 'connection')) ? '' : connection(this.props.task) }
                         { transaction(this.props.task) }
                         { transactionMetadata(this.props.task) }
                     </Card.Group>
+                    { query(this.props.task) }
                 </div> :
                 'Please select a task' }
             </div>
