@@ -18,6 +18,10 @@ export default class Troubleshooting extends Component {
             suggestions: kb.BrowserSecurityConstraints,
         },
         {
+            detector: neo4jErrors.insecureWSFromHTTPS,
+            suggestions: kb.BrowserSecurityConstraints,
+        },
+        {
             detector: neo4jErrors.noActiveDatabase,
             suggestions: kb.NoActiveDatabase,
         },
