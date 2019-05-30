@@ -1,5 +1,13 @@
 # Halin Release Notes
 
+## 0.11
+
+- New UI layout which is more expand-able for larger clusters.
+- Refactored component structure for better maintainability
+- Thanks to D. Shiposh, D. Fauth, R. Kharwar, and others who provided valuable feedback
+on security & usability fixes.
+- Fixes #90
+
 ## 0.10.0
 
 - Enabled CSV download of query stats, and active tasks (#78)
