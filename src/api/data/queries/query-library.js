@@ -6,7 +6,9 @@ import OS_MEMORY_STATS from './jmx/osMemoryStats';
 import OS_OPEN_FDS from './jmx/osOpenFDs';
 import JMX_PAGE_CACHE from './jmx/pageCache';
 import JMX_STORE_SIZES from './jmx/storeSizes';
+import JMX_DISK_UTILIZATION from './jmx/diskUtilization';
 import JMX_TRANSACTIONS from './jmx/transactions';
+import JMX_LAST_TRANSACTION_ID from './jmx/lastCommittedTx';
 
 import PING from './basic/ping';
 import CLUSTER_ROLE from './cluster/role';
@@ -26,6 +28,7 @@ import DB_QUERY_STATS_STOP from './dbStats/stopCollection';
 import DBMS_COMPONENTS from './dbms/components';
 import DBMS_AUTH_ENABLED from './dbms/authEnabled';
 import DBMS_GET_AUTH_PROVIDER from './dbms/getAuthProvider';
+import DBMS_GET_MAX_HEAP from './dbms/getMaxHeap';
 import DBMS_FUNCTIONS from './dbms/functions';
 import DBMS_PROCEDURES from './dbms/procedures';
 import DBMS_LIST_CONFIG from './dbms/listConfig';
@@ -54,10 +57,12 @@ export default {
     
     JMX_ALL,
     JMX_STORE_SIZES,
+    JMX_DISK_UTILIZATION,
     JMX_PAGE_CACHE,
     JMX_MEMORY_STATS,
     JMX_GARBAGE_COLLECTOR,
     JMX_TRANSACTIONS,
+    JMX_LAST_TRANSACTION_ID,
     
     OS_OPEN_FDS,
     OS_LOAD_STATS,
@@ -77,6 +82,7 @@ export default {
     DBMS_COMPONENTS,
     DBMS_AUTH_ENABLED,
     DBMS_GET_AUTH_PROVIDER,
+    DBMS_GET_MAX_HEAP,
     DBMS_FUNCTIONS,
     DBMS_PROCEDURES,
     DBMS_LIST_CONFIG,

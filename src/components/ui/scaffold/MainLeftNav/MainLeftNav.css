@@ -1,0 +1,11 @@
+div#MainLeftNav {
+    /* max-width: 100px; */
+}
+
+div#MainContent {
+    height: 100%;
+    /* Subtracting 150px for the width of the push navbar in MainLeftNav */
+    width: -webkit-calc(100% - 150px);
+    width:    -moz-calc(100% - 150px);
+    width:         calc(100% - 150px);
+}

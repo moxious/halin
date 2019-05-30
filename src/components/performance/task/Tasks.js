@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Button, Popup, Modal, Header } from 'semantic-ui-react';
+import { Button, Modal, Header } from 'semantic-ui-react';
 import 'react-table/react-table.css';
 import 'semantic-ui-css/semantic.min.css';
 import _ from 'lodash';
@@ -9,9 +9,9 @@ import queryLibrary from '../../../api/data/queries/query-library';
 import fields from '../../../api/data/fields';
 
 import hoc from '../../higherOrderComponents';
-import CypherDataTable from '../../data/CypherDataTable';
+import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
 import TaskDetail from './TaskDetail';
-import Explainer from '../../ui/Explainer';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
 const age = since => {
     const start = moment.utc(since);
@@ -50,10 +50,6 @@ class Tasks extends Component {
             { 
                 Header: 'Query', 
                 accessor: 'query.query',
-                Cell: row => 
-                    <Popup trigger={<span>{row.value}</span>} content={
-                        <div><pre>{row.value}</pre></div>
-                    }/>,
                 style: { textAlign: 'left' },
                 show: true,
             },
@@ -155,7 +151,6 @@ class Tasks extends Component {
     }
 
     open = (row) => {
-        console.log('Clicked row',row);
         this.setState({ selected: row });
     };
 

@@ -23,6 +23,11 @@ export default {
 
     roundPct: num => Math.round(num * 100),
 
+    signalStrengthFromFreshRatio: (fresh, total) => {
+        const ratio = fresh / Math.max(total, 1);
+        return ratio * 100;
+    },
+
     /**
      * Given a ping time in ms, return a strength rating (0-100).
      * These are somewhat arbitrary, based on experience with remote databases

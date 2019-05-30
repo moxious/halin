@@ -159,7 +159,9 @@ export default new HalinQuery({
             connectionId: QconnectionId
         } as query
         
-        RETURN id, connection, transaction, query;
+        RETURN id, connection, transaction, query
+        ORDER BY query.elapsedTimeMillis DESC
+        LIMIT 500
     `,
     columns: [
         { Header: 'ID', accessor: 'id' },

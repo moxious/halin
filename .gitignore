@@ -24,6 +24,8 @@ chrome-user-data
 *.swo
 dist
 grafana
-cluster-credentials.json
+src/creds/*
 reports
 code-signing
+build.json
+

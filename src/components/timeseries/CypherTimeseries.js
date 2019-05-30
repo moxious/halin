@@ -1,23 +1,27 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
 import 'semantic-ui-css/semantic.min.css';
-import { Grid, Label } from 'semantic-ui-react';
+import { Grid, Label, Popup, Icon, List } from 'semantic-ui-react';
 import {
     TimeSeries,
     TimeRange,
     Stream,
 } from 'pondjs';
-import uuid from 'uuid';
-import Spinner from '../ui/Spinner';
-import datautil from '../../api/data/util';
-import timewindow from '../../api/timeseries/timewindow';
-import sentry from '../../api/sentry/index';
-import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
-import NodeLabel from '../ui/NodeLabel';
+// import { datautil, timewindow, sentry, palette } from '../../api';
+import api from '../../api';
 
-const DEFAULT_PALETTE = [
-    '#f68b24', 'steelblue', '#619F3A', '#dfecd7', '#e14594', '#7045af', '#2b3595',
-];
+import uuid from 'uuid';
+import Spinner from '../ui/scaffold/Spinner/Spinner';
+import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
+import NodeLabel from '../ui/scaffold/NodeLabel/NodeLabel';
+import './CypherTimeseries.css';
+
+const {
+    datautil,
+    timewindow,
+    sentry,
+    palette
+} = api;
 
 /**
  * Repeatedly executes the same cypher query in a loop on a given timeline,
@@ -51,13 +55,12 @@ class CypherTimeseries extends Component {
 
         this.query = props.query;
         this.rate = props.rate || 1000;
-        this.width = props.width || 800;
+        this.width = props.width || 380;
         this.min = props.min || (() => this.state.minObservedValue);
         this.max = props.max || (() => this.state.maxObservedValue);
         this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 2;  // 2 min
         this.displayColumns = props.displayColumns;
         this.legendOnlyColumns = props.legendOnlyColumns || [];
-        this.palette = props.palette || DEFAULT_PALETTE;
         this.showGrid = _.isNil(props.showGrid) ? false : props.showGrid;
         this.showGridPosition = _.isNil(props.showGridPosition) ? 'over' : props.showGridPosition;
 
@@ -209,14 +212,14 @@ class CypherTimeseries extends Component {
 
     chooseColor(idx) {
         if (_.isNil(idx)) {
-            return this.palette[0];
+            return palette.chooseColor(0);
         }
 
         if (this.state.disabled[idx]) {
             return 'transparent';
         }
 
-        return this.palette[idx % this.palette.length];
+        return palette.chooseColor(idx);
     }
 
     legendClick = data => {
@@ -264,12 +267,13 @@ class CypherTimeseries extends Component {
         return (
             <Grid.Row columns={1}>
                 <Grid.Column>
+                    <List>
                     {this.legendOnlyColumns.map((col, i)=>
-                        <Label key={i}>
-                            {col.Header}
-                            <Label.Detail>{_.get(this.state.data[0], col.accessor)}</Label.Detail>
-                        </Label>
+                        <List.Item key={i}>
+                            {col.Header}: {_.get(this.state.data[0], col.accessor)}
+                        </List.Item>
                     )}
+                    </List>
                 </Grid.Column>
             </Grid.Row>
         );
@@ -282,23 +286,45 @@ class CypherTimeseries extends Component {
 
     renderChartMetadata() {
         if (!this.state.metadata) { return ''; }
-        return (
-            <div className='ChartMetadata'>
-                { this.props.explainer || '' }
 
-                <Label>
+        const content = 
+            <Grid>
+                <Grid.Row columns={1}>
+                    <Label>
                     Max
-                    <Label.Detail>{datautil.roundToPlaces(this.getChartMax(), 2)}</Label.Detail>
-                </Label>
+                        <Label.Detail>{datautil.roundToPlaces(this.getChartMax(), 2)}</Label.Detail>
+                    </Label>
 
-                <Label>
-                    Min
-                    <Label.Detail>{datautil.roundToPlaces(this.getChartMin(), 2)}</Label.Detail>
-                </Label>
+                    <Label>
+                        Min
+                        <Label.Detail>{datautil.roundToPlaces(this.getChartMin(), 2)}</Label.Detail>
+                    </Label>
 
-                <NodeLabel node={this.props.node}/>
-            </div>
+                    <NodeLabel node={this.props.node}/>
+                </Grid.Row>
+                { this.renderLegendOnlyColumns() }
+            </Grid>;
+
+        return (
+            <Popup on='click' wide='very'
+                trigger={<Icon name='database'/>}
+                content={content}
+                />
         );
+    }
+
+    heading() {
+        if (!this.props.heading) {
+            return '';
+        }
+
+        return (
+            <h3>
+                {this.props.heading}
+                {this.props.explainer || ''}
+                {this.renderChartMetadata()}
+            </h3>
+        )
     }
 
     render() {
@@ -323,8 +349,9 @@ class CypherTimeseries extends Component {
 
         return (this.state.data && this.mounted) ? (
             <div className="CypherTimeseries">
+                { this.heading() }
                 <Grid>
-                    <Grid.Row columns={1}>
+                    <Grid.Row columns={1} className='CypherTimeseriesLegend'>
                         <Grid.Column>
                             <Legend type="swatch"
                                 style={style}
@@ -356,7 +383,7 @@ class CypherTimeseries extends Component {
                         ) : null}
                         </Grid.Column>
                     </Grid.Row> */}
-                    <Grid.Row columns={1}>
+                    <Grid.Row columns={1} className='CypherTimeseriesContent'>
                         <Grid.Column textAlign='left'>
                             <ChartContainer 
                                 showGrid={this.showGrid}
@@ -390,8 +417,6 @@ class CypherTimeseries extends Component {
                             </ChartContainer>
                         </Grid.Column>
                     </Grid.Row>
-                    { this.renderLegendOnlyColumns() }
-                    { this.renderChartMetadata() }                    
                 </Grid>
             </div>
         ) : <Spinner active={true}/>;

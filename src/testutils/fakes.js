@@ -8,7 +8,7 @@ import _ from 'lodash';
 import sentry from '../api/sentry/index';
 
 import queryFakes from './queryfakes';
-import Neo4jDesktopApiStandIn from '../components/neo4jDesktop/Neo4jDesktopStandIn';
+import neo4jDesktop from '../api/neo4jDesktop/';
 
 sentry.disable();
 
@@ -153,7 +153,7 @@ const Driver = (data = []) => {
 
 window.neo4jDesktopApi = {
     getContext: () =>
-        Promise.resolve(Neo4jDesktopApiStandIn.buildFakeContext(basics)),
+        Promise.resolve(neo4jDesktop.buildFakeContext(basics)),
 };
 
 export default {

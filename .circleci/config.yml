@@ -41,7 +41,12 @@ jobs:
           name: Lint
           command: yarn run lint
       - run:
+          name: Generate build metadata
+          command: |
+            echo "{\"build\":\""$CIRCLE_BUILD_NUM"\",\"branch\":\""$CIRCLE_BRANCH"\",\"date\":"$(date +%s)000"}" > src/build.json
+      - run:
           name: Run tests
+          no_output_timeout: 1200
           command: |
             ls -l src/components/
             ls -l src/components/neo4jDesktop 
@@ -54,12 +59,13 @@ jobs:
             else
               export SUBDIR="${CIRCLE_BRANCH}-${CIRCLE_SHA1}"
               export BUCKET=halin
+              export HOMEPAGE=http://halin.graphapp.io/
               export BASE_URL=http://halin.s3-website-us-east-1.amazonaws.com/
               export FINAL_URL="$BASE_URL$SUBDIR/"
               cp package.json package.orig
               # Have to monkeypatch the "homepage" field so that the react build will
               # work.
-              cat package.json | sed s,$BASE_URL,$FINAL_URL, > package.branch
+              cat package.json | sed s,$HOMEPAGE,$FINAL_URL, > package.branch
               cp package.branch package.json
               cp package.branch /tmp/artifacts/package.branch.json
               npm run build
@@ -169,3 +175,5 @@ jobs:
             path: /home/circleci/.npm
       - store_artifacts:
             path: dist/
+      - store_artifacts:
+            path: src/build.json

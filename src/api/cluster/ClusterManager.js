@@ -109,6 +109,27 @@ export default class ClusterManager {
             .then(packageClusterOpResults);
     }
 
+    changeUserPassword(user) {
+        const { username, password } = user;
+
+        if (!user || !password) {
+            throw new Error('Call with an object containing keys username, password');
+        }
+
+        return this.clusterWideQuery(
+            'CALL dbms.security.changeUserPassword({username}, {password}, false)',
+            { username, password }            
+        )
+            .then(result => {
+                this.addEvent({
+                    type: 'passwordchange',
+                    message: `Changed password for ${username}`,
+                    payload: username,
+                });
+                return result;
+            });
+    }
+
     addUser(user) {
         const { username, password } = user;
         if (!user || !password) {

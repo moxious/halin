@@ -28,7 +28,7 @@ export default class HalinContext {
         this.pollRate = 1000;
         this.clusterMembers = null;
         this.driverOptions = {
-            connectionTimeout: 10000,
+            connectionTimeout: 15000,
             trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
         };
         this.debug = false;
@@ -221,9 +221,13 @@ export default class HalinContext {
      * and the dbms.cluster.* procedures are present (e.g. not mode=SINGLE).
      * @param {Object} activeDb 
      */
-    checkForCluster(activeDb) {
+    checkForCluster(activeDb, progressCallback) {
         const session = this.base.driver.session();
         // sentry.debug('activeDb', activeDb);
+
+        const report = str => progressCallback ? progressCallback(str) : null;
+
+        report('Checking cluster status');
         return session.run(queryLibrary.CLUSTER_OVERVIEW.query)
             .then(results => {
                 this.clusterMembers = results.records.map(rec => new ClusterMember(rec));
@@ -233,6 +237,7 @@ export default class HalinContext {
                 return this.clusterMembers.map(clusterMember => {
                     const driver = this.driverFor(clusterMember.getBoltAddress());
                     clusterMember.setDriver(driver);
+                    report(`Member ${clusterMember.getLabel()} initialized`);
                     return this.watchForClusterRoleChange(clusterMember);
                 });
             })
@@ -262,9 +267,11 @@ export default class HalinContext {
                     throw err;
                 }
             })
-            .then(() => Promise.all(this.clusterMembers.map(cn => cn.checkComponents())))
+            .then(() => report('Verifying connectivity with members...'))
             .then(() => 
                 Promise.all(this.clusterMembers.map(cn => this.ping(cn))))
+            .then(() => report('Checking components/features for each cluster member...'))
+            .then(() => Promise.all(this.clusterMembers.map(cn => cn.checkComponents())))
             .finally(() => session.close());
     }
 
@@ -272,7 +279,7 @@ export default class HalinContext {
         return this.currentUser;
     }
 
-    checkUser(driver) {
+    checkUser(driver /*, progressCallback */) {
         const q = 'call dbms.showCurrentUser()';
         const session = driver.session();
 
@@ -366,8 +373,16 @@ export default class HalinContext {
      * fake the neo4j desktop API facade prior to this step
      * (3) Running in terminal (and window object isn't even defined)
      */
-    initialize() {
+    initialize(progressCallback = null) {
         let inBrowser = true;
+
+        const report = str => {
+            if (progressCallback) {
+                return progressCallback(str, this);
+            }
+            return null;
+        };
+
         try {
             // Will fail with ReferenceError if not in a browser.
             // eslint-disable-next-line
@@ -390,6 +405,7 @@ export default class HalinContext {
                 getGraphSpecificsPromise = nd.getFirstActive();
             }
 
+            report('Getting database connection');
             return getGraphSpecificsPromise.then(active => {
                     if (_.isNil(active)) {
                         // In the web version, this will never happen because the
@@ -410,8 +426,8 @@ export default class HalinContext {
 
                     // sentry.fine('HalinContext created', this);
                     return Promise.all([
-                        this.checkUser(this.base.driver),
-                        this.checkForCluster(active),
+                        this.checkUser(this.base.driver, progressCallback),
+                        this.checkForCluster(active, progressCallback),
                     ]);
                 })
                 .then(() => {
@@ -420,10 +436,15 @@ export default class HalinContext {
                         message: 'Halin monitoring started',
                         address: 'all members',
                     });
+                    report('Initialization complete');
                     return this;
-                })
+                });
         } catch (e) {
             sentry.reportError(e, 'General Halin Context Error');
+            try { this.shutdown(); }
+            catch (err) {
+                sentry.reportError(err, 'Failure to shut down post halin context error');
+            }
             return Promise.reject(new Error('General Halin Context error', e));
         }
     }

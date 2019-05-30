@@ -28,7 +28,7 @@ const ports = pkg => {
                 return;
             }
 
-            const port = val.split(':')[1];
+            const port = val.split(':')[1] || 'unknown';
 
             if (port !== expected[settingName]) {
                 findings.push(new InspectionResult(InspectionResult.INFO, 

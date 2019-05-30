@@ -54,6 +54,9 @@ const links = {
     troubleshootingConnections: new KBLink('Troubleshooting Connection Issues', 'https://community.neo4j.com/t/troubleshooting-connection-issues-in-neo4j-browser-and-cypher-shell/129'),
     queryLogging: new KBLink('query logging', 'https://neo4j.com/docs/operations-manual/current/monitoring/logging/query-logging/'),
     logFiles: new KBLink('log file locations', 'https://neo4j.com/docs/operations-manual/current/configuration/file-locations/#file-locations-log-files'),
+    systemLoadAverage: new KBLink('JMX system load average', 'https://docs.oracle.com/javase/7/docs/api/java/lang/management/OperatingSystemMXBean.html#getSystemLoadAverage()'),
+    systemService: new KBLink('Neo4j as a system service', 'https://neo4j.com/docs/operations-manual/current/installation/linux/systemd/#linux-service-log'),
+    authMaxFailedAttempts: new KBLink('Configuring maximum failed authorization attempts', 'https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_dbms.security.auth_max_failed_attempts'),
 };
 
 export default {
@@ -79,6 +82,7 @@ export default {
     LogTroubleshooting: render([
         `Some installs of Neo4j may use journalctl to access logs, which may not be
         on disk in their usual locations.`,
+        links.systemService,
         links.queryLogging,
     ]),
     CypherSurface: render([
@@ -91,6 +95,10 @@ export default {
         `Store file sizes allow you to track how much disk space Neo4j is using.
          Neo4j uses a file for each kind of information it manages.  Total disk
          space is also impacted by things such as transaction logs.`,
+        links.understandingDataOnDisk,
+    ]),
+    DiskUtilization: render([
+        'Shows the breakdown of actual files on disk and how much storage they require',
         links.understandingDataOnDisk,
     ]),
     Neo4jConfiguration: render([
@@ -106,6 +114,13 @@ export default {
     Users: render([
         `User management allows creating new accounts that others can  use
         to access bolt connections in Neo4j.`,
+        links.usersAndRoles,
+    ]),
+    UserManagement: render([
+        `Neo4j typically manages users on a per-machine basis.`,
+        `Features here will apply changes across all machines in your cluster`,
+        `To check if your users and roles are consistent across all of your machines,
+        run the advisor in the diagnostics area.`,
         links.usersAndRoles,
     ]),
     SampleQueries: render([
@@ -183,9 +198,17 @@ export default {
     ]),
     SystemLoad: render([
         `The system load is a measure of the amount of computational work that a computer system performs.`,
-        `System load represents overall load, while process load shows how much load is caused by
-            the Neo4j process itself.`,
+        `System load is the load average for the last minute. 
+        The system load average is the sum of the number of runnable entities queued to the 
+        available processors and the number of runnable entities running on the available 
+        processors averaged over a period of time. The way in which the load average is 
+        calculated is operating system specific but is typically a damped 
+        time-dependent average. If the load average is not available, a negative 
+        value is returned.`,        
+        `This method is designed to provide a hint about the system load and may be queried frequently. The load average may be unavailable on some platform where it is expensive to implement this method`,
+        `Process load shows how much load is caused by the Neo4j process itself, subject to the same rolling average`,
         links.performanceTuning,
+        links.systemLoadAverage,
     ]),
     Tasks: render([
         `Neo4j Tasks is a combination of three kinds of information:  connections,
@@ -222,7 +245,15 @@ export default {
         'Double check your host and try again',
     ]),
     Unauthorized: render([
-        'Double check your username and password and try again'
+        'Double check your username and password and try again.',
+        `Halin assumes that when you log in as a user, the password for that user is
+        the same across all members in the cluster.  Please double check and ensure this
+        is the case as well`,
+    ]),
+    RepeatedAuthFailure: render([
+        `This error occurs when the client has tried to log in with the wrong password
+        too many times`,
+        links.authMaxFailedAttempts,
     ]),
     UnknownError: render([
         `Unfortunately, no troubleshooting is available for this particular error. 
@@ -230,5 +261,11 @@ export default {
     ]),
     NoActiveDatabase: render([
         'Check to make sure you have activated a database in Neo4j Desktop before launching Halin',
+    ]),
+    ClusterResponseGraph: render([
+        `Each data point represents the timing of a query returned by the Neo4j cluster, showing
+        evolving performance over time.`,
+        `This is simply used for diagnostic reasons to check if the cluster is responding slowly, or
+        if network factors are interfering`,
     ]),
 };

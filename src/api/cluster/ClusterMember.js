@@ -4,11 +4,12 @@ import math from 'mathjs';
 import Ring from 'ringjs';
 import featureProbes from '../feature/probes';
 import neo4j from '../driver/index';
+import neo4jErrors from '../driver/errors';
 import queryLibrary from '../data/queries/query-library';
 import sentry from '../sentry';
 import HalinQuery from '../data/queries/HalinQuery';
 
-const MAX_OBSERVATIONS = 500;
+const MAX_OBSERVATIONS = 100;
 
 /**
  * Abstraction that captures details and information about a node in a cluster.
@@ -64,6 +65,7 @@ export default class ClusterMember {
             address: this.getBoltAddress(),
             procotols: this.protocols(),
             role: this.role,
+            writer: this.canWrite(),
             database: this.database,
             id: this.id,
             label: this.getLabel(),
@@ -92,7 +94,7 @@ export default class ClusterMember {
     }
 
     getLabel() {
-        const addr = this.getAddress();
+        const addr = this.getAddress() || 'NO_ADDRESS';
         if (addr.match(/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/)) {
             // IP address
             return addr;
@@ -111,6 +113,10 @@ export default class ClusterMember {
     isLeader() { return this.role === 'LEADER'; }
     isFollower() { return this.role === 'FOLLOWER'; }
     isSingle() { return this.role === 'SINGLE'; }
+    isReadReplica() { return this.role === 'READ_REPLICA'; }
+    isCore() { 
+        return this.isLeader() || this.isSingle();
+    }
     canWrite() { 
         return this.isLeader() || this.isSingle();
     }
@@ -209,13 +215,41 @@ export default class ClusterMember {
             sentry.warn("This ClusterMember has more than one version installed; only using the first");
         }
 
-        const v = this.dbms.versions[0];
+        const v = this.dbms.versions[0] || '';
         const parts = v.split('.');
         return {
             major: parts[0] || 'unknown',
             minor: parts[1] || 'unknown',
             patch: parts[2] || 'unknown',
         };
+    }
+
+    getMaxPhysicalMemory() {
+        return this.run(queryLibrary.OS_MEMORY_STATS)
+            .then(results => {
+                const rec = results.records[0];
+                return neo4j.handleNeo4jInt(rec.get('physTotal'));
+            })
+            .catch(err => {
+                if (neo4jErrors.permissionDenied(err)) {
+                    return 'unknown';
+                }
+                throw err;
+            });
+    }
+
+    getMaxHeap() {
+        return this.run(queryLibrary.DBMS_GET_MAX_HEAP)
+            .then(results => {
+                const rec = results.records[0];
+                return rec.get('value');
+            })
+            .catch(err => {
+                if (neo4jErrors.permissionDenied(err)) {
+                    return 'unknown';
+                }
+                throw err;
+            })
     }
 
     checkComponents() {
@@ -245,6 +279,12 @@ export default class ClusterMember {
                 .then(metrics => { this.metrics = metrics; }),
             featureProbes.hasDBStats(this)
                 .then(result => { this.dbms.hasDBStats = result }),
+            this.getMaxHeap().then(maxHeap => {
+                this.dbms.maxHeap = maxHeap;
+            }),
+            this.getMaxPhysicalMemory().then(maxPhysMemory => {
+                this.dbms.physicalMemory = maxPhysMemory;
+            }),
         ];
 
         return Promise.all(allProbes)

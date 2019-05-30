@@ -25,7 +25,10 @@ describe('Cluster Timeseries', function() {
         // node = fakes.ClusterMember(returnData);
 
         const props = {
-            key, query, width: 400, rate, displayProperty: 'x',
+            key, 
+            query, 
+            rate, 
+            displayProperty: 'x',
         };
 
         component = ReactDOM.render(

@@ -9,20 +9,18 @@ import {
 } from 'pondjs';
 import uuid from 'uuid';
 
+import palette from '../../api/palette';
 import datautil from '../../api/data/util';
 import timewindow from '../../api/timeseries/timewindow';
 import queryLibrary from '../../api/data/queries/query-library';
 import sentry from '../../api/sentry/index';
 
-import Spinner from '../ui/Spinner';
+import Spinner from '../ui/scaffold/Spinner/Spinner';
 
-import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
+import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart, ScatterChart } from 'react-timeseries-charts';
+import './CypherTimeseries.css';
 
 const LEADER_COLOR = '#000000';
-
-const DEFAULT_PALETTE = [
-    '#f68b24', 'steelblue', '#619F3A', '#dfecd7', '#e14594', '#7045af', '#2b3595',
-];
 
 /**
  * Repeatedly executes the same cypher query in a loop on a given timeline,
@@ -60,9 +58,8 @@ class ClusterTimeseries extends Component {
         this.state.displayProperty = props.displayProperty;
         this.query = props.query;
         this.rate = props.rate || 2000;
-        this.width = props.width || 800;
+        this.width = props.width || 380;
         this.timeWindowWidth = props.timeWindowWidth || 1000 * 60 * 5;  // 5 min
-        this.palette = props.palette || DEFAULT_PALETTE;
         this.showGrid = _.isNil(props.showGrid) ? false : props.showGrid;
         this.showGridPosition = _.isNil(props.showGridPosition) ? 'over' : props.showGridPosition;
         this.feedMaker = props.feedMaker;
@@ -279,11 +276,15 @@ class ClusterTimeseries extends Component {
     }
 
     getChartMin() {
+        if (!_.isNil(this.props.min)) { return this.props.min; } 
+
         const allMins = this.getObservedMins();
         return Math.min(Math.min(...allMins), this.state.chartLowLimit);
     }
 
     getChartMax() {
+        if (!_.isNil(this.props.max)) { return this.props.max; }
+
         const allMaxes = this.getObservedMaxes();
         // return Math.max(Math.max(...allMaxes), this.state.chartHighLimit);
         return Math.max(...allMaxes);
@@ -291,7 +292,7 @@ class ClusterTimeseries extends Component {
 
     chooseColor(idx) {
         if (_.isNil(idx)) {
-            return this.palette[0];
+            return palette.chooseColor(0);
         }
 
         const addr = this.nodes[idx];
@@ -305,7 +306,7 @@ class ClusterTimeseries extends Component {
             return LEADER_COLOR;
         }
 
-        return this.palette[idx % this.palette.length];
+        return palette.chooseColor(idx);
     }
 
     legendClick = data => {
@@ -392,7 +393,7 @@ class ClusterTimeseries extends Component {
         return (this.mounted && hasData) ? (
             <div className="CypherTimeseries">
                 <Grid>
-                    <Grid.Row columns={1}>
+                    <Grid.Row columns={1} className='CypherTimeseriesLegend'>
                         <Grid.Column>
                             <Legend type="swatch"
                                 style={style}
@@ -407,7 +408,7 @@ class ClusterTimeseries extends Component {
                             />
                         </Grid.Column>
                     </Grid.Row>
-                    <Grid.Row columns={1}>
+                    <Grid.Row columns={1} className='CypherTimeseriesContent'>
                         <Grid.Column textAlign='left'>
                             <ChartContainer
                                 showGrid={this.showGrid}
@@ -424,19 +425,25 @@ class ClusterTimeseries extends Component {
                                         min={this.getChartMin()}
                                         max={this.getChartMax()}
                                         width="70"
+                                        format={this.props.yAxisFormat}
                                         showGrid={true}
                                         type="linear" />
                                     <Charts>
                                         {
-                                            this.nodes.map((addr /* , idx */) =>
-                                                <LineChart
-                                                    key={ClusterTimeseries.keyFor(addr, this.state.displayProperty)}
-                                                    axis="y"
-                                                    style={style}
-                                                    columns={[ClusterTimeseries.keyFor(addr, this.state.displayProperty)]}
-                                                    series={this.dataSeries[addr]}
-                                                />
-                                            )
+                                            this.nodes.map((addr /* , idx */) => {
+                                                const chartProps = {
+                                                    key: ClusterTimeseries.keyFor(addr, this.state.displayProperty),
+                                                    axis: 'y',
+                                                    style,
+                                                    columns: [ClusterTimeseries.keyFor(addr, this.state.displayProperty)],
+                                                    series: this.dataSeries[addr]
+                                                };
+
+                                                if (this.props.chartType === 'scatter') {
+                                                    return <ScatterChart {...chartProps} />;
+                                                }
+                                                return <LineChart {...chartProps} />
+                                            })
                                         }
                                     </Charts>
                                 </ChartRow>

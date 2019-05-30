@@ -8,3 +8,7 @@
     border: 1px solid red;
     margin-bottom: 15px; */
 }
+
+.Advisor > a.ui.button.DownloadCSV {
+    margin-bottom: 16px;
+}

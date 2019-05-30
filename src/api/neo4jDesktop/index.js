@@ -1,6 +1,8 @@
 /**
  * Utilities around dealing with Neo4j Desktop
  */
+import uuid from 'uuid';
+
 /* eslint-disable no-console */
 import sentry from '../sentry/index';
 
@@ -64,6 +66,61 @@ const getAddressesForGraph = graph => {
     });
 };
 
+/**
+ * Returns a faked Neo4j Desktop context given an object containing
+ * host, port, username, password, name, and encrypted.
+ * @param {*} data 
+ */
+const buildFakeContext = (data) => {
+    const { host, port, username, password, name, encrypted } = data;
+    const fakeContext = {
+        implementation: 'Halin.Neo4jDesktopStandIn',
+        global: {
+            online: true,
+            settings: {
+                allowSendReports: true,
+                allowSendStats: true,
+                allowStoreCredentials: true
+            }
+        },
+        projects: [
+            {
+                name,
+                graphs: [
+                    {
+                        name,
+                        status: 'ACTIVE',
+                        databaseStatus: 'RUNNING',
+                        databaseType: 'neo4j',
+                        id: uuid.v4(),
+                        connection: {
+                            configuration: {
+                                path: '.',
+                                protocols: {
+                                    'bolt': {
+                                        host,
+                                        port,
+                                        username,
+                                        password,
+                                        enabled: true,
+                                        tlsLevel: encrypted ? 'REQUIRED' : 'OPTIONAL',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
+            },
+        ],
+    };
+
+    return fakeContext;
+};
+
 export default {
-    getFirstActive, getActiveGraphs, getActiveProjects, getAddressesForGraph,
+    getFirstActive, 
+    getActiveGraphs, 
+    getActiveProjects, 
+    getAddressesForGraph,
+    buildFakeContext,
 };
