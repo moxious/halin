@@ -126,7 +126,9 @@ you'll catch updates.
 
 ![Halin Screenshot: Overview](img/screenshots/halin-overview.png "Halin Screenshot")
 
-![Halin Screenshot: OS](img/screenshots/halin-os.png "Halin Screenshot")
+![Halin Screenshot: Cluster Member](img/screenshots/halin-member.png "Halin Screenshot")
+
+![Halin Screenshot: User Management](img/screenshots/halin-user-management.png "Halin Screenshot")
 
 ![Halin Screenshot: Diagnostics](img/screenshots/halin-diagnostics.png "Halin Screenshot")
 
