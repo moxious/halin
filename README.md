@@ -109,6 +109,16 @@ the authority on the user set.
 The application is named for [Rudolf Halin](https://en.wikipedia.org/wiki/Rudolf_Halin) an
 influential German graph theorist, who came up with (among many other things) [Halin graphs](https://en.wikipedia.org/wiki/Halin_graph).
 
+8. How much load does Halin put on my cluster?
+
+Halin polls your Neo4j cluster by sending a variety of queries concurrently to each member of the
+cluster.  Generally, these queries are answered very quickly by Neo4j, requiring a few milliseconds
+per query.  The total load that Halin will place on the average small database, for example one
+running in Neo4j Desktop, will generally be about 1% of its load, with larger clusters experiencing
+a small fraction of a percent of the concurrent queries Neo4j can handle, and CPU.  Further, these
+queries are strictly read-only (unless you are creating users/roles) and generally require little
+heap.   All in all, the load Halin places should be negligible.
+
 ## Installing Halin in Neo4j Desktop
 
 **Neo4j Desktop minimum version 1.1.10 is required.**
