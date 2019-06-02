@@ -49,8 +49,9 @@ jobs:
           no_output_timeout: 1200
           command: |
             ls -l src/components/
-            ls -l src/components/neo4jDesktop 
-            yarn test
+            ls -l src/components/neo4jDesktop
+            # Take careful note of runInBand https://jestjs.io/docs/en/troubleshooting.html#tests-are-extremely-slow-on-docker-and-or-continuous-integration-ci-server
+            yarn test --runInBand
       - run: 
           name: Deploy to S3 (Build Branch)
           command: |
