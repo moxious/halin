@@ -27,5 +27,3 @@ grafana
 src/creds/*
 reports
 code-signing
-build.json
-
