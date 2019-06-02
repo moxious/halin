@@ -11,19 +11,13 @@ describe('Knowledge Base', function() {
     });
 
     it('has render-able common documentation entries for common topics', () => {
-        const kz = [
-            'Neo4jConfiguration', 
-            'Roles',
-            'Users',
-            'Diagnostics',
-            'ClusterMemory',
-            'GarbageCollection',
-            'Ping',
-            'Memory',
-            'PageCache',
-        ];
+        const kz = Object.keys(kb);
+
+        const special = ['links', 'render', 'metricsReference'];
 
         kz.forEach(k => {
+            if (special.indexOf(k) > -1) { return; }
+
             const entry = kb[k];
             expect(entry).toBeTruthy();
 
@@ -31,5 +25,11 @@ describe('Knowledge Base', function() {
                 document.createElement('div'));
             expect(component).toBeTruthy();
         });
+    });
+
+    it('includes a metrics reference', () => {
+        const { metricsReference } = kb;
+        expect(metricsReference).toBeTruthy();
+        expect(metricsReference['neo4j.transaction.active']).toContain('active transactions');
     });
 });
