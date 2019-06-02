@@ -12,6 +12,8 @@ import QueryExecutionPlan from '../QueryExecutionPlan/QueryExecutionPlan';
 import QueryStatTable from '../queries/QueryStatTable';
 import CSVDownload from '../../data/download/CSVDownload';
 
+import './SampleQueries.css';
+
 import {
     Button,
     Progress,
