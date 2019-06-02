@@ -60,6 +60,14 @@ describe('DataFeed', function () {
             feed.start();
         });
 
+        afterEach(() => {
+            feed.stop();
+
+            if (feed.timeout) {
+                clearInterval(feed.timeout);
+            }
+        });
+
         it('After starting, it is started', () => expect(feed.isRunning()).toBeTruthy());
         it('can stop', () => {
             feed.stop();
