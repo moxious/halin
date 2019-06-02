@@ -18,7 +18,7 @@ describe('AllocationChart', function() {
             <AllocationChart {...props} />,
             document.createElement('div'));
 
-        component.componentWillReceiveProps(props);
+        return component.componentWillReceiveProps(props);
     });
 
     it('sets state correctly', () => {
@@ -41,6 +41,4 @@ describe('AllocationChart', function() {
         expect(data[0].title).toBeTruthy();
         expect(data[1].title).toBeTruthy();
     });
-
-    
 });
