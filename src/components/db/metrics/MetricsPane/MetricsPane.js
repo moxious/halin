@@ -1,15 +1,16 @@
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import moment from 'moment';
-import hoc from '../../higherOrderComponents';
+import hoc from '../../../higherOrderComponents';
 import _ from 'lodash';
-import Spinner from '../../ui/Spinner';
-import sentry from '../../api/sentry';
-import queryLibrary from '../../data/queries/query-library';
+import Spinner from '../../../ui/scaffold/Spinner/Spinner';
+import api from '../../../../api';
 import { Grid, Dropdown, Message, Form } from 'semantic-ui-react';
-import unflatten from './unflatten';
-import MetricsChart from './MetricsChart';
-import MetricDescription from './MetricDescription';
+import unflatten from '../unflatten';
+import MetricsChart from '../MetricsChart/MetricsChart';
+import MetricDescription from '../MetricDescription/MetricDescription';
+
+const { sentry, queryLibrary } = api;
 
 const RECORDS = 100;
 const MAX_AGE = 2 * 1000;

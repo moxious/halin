@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Breadcrumb } from 'semantic-ui-react';
-import kb from '../../../api/knowledgebase';
+import kb from '../../../../api/knowledgebase';
 
 export default class MetricDescription extends Component {
     render() {

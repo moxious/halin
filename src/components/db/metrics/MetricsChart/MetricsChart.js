@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import timewindow from '../../timeseries/timewindow';
+import api from '../../../../api';
 import { styler, Charts, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
 import {
     TimeSeries,
@@ -8,6 +8,8 @@ import {
 } from 'pondjs';
 import _ from 'lodash';
 import uuid from 'uuid';
+
+const { timewindow } = api;
 
 /**
  * #operability

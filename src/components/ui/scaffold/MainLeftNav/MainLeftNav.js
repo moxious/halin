@@ -111,7 +111,7 @@ export default class MainLeftNav extends Component {
             {
                 section: 'about',
                 text: 'About',
-                icon: <Image className='icon' src='img/neo4j_logo_globe.png' />
+                icon: <Image className='icon' src='img/neo4j_logo_globe.png' />,
             },
         ];
 
