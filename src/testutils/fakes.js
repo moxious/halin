@@ -130,6 +130,7 @@ const HalinContext = (returnData = []) => {
         members: sinon.fake.returns(clusterMembers),
         getClusterManager: sinon.fake.returns(mgr),
         isEnterprise: () => sinon.fake.returns(true),
+        isCommunity: () => sinon.fake.returns(false),
         getCurrentUser: sinon.fake.returns({
             username: 'neo4j', roles: ['admin'],
         }),
