@@ -32,28 +32,11 @@ export default class AllocationChart extends Component {
             freePct: (props.free / props.total),
             allocPct: 1 - (props.free / props.total),
             alloc: (props.total - props.free),
-            pieWidth: props.pieWidth || defaultWidth,
-            pieHeight: props.pieHeight || defaultHeight,
+            width: props.pieWidth || defaultWidth,
+            height: props.pieHeight || defaultHeight,
         };
 
         this.setState(newState);
-    }
-
-    // Deprecated because the d3 pie chart seems to have CSS
-    // bugs that display the tooltip in a remote position relative to the chart
-    tooltip = (label /*, value */) => {
-        let underlyingValue = 0;
-        if (label.match(/alloc/i)) {
-            underlyingValue = this.state.alloc;
-        } else {
-            underlyingValue = this.state.free;
-        }
-
-        if (this.props.dataMeasurement) {
-            underlyingValue = datautil.humanDataSize(underlyingValue, true);
-        }
-
-        return label + ' (' + underlyingValue + ')';
     }
 
     makeData() {
