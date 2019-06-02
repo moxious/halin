@@ -6,6 +6,7 @@ import _ from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment';
 import appPkg from '../../../package.json';
+import appBuild from '../../../build.json';
 import neo4j from '../../driver/index';
 import sentry from '../../sentry/index.js';
 import queryLibrary from '../../data/queries/query-library';
@@ -238,6 +239,7 @@ const nodeDiagnostics = (halin, clusterMember) => {
 const halinDiagnostics = halinContext => {
     const halin = {
         halin: {
+            build: appBuild,
             cluster: halinContext.isCluster(),
             enterprise: halinContext.isEnterprise(),
             nativeAuth: halinContext.supportsNativeAuth(),
