@@ -1,13 +1,16 @@
 import React, { Component } from 'react';
-import api from '../../../../api';
-import { styler, Charts, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
+import _ from 'lodash';
+import uuid from 'uuid';
 import {
     TimeSeries,
     TimeRange,
     TimeEvent,
 } from 'pondjs';
-import _ from 'lodash';
-import uuid from 'uuid';
+import { styler, Charts, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
+import { Card } from 'semantic-ui-react';
+
+import api from '../../../../api';
+import HalinCard from '../../../ui/scaffold/HalinCard/HalinCard';
 
 const { timewindow } = api;
 
@@ -80,13 +83,14 @@ export default class MetricsChart extends Component {
             events: rawObservations.map(v => new TimeEvent(v.t, { [mapKey]: _.get(v.map, mapKey) })),
         });
 
+        const header = LABELS[mapKey] || mapKey;
+
         return (
-            <div className='MetricsChart' key={uuid.v4()}>
-                <h4>{LABELS[mapKey] || mapKey}</h4>
+            <HalinCard className='MetricsChart' header={header} key={uuid.v4()}>
                 <ChartContainer className='MetricsChart'
                     showGrid={true}                    
                     showGridPosition='under'
-                    // width='100%'
+                    width={this.props.width || 380}
                     enablePanZoom={false}
                     timeAxisAngledLabels={true}
                     timeAxisHeight={65}
@@ -112,7 +116,7 @@ export default class MetricsChart extends Component {
                         </Charts>
                     </ChartRow>
                 </ChartContainer>
-            </div>
+            </HalinCard>
         );
     }
 
@@ -137,10 +141,10 @@ export default class MetricsChart extends Component {
         }
 
         return (
-            <div className='MetricsChartContainer'>
+            <Card.Group className='MetricsChartContainer'>
                 {/* One chart per graphable metric! */}
                 { this.numericKeys.map(numericKey => this.chartFor(numericKey)) }
-            </div>
+            </Card.Group>
         );
     }
 }
