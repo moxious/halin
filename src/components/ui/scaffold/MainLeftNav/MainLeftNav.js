@@ -84,6 +84,16 @@ export default class MainLeftNav extends Component {
         window.location.reload();
     };
 
+    labsLabel() {
+        return (
+            <p style={{color: 'white'}}>Powered by<br/>
+              <a 
+                href="https://neo4j.com/labs/" 
+                target="halindocs">Neo4j Labs <Icon name='lab'/></a>
+            </p>
+        );
+    }
+
     render() {
         const size = 'large';
 
@@ -160,6 +170,8 @@ export default class MainLeftNav extends Component {
                             this.setState({ logoutConfirmOpen: false });
                         }}
                         onConfirm={this.logout} />
+
+                    { this.labsLabel() }
                 </Sidebar>
                 <Sidebar.Pusher id='MainContent' dimmed={false}>
                     {this.renderChildContent()}
