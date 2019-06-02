@@ -37,8 +37,6 @@ export default class MainLeftNav extends Component {
     };
 
     section = section => {
-        console.log('SECTION', section);
-
         if (section === this.state.section) {
             // Tracking a counter of how many times this menu item has been
             // clicked allows us to propagate toggle state to child.

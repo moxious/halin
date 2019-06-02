@@ -86,7 +86,7 @@ class CypherDataTable extends Component {
         const refresh = this.state.refresh;
         if (refresh !== props.refresh) {
             this.setState({ refresh: props.refresh });
-            sentry.fine('CypherDataTable: refreshing on parent prop change');
+            // sentry.fine('CypherDataTable: refreshing on parent prop change');
             // Cancel the next polling cycle and start a fresh one to update.
             this.cancelPoll();
             this.sampleData();

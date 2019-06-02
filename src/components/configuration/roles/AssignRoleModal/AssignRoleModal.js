@@ -42,7 +42,7 @@ class AssignRoleModal extends Component {
         return this.cypher('CALL dbms.security.listUsers()')
             .then(results => results.records)
             .then(records => {
-                sentry.fine('Got users ', records);
+                // sentry.fine('Got users ', records);
                 // Convert to dropdown option format.
                 const users = records.map(rec => ({
                     key: rec.get('username'),
