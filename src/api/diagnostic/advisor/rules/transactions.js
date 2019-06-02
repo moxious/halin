@@ -68,7 +68,7 @@ const transactionGapRule = pkg => {
         `Last Transaction ID is ${leadValue}`, null, 'N/A'));
 
     chart.even.forEach(entry => {
-        console.log('EVEN', entry);
+        // console.log('EVEN', entry);
         findings.push(new InspectionResult(InspectionResult.PASS, entry.member.basics.address,
             `This member is even with transaction replication at TXID ${leadValue}. Good!`, 
             null, 'N/A'));
