@@ -220,6 +220,7 @@ const nodeDiagnostics = (halin, clusterMember) => {
         simpleGather(clusterMember, 'apoc', 'RETURN apoc.version() as value', 'version'),
         simpleGather(clusterMember, 'nodes', 'MATCH (n) RETURN count(n) as value', 'count'),
         simpleGather(clusterMember, 'schema', 'call db.labels() yield label return collect(label) as value', 'labels'),
+        simpleGather(clusterMember, 'schema', 'call db.relationshipTypes() YIELD relationshipType return collect(relationshipType) as value', 'relationshipTypes'),
         simpleGather(clusterMember, 'algo', 'RETURN algo.version() as value', 'version'),
         simpleGather(clusterMember, 'lastTXID', 
             queryLibrary.JMX_LAST_TRANSACTION_ID.query, 
