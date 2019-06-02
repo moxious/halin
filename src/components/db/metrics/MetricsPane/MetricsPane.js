@@ -166,10 +166,10 @@ class MetricsPane extends Component {
         const dt2Text = i => moment.utc(i).format(this.state.dateFormat);
 
         return (
-            <h4><Icon name='calendar alternate outline'/>
+            <h4><Icon name='calendar outline'/>
                 {dt2Text(this.getChartStart())}
                 <Icon name='arrow right'/>
-                {dt2Text(this.getChartEnd())}
+                {dt2Text(this.getChartEnd())} (UTC)
             </h4>
         );
     }
@@ -188,6 +188,19 @@ class MetricsPane extends Component {
             if (err.indexOf('apoc.import.file.enabled') > -1) {
                 err = 'In your neo4j.conf, you must set apoc.import.file.enabled=true in order to use this feature';
                 negative = false;
+            } else if(err.indexOf('java.io.FileNotFoundException') > -1) {
+                // In versions of APOC prior to the required versions:
+                // (3.5.0.4 for Neo4j 3.5, or 3.4.0.7 for Neo4j 3.4)
+                // This error will come up because of a bug in an earlier patch version of APOC
+                // that concatenates file paths incorrectly.
+                // The solution is almost always to upgrade APOC.  If that does not work, the user may
+                // have done some funky file path configuration of their Neo4j instance, which would be
+                // pretty rare, but possible.
+                err = `
+                    Neo4j was not able to locate the metrics files on disk; you may be using an outdated APOC.
+                    Please check that your version of APOC meets the requirements mentioned below, and
+                    try again.`;
+                negative = false;
             }
 
             return (
@@ -203,7 +216,7 @@ class MetricsPane extends Component {
 
         return (
             <div>
-                <p>{ this.describeDateRange() }</p>
+                { this.describeDateRange() }
 
                 <MetricsChart metric={this.state.activeMetric} data={this.state[this.state.activeMetric]} />
             </div>
