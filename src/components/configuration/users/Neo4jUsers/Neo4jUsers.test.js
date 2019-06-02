@@ -1,24 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Neo4jRoles from './Neo4jRoles';
+import Neo4jUsers from './Neo4jUsers';
 import fakes from '../../../../testutils/fakes';
 import uuid from 'uuid';
 import sinon from 'sinon';
 
-describe('Neo4jRoles', function() {
+describe('Neo4jUsers', function() {
     let component, node, props;
-    let roles = [
+    let users = [
         {
-            role: 'foo', users: ['a', 'b'],
+            username: 'foo', roles: ['admin'], flags: '',
         },
         {
-            role: 'bar', users: ['c', 'd'],
+            username: 'bar', roles: ['a', 'b'], flags: '',
         },
     ]; 
 
     beforeEach(() => {
-        window.halinContext = fakes.HalinContext(roles);
-        node = fakes.ClusterMember(roles);
+        window.halinContext = fakes.HalinContext(users);
+        node = fakes.ClusterMember(users);
         props = {
             node,
             refresh: sinon.stub(),
@@ -26,7 +26,7 @@ describe('Neo4jRoles', function() {
         };
 
         component = ReactDOM.render(
-            <Neo4jRoles {...props} />,
+            <Neo4jUsers {...props} />,
             document.createElement('div'));
     });
 
