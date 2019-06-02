@@ -5,6 +5,7 @@ import queryLibrary from '../../../api/data/queries/query-library';
 import { Message } from 'semantic-ui-react';
 import hoc from '../../higherOrderComponents';
 
+// Ref: https://github.com/moxious/halin/issues/30
 class StorageCapacity extends Component {
     state = {
         // Slow way down, doesn't change moment to moment and places
