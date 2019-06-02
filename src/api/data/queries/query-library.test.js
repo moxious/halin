@@ -1,7 +1,21 @@
 import ql from './query-library';
 import HalinQuery from './HalinQuery';
+import HalinContext from '../../HalinContext';
+import neo4j from '../../driver/index';
+import sinon from 'sinon';
+import fakes from '../../../testutils/fakes';
 
 describe('Query Library', function () {
+    let ctx;
+
+    beforeEach(() => {
+        ctx = new HalinContext();
+        neo4j.driver = sinon.fake.returns(fakes.Driver());
+        return ctx.initialize();
+    });
+
+    afterEach(() => sinon.restore());
+
     it('is an object', () => expect(ql).toBeInstanceOf(Object));
 
     Object.keys(ql).forEach(key => {
@@ -29,6 +43,15 @@ describe('Query Library', function () {
 
             if (query.getDependency()) {
                 expect(query.getDependency()).toBeInstanceOf(Function);
+
+                it('Query dependencies always return true or false', () => {
+                    const val = query.getDependency()(ctx);
+
+                    const passIsBool = (val.pass === true) || (val.pass === false);
+
+                    expect(passIsBool).toBeTruthy();
+                    expect(val.description).toBeTruthy();
+                });
             }
 
             const params = query.getParameters();

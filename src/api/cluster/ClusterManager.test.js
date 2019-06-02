@@ -26,7 +26,7 @@ describe('ClusterManager', function () {
     let mgr;
 
     beforeEach(() => {
-        ctx = new HalinContext();        
+        ctx = new HalinContext();
         neo4j.driver = sinon.fake.returns(fakes.Driver());
         return ctx.initialize()
             .then(() => {
