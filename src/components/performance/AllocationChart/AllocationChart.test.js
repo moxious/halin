@@ -22,7 +22,7 @@ describe('AllocationChart', function() {
     });
 
     it('sets state correctly', () => {
-        console.log(component.state);
+        // console.log(component.state);
         expect(component.state.populated).toBeTruthy();
         expect(component.state.valid).toBeTruthy();
         expect(component.state.free).toEqual(free);

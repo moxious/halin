@@ -57,7 +57,7 @@ const transactionGapRule = pkg => {
     }
 
     const chart = makeRaceChart(pkg);
-    console.log('CHART', chart);
+    // console.log('CHART', chart);
 
     const memb = chart.leader;
     const leadAddr = memb.member.basics.address;

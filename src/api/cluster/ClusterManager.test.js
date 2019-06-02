@@ -51,7 +51,7 @@ describe('ClusterManager', function () {
     it('can add an event to the log', () => {
         const type = 'serious';
         const message = 'Something Happened!';
-        console.log('MGR',mgr);
+        // console.log('MGR',mgr);
         mgr.addEvent({ message, type });
 
         const myThing = mgr.getEventLog().filter(i => i.type === type)[0];
