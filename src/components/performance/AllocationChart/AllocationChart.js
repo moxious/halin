@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
-import { PieChart } from 'react-d3-components';
-import d3 from 'd3';
+import PieChart from 'react-minimal-pie-chart';
 import './AllocationChart.css';
 import datautil from '../../../api/data/util';
 import Spinner from '../../ui/scaffold/Spinner/Spinner';
+import api from '../../../api';
 
 const defaultHeight = 200;
 const defaultWidth = 380;
@@ -57,14 +57,43 @@ export default class AllocationChart extends Component {
     }
 
     makeData() {
-        return {
-            label: this.props.label || 'Generic',
+        return [
+            {
+                title: `Allocated: ${datautil.roundPct(this.state.allocPct)}%`,
+                value: this.state.allocPct * 100,
+                color: api.palette.chooseColor(0, api.palette.TWO_TONE),
+            },
+            {
+                title: `Free: ${datautil.roundPct(this.state.freePct)}%`,
+                value: this.state.freePct * 100,
+                color: api.palette.chooseColor(1, api.palette.TWO_TONE),
+            },
+        ];
+    }
 
-            values: [
-                { x: `Allocated: ${datautil.roundPct(this.state.allocPct)}%`, y: this.state.allocPct * 100 },
-                { x: `Free: ${datautil.roundPct(this.state.freePct)}%`, y: this.state.freePct * 100 },
-            ],
+    renderPieChart() {
+        const assignLabel = props => {
+            const dataItem = props.data[props.dataIndex];
+            return dataItem.title;
         };
+
+        return (
+            <PieChart 
+                data={this.makeData()}
+                label={assignLabel}
+                labelStyle={{
+                    fontSize: '5px',
+                    fontFamily: 'sans-serif',
+                    fill: 'black'
+                }}
+                radius={42}
+                labelPosition={112}
+                style={{
+                    height: this.state.height,
+                    width: this.state.width,
+                }}
+            />
+        );
     }
 
     render() {
@@ -73,17 +102,10 @@ export default class AllocationChart extends Component {
         return (
             <div className='AllocationChart'>
                 <h5>{this.props.label} Total: {tot}</h5>
-                { this.state.populated ? 
-                    ((this.state.total && this.state.total > 0) ? 
-                    <PieChart
-                        data={this.makeData()}
-                        width={this.state.width}
-                        height={this.state.height}
-                        colorScale={d3.scale.category20()}
-                        margin={{top: 10, bottom: 10, left: 100, right: 100}}
-                        sort={this.state.sort}
-                    /> : <h5>None/Not Enabled</h5>)
-                : <Spinner active={true} /> }
+                {this.state.populated ?
+                    ((this.state.total && this.state.total > 0) ?
+                        this.renderPieChart() : <h5>None/Not Enabled</h5>)
+                    : <Spinner active={true} />}
             </div>
         )
     }
