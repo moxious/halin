@@ -5,6 +5,7 @@
 import _ from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment';
+import Promise from 'bluebird';
 import appPkg from '../../../package.json';
 import appBuild from '../../../build.json';
 import neo4j from '../../driver/index';
@@ -72,12 +73,12 @@ const swallowAndReportError = (title, somePromise, whatToResolve = {}) => {
  * @param {String} domain 
  * @param {String} query a cypher query which produces the data point
  * @param {String} key the name of the key to return. 
- * @returns {Promise} which is guaranteed to resolve to an object with domain as a key,
+ * @returns {Function{Promise}} which is guaranteed to resolve to an object with domain as a key,
  * and key as the key of a nested object.  
  * Example args: domain='apoc', query='RETURN apoc.version() as value', key='version'
  * you would get { apoc: { version: '3.5.2' } }
  */
-const simpleGather = (node, domain, query, key) =>
+const simpleGather = (node, domain, query, key) => () =>
     node.run(query, {})
         .then(results => results.records.length === 0 ? null : results.records[0].get('value'))
         .catch(err => `${err}`) // stringify on purpose, don't need full stacktrace
@@ -88,7 +89,7 @@ const simpleGather = (node, domain, query, key) =>
             return obj;
         });
 
-const gatherUsers = (halin, node) => {
+const gatherUsers = (halin, node) => () => {
     const defaultIfUnable = { users: [] };
 
     if (halin.supportsAuth() && halin.supportsNativeAuth()) {
@@ -105,7 +106,7 @@ const gatherUsers = (halin, node) => {
     return Promise.resolve(defaultIfUnable);
 };
 
-const gatherRoles = (halin, node) => {
+const gatherRoles = (halin, node) => () => {
     const defaultIfUnable = { roles: [] };
 
     if (halin.isEnterprise() && halin.supportsAuth()) {
@@ -121,7 +122,7 @@ const gatherRoles = (halin, node) => {
     return Promise.resolve(defaultIfUnable);
 };
 
-const gatherJMX = (halin, node) => {
+const gatherJMX = (halin, node) => () => {
     const defaultIfUnable = { JMX: [] };
 
     const promise = node.run(queryLibrary.JMX_ALL.query, {})
@@ -133,7 +134,7 @@ const gatherJMX = (halin, node) => {
     return swallowAndReportError('Gather JMX', promise, defaultIfUnable);
 };
 
-const gatherConstraints = (halin, node) => {
+const gatherConstraints = (halin, node) => () => {
     const defaultIfUnable = { constraints: [] };
 
     const promise = node.run(queryLibrary.GET_CONSTRAINTS.query, {})
@@ -145,7 +146,7 @@ const gatherConstraints = (halin, node) => {
     return swallowAndReportError('Gather Constraints', promise, defaultIfUnable);
 };
 
-const gatherIndexes = (halin, node) => {
+const gatherIndexes = (halin, node) => () => {
     const defaultIfUnable = { indexes: [] };
 
     // Signature differs between 3.4 and 3.5, particularly
@@ -162,7 +163,7 @@ const gatherIndexes = (halin, node) => {
     return swallowAndReportError('Gather Indexes', promise, defaultIfUnable);
 };
 
-const gatherConfig = (halin, node) => {
+const gatherConfig = (halin, node) => () => {
     const defaultIfUnable = { configuration: {} };
 
     const promise = node.run('CALL dbms.listConfig()', {})
@@ -201,13 +202,15 @@ const gatherConfig = (halin, node) => {
  * @param clusterMember{ClusterMember} 
  * @return Promise{Object} of diagnostic information about that node.
  */
-const nodeDiagnostics = (halin, clusterMember) => {
+const memberDiagnostics = (halin, clusterMember) => {
     const basics = {
         basics: clusterMember.asJSON(),
     };
 
     /* GATHER STEPS.
-     * Each of these is a promise that is guaranteed not to fail because it's wrapped
+     * Each of these is a promise that is guaranteed not to fail because it's wrapped.
+     * Each is wrapped in a closure (they all return functions) to help us control concurrency.
+     * The async operation doesn't kick off until you call these variables as functions.
      */
     const genJMX = gatherJMX(halin, clusterMember);
     const users = gatherUsers(halin, clusterMember);
@@ -227,8 +230,13 @@ const nodeDiagnostics = (halin, clusterMember) => {
             queryLibrary.JMX_LAST_TRANSACTION_ID.columns[0].accessor),
     ];
 
-    return Promise.all([
-        users, roles, indexes, constraints, genJMX, genConfig, ...otherPromises])
+    const allPromiseFunctions = [
+        users, roles, indexes, constraints, genJMX, genConfig, ...otherPromises,
+    ];
+
+    // Use of promise.map and concurrency here is to prevent spamming the cluster member
+    // with lots of different simultaneous queries, which is taxing for it and also slow.
+    return Promise.map(allPromiseFunctions, f => f(), { concurrency: 2 })
         .then(arrayOfDiagnosticObjects =>
             _.merge(basics, ...arrayOfDiagnosticObjects));
 };
@@ -293,8 +301,8 @@ const neo4jDesktopDiagnostics = () => {
 const runDiagnostics = halinContext => {
     const allNodeDiags = Promise.all(
         halinContext.members().map(clusterMember => 
-            nodeDiagnostics(halinContext, clusterMember)))
-        .then(nodeDiagnostics => ({ nodes: nodeDiagnostics }));
+            memberDiagnostics(halinContext, clusterMember)))
+        .then(memberDiagnostics => ({ nodes: memberDiagnostics }));
 
     const root = Promise.resolve({
         id: uuid.v4(),
