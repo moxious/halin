@@ -134,6 +134,12 @@ export default class HalinContext {
         return !this.isEnterprise();
     }
 
+    userIsAdmin() {
+        // On community, there are no roles so all users have admin privileges.  Everyone else
+        // requires the admin role.
+        return !this.isEnterprise() || this.getCurrentUser().roles.indexOf('admin') > -1;
+    }
+
     supportsAPOC() {
         return this.getWriteMember().supportsAPOC();
     }
