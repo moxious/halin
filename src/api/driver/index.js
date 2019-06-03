@@ -131,7 +131,7 @@ const getSessionPool = (id, driver, poolSize=15) => {
                 .catch(() => false),
     };
 
-    const sessionPoolOpts = { min: 1, max: poolSize };
+    const sessionPoolOpts = { min: 3, max: Math.max(3, poolSize) };
     const sessionPool = genericPool.createPool(factory, sessionPoolOpts);
     
     sessionPool.on('factoryCreateError', err => sentry.reportError('SESSION POOL ERROR', err));
