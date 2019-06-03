@@ -194,4 +194,4 @@ class GeneratePackage extends Component {
     }
 }
 
-export default hoc.adminOnlyComponent(GeneratePackage);
+export default hoc.adminOnlyComponent(GeneratePackage, null, false);

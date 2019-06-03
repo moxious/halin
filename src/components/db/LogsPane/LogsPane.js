@@ -441,4 +441,4 @@ const notSupported = () => {
 export default hoc.adminOnlyComponent(hoc.compatibilityCheckableComponent(
     LogsPane,
     compatCheckFn,
-    notSupported));
+    notSupported), null, false);

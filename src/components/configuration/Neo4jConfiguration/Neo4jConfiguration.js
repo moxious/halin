@@ -63,4 +63,4 @@ class Neo4jConfiguration extends Component {
     }
 }
 
-export default hoc.adminOnlyComponent(Neo4jConfiguration, 'Neo4j Configuration');
+export default hoc.adminOnlyComponent(Neo4jConfiguration, 'Neo4j Configuration', false);
