@@ -1,5 +1,6 @@
 import Parser from 'uri-parser';
 import _ from 'lodash';
+import Promise from 'bluebird';
 import math from 'mathjs';
 import Ring from 'ringjs';
 import featureProbes from '../feature/probes';
@@ -71,6 +72,14 @@ export default class ClusterMember {
             label: this.getLabel(),
             dbms: this.dbms,
             performance: this.performance(),
+            pool: {
+                size: this.pool.size,
+                available: this.pool.available,
+                borrowed: this.pool.borrowed,
+                pending: this.pool.pending,
+                min: this.pool.min,
+                max: this.pool.max,
+            },
         };
     }
 
@@ -259,35 +268,41 @@ export default class ClusterMember {
 
         // Probes get individual pieces of information then assign them into our structure,
         // so we can drive feature request functions for outside callers.
+        // These are functions so that the async call doesn't start until we call it.
         const allProbes = [
-            featureProbes.getNameVersionsEdition(this)
+            () => featureProbes.getNameVersionsEdition(this)
                 .then(result => { this.dbms = _.merge(_.cloneDeep(this.dbms), result); }),
-            featureProbes.supportsNativeAuth(this)
+            () => featureProbes.supportsNativeAuth(this)
                 .then(result => { 
                     this.dbms.nativeAuth = result.nativeAuth; 
                     this.dbms.systemGraph = result.systemGraph;
                 }),
-            featureProbes.authEnabled(this)
+            () => featureProbes.authEnabled(this)
                 .then(result => { this.dbms.authEnabled = result; }),
-            featureProbes.csvMetricsEnabled(this)
+            () => featureProbes.csvMetricsEnabled(this)
                 .then(result => { this.dbms.csvMetricsEnabled = result; }),
-            featureProbes.hasAPOC(this)
+            () => featureProbes.hasAPOC(this)
                 .then(result => { this.dbms.apoc = result; }),
-            featureProbes.hasLogStreaming(this)
+            () => featureProbes.hasLogStreaming(this)
                 .then(result => { this.dbms.logStreaming = result; }),
-            featureProbes.getAvailableMetrics(this)
+            () => featureProbes.getAvailableMetrics(this)
                 .then(metrics => { this.metrics = metrics; }),
-            featureProbes.hasDBStats(this)
+            () => featureProbes.hasDBStats(this)
                 .then(result => { this.dbms.hasDBStats = result }),
-            this.getMaxHeap().then(maxHeap => {
+            () => this.getMaxHeap().then(maxHeap => {
                 this.dbms.maxHeap = maxHeap;
             }),
-            this.getMaxPhysicalMemory().then(maxPhysMemory => {
+            () => this.getMaxPhysicalMemory().then(maxPhysMemory => {
                 this.dbms.physicalMemory = maxPhysMemory;
             }),
         ];
 
-        return Promise.all(allProbes)
+        const s = new Date().getTime();
+
+        // When halin is first starting, doing all of these things in parallel can a bit
+        // spam the server with new connections, so we limit concurrency which is friendlier
+        // and also results in faster startup times.
+        return Promise.map(allProbes, f => f(), { concurrency: 2 })
             .then(whatever => {
                 if (this.isCommunity()) {
                     // #operability As a special exception, community will fail 
@@ -300,6 +315,8 @@ export default class ClusterMember {
                 // { major, minor, patch }
                 _.set(this.dbms, 'version', this.getVersion());
 
+                const e = new Date().getTime() - s;
+                sentry.fine(this.getLabel(), 'initialization', e, 'ms elapsed');
                 return whatever;
             });
     }
