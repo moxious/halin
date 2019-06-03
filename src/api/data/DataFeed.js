@@ -291,8 +291,10 @@ export default class DataFeed extends Metric {
      * its result.
      */
     sampleData() {
+        let firstRun = false;
         if (!this.feedStartTime) {
             this.feedStartTime = new Date();
+            firstRun = true;
         }
 
         const startTime = new Date().getTime();
@@ -302,12 +304,12 @@ export default class DataFeed extends Metric {
             .then(results => {
                 const elapsedMs = new Date().getTime() - startTime;
 
-                if (elapsedMs > this.rate) {
+                if (elapsedMs > this.rate && !firstRun) {
                     // It's a bad idea to run long-running queries with a short window.
                     // It puts too much load on the system and does a bad job updating the
                     // graphic.
                     sentry.warn(`DataFeed: query took ${elapsedMs} against window of ${this.rate}`,
-                        this.name.slice(0, 150));
+                        this.name.slice(0, 200));
                 }
 
                 // Take the first result only.  This component only works with single-record queries.
