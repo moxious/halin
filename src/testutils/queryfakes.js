@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import neo4j from '../driver/index';
-import HalinQuery from '../data/queries/HalinQuery';
+import neo4j from '../api/driver/index';
+import HalinQuery from '../api/data/queries/HalinQuery';
 
 const queries = {
     'RETURN true AS value': [
@@ -24,6 +24,24 @@ const queries = {
     ],
     'CALL dbms.listConfig.*dbms.security.auth_provider.*': [
         { value: ['native'] },
+    ],
+    'WHERE name=\'dbms.memory.heap.max_size\'': [
+        { value: '1G' },
+    ],
+    'physTotal': [
+        {
+            fdOpen: neo4j.int(622),
+            fdMax: neo4j.int(10240),
+            physFree: neo4j.int(1044156416),
+            physTotal: neo4j.int(17179869184),
+            virtCommitted: neo4j.int(7469420544),
+            swapFree: neo4j.int(759169024),
+            swapTotal: neo4j.int(3221225472),
+            osName: "Mac OS X",
+            osVersion: "10.13.6",
+            arch: "x86_64",
+            processors: neo4j.int(8),
+        },
     ],
     'CALL dbms.procedures.*apoc.log.stream': [ { n: neo4j.int(0) } ],
     'CALL dbms.components': [

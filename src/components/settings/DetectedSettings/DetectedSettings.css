@@ -1,0 +1,9 @@
+div.DetectedSettings {
+    text-align: left !important;
+}
+
+div.DetectedSettings > div.ui.list > div.item {
+    text-align: left;
+    font-size: 10px;
+    word-break: break-all;
+}

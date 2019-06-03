@@ -1,0 +1,14 @@
+.TaskDetail {
+
+}
+
+.TaskDetail > div > div.QueryBox {
+    max-height: 380px;
+    width: 100%;
+    overflow-y: scroll;
+    overflow-x: auto;
+    text-align: 'left';
+    border: 1px solid black;
+    font-size: 0.9em;
+    margin-top: 16px; 
+}

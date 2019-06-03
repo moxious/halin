@@ -109,6 +109,16 @@ the authority on the user set.
 The application is named for [Rudolf Halin](https://en.wikipedia.org/wiki/Rudolf_Halin) an
 influential German graph theorist, who came up with (among many other things) [Halin graphs](https://en.wikipedia.org/wiki/Halin_graph).
 
+8. How much load does Halin put on my cluster?
+
+Halin polls your Neo4j cluster by sending a variety of queries concurrently to each member of the
+cluster.  Generally, these queries are answered very quickly by Neo4j, requiring a few milliseconds
+per query.  The total load that Halin will place on the average small database, for example one
+running in Neo4j Desktop, will generally be about 1% of its load, with larger clusters experiencing
+a small fraction of a percent of the concurrent queries Neo4j can handle, and CPU.  Further, these
+queries are strictly read-only (unless you are creating users/roles) and generally require little
+heap.   All in all, the load Halin places should be negligible.
+
 ## Installing Halin in Neo4j Desktop
 
 **Neo4j Desktop minimum version 1.1.10 is required.**
@@ -126,7 +136,9 @@ you'll catch updates.
 
 ![Halin Screenshot: Overview](img/screenshots/halin-overview.png "Halin Screenshot")
 
-![Halin Screenshot: OS](img/screenshots/halin-os.png "Halin Screenshot")
+![Halin Screenshot: Cluster Member](img/screenshots/halin-member.png "Halin Screenshot")
+
+![Halin Screenshot: User Management](img/screenshots/halin-user-management.png "Halin Screenshot")
 
 ![Halin Screenshot: Diagnostics](img/screenshots/halin-diagnostics.png "Halin Screenshot")
 
@@ -138,27 +150,65 @@ To serve it as a graph application, read the docs for that in the Neo4j Desktop 
 This is a short overview of how Halin is put together, with hopes that it's useful for those
 hacking on it or wanting to extend it.
 
+The entirety of the application is broken into two trees:
+- API, where all of the Neo4j, network, and datastructure parts reside, independent from Halin's
+React-based UI, and 
+- Components, where all react-based content lives.
+
+### Core API Parts
+
+#### HalinContext
+
 The HalinContext class is a global and gets attached to the window object.  It always has an
 array of ClusterMember instances.  Halin treats single-node databases as a cluster with only one
-member.
+member.  The HalinContext also has a ClusterManager object it can create, which handles cluster-
+wide operations, such as mapping queries across a cluster (user management).
 
-Both the HalinContext object and the ClusterNodes that it has have the concept of feature
+#### Feature Probes
+
+Both the HalinContext object and the ClusterMembers that it has have the concept of feature
 probes; when Halin starts up it gathers basic information about which sorts of features are supported by the database, which version, enterprise vs. community, and so on.  In this way,
 the UI can be adapted to a different layout depending on what the DB exposes and its version.
 
-Higher order components are provided which allow other components to express their
-requirements.  For example, in order to display metrics, those metrics have to be enabled server side.  In order to administer users, you have to be using enterprise, and so on.
+#### Query Library
 
-Each of the components then expresses requirements by wrapping themselves in a higher order 
-component, or none, if they work anywhere.
+Halin exposes a "Query Library" which centralizes all of the queries Halin runs, and the 
+display columns used in the UI corresponding to the data that comes back from the server.
+
+#### DataFeeds
+
+A Datafeed is a polling data stream that requires a query, a set of display columns, and a rate.
+The datafeed can notify the caller when new data is available, and can handle a variety of error
+scenarios.  Most visual components in Halin are backed by a Datafeed object.
+
+#### Driver Management
 
 Neo4j driver management is done centrally.  Components are discouraged from creating drivers
 or even using them. By using the ClusterMember object to run queries, we get to centrally manage
-all of that and also track performance and errors.
+all of that and also track performance and errors.  Additionally, Halin uses "session pooling"
+on top of the standard Neo4j driver.  This was introduced because session creation/destruction
+requires extra roundtrips in the bolt protocol, and session reuse is desirable for improving
+latency to/from Neo4j.
 
-Sentry is used throughout for error detection and reporting.
+#### Error Reporting
+
+Sentry is used throughout for error detection and reporting, and telemetry.
+
+### React Parts
+
+#### Higher-Order Components
+
+Higher order components (HOCs) are provided which allow other components to express their
+requirements.  For example, in order to display metrics, those metrics have to be enabled server side.  In order to administer users, you have to be using enterprise, and so on.
+
+Each of the components then expresses requirements by wrapping themselves in a higher order 
+component, or none, if they work anywhere.  This allows the HOC to check the various feature
+probes in the API and selectively display components.
+
+#### Key React Components
 
 Most of the actual display components are quite straightforward; the most complex bits of Halin
 are in dealing with how different the product surface for Neo4j is depending on the version
 and available features that are exposed.
 
+The key react components to have a look at are CypherDataTable, CypherTimeseries, and ClusterTimeseries.

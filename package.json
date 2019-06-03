@@ -1,7 +1,7 @@
 {
   "name": "halin",
   "description": "Halin helps you monitor and improve your Neo4j graph",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "neo4jDesktop": {
     "apiVersion": "^1.2.0"
   },
@@ -35,6 +35,7 @@
     "react-d3-components": "^0.9.1",
     "react-dom": "^16.6.3",
     "react-graph-vis": "^1.0.2",
+    "react-minimal-pie-chart": "^4.0.0",
     "react-scripts": "^2.1.5",
     "react-sortable-tree": "^2.2.0",
     "react-table": "^6.8.6",

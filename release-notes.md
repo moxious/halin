@@ -1,5 +1,18 @@
 # Halin Release Notes
 
+## 0.11
+
+- New UI layout which is more expand-able for larger clusters.
+- New metrics feature for Neo4j instances with most recent APOC installed; view/track server-side
+metrics.
+- Refactored component structure for better maintainability
+- Added connection concurrency controls which have the effect of improving startup time over 
+high-latency networks, e.g. when Neo4j is network distant from the Halin client.
+- Various improvements for feature filtering for read-only users of Halin
+- Thanks to D. Shiposh, D. Fauth, R. Kharwar, and others who provided valuable feedback
+on security & usability fixes.
+- Fixes and/or closes #90, #86, #60, #30, #88, #69
+
 ## 0.10.0
 
 - Enabled CSV download of query stats, and active tasks (#78)

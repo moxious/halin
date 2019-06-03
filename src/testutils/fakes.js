@@ -2,11 +2,13 @@ import sinon from 'sinon';
 import Ring from 'ringjs';
 import { TimeEvent } from 'pondjs';
 import moment from 'moment';
-import Neo4jDesktopApiStandIn from '../neo4jDesktop/Neo4jDesktopStandIn';
-import queryFakes from './queryfakes';
 import uuid from 'uuid';
 import _ from 'lodash';
-import sentry from '../sentry/index';
+
+import sentry from '../api/sentry/index';
+
+import queryFakes from './queryfakes';
+import neo4jDesktop from '../api/neo4jDesktop/';
 
 sentry.disable();
 
@@ -128,6 +130,7 @@ const HalinContext = (returnData = []) => {
         members: sinon.fake.returns(clusterMembers),
         getClusterManager: sinon.fake.returns(mgr),
         isEnterprise: () => sinon.fake.returns(true),
+        isCommunity: () => sinon.fake.returns(false),
         getCurrentUser: sinon.fake.returns({
             username: 'neo4j', roles: ['admin'],
         }),
@@ -151,7 +154,7 @@ const Driver = (data = []) => {
 
 window.neo4jDesktopApi = {
     getContext: () =>
-        Promise.resolve(Neo4jDesktopApiStandIn.buildFakeContext(basics)),
+        Promise.resolve(neo4jDesktop.buildFakeContext(basics)),
 };
 
 export default {
