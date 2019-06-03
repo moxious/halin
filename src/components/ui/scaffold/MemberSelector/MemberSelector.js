@@ -58,43 +58,51 @@ export default class MemberSelector extends Component {
             // https://stackoverflow.com/questions/29074690/react-why-components-constructor-is-called-only-once
             {
                 menuItem: 'Performance',
+                visible: () => true,
                 render: () => this.paneWrapper(
                     <PerformancePane key={key} node={member} />),
             },
             {
                 menuItem: 'Queries',
+                visible: () => member.isEnterprise(),
                 render: () => this.paneWrapper(
                     <Tasks key={key} node={member} />
                 ),
             },
             {
                 menuItem: 'Configuration',
+                visible: () => true,
                 render: () => this.paneWrapper(
                     <Neo4jConfiguration key={key} node={member} />),
             },
             {
                 menuItem: 'OS',
+                visible: () => true,
                 render: () => this.paneWrapper(
                     <OSPane key={key} node={member} />),
             },
             {
                 menuItem: 'Plugins',
+                visible: () => true,
                 render: () => this.paneWrapper(
                     <PluginPane key={key} node={member} />),
             },
             {
                 menuItem: 'Query Performance',
+                visible: () => true,
                 render: () => this.paneWrapper(
                     <SampleQueryPane key={key} node={member} />),
             },
             {
               menuItem: 'Metrics',
+              visible: () => true,
               render: () => this.paneWrapper(
                 <MetricsPane key={key} node={member}/>
               ),
             },
             {
                 menuItem: 'Logs',
+                visible: () => true,
                 render: () => this.paneWrapper(
                     <LogsPane key={key} node={member} />),
             }
@@ -117,7 +125,8 @@ export default class MemberSelector extends Component {
                 paddingBottom: 14,
             }}
                 menu={{ secondary: true, pointing: true }}
-                panes={this.state.panes(this.state.member)}
+                // Limit to panes which are visible under the given config.
+                panes={this.state.panes(this.state.member).filter(p => p.visible())}
             />
         );
     }
