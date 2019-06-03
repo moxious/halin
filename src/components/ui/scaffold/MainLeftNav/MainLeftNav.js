@@ -99,26 +99,38 @@ export default class MainLeftNav extends Component {
             {
                 section: 'home',
                 text: 'Overview',
+                visible: () => true,
                 icon: <Image className='icon' style={{ filter: 'invert(100%)' }} src='favicon-32x32.png' />,
             },
             {
                 section: 'members',
                 text: 'Cluster Members',
+                visible: () => true,
                 icon: <Icon size={size} name='tv' />,
             },
             {
                 section: 'users',
                 text: 'Permissions Management',
+                visible: () => {
+                    // Permissions is functionality only for admin users.
+                    const ctx = window.halinContext;
+
+                    // Under community, all users are admins.  Under enterprise, you must have
+                    // the admin role.
+                    return !ctx.isEnterprise() || ctx.getCurrentUser().roles.indexOf('admin') > -1;
+                },
                 icon: <Icon size={size} name='group' />,
             },
             {
                 section: 'diagnostics',
                 text: 'Cluster Diagnostic Tools',
+                visible: () => true,
                 icon: <Icon size={size} name='wrench' />,
             },
             {
                 section: 'about',
                 text: 'About',
+                visible: () => true,
                 icon: <Image className='icon' src='img/neo4j_logo_globe.png' />,
             },
         ];
@@ -140,7 +152,9 @@ export default class MainLeftNav extends Component {
                     width='thin'
                 >
                     {
-                        selections.map((selection, index) =>
+                        // Filter to only those that are visible, allowing us to check
+                        // if the config permits that section for that user.
+                        selections.filter(s => s.visible()).map((selection, index) =>
                             hoverPopup(selection.text,
                                 <Menu.Item
                                     active={this.state.section === selection.section}
