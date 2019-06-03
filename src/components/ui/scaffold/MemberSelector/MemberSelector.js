@@ -89,7 +89,7 @@ export default class MemberSelector extends Component {
             },
             {
                 menuItem: 'Query Performance',
-                visible: () => true,
+                visible: () => window.halinContext.userIsAdmin(),
                 render: () => this.paneWrapper(
                     <SampleQueryPane key={key} node={member} />),
             },

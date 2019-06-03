@@ -111,14 +111,7 @@ export default class MainLeftNav extends Component {
             {
                 section: 'users',
                 text: 'Permissions Management',
-                visible: () => {
-                    // Permissions is functionality only for admin users.
-                    const ctx = window.halinContext;
-
-                    // Under community, all users are admins.  Under enterprise, you must have
-                    // the admin role.
-                    return !ctx.isEnterprise() || ctx.getCurrentUser().roles.indexOf('admin') > -1;
-                },
+                visible: () => window.halinContext.userIsAdmin(),
                 icon: <Icon size={size} name='group' />,
             },
             {
