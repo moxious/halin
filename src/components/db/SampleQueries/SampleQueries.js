@@ -5,6 +5,7 @@ import queryLibrary from '../../../api/data/queries/query-library';
 import HalinQuery from '../../../api/data/queries/HalinQuery';
 import sentry from '../../../api/sentry';
 
+import hoc from '../../higherOrderComponents';
 import DBStats from '../../dbstats/DBStats';
 import Spinner from '../../ui/scaffold/Spinner/Spinner';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
@@ -32,7 +33,7 @@ const RUNNING = 'Collecting queries...';
 const GATHERING = 'Gathering statistics...';
 const ERROR = 'Error';
 
-export default class SampleQueries extends Component {
+class SampleQueries extends Component {
     state = {
         includeHalinQueries: true,
         data: null,
@@ -263,3 +264,5 @@ export default class SampleQueries extends Component {
         );
     }
 }
+
+export default hoc.adminOnlyComponent(SampleQueries, 'Sample Query Performance', false);
