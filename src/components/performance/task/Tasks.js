@@ -29,6 +29,16 @@ const createHiddenColumnFromSubfield = (section, subfield) => {
     };
 };
 
+const fullClientAddress = ({ row }) => {
+    if (_.get(row, 'connection.clientAddress') && _.get(row, 'connection.userAgent')) {
+        return ((_.get(row, 'connection.connector') || 'bolt') + '://' + 
+        _.get(row, 'connection.clientAddress') + ' (' + 
+        _.get(row, 'connection.userAgent') + ')');        
+    }
+
+    return 'unknown';
+};
+
 class Tasks extends Component {
     state = {
         // The 3.4 version of this query doesn't have as much info, but works.
@@ -55,10 +65,7 @@ class Tasks extends Component {
             },
             {
                 Header: 'Client',
-                Cell: ({ row }) => 
-                    (   (_.get(row, 'connection.connector') || 'bolt') + '://' + 
-                        _.get(row, 'connection.clientAddress') + ' (' + 
-                        _.get(row, 'connection.userAgent') + ')'),
+                Cell: fullClientAddress,
             },
             {
                 Header: 'Username',
@@ -181,6 +188,7 @@ class Tasks extends Component {
                     query={this.state.query}
                     allowColumnSelect={false}
                     sortable={true}
+                    defaultPageSize={10}
                     filterable={false}
                     refresh={this.state.childRefresh}
                     displayColumns={this.state.columns}
