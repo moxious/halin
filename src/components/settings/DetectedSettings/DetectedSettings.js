@@ -37,6 +37,7 @@ export default class DetectedSettings extends Component {
             this.lineItem(ctx.supportsDBStats(), 'DB Stats'),
             this.lineItem(ctx.supportsMetrics(), 'Metrics'),
             this.lineItem(ctx.isCluster(), 'Clustered'),
+            this.lineItem(ctx.isNeo4jCloud(), 'Neo4j Cloud'),
         ];
 
         const listify = someStuff =>
