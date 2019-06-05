@@ -70,12 +70,13 @@ class Tasks extends Component {
                 Cell: e =>
                     <span>
                         {this.detailModal(e)}
-                        <KillTransaction 
-                            member={this.props.node} 
-                            // The clone here is very important, to create a copy.  This component
-                            // will keep updating, and needs to not pass down updated refs to 
-                            // the KillTransaction component as it does.
-                            transaction={_.cloneDeep(e.row.transaction)} />
+                        { window.halinContext.userIsAdmin() && v3_5_andUp(window.halinContext.getVersion()) ? 
+                            <KillTransaction 
+                                member={this.props.node} 
+                                // The clone here is very important, to create a copy.  This component
+                                // will keep updating, and needs to not pass down updated refs to 
+                                // the KillTransaction component as it does.
+                                transaction={_.cloneDeep(e.row.transaction)} /> : '' }
                     </span>,
                 appliesTo: allVersions,
             },
