@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Button, Modal, Header } from 'semantic-ui-react';
+import { Button, Modal, Header, Confirm } from 'semantic-ui-react';
 import 'react-table/react-table.css';
 import 'semantic-ui-css/semantic.min.css';
 import _ from 'lodash';
@@ -12,6 +12,7 @@ import hoc from '../../higherOrderComponents';
 import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
 import TaskDetail from './TaskDetail';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
+import KillTransaction from './KillTransaction/KillTransaction';
 
 const age = since => {
     const start = moment.utc(since);
@@ -31,17 +32,29 @@ const createHiddenColumnFromSubfield = (section, subfield) => {
 
 const fullClientAddress = ({ row }) => {
     if (_.get(row, 'connection.clientAddress') && _.get(row, 'connection.userAgent')) {
-        return ((_.get(row, 'connection.connector') || 'bolt') + '://' + 
-        _.get(row, 'connection.clientAddress') + ' (' + 
-        _.get(row, 'connection.userAgent') + ')');        
+        return ((_.get(row, 'connection.connector') || 'bolt') + '://' +
+            _.get(row, 'connection.clientAddress') + ' (' +
+            _.get(row, 'connection.userAgent') + ')');
     }
 
     return 'unknown';
 };
 
-const v3_5_andUp = version => 
+const v3_5_andUp = version =>
     _.get(version, 'major') >= 3 && _.get(version, 'minor') >= 5;
 const allVersions = version => true;
+
+const buttonTriggeredModal = (component, row, icon, header, content) =>
+    <Modal size='fullscreen' closeIcon
+        trigger={
+            <Button compact
+                disabled={false}
+                onClick={e => component.open(row)}
+                type='submit' icon={icon} />
+        }>
+        <Header>{header}</Header>
+        <Modal.Content scrolling>{content}</Modal.Content>
+    </Modal>;
 
 class Tasks extends Component {
     state = {
@@ -50,21 +63,30 @@ class Tasks extends Component {
         selected: null,
         columns: [
             {
-                Header: 'Inspect',
-                id: 'delete',
-                minWidth: 70,
-                maxWidth: 100,
-                Cell: e => this.detailModal(e),
+                Header: 'Actions',
+                id: 'actions',
+                minWidth: 100,
+                maxWidth: 200,
+                Cell: e =>
+                    <span>
+                        {this.detailModal(e)}
+                        <KillTransaction 
+                            member={this.props.node} 
+                            // The clone here is very important, to create a copy.  This component
+                            // will keep updating, and needs to not pass down updated refs to 
+                            // the KillTransaction component as it does.
+                            transaction={_.cloneDeep(e.row.transaction)} />
+                    </span>,
                 appliesTo: allVersions,
-            },    
-            { 
-                Header: 'ID', 
+            },
+            {
+                Header: 'ID',
                 accessor: 'transaction.id',
                 show: true,
                 appliesTo: allVersions,
             },
-            { 
-                Header: 'Query', 
+            {
+                Header: 'Query',
                 accessor: 'query.query',
                 style: { textAlign: 'left' },
                 show: true,
@@ -89,7 +111,7 @@ class Tasks extends Component {
                 Header: 'CPU (ms)',
                 accessor: 'transaction.cpuTimeMillis',
                 Cell: fields.numField,
-                appliesTo: allVersions,             
+                appliesTo: allVersions,
             },
             {
                 Header: 'Elapsed(ms)',
@@ -109,9 +131,9 @@ class Tasks extends Component {
                 Cell: fields.numField,
                 appliesTo: allVersions,
             },
-            { 
-                Header: 'Connection', 
-                accessor: 'connection', 
+            {
+                Header: 'Connection',
+                accessor: 'connection',
                 show: false,
                 excludeFromCSV: true,
                 Cell: fields.jsonField,
@@ -132,7 +154,7 @@ class Tasks extends Component {
                 excludeFromCSV: true,
                 Cell: fields.jsonField,
                 appliesTo: allVersions,
-            },            
+            },
 
             // All fields below this are hidden by default and not
             // shown to the user, but destructured in this way so
@@ -147,7 +169,7 @@ class Tasks extends Component {
 
             // TRANSACTION PROPERTIES
             ...[
-                'metaData', 'startTime', 'protocol', 
+                'metaData', 'startTime', 'protocol',
                 'clientAddress', 'requestUri', 'currentQueryId',
                 'currentQuery', 'activeLockCount', 'status',
                 'resourceInformation', 'elapsedTimeMillis',
@@ -155,7 +177,7 @@ class Tasks extends Component {
             ].map(sf => createHiddenColumnFromSubfield('transaction', sf)),
 
             ...[
-                'id', 'parameters', 'planner', 'runtime', 
+                'id', 'parameters', 'planner', 'runtime',
                 'indexes', 'startTime',
                 'allocatedBytes', 'pageHits', 'pageFaults',
             ].map(sf => createHiddenColumnFromSubfield('query', sf)),
@@ -168,7 +190,6 @@ class Tasks extends Component {
         const version = window.halinContext.getVersion();
         let query = queryLibrary.DBMS_34_TASKS.getQuery();
         const columns = this.state.columns.filter(c => {
-            console.log('AppliesTo ', c, version);
             if (!c.appliesTo) { return true; }
             return c.appliesTo(version);
         });
@@ -185,26 +206,13 @@ class Tasks extends Component {
     };
 
     detailModal({ row }) {
-        return (
-            <Modal size='fullscreen' closeIcon
-                trigger={
-                    <Button compact 
-                        disabled={false}
-                        onClick={e => this.open(row)}
-                        type='submit' icon="info"/>
-                }>
-                <Header>Query Detail</Header>
-                <Modal.Content scrolling>
-                    <TaskDetail task={this.state.selected} />
-                </Modal.Content>
-            </Modal>
-        );
+        return buttonTriggeredModal(this, row, 'info', 'Query Detail', <TaskDetail task={this.state.selected} />);
     }
 
     render() {
         return (
             <div className="Tasks">
-                <h3>Tasks <Explainer knowledgebase='Tasks'/></h3>
+                <h3>Tasks <Explainer knowledgebase='Tasks' /></h3>
                 <CypherDataTable
                     allowDownloadCSV={true}
                     node={this.props.node}
