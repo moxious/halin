@@ -11,7 +11,7 @@ const message = (header, body) => ({ header, body });
 const toastContent = messageObject => 
     <div className='HalinToast'>
         <h4>{messageObject.header}</h4>
-        <p>{messageObject.body}</p>
+        <div>{messageObject.body}</div>
     </div>;
 
 /**
@@ -96,7 +96,7 @@ export default {
             message = 
                 <Message success>
                     <Message.Header>{component.state.message.header || 'Success'}</Message.Header>
-                    <p>{component.state.message.body}</p>
+                    {component.state.message.body}
                 </Message>
         }
 
