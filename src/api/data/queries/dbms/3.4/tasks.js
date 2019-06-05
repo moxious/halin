@@ -28,23 +28,23 @@ export default new HalinQuery({
         cpuTimeMillis, waitTimeMillis, idleTimeMillis
         
         /* Rename fields so we can tell when a duplicated field comes from TX data */
-        WITH 
-            transactionId AS TXtransactionId, 
-            username AS TXusername, 
-            metaData AS TXmetaData, 
-            startTime AS TXstartTime, 
-            protocol AS TXprotocol,
-            clientAddress AS TXclientAddress, 
-            requestUri AS TXrequestUri, 
-            currentQueryId AS TXcurrentQueryId, 
-            currentQuery AS TXcurrentQuery, 
-            activeLockCount AS TXactiveLockCount, 
-            status AS TXstatus, 
-            resourceInformation AS TXresourceInformation, 
-            elapsedTimeMillis AS TXelapsedTimeMillis,
-            cpuTimeMillis AS TXcpuTimeMillis, 
-            waitTimeMillis AS TXwaitTimeMillis, 
-            idleTimeMillis AS TXidleTimeMillis 
+        WITH collect({
+            id: transactionId,
+            metaData: metaData,
+            startTime: startTime,
+            protocol: protocol,
+            clientAddress: clientAddress,
+            requestUri: requestUri,
+            currentQueryId: currentQueryId,
+            currentQuery: currentQuery,
+            activeLockCount: activeLockCount,
+            status: status,
+            resourceInformation: resourceInformation,
+            elapsedTimeMillis: elapsedTimeMillis,
+            cpuTimeMillis: cpuTimeMillis,
+            waitTimeMillis: waitTimeMillis,
+            idleTimeMillis: idleTimeMillis
+        }) as transactions
         
         /* Grab queries */
         CALL dbms.listQueries()
@@ -54,82 +54,38 @@ export default new HalinQuery({
         allocatedBytes, pageHits, pageFaults
         
         /* Rename fields so we can tell when a duplicated field comes from Query data */
-        WITH 
-            queryId AS QqueryId, 
-            username AS Qusername, 
-            metaData AS QmetaData, 
-            query AS Qquery, 
-            parameters AS Qparameters, 
-            planner AS Qplanner, 
-            runtime AS Qruntime, 
-            indexes AS Qindexes,
-            startTime AS QstartTime, 
-            protocol AS Qprotocol, 
-            clientAddress AS QclientAddress, 
-            requestUri AS QrequestUri, 
-            status AS Qstatus, 
-            resourceInformation AS QresourceInformation, 
-            activeLockCount AS QactiveLockCount, 
-            elapsedTimeMillis AS QelapsedTimeMillis, 
-            cpuTimeMillis AS QcpuTimeMillis, 
-            waitTimeMillis AS QwaitTimeMillis, 
-            idleTimeMillis AS QidleTimeMillis,
-            allocatedBytes AS QallocatedBytes, 
-            pageHits AS QpageHits, 
-            pageFaults AS QpageFaults, 
+        WITH transactions, collect({
+            id: queryId,
+            query: query,
+            parameters: parameters,
+            planner: planner,
+            runtime: runtime,
+            indexes: indexes,
+            startTime: startTime,
+            protocol: protocol,
+            clientAddress: clientAddress,
+            requestUri: requestUri,
+            status: status,
+            resourceInformation: resourceInformation,
+            activeLockCount: activeLockCount,
+            elapsedTimeMillis: elapsedTimeMillis,
+            cpuTimeMillis: cpuTimeMillis,
+            waitTimeMillis: waitTimeMillis,
+            idleTimeMillis: idleTimeMillis,
+            allocatedBytes: allocatedBytes,
+            pageHits: pageHits,
+            pageFaults: pageFaults
+        }) as queries
         
-        /* Block of carry-over TX definitions */
-        TXtransactionId, TXusername, TXmetaData, TXstartTime, TXprotocol,
-        TXclientAddress, TXrequestUri, TXcurrentQueryId, TXcurrentQuery, 
-        TXactiveLockCount, TXstatus, TXresourceInformation, TXelapsedTimeMillis,
-        TXcpuTimeMillis, TXwaitTimeMillis, TXidleTimeMillis
-        
-        /* Join queries to transactions by the Query ID */
-        WHERE TXcurrentQueryId = QqueryId
-        
-        WITH *, 
-            TXtransactionId + ':' + QqueryId AS id,
-        {
-            id: TXtransactionId,
-            metaData: TXmetaData,
-            startTime: TXstartTime,
-            protocol: TXprotocol,
-            clientAddress: TXclientAddress,
-            requestUri: TXrequestUri,
-            currentQueryId: TXcurrentQueryId,
-            currentQuery: TXcurrentQuery,
-            activeLockCount: TXactiveLockCount,
-            status: TXstatus,
-            resourceInformation: TXresourceInformation,
-            elapsedTimeMillis: TXelapsedTimeMillis,
-            cpuTimeMillis: TXcpuTimeMillis,
-            waitTimeMillis: TXwaitTimeMillis,
-            idleTimeMillis: TXidleTimeMillis
-        } as transaction, 
-        {
-            id: QqueryId,
-            query: Qquery,
-            parameters: Qparameters,
-            planner: Qplanner,
-            runtime: Qruntime,
-            indexes: Qindexes,
-            startTime: QstartTime,
-            protocol: Qprotocol,
-            clientAddress: QclientAddress,
-            requestUri: QrequestUri,
-            status: Qstatus,
-            resourceInformation: QresourceInformation,
-            activeLockCount: QactiveLockCount,
-            elapsedTimeMillis: QelapsedTimeMillis,
-            cpuTimeMillis: QcpuTimeMillis,
-            waitTimeMillis: QwaitTimeMillis,
-            idleTimeMillis: QidleTimeMillis,
-            allocatedBytes: QallocatedBytes,
-            pageHits: QpageHits,
-            pageFaults: QpageFaults
-        } as query
-        
-        RETURN id, transaction, query;
+        UNWIND transactions as transaction
+
+        RETURN 
+            transaction.id, 
+            transaction,
+            [q in queries WHERE q.id = transaction.currentQueryId][0] as query
+
+        ORDER BY transaction.elapsedTimeMillis DESC
+        LIMIT 500            
     `,
     columns: ['id', 'transaction', 'query'].map(column),
     exampleResult: [ 
