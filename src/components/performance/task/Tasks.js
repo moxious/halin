@@ -39,6 +39,10 @@ const fullClientAddress = ({ row }) => {
     return 'unknown';
 };
 
+const v3_5_andUp = version => 
+    _.get(version, 'major') >= 3 && _.get(version, 'minor') >= 5;
+const allVersions = version => true;
+
 class Tasks extends Component {
     state = {
         // The 3.4 version of this query doesn't have as much info, but works.
@@ -51,57 +55,67 @@ class Tasks extends Component {
                 minWidth: 70,
                 maxWidth: 100,
                 Cell: e => this.detailModal(e),
+                appliesTo: allVersions,
             },    
             { 
                 Header: 'ID', 
                 accessor: 'transaction.id',
                 show: true,
+                appliesTo: allVersions,
             },
             { 
                 Header: 'Query', 
                 accessor: 'query.query',
                 style: { textAlign: 'left' },
                 show: true,
+                appliesTo: allVersions,
             },
             {
                 Header: 'Client',
                 Cell: fullClientAddress,
+                appliesTo: v3_5_andUp,
             },
             {
                 Header: 'Username',
                 accessor: 'connection.username',
+                appliesTo: v3_5_andUp,
             },
             {
                 Header: 'Age',
                 Cell: ({ row }) => age(_.get(row, 'transaction.startTime')),
+                appliesTo: allVersions,
             },
             {
                 Header: 'CPU (ms)',
                 accessor: 'transaction.cpuTimeMillis',
-                Cell: fields.numField,              
+                Cell: fields.numField,
+                appliesTo: allVersions,             
             },
             {
                 Header: 'Elapsed(ms)',
                 accessor: 'transaction.elapsedTimeMillis',
                 Cell: fields.numField,
+                appliesTo: allVersions,
             },
             {
                 Header: 'Idle(ms)',
                 accessor: 'transaction.idleTimeMillis',
                 Cell: fields.numField,
+                appliesTo: allVersions,
             },
             {
                 Header: 'Wait(ms)',
                 accessor: 'transaction.waitTimeMillis',
                 Cell: fields.numField,
+                appliesTo: allVersions,
             },
-
             { 
                 Header: 'Connection', 
                 accessor: 'connection', 
                 show: false,
                 excludeFromCSV: true,
                 Cell: fields.jsonField,
+                appliesTo: v3_5_andUp,
             },
             {
                 Header: 'Transaction',
@@ -109,6 +123,7 @@ class Tasks extends Component {
                 show: false,
                 excludeFromCSV: true,
                 Cell: fields.jsonField,
+                appliesTo: allVersions,
             },
             {
                 Header: 'QueryDetails',
@@ -116,6 +131,7 @@ class Tasks extends Component {
                 show: false,
                 excludeFromCSV: true,
                 Cell: fields.jsonField,
+                appliesTo: allVersions,
             },            
 
             // All fields below this are hidden by default and not
@@ -150,11 +166,18 @@ class Tasks extends Component {
     componentWillMount() {
         // We use a different query according to supported features if 3.5 is present.
         const version = window.halinContext.getVersion();
+        let query = queryLibrary.DBMS_34_TASKS.getQuery();
+        const columns = this.state.columns.filter(c => {
+            console.log('AppliesTo ', c, version);
+            if (!c.appliesTo) { return true; }
+            return c.appliesTo(version);
+        });
+
         if (version.major >= 3 && version.minor >= 5) {
-            this.setState({
-                query: queryLibrary.DBMS_35_TASKS.getQuery()
-            });
+            query = queryLibrary.DBMS_35_TASKS.getQuery();
         }
+
+        this.setState({ query, columns });
     }
 
     open = (row) => {
