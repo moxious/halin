@@ -19,7 +19,7 @@ export default class TaskDetailModal extends Component {
                         type='submit' icon='info' />
                 }>
                 <Header>Transaction Detail: {this.props.task.transaction.id}</Header>
-                <Modal.Content scrolling>
+                <Modal.Content>
                     <TaskDetail task={this.props.task} />
                 </Modal.Content>
             </Modal>
