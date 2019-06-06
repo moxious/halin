@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { Button, Modal, Header, Confirm } from 'semantic-ui-react';
 import 'react-table/react-table.css';
 import 'semantic-ui-css/semantic.min.css';
 import _ from 'lodash';
@@ -10,7 +9,7 @@ import fields from '../../../api/data/fields';
 
 import hoc from '../../higherOrderComponents';
 import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
-import TaskDetail from './TaskDetail';
+import TaskDetailModal from './TaskDetailModal/TaskDetailModal';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
 import KillTransaction from './KillTransaction/KillTransaction';
 
@@ -42,19 +41,7 @@ const fullClientAddress = ({ row }) => {
 
 const v3_5_andUp = version =>
     _.get(version, 'major') >= 3 && _.get(version, 'minor') >= 5;
-const allVersions = version => true;
-
-const buttonTriggeredModal = (component, row, icon, header, content) =>
-    <Modal size='fullscreen' closeIcon
-        trigger={
-            <Button compact
-                disabled={false}
-                onClick={e => component.open(row)}
-                type='submit' icon={icon} />
-        }>
-        <Header>{header}</Header>
-        <Modal.Content scrolling>{content}</Modal.Content>
-    </Modal>;
+const allVersions = () => true;
 
 class Tasks extends Component {
     state = {
@@ -67,23 +54,25 @@ class Tasks extends Component {
                 id: 'actions',
                 minWidth: 100,
                 maxWidth: 200,
-                Cell: e =>
-                    <span>
-                        {this.detailModal(e)}
-                        { window.halinContext.userIsAdmin() && v3_5_andUp(window.halinContext.getVersion()) ? 
+                Cell: e => {
+                    // Clone is important to prevent passing ever-changing state down.
+                    const copy = _.cloneDeep(e.row);
+                    return (<span>
+                        <TaskDetailModal task={copy} />
+                        { this.allowKillTransactions() ? 
                             <KillTransaction 
                                 member={this.props.node} 
-                                // The clone here is very important, to create a copy.  This component
-                                // will keep updating, and needs to not pass down updated refs to 
-                                // the KillTransaction component as it does.
-                                transaction={_.cloneDeep(e.row.transaction)} /> : '' }
-                    </span>,
+                                transaction={copy.transaction} /> : '' }
+                    </span>);
+                },
                 appliesTo: allVersions,
             },
             {
                 Header: 'ID',
                 accessor: 'transaction.id',
                 show: true,
+                // Neo4j IDs are things like 'transaction-123' which is redundant and too long to display.
+                Cell: ({ row }) => (_.get(row, 'transaction.id') || '').replace(/transaction-/, ''),
                 appliesTo: allVersions,
             },
             {
@@ -186,6 +175,10 @@ class Tasks extends Component {
         rate: 1000,
     };
 
+    allowKillTransactions() {
+        return window.halinContext.userIsAdmin() && v3_5_andUp(window.halinContext.getVersion());
+    }
+
     componentWillMount() {
         // We use a different query according to supported features if 3.5 is present.
         const version = window.halinContext.getVersion();
@@ -205,10 +198,6 @@ class Tasks extends Component {
     open = (row) => {
         this.setState({ selected: row });
     };
-
-    detailModal({ row }) {
-        return buttonTriggeredModal(this, row, 'info', 'Query Detail', <TaskDetail task={this.state.selected} />);
-    }
 
     render() {
         return (
