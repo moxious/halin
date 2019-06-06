@@ -55,14 +55,14 @@ class Tasks extends Component {
                 minWidth: 100,
                 maxWidth: 200,
                 Cell: e => {
-                    // Clone is important to prevent passing ever-changing state down.
-                    const copy = _.cloneDeep(e.row);
+                    // TODO: these update dynamically as component refreshes, which isn't
+                    // desirable.
                     return (<span>
-                        <TaskDetailModal task={copy} />
+                        <TaskDetailModal task={e.row} />
                         { this.allowKillTransactions() ? 
                             <KillTransaction 
                                 member={this.props.node} 
-                                transaction={copy.transaction} /> : '' }
+                                transaction={e.row.transaction} /> : '' }
                     </span>);
                 },
                 appliesTo: allVersions,
