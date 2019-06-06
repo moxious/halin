@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Card, List } from 'semantic-ui-react';
-import neo4j from '../../../api/driver/index';
+import neo4j from '../../../../api/driver/index';
 import _ from 'lodash';
 import moment from 'moment';
 import './TaskDetail.css';

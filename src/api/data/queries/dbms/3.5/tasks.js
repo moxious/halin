@@ -20,31 +20,30 @@ export default new HalinQuery({
      */
     query: `
         CALL dbms.listTransactions()
-        
+            
         YIELD transactionId, username, metaData, startTime, protocol,
         clientAddress, requestUri, currentQueryId, currentQuery, 
         activeLockCount, status, resourceInformation, elapsedTimeMillis,
         cpuTimeMillis, waitTimeMillis, idleTimeMillis, connectionId
         
-        /* Rename fields so we can tell when a duplicated field comes from TX data */
-        WITH 
-            transactionId AS TXtransactionId, 
-            username AS TXusername, 
-            metaData AS TXmetaData, 
-            startTime AS TXstartTime, 
-            protocol AS TXprotocol,
-            clientAddress AS TXclientAddress, 
-            requestUri AS TXrequestUri, 
-            currentQueryId AS TXcurrentQueryId, 
-            currentQuery AS TXcurrentQuery, 
-            activeLockCount AS TXactiveLockCount, 
-            status AS TXstatus, 
-            resourceInformation AS TXresourceInformation, 
-            elapsedTimeMillis AS TXelapsedTimeMillis,
-            cpuTimeMillis AS TXcpuTimeMillis, 
-            waitTimeMillis AS TXwaitTimeMillis, 
-            idleTimeMillis AS TXidleTimeMillis, 
-            connectionId AS TXconnectionId
+        WITH collect({
+            id: transactionId,
+            metaData: metaData,
+            startTime: startTime,
+            protocol: protocol,
+            clientAddress: clientAddress,
+            requestUri: requestUri,
+            currentQueryId: currentQueryId,
+            currentQuery: currentQuery,
+            activeLockCount: activeLockCount,
+            status: status,
+            resourceInformation: resourceInformation,
+            elapsedTimeMillis: elapsedTimeMillis,
+            cpuTimeMillis: cpuTimeMillis,
+            waitTimeMillis: waitTimeMillis,
+            idleTimeMillis: idleTimeMillis,
+            connectionId: connectionId
+        }) as transactions
         
         /* Grab queries */
         CALL dbms.listQueries()
@@ -53,114 +52,53 @@ export default new HalinQuery({
         activeLockCount, elapsedTimeMillis, cpuTimeMillis, waitTimeMillis, idleTimeMillis,
         allocatedBytes, pageHits, pageFaults, connectionId
         
-        /* Rename fields so we can tell when a duplicated field comes from Query data */
-        WITH 
-            queryId AS QqueryId, 
-            username AS Qusername, 
-            metaData AS QmetaData, 
-            query AS Qquery, 
-            parameters AS Qparameters, 
-            planner AS Qplanner, 
-            runtime AS Qruntime, 
-            indexes AS Qindexes,
-            startTime AS QstartTime, 
-            protocol AS Qprotocol, 
-            clientAddress AS QclientAddress, 
-            requestUri AS QrequestUri, 
-            status AS Qstatus, 
-            resourceInformation AS QresourceInformation, 
-            activeLockCount AS QactiveLockCount, 
-            elapsedTimeMillis AS QelapsedTimeMillis, 
-            cpuTimeMillis AS QcpuTimeMillis, 
-            waitTimeMillis AS QwaitTimeMillis, 
-            idleTimeMillis AS QidleTimeMillis,
-            allocatedBytes AS QallocatedBytes, 
-            pageHits AS QpageHits, 
-            pageFaults AS QpageFaults, 
-            connectionId AS QconnectionId,
-        
-        /* Block of carry-over TX definitions */
-        TXtransactionId, TXusername, TXmetaData, TXstartTime, TXprotocol,
-        TXclientAddress, TXrequestUri, TXcurrentQueryId, TXcurrentQuery, 
-        TXactiveLockCount, TXstatus, TXresourceInformation, TXelapsedTimeMillis,
-        TXcpuTimeMillis, TXwaitTimeMillis, TXidleTimeMillis, TXconnectionId
-        
-        /* Join queries to transactions by the Query ID */
-        WHERE TXcurrentQueryId = QqueryId
-        
+        WITH transactions, collect({
+            id: queryId,
+            query: query,
+            parameters: parameters,
+            planner: planner,
+            runtime: runtime,
+            indexes: indexes,
+            startTime: startTime,
+            protocol: protocol,
+            clientAddress: clientAddress,
+            requestUri: requestUri,
+            status: status,
+            resourceInformation: resourceInformation,
+            activeLockCount: activeLockCount,
+            elapsedTimeMillis: elapsedTimeMillis,
+            cpuTimeMillis: cpuTimeMillis,
+            waitTimeMillis: waitTimeMillis,
+            idleTimeMillis: idleTimeMillis,
+            allocatedBytes: allocatedBytes,
+            pageHits: pageHits,
+            pageFaults: pageFaults,
+            connectionId: connectionId
+        }) as queries
+    
         /* Fetch connections */
         CALL dbms.listConnections()
         YIELD connectionId, connectTime, connector, username, userAgent,
         serverAddress, clientAddress
         
         /* Rename fields */
-        WITH *, /* Copy over previous variables */
-            connectionId AS CconnectionId,
-            connectTime AS CconnectTime,
-            connector AS Cconnector,
-            username AS Cusername,
-            userAgent AS CuserAgent,
-            serverAddress AS CserverAddress,
-            clientAddress AS CclientAddress
-        
-        /* Join connections to transactions */
-        WHERE CconnectionId = TXconnectionId
-        
-        WITH *, 
-            CconnectionId + ':' + TXtransactionId + ':' + QqueryId AS id,
-        {
-            id: CconnectionId,
-            connectTime: CconnectTime,
-            connector: Cconnector,
-            username: Cusername,
-            userAgent: CuserAgent,
-            serverAddress: CserverAddress,
-            clientAddress: CclientAddress
-        } as connection, 
-        {
-            id: TXtransactionId,
-            metaData: TXmetaData,
-            startTime: TXstartTime,
-            protocol: TXprotocol,
-            clientAddress: TXclientAddress,
-            requestUri: TXrequestUri,
-            currentQueryId: TXcurrentQueryId,
-            currentQuery: TXcurrentQuery,
-            activeLockCount: TXactiveLockCount,
-            status: TXstatus,
-            resourceInformation: TXresourceInformation,
-            elapsedTimeMillis: TXelapsedTimeMillis,
-            cpuTimeMillis: TXcpuTimeMillis,
-            waitTimeMillis: TXwaitTimeMillis,
-            idleTimeMillis: TXidleTimeMillis,
-            connectionId: TXconnectionId
-        } as transaction, 
-        {
-            id: QqueryId,
-            query: Qquery,
-            parameters: Qparameters,
-            planner: Qplanner,
-            runtime: Qruntime,
-            indexes: Qindexes,
-            startTime: QstartTime,
-            protocol: Qprotocol,
-            clientAddress: QclientAddress,
-            requestUri: QrequestUri,
-            status: Qstatus,
-            resourceInformation: QresourceInformation,
-            activeLockCount: QactiveLockCount,
-            elapsedTimeMillis: QelapsedTimeMillis,
-            cpuTimeMillis: QcpuTimeMillis,
-            waitTimeMillis: QwaitTimeMillis,
-            idleTimeMillis: QidleTimeMillis,
-            allocatedBytes: QallocatedBytes,
-            pageHits: QpageHits,
-            pageFaults: QpageFaults,
-            connectionId: QconnectionId
-        } as query
-        
-        RETURN id, connection, transaction, query
-        ORDER BY query.elapsedTimeMillis DESC
+        WITH transactions, queries, collect({
+            connectionId: connectionId,
+            connectTime: connectTime,
+            connector: connector,
+            username: username,
+            userAgent: userAgent,
+            serverAddress: serverAddress,
+            clientAddress: clientAddress
+        }) as connections
+
+        UNWIND transactions AS transaction
+        RETURN 
+            transaction,
+            [q IN queries WHERE q.id = transaction.currentQueryId][0] as query,
+            [c IN connections WHERE c.connectionId = transaction.connectionId][0] as connection
+
+        ORDER BY transaction.elapsedTimeMillis DESC
         LIMIT 500
     `,
     columns: [

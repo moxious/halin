@@ -9,7 +9,7 @@ import PluginPane from '../../../db/PluginPane/PluginPane';
 import SampleQueryPane from '../../../db/SampleQueryPane/SampleQueryPane';
 import LogsPane from '../../../db/LogsPane/LogsPane';
 import MetricsPane from '../../../db/metrics/MetricsPane/MetricsPane';
-import Tasks from '../../../performance/task/Tasks';
+import Tasks from '../../../performance/task/Tasks/Tasks';
 import ClusterMemberMenuItem from '../ClusterMemberMenuItem/ClusterMemberMenuItem';
 
 import './MemberSelector.css';

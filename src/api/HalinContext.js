@@ -134,6 +134,14 @@ export default class HalinContext {
         return !this.isEnterprise();
     }
 
+    /**
+     * @returns true if the HalinContext is attached to a Neo4j Cloud instance, false otherwise.
+     */
+    isNeo4jCloud() {
+        const uri = this.getBaseURI();
+        return (uri || '').toLowerCase().indexOf('databases.neo4j.io') > -1;
+    }
+
     userIsAdmin() {
         // On community, there are no roles so all users have admin privileges.  Everyone else
         // requires the admin role.

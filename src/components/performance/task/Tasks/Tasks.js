@@ -1,17 +1,17 @@
 import React, { Component } from "react";
-import { Button, Modal, Header } from 'semantic-ui-react';
 import 'react-table/react-table.css';
 import 'semantic-ui-css/semantic.min.css';
 import _ from 'lodash';
 import moment from 'moment';
 
-import queryLibrary from '../../../api/data/queries/query-library';
-import fields from '../../../api/data/fields';
+import queryLibrary from '../../../../api/data/queries/query-library';
+import fields from '../../../../api/data/fields';
 
-import hoc from '../../higherOrderComponents';
-import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
-import TaskDetail from './TaskDetail';
-import Explainer from '../../ui/scaffold/Explainer/Explainer';
+import hoc from '../../../higherOrderComponents';
+import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
+import TaskDetailModal from '../TaskDetailModal/TaskDetailModal';
+import Explainer from '../../../ui/scaffold/Explainer/Explainer';
+import KillTransaction from '../KillTransaction/KillTransaction';
 
 const age = since => {
     const start = moment.utc(since);
@@ -29,6 +29,20 @@ const createHiddenColumnFromSubfield = (section, subfield) => {
     };
 };
 
+const fullClientAddress = ({ row }) => {
+    if (_.get(row, 'connection.clientAddress') && _.get(row, 'connection.userAgent')) {
+        return ((_.get(row, 'connection.connector') || 'bolt') + '://' +
+            _.get(row, 'connection.clientAddress') + ' (' +
+            _.get(row, 'connection.userAgent') + ')');
+    }
+
+    return 'unknown';
+};
+
+const v3_5_andUp = version =>
+    _.get(version, 'major') >= 3 && _.get(version, 'minor') >= 5;
+const allVersions = () => true;
+
 class Tasks extends Component {
     state = {
         // The 3.4 version of this query doesn't have as much info, but works.
@@ -36,65 +50,84 @@ class Tasks extends Component {
         selected: null,
         columns: [
             {
-                Header: 'Inspect',
-                id: 'delete',
-                minWidth: 70,
-                maxWidth: 100,
-                Cell: e => this.detailModal(e),
-            },    
-            { 
-                Header: 'ID', 
+                Header: 'Actions',
+                id: 'actions',
+                minWidth: 100,
+                maxWidth: 200,
+                Cell: e => {
+                    // TODO: these update dynamically as component refreshes, which isn't
+                    // desirable.
+                    return (<span>
+                        <TaskDetailModal task={e.row} />
+                        { this.allowKillTransactions() ? 
+                            <KillTransaction 
+                                member={this.props.node} 
+                                transaction={e.row.transaction} /> : '' }
+                    </span>);
+                },
+                appliesTo: allVersions,
+            },
+            {
+                Header: 'ID',
                 accessor: 'transaction.id',
                 show: true,
+                // Neo4j IDs are things like 'transaction-123' which is redundant and too long to display.
+                Cell: ({ row }) => (_.get(row, 'transaction.id') || '').replace(/transaction-/, ''),
+                appliesTo: allVersions,
             },
-            { 
-                Header: 'Query', 
+            {
+                Header: 'Query',
                 accessor: 'query.query',
                 style: { textAlign: 'left' },
                 show: true,
+                appliesTo: allVersions,
             },
             {
                 Header: 'Client',
-                Cell: ({ row }) => 
-                    (   (_.get(row, 'connection.connector') || 'bolt') + '://' + 
-                        _.get(row, 'connection.clientAddress') + ' (' + 
-                        _.get(row, 'connection.userAgent') + ')'),
+                Cell: fullClientAddress,
+                appliesTo: v3_5_andUp,
             },
             {
                 Header: 'Username',
                 accessor: 'connection.username',
+                appliesTo: v3_5_andUp,
             },
             {
                 Header: 'Age',
                 Cell: ({ row }) => age(_.get(row, 'transaction.startTime')),
+                appliesTo: allVersions,
             },
             {
                 Header: 'CPU (ms)',
                 accessor: 'transaction.cpuTimeMillis',
-                Cell: fields.numField,              
+                Cell: fields.numField,
+                appliesTo: allVersions,
             },
             {
                 Header: 'Elapsed(ms)',
                 accessor: 'transaction.elapsedTimeMillis',
                 Cell: fields.numField,
+                appliesTo: allVersions,
             },
             {
                 Header: 'Idle(ms)',
                 accessor: 'transaction.idleTimeMillis',
                 Cell: fields.numField,
+                appliesTo: allVersions,
             },
             {
                 Header: 'Wait(ms)',
                 accessor: 'transaction.waitTimeMillis',
                 Cell: fields.numField,
+                appliesTo: allVersions,
             },
-
-            { 
-                Header: 'Connection', 
-                accessor: 'connection', 
+            {
+                Header: 'Connection',
+                accessor: 'connection',
                 show: false,
                 excludeFromCSV: true,
                 Cell: fields.jsonField,
+                appliesTo: v3_5_andUp,
             },
             {
                 Header: 'Transaction',
@@ -102,6 +135,7 @@ class Tasks extends Component {
                 show: false,
                 excludeFromCSV: true,
                 Cell: fields.jsonField,
+                appliesTo: allVersions,
             },
             {
                 Header: 'QueryDetails',
@@ -109,7 +143,8 @@ class Tasks extends Component {
                 show: false,
                 excludeFromCSV: true,
                 Cell: fields.jsonField,
-            },            
+                appliesTo: allVersions,
+            },
 
             // All fields below this are hidden by default and not
             // shown to the user, but destructured in this way so
@@ -124,7 +159,7 @@ class Tasks extends Component {
 
             // TRANSACTION PROPERTIES
             ...[
-                'metaData', 'startTime', 'protocol', 
+                'metaData', 'startTime', 'protocol',
                 'clientAddress', 'requestUri', 'currentQueryId',
                 'currentQuery', 'activeLockCount', 'status',
                 'resourceInformation', 'elapsedTimeMillis',
@@ -132,7 +167,7 @@ class Tasks extends Component {
             ].map(sf => createHiddenColumnFromSubfield('transaction', sf)),
 
             ...[
-                'id', 'parameters', 'planner', 'runtime', 
+                'id', 'parameters', 'planner', 'runtime',
                 'indexes', 'startTime',
                 'allocatedBytes', 'pageHits', 'pageFaults',
             ].map(sf => createHiddenColumnFromSubfield('query', sf)),
@@ -140,47 +175,41 @@ class Tasks extends Component {
         rate: 1000,
     };
 
+    allowKillTransactions() {
+        return window.halinContext.userIsAdmin() && v3_5_andUp(window.halinContext.getVersion());
+    }
+
     componentWillMount() {
         // We use a different query according to supported features if 3.5 is present.
         const version = window.halinContext.getVersion();
+        let query = queryLibrary.DBMS_34_TASKS.getQuery();
+        const columns = this.state.columns.filter(c => {
+            if (!c.appliesTo) { return true; }
+            return c.appliesTo(version);
+        });
+
         if (version.major >= 3 && version.minor >= 5) {
-            this.setState({
-                query: queryLibrary.DBMS_35_TASKS.getQuery()
-            });
+            query = queryLibrary.DBMS_35_TASKS.getQuery();
         }
+
+        this.setState({ query, columns });
     }
 
     open = (row) => {
         this.setState({ selected: row });
     };
 
-    detailModal({ row }) {
-        return (
-            <Modal size='fullscreen' closeIcon
-                trigger={
-                    <Button compact 
-                        disabled={false}
-                        onClick={e => this.open(row)}
-                        type='submit' icon="info"/>
-                }>
-                <Header>Query Detail</Header>
-                <Modal.Content scrolling>
-                    <TaskDetail task={this.state.selected} />
-                </Modal.Content>
-            </Modal>
-        );
-    }
-
     render() {
         return (
             <div className="Tasks">
-                <h3>Tasks <Explainer knowledgebase='Tasks'/></h3>
+                <h3>Tasks <Explainer knowledgebase='Tasks' /></h3>
                 <CypherDataTable
                     allowDownloadCSV={true}
                     node={this.props.node}
                     query={this.state.query}
                     allowColumnSelect={false}
                     sortable={true}
+                    defaultPageSize={10}
                     filterable={false}
                     refresh={this.state.childRefresh}
                     displayColumns={this.state.columns}
