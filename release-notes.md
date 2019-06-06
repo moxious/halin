@@ -1,5 +1,11 @@
 # Halin Release Notes
 
+## 0.11.1
+
+- Reorganize task pane to better display all transactions, even those with no currently executing query
+- Allow killing transactions in the Task pane (Neo4j >= 3.5)
+- Fixed minor packaging issue reported by community user
+
 ## 0.11
 
 - New UI layout which is more expand-able for larger clusters.
