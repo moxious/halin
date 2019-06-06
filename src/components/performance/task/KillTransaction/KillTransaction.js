@@ -15,11 +15,21 @@ export default class KillTransaction extends Component {
     getContent() {
         const tx = this.props.transaction;
 
+        const style = {
+            paddingLeft: '16px',
+            paddingRight: '16px',
+            paddingTop: '16px',
+            paddingBottom: '16px',
+            overflowX: 'scroll',
+        };
+
         if (tx.currentQuery) {
             const isLong = tx.currentQuery.length > 200;
-            return <div>
-                <pre>{tx.currentQuery.slice(0, 300) + (isLong ? '\n...(rest ommitted)' : '')}</pre>
-            </div>;
+            return (
+                <div style={style}>
+                    <pre>{tx.currentQuery.slice(0, 300) + (isLong ? '\n...(rest ommitted)' : '')}</pre>
+                </div>
+            );
         }
 
         return <p>Status: {tx.status}</p>;
