@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Button, Modal, Header } from 'semantic-ui-react';
-import TaskDetail from '../TaskDetail';
+import TaskDetail from '../TaskDetail/TaskDetail';
 
 export default class TaskDetailModal extends Component {
     state = {

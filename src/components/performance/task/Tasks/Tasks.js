@@ -4,14 +4,14 @@ import 'semantic-ui-css/semantic.min.css';
 import _ from 'lodash';
 import moment from 'moment';
 
-import queryLibrary from '../../../api/data/queries/query-library';
-import fields from '../../../api/data/fields';
+import queryLibrary from '../../../../api/data/queries/query-library';
+import fields from '../../../../api/data/fields';
 
-import hoc from '../../higherOrderComponents';
-import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
-import TaskDetailModal from './TaskDetailModal/TaskDetailModal';
-import Explainer from '../../ui/scaffold/Explainer/Explainer';
-import KillTransaction from './KillTransaction/KillTransaction';
+import hoc from '../../../higherOrderComponents';
+import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
+import TaskDetailModal from '../TaskDetailModal/TaskDetailModal';
+import Explainer from '../../../ui/scaffold/Explainer/Explainer';
+import KillTransaction from '../KillTransaction/KillTransaction';
 
 const age = since => {
     const start = moment.utc(since);
