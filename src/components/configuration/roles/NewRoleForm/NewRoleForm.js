@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { Form, Message } from 'semantic-ui-react';
-import 'semantic-ui-css/semantic.min.css';
 import './NewRoleForm.css';
 import status from '../../../../api/status/index';
 import hoc from '../../../higherOrderComponents';

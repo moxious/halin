@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import 'semantic-ui-css/semantic.min.css';
 import { Card } from 'semantic-ui-react';
 
 import MemoryMonitor from '../MemoryMonitor/MemoryMonitor';

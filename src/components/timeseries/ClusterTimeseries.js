@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import 'semantic-ui-css/semantic.min.css';
 import { Grid, Label } from 'semantic-ui-react';
 import {
     TimeSeries,
