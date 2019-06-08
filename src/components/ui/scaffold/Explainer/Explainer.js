@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { Popup, Icon } from 'semantic-ui-react'
 import kb from '../../../../api/knowledgebase';
 import sentry from '../../../../api/sentry/';
 
 const iGotNothing = 'No further information available';
 
-export default class Explainer extends Component {
+export default class Explainer extends PureComponent {
     getMainContent() {
         if (this.props.knowledgebase) {
             if (!kb[this.props.knowledgebase]) {

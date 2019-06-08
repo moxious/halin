@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { Message } from 'semantic-ui-react';
 import neo4jErrors from '../../api/driver/errors';
 import kb from '../../api/knowledgebase';
 
-export default class Troubleshooting extends Component {
+export default class Troubleshooting extends PureComponent {
     issuesAndResolutions = [
         {
             detector: neo4jErrors.unauthorized,

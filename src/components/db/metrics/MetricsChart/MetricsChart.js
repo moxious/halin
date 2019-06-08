@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import _ from 'lodash';
 import uuid from 'uuid';
 import {
@@ -44,7 +44,7 @@ const LABELS = {
     p999: '99.9 Percentile',
 };
 
-export default class MetricsChart extends Component {
+export default class MetricsChart extends PureComponent {
     getChartMin(mapKey='value') {
         return Math.min(...this.props.data.map(d => _.get(d.map, mapKey)))
     }

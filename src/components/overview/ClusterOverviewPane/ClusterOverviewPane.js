@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Card } from 'semantic-ui-react';
 
 import ClusterMemory from '../ClusterMemory/ClusterMemory';
@@ -10,19 +10,17 @@ import OpenFileDescriptors from '../OpenFileDescriptors/OpenFileDescriptors';
 
 import hoc from '../../higherOrderComponents';
 
-class ClusterOverviewPane extends Component {
-    render() {
-        return (
-            <Card.Group itemsPerRow={3} className="PerformancePane">
-                <ClusterMemory />
-                <UsedMemory />
-                <GCPauseTime />
-                <PageCacheTracking />
-                <TransactionsOpen />
-                <OpenFileDescriptors />
-            </Card.Group>
-        );
-    }
+const ClusterOverviewPane = (props) => {
+    return (
+        <Card.Group itemsPerRow={3} className="PerformancePane">
+            <ClusterMemory />
+            <UsedMemory />
+            <GCPauseTime />
+            <PageCacheTracking />
+            <TransactionsOpen />
+            <OpenFileDescriptors />
+        </Card.Group>
+    );
 }
 
 export default hoc.contentPaneComponent(ClusterOverviewPane);
