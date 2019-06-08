@@ -6,7 +6,6 @@ import queryLibrary from '../../../api/data/queries/query-library';
 import hoc from '../../higherOrderComponents';
 import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
-import 'react-table/react-table.css';
 import './Neo4jConfiguration.css';
 
 class Neo4jConfiguration extends Component {
