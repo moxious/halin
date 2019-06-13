@@ -1,5 +1,10 @@
 # Halin Release Notes
 
+## 0.11.2
+
+- Fixed packaging error that affected some Neo4j Desktop users.
+- Added contributions file (closes #95)
+
 ## 0.11.1
 
 - Reorganize task pane to better display all transactions, even those with no currently executing query
