@@ -22,7 +22,6 @@ chrome-user-data
 .vscode
 *.swp
 *.swo
-dist
 grafana
 src/creds/*
 reports
