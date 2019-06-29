@@ -59,6 +59,7 @@ export default class Troubleshooting extends Component {
                     }
                     </Message.Header>
                 { suggestions ? suggestions : '' }
+                { kb.links.troubleshootingHalin.render() }
                 { kb.links.troubleshootingConnections.render() }
             </Message>
         );
