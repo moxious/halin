@@ -24,6 +24,7 @@ class GCPauseTime extends Component {
                 <ClusterTimeseries key={this.state.key}
                     query={this.state.query} 
                     rate={this.state.rate}
+                    yAxis={{ label: 'Milliseconds' }}
                     displayProperty='duration'
                     chartType='scatter'
                 />
