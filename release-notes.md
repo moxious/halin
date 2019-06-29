@@ -1,5 +1,10 @@
 # Halin Release Notes
 
+## 0.11.3
+
+- Fixes #96, adds labels to GC Pause times
+- Addresses #98, more help for troubleshooting Halin connection issues
+
 ## 0.11.2
 
 - Fixed packaging error that affected some Neo4j Desktop users.
