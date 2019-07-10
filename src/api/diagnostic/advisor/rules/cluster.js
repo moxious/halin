@@ -1,5 +1,6 @@
 import InspectionResult from '../InspectionResult';
 import metarule from './metarule';
+import util from '../../../data/util';
 
 const clusterSize = metarule.clusterOnlyRule(pkg => {
     const findings = [];
@@ -20,6 +21,35 @@ const clusterSize = metarule.clusterOnlyRule(pkg => {
 
     return findings;
 });
+
+const nonStandardRoutingTTL = pkg => {
+    const findings = [];
+    const key = 'causal_clustering.cluster_routing_ttl';
+    const recommended = '300s';
+
+    pkg.nodes.forEach(node => {
+        const addr = node.basics.address;
+        const val = node.configuration[key];
+
+        const inMs = util.timeAbbreviation2Milliseconds(val);
+
+        if (Number.isNaN(Number(inMs))) {
+            findings.push(InspectionResult(InspectionResult.ERROR,
+                addr, `Configuration key ${key} has an invalid value: ${val}`,
+                null, `Consider setting this to the default value ${val}`));
+        } else if(inMs < util.timeAbbreviation2Milliseconds(recommended)) {
+            findings.push(new InspectionResult(InspectionResult.WARN,
+                addr, `Configuration key ${key} is set to a lower than default value`,
+                null, `Consider using the default (${recommended}) unless you are sure you know this
+                is right for you.  Inappropriately low values may cause performance issues.`));
+        } else {
+            findings.push(new InspectionResult(InspectionResult.PASS, addr,
+                'Cluster routing TTL looks good!', null, 'N/A'));
+        }
+    });
+
+    return findings;
+};
 
 const clusterShouldHaveWriter = pkg => {
     const findings = [];
@@ -49,5 +79,5 @@ const clusterShouldHaveWriter = pkg => {
 };
 
 export default [
-    clusterSize, clusterShouldHaveWriter,
+    clusterSize, clusterShouldHaveWriter, nonStandardRoutingTTL,
 ];

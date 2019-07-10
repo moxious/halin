@@ -1,3 +1,5 @@
+import sentry from "../sentry";
+
 export default {
     /**
      * Turn a number of bytes into a human readable label, like 4KB.
@@ -26,6 +28,21 @@ export default {
     signalStrengthFromFreshRatio: (fresh, total) => {
         const ratio = fresh / Math.max(total, 1);
         return ratio * 100;
+    },
+
+    timeAbbreviation2Milliseconds: abbrev => {
+        if (!abbrev) { return 0; }
+
+        if (abbrev.endsWith('ms')) {
+            return abbrev.slice(0, abbrev.length - 2) * 1;
+        } else if(abbrev.endsWith('s')) {
+            return abbrev.slice(0, abbrev.length - 1) * 1000;
+        } else if(abbrev.endsWith('m')) {
+            return abbrev.slice(0, abbrev.length - 1) * 1000 * 60;
+        }
+
+        sentry.warn(`Unrecognized time suffix ${abbrev}`);
+        return abbrev;
     },
 
     /**
