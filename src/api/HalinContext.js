@@ -435,6 +435,16 @@ export default class HalinContext {
 
                     this.base = _.cloneDeep(active.graph.connection.configuration.protocols.bolt);
 
+                    if (!this.base.password) {
+                        // See https://github.com/moxious/halin/issues/100
+                        // Arises when the Neo4j Desktop API semi-violates its own
+                        // contract, doesn't know the password, and so fails to pass it
+                        // to halin.
+                        throw new Error(`No password received from Neo4j Desktop.
+                        Please check that the option "Store Database Passwords" is
+                        enabled in Neo4j Desktop`);
+                    }
+
                     // Create a default driver to have around.
                     this.base.driver = this.driverFor(this.getBaseURI());
 
