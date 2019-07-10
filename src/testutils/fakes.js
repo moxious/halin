@@ -82,6 +82,7 @@ const DataFeed = (returnData = []) => {
         events,
         feedStartTime: new Date(),
         addListener: f => listeners.indexOf(f) === -1 ? listeners.push(f) : null,
+        addAugmentationFunction: f => f,
         currentState: sinon.fake.returns(state),
         min: sinon.fake.returns(13),
         max: sinon.fake.returns(31),
