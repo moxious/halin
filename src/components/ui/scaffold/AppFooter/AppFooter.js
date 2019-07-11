@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { List, Image } from 'semantic-ui-react';
 import api from '../../../../api/';
 import appPkg from '../../../../package.json';
@@ -9,7 +9,7 @@ import './AppFooter.css';
 
 import HalinCard from '../../scaffold/HalinCard/HalinCard';
 
-export default class AppFooter extends Component {
+export default class AppFooter extends PureComponent {
     render() {
         api.sentry.fine('build', build);
         const buildDate = moment.utc(build.date).format("YYYY-MM-DD");

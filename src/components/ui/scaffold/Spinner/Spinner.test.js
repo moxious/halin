@@ -7,7 +7,7 @@ describe('Spinner', function () {
 
     beforeEach(() => {
         component = ReactDOM.render(
-            <Spinner />,
+            Spinner(),
             document.createElement('div'));
     });
 

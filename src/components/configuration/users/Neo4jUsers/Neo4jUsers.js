@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
 import { Button, Confirm, Grid, Modal, Icon, Popup } from 'semantic-ui-react';
-import 'semantic-ui-css/semantic.min.css';
 import uuid from 'uuid';
 import moment from 'moment';
 

@@ -1,27 +1,39 @@
-import React, { Component } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
+
 import { Image } from 'semantic-ui-react';
 import './Spinner.css';
+
+const style = {
+    display:'block', 
+    marginLeft:'auto', 
+    marginRight: 'auto',
+};
 
 /**
  * Simple wrapper for a react loader component,
  * so that we can style it consistenty across components
  */
-export default class Spinner extends Component {
-    render() {
-        return (
-            <div className='Spinner'>                
-                <Image 
-                    className='Spinner-logo' 
-                    style={{
-                        display:'block', 
-                        marginLeft:'auto', 
-                        marginRight: 'auto',
-                    }} 
-                    src='img/neo4j_logo_globe.png' 
-                    size='mini' 
-                />
-                { this.props.text || 'Loading' }
-            </div>
-        )
-    }
+const Spinner = (props = {}) => {
+    return (
+        <div className='Spinner'>                
+            <Image 
+                className='Spinner-logo' 
+                style={style} 
+                src='img/neo4j_logo_globe.png' 
+                size='mini' 
+            />
+            { props.text || 'Loading...' }
+        </div>
+    );
 }
+
+Spinner.defaultProps = {
+    text: 'Loading',
+}
+
+Spinner.props = {
+    text: PropTypes.string,
+}
+
+export default Spinner;

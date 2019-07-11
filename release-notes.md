@@ -1,5 +1,13 @@
 # Halin Release Notes
 
+## 0.11.3
+
+- Fixes #96, adds labels to GC Pause times
+- Addresses #98, more help for troubleshooting Halin connection issues
+- Addresses #99, which detects non-standard cluster routing TTL in the diagnostics rules
+- Addresses #100, when Neo4j desktop doesn't pass the appropriate token to connect
+- Merges PR #94 (thanks to @wagnerjt) which improves various components to, among other things, use pure functional components where possible. 
+
 ## 0.11.2
 
 - Fixed packaging error that affected some Neo4j Desktop users.

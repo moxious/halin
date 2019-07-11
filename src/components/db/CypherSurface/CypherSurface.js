@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Spinner from '../../ui/scaffold/Spinner/Spinner';
 import ReactTable from 'react-table';
-import 'react-table/react-table.css';
 import CSVDownload from '../../data/download/CSVDownload';
 import sentry from '../../../api/sentry/index';
 import moment from 'moment';

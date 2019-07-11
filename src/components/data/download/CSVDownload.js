@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { CSVLink } from 'react-csv';
 import _ from 'lodash';
 import moment from 'moment';
@@ -19,7 +19,7 @@ const toCsvString = obj => {
     return !_.isNil(asString) ? asString.replace(/"/g, '""') : null;
 };
 
-export default class CSVDownload extends Component {
+export default class CSVDownload extends PureComponent {
     getButtonText() {
         return this.props.title ? this.props.title : 'Download';
     }
@@ -74,4 +74,4 @@ export default class CSVDownload extends Component {
             </CSVLink>
         );
     }
-};
+}

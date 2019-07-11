@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import 'semantic-ui-css/semantic.min.css';
 import { Grid, Label } from 'semantic-ui-react';
 import {
     TimeSeries,
@@ -390,7 +389,33 @@ class ClusterTimeseries extends Component {
             });
         }
 
-        return (this.mounted && hasData) ? (
+        if (!this.mounted || !hasData) {
+            return <Spinner active={true} />;
+        }
+
+        // For both the yAxis and the container, define some defaults, permitting overrides to be
+        // passed in via props.
+        const yAxisProps = _.merge({
+            id: 'y',
+            width: 70,
+            showGrid: true,
+            type: 'linear',
+            min: this.getChartMin(),
+            max: this.getChartMax(),
+        }, this.props.yAxis || {});
+
+        const containerProps = _.merge({
+            showGrid: this.showGrid,
+            showGridPosition: this.showGridPosition,
+            width: this.width,
+            enablePanZoom: true,
+            trackerPosition: this.state.tracker,
+            onTrackerChanged: this.handleTrackerChanged,
+            onTimeRangeChanged: this.handleTimeRangeChange,
+            timeRange: this.displayTimeRange()
+        }, this.props.container || {});
+
+        return (
             <div className="CypherTimeseries">
                 <Grid>
                     <Grid.Row columns={1} className='CypherTimeseriesLegend'>
@@ -410,24 +435,9 @@ class ClusterTimeseries extends Component {
                     </Grid.Row>
                     <Grid.Row columns={1} className='CypherTimeseriesContent'>
                         <Grid.Column textAlign='left'>
-                            <ChartContainer
-                                showGrid={this.showGrid}
-                                showGridPosition={this.showGridPosition}
-                                width={this.width}
-                                enablePanZoom={true}
-                                trackerPosition={this.state.tracker}
-                                onTrackerChanged={this.handleTrackerChanged}
-                                onTimeRangeChanged={this.handleTimeRangeChange}
-                                timeRange={this.displayTimeRange()}>
-
+                            <ChartContainer {...containerProps}>
                                 <ChartRow height="150">
-                                    <YAxis id="y"
-                                        min={this.getChartMin()}
-                                        max={this.getChartMax()}
-                                        width="70"
-                                        format={this.props.yAxisFormat}
-                                        showGrid={true}
-                                        type="linear" />
+                                    <YAxis {...yAxisProps} />
                                     <Charts>
                                         {
                                             this.nodes.map((addr /* , idx */) => {
@@ -454,7 +464,7 @@ class ClusterTimeseries extends Component {
 
                 { this.renderChartMetadata() }
             </div>
-        ) : <Spinner active={true} />;
+        );
     }
 }
 

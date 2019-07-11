@@ -10,9 +10,8 @@ describe('Metric Description', function() {
         window.halinContext = fakes.HalinContext([ { x: 1 }]);
         node = fakes.ClusterMember([ { x: 1 } ]);
 
-
         component = ReactDOM.render(
-            <MetricDescription metric='foo.bar.baz'/>,
+            MetricDescription({ metric: 'foo.bar.baz' }),
             document.createElement('div'));
     });
 

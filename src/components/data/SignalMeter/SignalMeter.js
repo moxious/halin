@@ -1,22 +1,22 @@
-import React, { Component } from 'react'
+import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types';
 
-// Adapted from MIT licensed code here: https://github.com/mbrookes/react-mobile-signal-strength
-class SignalMeter extends Component {
-    state = {
-        containerStyle: {
-            width: 30,
-            height: 30,
-            padding: '2px',
-            margin: '10px',
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'space-between',
-            borderRadius: 2,
-            background: 'transparent',
-        },
-    };
+const style = {
+    containerStyle: {
+        width: 30,
+        height: 30,
+        padding: '2px',
+        margin: '10px',
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'space-between',
+        borderRadius: 2,
+        background: 'transparent',
+    },
+};
 
+// Adapted from MIT licensed code here: https://github.com/mbrookes/react-mobile-signal-strength
+class SignalMeter extends PureComponent {
     barStyle(bar) {
         let color;
 
@@ -38,7 +38,7 @@ class SignalMeter extends Component {
 
     render() {
         return (
-            <div style={this.state.containerStyle}>
+            <div style={style.containerStyle}>
                 <div style={this.barStyle(1)} />
                 <div style={this.barStyle(2)} />
                 <div style={this.barStyle(3)} />
@@ -52,4 +52,4 @@ SignalMeter.propTypes = {
     strength: PropTypes.number.isRequired,
 }
 
-export default SignalMeter
+export default SignalMeter;

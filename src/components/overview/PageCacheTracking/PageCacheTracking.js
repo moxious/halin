@@ -113,8 +113,8 @@ class PageCacheTracking extends Component {
 
                 <ClusterTimeseries key={this.state.key}
                     min={this.state.min} 
-                    max={this.state.max} 
-                    yAxisFormat={this.state.yAxisFormat}
+                    max={this.state.max}
+                    yAxis={{ format: this.state.yAxisFormat }}
                     feedMaker={this.dataFeedMaker}
                     displayProperty={this.state.displayProperty}
                 />

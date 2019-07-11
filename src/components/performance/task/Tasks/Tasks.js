@@ -1,6 +1,4 @@
 import React, { Component } from "react";
-import 'react-table/react-table.css';
-import 'semantic-ui-css/semantic.min.css';
 import _ from 'lodash';
 import moment from 'moment';
 
