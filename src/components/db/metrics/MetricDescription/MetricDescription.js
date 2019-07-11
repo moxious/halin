@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import kb from '../../../../api/knowledgebase';
 import Explainer from '../../../ui/scaffold/Explainer/Explainer';
 
-const MetricDescription = (props) => {
+const MetricDescription = (props = {}) => {
     return (
         <div className='MetricDescription'>
             <h3>

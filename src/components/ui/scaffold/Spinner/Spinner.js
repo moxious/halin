@@ -14,7 +14,7 @@ const style = {
  * Simple wrapper for a react loader component,
  * so that we can style it consistenty across components
  */
-const Spinner = (props) => {
+const Spinner = (props = {}) => {
     return (
         <div className='Spinner'>                
             <Image 
@@ -23,7 +23,7 @@ const Spinner = (props) => {
                 src='img/neo4j_logo_globe.png' 
                 size='mini' 
             />
-            { props.text }
+            { props.text || 'Loading...' }
         </div>
     );
 }

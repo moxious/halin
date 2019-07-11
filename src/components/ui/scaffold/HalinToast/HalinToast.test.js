@@ -7,7 +7,7 @@ describe('Metric Description', function() {
     
     beforeEach(() => {
         component = ReactDOM.render(
-            <HalinToast />,
+            HalinToast(),
             document.createElement('div'));
     });
 
