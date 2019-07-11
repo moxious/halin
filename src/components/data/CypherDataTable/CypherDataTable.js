@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import ReactTable from 'react-table';
-import 'react-table/react-table.css';
 import _ from 'lodash';
 import { Grid } from 'semantic-ui-react';
 import uuid from 'uuid';

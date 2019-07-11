@@ -1,4 +1,5 @@
-import React, { Component } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 
 import api from '../../../api';
 
@@ -6,18 +7,22 @@ import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 import CypherPieChart from '../../data/CypherPieChart/CypherPieChart';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
-export default class DiskUtilizationPieChart extends Component {
-    render() {
-        return (
-            <HalinCard>
-                <h3>Data on Disk <Explainer knowledgebase='DiskUtilization' /></h3>
+const DiskUtilizationPieChart = (props) => {
+    return (
+        <HalinCard>
+            <h3>Data on Disk <Explainer knowledgebase='DiskUtilization' /></h3>
 
-                <CypherPieChart
-                    query={api.queryLibrary.JMX_DISK_UTILIZATION.query}
-                    member={this.props.node}
-                    title="Title"
-                    units="GB" />
-            </HalinCard>
-        );
-    }
+            <CypherPieChart
+                query={api.queryLibrary.JMX_DISK_UTILIZATION.query}
+                member={props.node}
+                title="Title"
+                units="GB" />
+        </HalinCard>
+    );
 };
+
+DiskUtilizationPieChart.props = {
+    node: PropTypes.object.isRequired, // TODO: shape?
+}
+
+export default DiskUtilizationPieChart;

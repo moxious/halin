@@ -1,6 +1,5 @@
 import React from 'react';
 import { Message } from 'semantic-ui-react';
-import 'semantic-ui-css/semantic.min.css';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import sentry from '../sentry/index';

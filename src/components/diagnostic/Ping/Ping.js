@@ -69,9 +69,9 @@ export default class Ping extends Component {
     }
 
     render() {
-        let message = status.formatStatusMessage(this);
+        const message = status.formatStatusMessage(this);
 
-        let rows = [
+        const rows = [
             { header: 'Machine', show: true, render: r => <NodeLabel node={r.clusterMember} /> },
             { header: 'Role', show: true, render: r => r.clusterMember.role },
             { header: 'Result (ms)', show: true, render: r => r.elapsedMs },

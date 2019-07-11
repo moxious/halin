@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import moment from 'moment';
 import { Button, Icon } from 'semantic-ui-react';
 import _ from 'lodash';
 
-export default class JSONDownload extends Component {
+export default class JSONDownload extends PureComponent {
     buildURI = data => {
         const pretty = JSON.stringify(data, null, 2);
         const blob = new Blob([pretty], { type: 'text/json' });
@@ -37,4 +37,4 @@ export default class JSONDownload extends Component {
             </Button>
         );
     }
-};
+}

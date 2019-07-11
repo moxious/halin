@@ -1,9 +1,9 @@
-import React, { Component } from 'react';
+import React, { PureComponent } from 'react';
 import { List, Icon, Grid } from 'semantic-ui-react'
 import './DetectedSettings.css';
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 
-export default class DetectedSettings extends Component {
+export default class DetectedSettings extends PureComponent {
     lineItem(value, name) {
         if (value) {
             return <span><Icon name='check' color='green'/> { name }</span>
