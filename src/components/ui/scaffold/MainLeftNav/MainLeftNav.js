@@ -6,6 +6,7 @@ import PermissionsPane from '../../../configuration/PermissionsPane/PermissionsP
 import SettingsPane from '../../../settings/SettingsPane/SettingsPane';
 import DiagnosticsPane from '../../../diagnostic/DiagnosticPane/DiagnosticPane';
 import MemberSelector from '../MemberSelector/MemberSelector';
+import DatabaseSelector from '../DatabaseSelector/DatabaseSelector';
 import sentry from '../../../../api/sentry';
 
 const segmentStyle = {
@@ -70,6 +71,8 @@ export default class MainLeftNav extends Component {
             return this.segmentWrap(<SettingsPane />);
         } else if (this.state.section === 'diagnostics') {
             return this.segmentWrap(<DiagnosticsPane />);
+        } else if (this.state.section === 'databases') {
+            return this.segmentWrap(<DatabaseSelector clickCount={this.state.toggleCounter} />);
         }
 
         return 'No child tab';
@@ -107,6 +110,12 @@ export default class MainLeftNav extends Component {
                 text: 'Cluster Members',
                 visible: () => true,
                 icon: <Icon size={size} name='tv' />,
+            },
+            {
+                section: 'databases',
+                text: 'Databases',
+                visible: () => true,
+                icon: <Icon size={size} name='database' />,
             },
             {
                 section: 'users',

@@ -31,6 +31,7 @@ export default class DetectedSettings extends PureComponent {
             ctx.isCommunity() ? this.lineItem(true, 'Community') : this.lineItem(true, 'Enterprise'),
             this.lineItem(ctx.supportsAuth(), 'Authorization'),
             this.lineItem(ctx.supportsNativeAuth(), 'Native Auth'),
+            this.lineItem(ctx.supportsMultiDatabase(), 'Multi-Database'),
             this.lineItem(ctx.supportsSystemGraph(), 'System Graph'),
             this.lineItem(ctx.supportsAPOC(), 'APOC'),
             this.lineItem(ctx.supportsLogStreaming(), 'File Streaming'),

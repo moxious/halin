@@ -48,6 +48,23 @@ export default {
         return prom;
     },
 
+    hasMultiDatabase: node => {
+        const probePromise = node.run(queryLibrary.DBMS_40_SHOW_DATABASES)
+            .then(results => true)
+            .catch(err => {
+                const str = `${err}`;
+                if (str.indexOf('Invalid input')) {
+                    // This is what Neo4j does when it has no idea what you're talking 
+                    // about because you're issuing a >= 4.0 query to < 4.0.
+                    return false;
+                }
+                
+                sentry.warn('Feature probe for multi-database returned unexpected error', false);
+                return false;
+            });
+        return probePromise;
+    },
+
     hasDBStats: node => {
         // #operability
         // The full feature set needed for Halin was first introduced 

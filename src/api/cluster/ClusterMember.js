@@ -158,6 +158,10 @@ export default class ClusterMember {
         return this.dbms.csvMetricsEnabled;
     }
 
+    supportsMultiDatabase() {
+        return this.dbms.multidatabase;
+    }
+
     /**
      * Returns true if the context provides for native auth management, false otherwise.
      */
@@ -289,6 +293,8 @@ export default class ClusterMember {
                 .then(metrics => { this.metrics = metrics; }),
             () => featureProbes.hasDBStats(this)
                 .then(result => { this.dbms.hasDBStats = result }),
+            () => featureProbes.hasMultiDatabase(this)
+                .then(result => { this.dbms.multidatabase = result }),
             () => this.getMaxHeap().then(maxHeap => {
                 this.dbms.maxHeap = maxHeap;
             }),

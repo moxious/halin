@@ -6,7 +6,7 @@ import { Card } from 'semantic-ui-react';
 import MemoryMonitor from '../MemoryMonitor/MemoryMonitor';
 import SystemLoad from '../SystemLoad/SystemLoad';
 import TransactionMonitor from '../TransactionMonitor/TransactionMonitor';
-import DiskUtilizationPieChart from '../DiskUtilizationPieChart/DiskUtilizationPieChart';
+// import DiskUtilizationPieChart from '../../database/DiskUtilizationPieChart/DiskUtilizationPieChart';
 
 const PerformancePane = (props) => {
     return (
@@ -14,7 +14,7 @@ const PerformancePane = (props) => {
             <SystemLoad node={props.node} />
             <MemoryMonitor node={props.node} />
             <TransactionMonitor node={props.node} />
-            <DiskUtilizationPieChart node={props.node} />
+            {/* <DiskUtilizationPieChart node={props.node} /> */}
         </Card.Group>
     );
 }

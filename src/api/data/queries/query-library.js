@@ -40,6 +40,8 @@ import DBMS_LIST_ACTIVE_LOCKS from './dbms/listActiveLocks';
 import DBMS_35_TASKS from './dbms/3.5/tasks';
 import DBMS_34_TASKS from './dbms/3.4/tasks';
 
+import DBMS_40_SHOW_DATABASES from './dbms/4.0/showDatabases';
+
 import APOC_LOG_STREAM from './apoc/logStream';
 import APOC_VERSION from './apoc/version';
 
@@ -93,6 +95,8 @@ export default {
 
     DBMS_34_TASKS,
     DBMS_35_TASKS,
+
+    DBMS_40_SHOW_DATABASES,
 
     APOC_LOG_STREAM,
     APOC_VERSION,

@@ -11,6 +11,7 @@ import DataFeed from './data/DataFeed';
 import neo4j from './driver';
 import neo4jErrors from './driver/errors';
 import errors from './driver/errors';
+import Database from './Database';
 
 /**
  * HalinContext is a controller object that keeps track of state and permits diagnostic
@@ -37,6 +38,10 @@ export default class HalinContext {
 
     members() {
         return this.clusterMembers;
+    }
+
+    databases() {
+        return this.clusterDatabases;
     }
 
     getWriteMember() {
@@ -179,6 +184,10 @@ export default class HalinContext {
         return this.getWriteMember().supportsSystemGraph();
     }
 
+    supportsMultiDatabase() {
+        return this.getWriteMember().supportsMultiDatabase();
+    }
+
     /**
      * Returns true if the context supports authorization overall.
      */
@@ -291,6 +300,17 @@ export default class HalinContext {
 
     getCurrentUser() {
         return this.currentUser;
+    }
+
+    checkDatabases(driver) {
+        // When 4.0 is ready, do "SHOW DATABASES" here.
+        return Promise.resolve(true)
+            .then(databases => {
+                sentry.info('Faking databases pre 4.0');
+                this.clusterDatabases = [
+                    new Database('default', 'online', true),
+                ];
+            })
     }
 
     checkUser(driver /*, progressCallback */) {
@@ -452,6 +472,7 @@ export default class HalinContext {
                     return Promise.all([
                         this.checkUser(this.base.driver, progressCallback),
                         this.checkForCluster(active, progressCallback),
+                        this.checkDatabases(this.base.driver),
                     ]);
                 })
                 .then(() => {
