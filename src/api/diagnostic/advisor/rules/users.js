@@ -1,4 +1,4 @@
-import InspectionResult from '../InspectionResult';
+import Advice from '../Advice';
 import _ from 'lodash';
 import metarule from './metarule';
 import sentry from '../../../sentry/index';
@@ -13,23 +13,22 @@ const atLeastOneAdmin = metarule.enterpriseOnlyRule(pkg => {
         const addr = node.basics.address;
         const admins = node.users.filter(u => u.roles.indexOf('admin') > -1);
         if (admins.length === 0) {
-            findings.push(new InspectionResult(
-                InspectionResult.ERROR, addr,
-                `Machine has no admin users`,
-                'Ensure system has a user with role admin'
-            ));
+            findings.push(Advice.error({
+                addr,
+                finding: `Machine has no admin users`,
+                advice: 'Ensure system has a user with role admin',
+            }));
         } else {
-            findings.push(new InspectionResult(
-                InspectionResult.PASS, addr,
-                `Machine has admin users specified`
-            ));
+            findings.push(Advice.pass({
+                addr, finding: `Machine has admin users specified`,
+            }));
 
             if (admins.length > 5) {
-                findings.push(new InspectionResult(
-                    InspectionResult.WARN, addr,
-                    `Machine has a large number (${admins.length}) of users with admin privileges`,
-                    'Periodically review permissions, and limit users to only the permissions they require'
-                ));
+                findings.push(Advice.warn({
+                    addr,
+                    finding: `Machine has a large number (${admins.length}) of users with admin privileges`,
+                    advice: 'Periodically review permissions, and limit users to only the permissions they require',
+                }));
             }
         }
     });
@@ -92,30 +91,30 @@ const userConsistency = pkg => {
 
         if(userDifference.size > 0) {
             const diff = [...userDifference].join(', ');
-            findings.push(new InspectionResult(
-                InspectionResult.ERROR, addr,
-                `Machine is missing users ${diff} which are defined elsewhere in the cluster`,
-                'Consider creating the appropriate users to sync them across the cluster'
-            ));
+            findings.push(Advice.error({
+                addr,
+                finding: `Machine is missing users ${diff} which are defined elsewhere in the cluster`,
+                advice: 'Consider creating the appropriate users to sync them across the cluster',
+            }));
         } else {
-            findings.push(new InspectionResult(
-                InspectionResult.PASS, addr,
-                `Machine has a consistent user set`
-            ));
+            findings.push(Advice.pass({
+                addr,
+                finding: `Machine has a consistent user set`
+            }));
         }
 
         if (roleDifference.size > 0) {
             const diff = [...roleDifference].join(', ');
-            findings.push(new InspectionResult(
-                InspectionResult.ERROR, addr,
-                `Machine is missing roles ${diff} which are defined elsewhere in the cluster`,
-                'Consider creating the appropriate roles to sync them across the cluster'
-            ));
+            findings.push(Advice.error({
+                addr,
+                finding: `Machine is missing roles ${diff} which are defined elsewhere in the cluster`,
+                advice: 'Consider creating the appropriate roles to sync them across the cluster',
+            }));
         } else {
-            findings.push(new InspectionResult(
-                InspectionResult.PASS, addr,
-                `Machine has a consistent role set`
-            ));
+            findings.push(Advice.pass({
+                addr,
+                finding: `Machine has a consistent role set`,
+            }));
         }
     });
     

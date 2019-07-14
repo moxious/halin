@@ -1,4 +1,4 @@
-import InspectionResult from '../InspectionResult';
+import Advice from '../Advice';
 import _ from 'lodash';
 
 const versionConsistency = pkg => {
@@ -14,23 +14,16 @@ const versionConsistency = pkg => {
     const uniqueVersions = _.uniq(neo4jVersionsFound);
         
     if (uniqueVersions.length === 1) {
-        findings.push(new InspectionResult(
-            InspectionResult.PASS,
-            'overall',
-            `All machines are running the same version of Neo4j, ${uniqueVersions[0]}`,
-            null,
-            'N/A'
-        ));
+        findings.push(Advice.pass({
+            finding: `All machines are running the same version of Neo4j, ${uniqueVersions[0]}`,
+        }));
     } else {
-        findings.push(new InspectionResult(
-            InspectionResult.ERROR,
-            'overall',
-            `Machines in your cluster are running different versions of Neo4j!
+        findings.push(Advice.error({
+            finding: `Machines in your cluster are running different versions of Neo4j!
             Detected versions:  ${uniqueVersions.join(', ')}
             `,
-            null,
-            'Consider baselining all machines on one version.'
-        ));
+            advice: 'Consider baselining all machines on one version.'
+        }));
     }
 
     return findings;

@@ -1,4 +1,4 @@
-import InspectionResult from '../InspectionResult';
+import Advice from '../Advice';
 import metarule from './metarule';
 
 const ports = pkg => {
@@ -31,18 +31,19 @@ const ports = pkg => {
             const port = val.split(':')[1] || 'unknown';
 
             if (port !== expected[settingName]) {
-                findings.push(new InspectionResult(InspectionResult.INFO, 
-                    who,
-                    `The port configured for ${settingName} is ${port}, which is non-standard`,
-                    null,
-                    `Consider using the default port, ${expected[settingName]} if firewall rules allow.`));
+                findings.push(Advice.info({
+                    addr: who,
+                    finding: `The port configured for ${settingName} is ${port}, which is non-standard`,
+                    advice: `Consider using the default port, ${expected[settingName]} if firewall rules allow.`,
+                }));
                 looksGood = false;
             }
         });
 
         if (looksGood) {
-            findings.push(new InspectionResult(InspectionResult.PASS,
-                who, `Network port settings look good!`));
+            findings.push(Advice.pass({
+                addr: who, finding: 'Network port settings look good!',
+            }));
         }
     });
 
@@ -58,11 +59,12 @@ const netAddrs = pkg => {
         const val = node.configuration['dbms.connectors.default_advertised_address'];
 
         if (val.match(/^10\.*/) || val.match(/^192\.168\.*/)) {
-            findings.push(new InspectionResult(InspectionResult.WARN,
-                who,
-                `Your default_advertised_address is an internal reserved IP address.
+            findings.push(Advice.warn({
+                addr: who,
+                finding: `Your default_advertised_address is an internal reserved IP address.
                  This configuration is likely to cause problems for other users on other networks`,
-                 null, 'Set dbms.connectors.default_advertised_address to an externally valid IP or DNS name'));
+                advice: 'Set dbms.connectors.default_advertised_address to an externally valid IP or DNS name',
+            }));
         }
     });
 
@@ -81,24 +83,27 @@ const backup = metarule.enterpriseOnlyRule(pkg => {
         const addr = node.basics.address;
 
         if (isBackupEnabled(node)) {
-            const backupAddr = ''+node.configuration['dbms.backup.address'];
+            const backupAddr = '' + node.configuration['dbms.backup.address'];
 
             if(backupAddr.match(/(localhost|127\.0\.0\.1)/i)) {
-                findings.push(new InspectionResult(InspectionResult.PASS,
+                findings.push(Advice.pass({
                     addr,
-                    'Backups are enabled, but only on localhost.'));
+                    finding: 'Backups are enabled, but only on localhost.',
+                }));
             } else {
-                findings.push(new InspectionResult(InspectionResult.WARN,
+                findings.push(Advice.warn({
                     addr,
-                    `You have backups enabled on a remote network device or address (${backupAddr}).`,
-                    `For best security, please ensure you have proper firewalling 
-                    to allow ony authorized parties to access your backup address`));
+                    finding: `You have backups enabled on a remote network device or address (${backupAddr}).`,
+                    advice: `For best security, please ensure you have proper firewalling 
+                    to allow ony authorized parties to access your backup address`,
+                }));
             }
         } else {
-            findings.push(new InspectionResult(InspectionResult.INFO,
+            findings.push(Advice.info({
                 addr, 
-                'Backup is not enabled on this machine',
-                'Consider using backup when moving to production'));
+                finding: 'Backup is not enabled on this machine',
+                advice: 'Consider using backup when moving to production',
+            }));
         }
     });
 

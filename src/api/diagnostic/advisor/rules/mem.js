@@ -1,4 +1,4 @@
-import InspectionResult from '../InspectionResult';
+import Advice from '../Advice';
 import _ from 'lodash';
 import neo4j from '../../../driver';
 import sentry from '../../../sentry/index';
@@ -15,10 +15,11 @@ const memActuals = pkg => {
             const freeRatio = obs.physFree / obs.physTotal;
 
             if (!_.isNaN(freeRatio) && freeRatio <= 0.1) {
-                findings.push(new InspectionResult(InspectionResult.WARN,
+                findings.push(Advice.warn({
                     addr,
-                    'At time of measurement, your memory utilization was very high',
-                    'Consider looking at memory configuration for your system'));
+                    finding: 'At time of measurement, your memory utilization was very high',
+                    advice: 'Consider looking at memory configuration for your system'
+                }));
             }
         });
 
@@ -33,10 +34,11 @@ const pageCacheSizing = pkg => {
 
         if (!pageCache) {
             sentry.fine('PC bailout; no PC');
-            findings.push(new InspectionResult(InspectionResult.WARN, addr, 
-                'Because page cache is not set, we cannot evaluate appropriateness of your memory settings',
-                null, 
-                'For best performance, set heap and page cache sizes'));
+            findings.push(Advice.warn({
+                addr, 
+                finding: 'Because page cache is not set, we cannot evaluate appropriateness of your memory settings',
+                advice: 'For best performance, set heap and page cache sizes'
+            }));
             return;
         }
 
@@ -65,8 +67,11 @@ const pageCacheSizing = pkg => {
             pageCacheInBytes = base * multiplier;
         } else {
             sentry.fine('PC bailout; size is weird', pageCache);
-            findings.push(new InspectionResult(InspectionResult.WARN, addr, 
-                `Cannot determine data sizing of page cache setting ${pageCache}; check your configuration`));
+            findings.push(Advice.warn({
+                addr, 
+                finding: `Cannot determine data sizing of page cache setting ${pageCache}`,
+                advice: 'Check your configuration and explicitly configure page cache'
+            }));
             return;
         }
 
@@ -74,8 +79,10 @@ const pageCacheSizing = pkg => {
 
         if (!storeSizes) {
             sentry.fine('PC bailout; no store sizes');
-            findings.push(new InspectionResult(InspectionResult.WARN, addr,
-                'Unknown store sizes; cannot compute appropriateness of memory/page cache settings'));
+            findings.push(Advice.warn({
+                addr,
+                finding: 'Unknown store sizes; cannot compute appropriateness of memory/page cache settings',
+            }));
             return;
         }
 
@@ -104,19 +111,24 @@ const pageCacheSizing = pkg => {
             const probablyOK = needThisMuch * 0.9;   // 90% or more of your store in memory is pretty good.
 
             if (pageCacheInBytes >= tooMuchPageCache) {
-                findings.push(new InspectionResult(InspectionResult.WARN, addr,
-                    `Your page cache setting is more than 50% greater than your store on disk size.
+                findings.push(Advice.warn({
+                    addr,
+                    finding: `Your page cache setting is more than 50% greater than your store on disk size.
                     Store size=${needThisMuch}, page cache ${pageCacheInBytes} bytes (${pageCache})`,
-                    null,
-                    'You can reduce your page cache size to be more efficient with memory'));
+                    advice: 'You can reduce your page cache size to be more efficient with memory'
+                }));
             } else if (pageCacheInBytes >= probablyOK) {
-                findings.push(new InspectionResult(InspectionResult.PASS, addr,
-                    `Your page cache looks appropriately sized considering your store size on disk`));
+                findings.push(Advice.pass({
+                    addr,
+                    finding: `Your page cache looks appropriately sized considering your store size on disk`,
+                }));
             } else {
-                findings.push(new InspectionResult(InspectionResult.WARN, addr,
-                    `Your page cache setting is too small considering your store size.
-                    Store size=${needThisMuch} bytes, page cache ${pageCacheInBytes} bytes (${pageCache})`, null,
-                    'Consider increasing your page cache size to improve system performance'));
+                findings.push(Advice.warn({
+                    addr,
+                    finding: `Your page cache setting is too small considering your store size.
+                    Store size=${needThisMuch} bytes, page cache ${pageCacheInBytes} bytes (${pageCache})`,
+                    advice: 'Consider increasing your page cache size to improve system performance',
+                }));
             }
         }
     });
@@ -141,18 +153,20 @@ const memSettings = pkg => {
             const val = node.configuration[setting];
 
             if (!val) {
-                findings.push(new InspectionResult(InspectionResult.ERROR,
+                findings.push(Advice.error({
                     addr,
-                    `No value specified for ${setting}`, null,
-                    'For best performance, these values should be set. Consider running neo4j-admin memrec'));
+                    finding: `No value specified for ${setting}`, 
+                    advice: 'For best performance, these values should be set. Consider running neo4j-admin memrec',
+                }));
                 incomplete = true;
             }
         });
 
         if (!incomplete) {
-            findings.push(new InspectionResult(InspectionResult.PASS,
+            findings.push(Advice.pass({
                 addr, 
-                `Found configured memory settings.  Good!`));
+                finding: `Found configured memory settings.  Good!`,
+            }));
         }
 
         // Check for initial and max heap size, which should match.
@@ -161,9 +175,11 @@ const memSettings = pkg => {
 
         // Ship's suggestion.  Thanks ship!
         if (initial !== max) {
-            findings.push(new InspectionResult(InspectionResult.WARN, addr,
-                'Initial heap size and max heap size differ', null,
-                'For best performance, these values should match, to prevent rapid heap re-allocation'));
+            findings.push(Advice.warn({
+                addr,
+                finding: 'Initial heap size and max heap size differ', 
+                advice: 'For best performance, these values should match, to prevent rapid heap re-allocation',
+            }));
         }
     });
 
