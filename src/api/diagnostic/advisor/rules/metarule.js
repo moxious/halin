@@ -29,6 +29,20 @@ const enterpriseOnlyRule = ruleFunction => {
     };
 };
 
+/**
+ * 
+ * @param {*} pkg diagnostic package
+ * @param {*} configOption string with name of config option the rule is interested in
+ * @param {*} generator function which takes (addr, value, node) and returns [Advice]
+ */
+const forConfigOption = (pkg, configOption, generator) =>
+    pkg.nodes.map(node => {
+        const val = node.configuration[configOption];
+        const addr = node.basics.address;
+
+        return generator(addr, val, node);
+    });
+
 export default {
-    enterpriseOnlyRule, clusterOnlyRule,
+    enterpriseOnlyRule, clusterOnlyRule, forConfigOption,
 };

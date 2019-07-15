@@ -21,7 +21,7 @@ import indexAndConstraint from './rules/index-and-constraint';
 import users from './rules/users';
 import config from './rules/config';
 import versions from './rules/versions';
-import security from './rules/security';
+import security from './rules/security/';
 import plugins from './rules/plugins';
 import transactions from './rules/transactions';
 
