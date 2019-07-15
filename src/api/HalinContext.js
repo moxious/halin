@@ -302,15 +302,24 @@ export default class HalinContext {
         return this.currentUser;
     }
 
-    checkDatabases(driver) {
-        // When 4.0 is ready, do "SHOW DATABASES" here.
-        return Promise.resolve(true)
+    checkDatabases() {
+        return this.getClusterManager().getDatabases()
             .then(databases => {
-                sentry.info('Faking databases pre 4.0');
-                this.clusterDatabases = [
-                    new Database('default', 'online', true),
-                ];
-            })
+                this.clusterDatabases = databases;
+                return this.clusterDatabases;
+            });
+    }
+
+    /**
+     * Listener that fires in ClusterManager whenever a cluster-wide event happens.  This allows the
+     * context to be aware of things changing around it and adjust.
+     * @param {Object} event with keys date, payload, id, type
+     */
+    onClusterEvent(event) {
+        // Happens when databases get stopped/started/added/removed.
+        if (_.get(event, 'type') === 'database') {
+            return this.checkDatabases();
+        }
     }
 
     checkUser(driver /*, progressCallback */) {
@@ -472,9 +481,10 @@ export default class HalinContext {
                     return Promise.all([
                         this.checkUser(this.base.driver, progressCallback),
                         this.checkForCluster(active, progressCallback),
-                        this.checkDatabases(this.base.driver),
                     ]);
                 })
+                // Checking databases must be after checking for a cluster, since we need to know who leader is
+                .then(() => this.checkDatabases())
                 .then(() => {
                     this.getClusterManager().addEvent({
                         type: 'halin',

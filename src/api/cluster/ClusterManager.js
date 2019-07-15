@@ -6,6 +6,7 @@ import uuid from 'uuid';
 import Ring from 'ringjs';
 import neo4j from '../driver/index';
 import ql from '../data/queries/query-library';
+import Database from '../Database';
 
 /**
  * This is a controller for clusters.
@@ -67,6 +68,7 @@ export default class ClusterManager {
         _.set(data, 'payload', event.payload || null);
         _.set(data, 'id', uuid.v4());
         this.eventLog.push(data);
+        return this.ctx.onClusterEvent(event);
     }
 
     getEventLog() {
@@ -329,5 +331,82 @@ export default class ClusterManager {
 
         return Promise.all(allPromises)
             .then(packageClusterOpResults);
+    }
+
+    /**
+     * Checks for which databases are online
+     * @returns Array{Database}
+     */
+    getDatabases() {
+        return this.ctx.getWriteMember().run(ql.DBMS_4_SHOW_DATABASES)
+            .then(results => neo4j.unpackResults(results, {
+                required: ['name', 'status', 'default'],
+            }))
+            .then(results => results.map(r => new Database(r.name, r.status, r.default)))
+            .catch(err => {
+                const str = `${err}`;
+                // This is what Neo4j does when it has no idea what you're talking 
+                // about because you're issuing a >= 4.0 query to < 4.0.
+                if (!str.indexOf('Invalid input')) {
+                    sentry.warn('ClusterManager#getDatabases() returned unexpected error', err);
+                }
+                
+                sentry.info('Faking databases pre 4.0');
+                // Just like we fake single-node Neo4j instances as a cluster of one member,
+                // we fake non-multidb clusters as a multi-db of one database.  :)
+                return [ new Database('neo4j', 'online', true) ];
+            });
+    }
+
+    stopDatabase(db) {
+        if (!db || !db.name) { throw new Error('Invalid or missing database'); }
+
+        return this.ctx.getWriteMember().run(ql.DBMS_4_STOP_DATABASE, db)
+            .then(() => {
+                this.addEvent({
+                    type: 'database',
+                    message: `Stopped database ${db.name}`,
+                    payload: db,
+                });
+            });
+    }
+
+    startDatabase(db) {
+        if (!db || !db.name) { throw new Error('Invalid or missing database'); }
+
+        return this.ctx.getWriteMember().run(ql.DBMS_4_START_DATABASE, db)
+            .then(() => {
+                this.addEvent({
+                    type: 'database',
+                    message: `Started database ${db.name}`,
+                    payload: db,
+                });
+            });
+    }
+
+    dropDatabase(db) {
+        if (!db || !db.name) { throw new Error('Invalid or missing database'); }
+
+        return this.ctx.getWriteMember().run(ql.DBMS_4_DROP_DATABASE, db)
+            .then(results => {
+                this.addEvent({
+                    type: 'database',
+                    message: `Dropped database ${db.name}`,
+                });
+            })
+    }
+
+    createDatabase(name) {
+        return this.ctx.getWriteMember().run(ql.DBMS_4_CREATE_DATABASE, { name })
+            .then(results => neo4j.unpackResults(results, {
+                required: ['name', 'status'],
+            }))
+            .then(results => {
+                sentry.info('Created database; results ', results);
+                this.addEvent({
+                    type: 'database',
+                    message: `Created database ${name}`,
+                });
+            });
     }
 }

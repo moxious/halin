@@ -40,7 +40,11 @@ import DBMS_LIST_ACTIVE_LOCKS from './dbms/listActiveLocks';
 import DBMS_35_TASKS from './dbms/3.5/tasks';
 import DBMS_34_TASKS from './dbms/3.4/tasks';
 
-import DBMS_40_SHOW_DATABASES from './dbms/4.0/showDatabases';
+import DBMS_4_SHOW_DATABASES from './dbms/4.0/showDatabases';
+import DBMS_4_START_DATABASE from './dbms/4.0/startDatabase';
+import DBMS_4_STOP_DATABASE from './dbms/4.0/stopDatabase';
+import DBMS_4_CREATE_DATABASE from './dbms/4.0/createDatabase';
+import DBMS_4_DROP_DATABASE from './dbms/4.0/dropDatabase';
 
 import APOC_LOG_STREAM from './apoc/logStream';
 import APOC_VERSION from './apoc/version';
@@ -96,7 +100,11 @@ export default {
     DBMS_34_TASKS,
     DBMS_35_TASKS,
 
-    DBMS_40_SHOW_DATABASES,
+    DBMS_4_SHOW_DATABASES,
+    DBMS_4_START_DATABASE,
+    DBMS_4_STOP_DATABASE,
+    DBMS_4_CREATE_DATABASE,
+    DBMS_4_DROP_DATABASE,
 
     APOC_LOG_STREAM,
     APOC_VERSION,

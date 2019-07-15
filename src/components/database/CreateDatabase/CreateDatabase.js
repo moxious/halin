@@ -1,12 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { Button, Modal, Form, Message } from 'semantic-ui-react';
+import _ from 'lodash';
+import sentry from '../../../api/sentry';
+import status from '../../../api/status/index';
 
 class CreateDatabase extends Component {
     state = {
         open: false,
         name: '',
         pending: false,
+        message: null,
+        error: null,
     };
 
     formValid = () => {
@@ -17,7 +22,27 @@ class CreateDatabase extends Component {
 
     ok = () => {
         console.log('TODO -- logic to create database named ', this.state.name);
-        this.setState({ open: false });
+        this.setState({ pending: true });
+        return window.halinContext.getClusterManager().createDatabase(this.state.name)
+            .then(() => {
+                this.setState({ 
+                    open: false, 
+                    message: status.message('Success', `Created database ${this.state.name}`),
+                    error: null,
+                });
+            })
+            .catch(err => {
+                sentry.error('Failed to create database', err);
+                this.setState({ 
+                    message: null, 
+                    error: status.message('Error',
+                        `Failed to create database ${this.state.name}: ${err}`),
+                });
+            })
+            .finally(() => {
+                this.setState({ pending: false });
+                status.toastify(this);
+            });
     }
     
     cancel = () => this.setState({ open: false });
@@ -32,12 +57,21 @@ class CreateDatabase extends Component {
         this.setState(mod);
     }
 
+    formHasErrors = () => {
+        if (_.isEmpty(this.state.name)) {
+            // user hasn't put anything in that's not an error.
+            return false;
+        }
+
+        return !this.formValid();
+    };
+
     render() {
         return (
             <Modal className='CreateDatabaseModal' open={this.state.open}>
                 <Modal.Header>Create Database</Modal.Header>
                 <Modal.Content>
-                    <Form error={this.state.name && !this.formValid()} size='small' style={{ textAlign: 'left' }}>
+                    <Form error={this.formHasErrors()} size='small' style={{ textAlign: 'left' }}>
                         <Form.Input 
                             fluid 
                             disabled={this.state.pending}
@@ -46,7 +80,7 @@ class CreateDatabase extends Component {
 
                         <Message
                             error
-                            header='Invalid database name'
+                            header={ this.state.error ? 'Error' : 'Invalid database name' }
                             content={
                                 <div>
                                     Database names may consist only of simple letters and numbers,
