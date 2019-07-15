@@ -18,26 +18,11 @@ class AdministerDatabase extends Component {
     }
 
     dropButton() {
-        const cancel = () => this.setState({ dropConfirmOpen: false });
-        const confirm = () => {
-            this.setState({ dropConfirmOpen: false });
-            this.drop();
-        };
-
         return (
-            <div>
-                <Button disabled={this.state.pending} size='large' negative onClick={() => this.setState({ dropConfirmOpen: true })}>
-                    <Icon name='delete' />
-                        Drop
-                </Button>
-
-                <Confirm
-                    open={this.state.dropConfirmOpen}
-                    content='Are you sure?  This action will DESTROY ALL DATA IN THE DATABASE and cannot be undone'
-                    onCancel={cancel}
-                    onConfirm={confirm}
-                />
-            </div>
+            <Button secondary disabled={this.state.pending} size='large' negative onClick={() => this.setState({ dropConfirmOpen: true })}>
+                <Icon name='delete' />
+                Drop
+            </Button>
         );
     }
 
@@ -95,14 +80,27 @@ class AdministerDatabase extends Component {
     }
 
     render() {
+        const cancel = () => this.setState({ dropConfirmOpen: false });
+        const confirm = () => {
+            this.setState({ dropConfirmOpen: false });
+            this.drop();
+        };
+
         return (
             <HalinCard>
                 <h3>Administer Database {this.props.database.name}</h3>
 
-                <Button.Group>
+                <div>
                     {this.props.database.isOnline() ? this.stopButton() : this.startButton()}
                     {this.dropButton()}
-                </Button.Group>
+                </div>
+
+                <Confirm
+                    open={this.state.dropConfirmOpen}
+                    content='Are you sure?  This action will DESTROY ALL DATA IN THE DATABASE and cannot be undone'
+                    onCancel={cancel}
+                    onConfirm={confirm}
+                />
             </HalinCard>
         );
     }
