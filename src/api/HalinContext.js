@@ -11,7 +11,6 @@ import DataFeed from './data/DataFeed';
 import neo4j from './driver';
 import neo4jErrors from './driver/errors';
 import errors from './driver/errors';
-import Database from './Database';
 
 /**
  * HalinContext is a controller object that keeps track of state and permits diagnostic

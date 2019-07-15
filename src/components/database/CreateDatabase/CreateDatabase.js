@@ -17,7 +17,7 @@ class CreateDatabase extends Component {
     formValid = () => {
         return this.state.name && 
             // Don't allow duplicate names
-            window.halinContext.databases().filter(db => db.name === this.state.name).length == 0;
+            window.halinContext.databases().filter(db => db.name === this.state.name).length === 0;
     }
 
     ok = () => {
