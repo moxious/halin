@@ -135,7 +135,7 @@ export default class ClusterMember {
      * false otherwise.
      */
     isEnterprise() {
-        return this.dbms.edition === 'enterprise';
+        return this.dbms.edition === 'enterprise' || this.dbms.edition === 'commercial';
     }
 
     isCommunity() {
