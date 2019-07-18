@@ -13,7 +13,7 @@ const PerformancePane = (props) => {
         <Card.Group itemsPerRow={2} className="PerformancePane">
             <SystemLoad node={props.node} />
             <MemoryMonitor node={props.node} />
-            <TransactionMonitor node={props.node} />
+            {/* <TransactionMonitor node={props.node} /> */}
             {/* <DiskUtilizationPieChart node={props.node} /> */}
         </Card.Group>
     );
