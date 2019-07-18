@@ -349,16 +349,28 @@ export default class ClusterMember {
      * that we can track the cluster node's responsiveness and performance over time.
      * @param {String | HalinQuery} query a cypher query
      * @param {Object} params parameters to pass to the query.
+     * @param database the name of the database to run the query against
      * @returns {Promise} which resolves to a neo4j driver result set
      */
-    run(query, params = {}) {
+    run(query, params = {}, database=null) {
         if (!this.driver) { throw new Error('ClusterMember has no driver!'); }
         if (!query) { throw new Error('Missing query'); }
 
         let s;
 
         const start = new Date().getTime();
-        return this.pool.acquire()
+
+        let getSessionPromise, poolSession;
+        
+        if (!database) {
+            getSessionPromise = this.pool.acquire();
+            poolSession = true;
+        } else {
+            getSessionPromise = Promise.resolve(this.driver.session({ database }));
+            poolSession = false;
+        }
+
+        return getSessionPromise
             .then(session => {
                 s = session;
                 // #operability: transaction metadata is disabled because it causes errors
@@ -388,8 +400,8 @@ export default class ClusterMember {
             })
             // Cleanup session.
             .finally(() => {
-                return this.pool.release(s)
-                    .catch(e => sentry.fine('Pool release error', e));
+                return poolSession ? this.pool.release(s)
+                    .catch(e => sentry.fine('Pool release error', e)) : true;
             });
     }
 }
