@@ -27,7 +27,7 @@
     "lodash": "^4.17.11",
     "mathjs": "^5.4.0",
     "moment": "^2.22.2",
-    "neo4j-driver": "^1.7.2",
+    "neo4j-driver": "^2.0.0-alpha03",
     "pondjs": "^0.8.9",
     "prop-types": "^15.6.0",
     "react": "^16.6.3",
