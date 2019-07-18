@@ -2,7 +2,8 @@ import HalinQuery from '../../HalinQuery';
 
 export default new HalinQuery({
     description: 'Starts a database',
-    query: `START DATABASE $name;`,
+    query: `START DATABASE $name`,
+    bare: true,
     parameters: {
         name: 'Name of the database',
     },

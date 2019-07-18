@@ -2,7 +2,8 @@ import HalinQuery from '../../HalinQuery';
 
 export default new HalinQuery({
     description: 'Stops a database',
-    query: `STOP DATABASE $name;`,
+    query: `STOP DATABASE $name`,
+    bare: true,
     parameters: {
         name: 'Name of the database',
     },

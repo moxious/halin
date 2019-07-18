@@ -2,7 +2,8 @@ import HalinQuery from '../../HalinQuery';
 
 export default new HalinQuery({
     description: 'Gets a list of the databases supported by the system',
-    query: `SHOW DATABASES;`,
+    query: `SHOW DATABASES`,
+    bare: true, // Do not disclaim
     columns: [
         { Header: 'Name', accessor: 'name' },
         { Header: 'Status', accessor: 'status' },

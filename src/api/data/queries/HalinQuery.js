@@ -30,7 +30,10 @@ class HalinQuery {
         }
 
         this.description = props.description || null;
-        this.query = HalinQuery.disclaim(props.query);
+
+        // If "bare" is truthy, do not disclaim the query.  This is needed
+        // for some 4.0 system commands.
+        this.query = props.bare ? props.query : HalinQuery.disclaim(props.query);
         this.columns = props.columns;
         this.dependency = props.dependency || (() => ({
             pass: true,
