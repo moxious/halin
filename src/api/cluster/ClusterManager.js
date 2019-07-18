@@ -8,6 +8,9 @@ import neo4j from '../driver/index';
 import ql from '../data/queries/query-library';
 import Database from '../Database';
 
+const SYSTEM_DB = 'system';
+const DEFAULT_DB = 'neo4j';
+
 /**
  * This is a controller for clusters.
  * 
@@ -68,7 +71,9 @@ export default class ClusterManager {
         _.set(data, 'payload', event.payload || null);
         _.set(data, 'id', uuid.v4());
         this.eventLog.push(data);
-        return this.ctx.onClusterEvent(event);
+        
+        this.ctx.onClusterEvent(event);
+        return event;
     }
 
     getEventLog() {
@@ -338,12 +343,13 @@ export default class ClusterManager {
      * @returns Array{Database}
      */
     getDatabases() {
-        return this.ctx.getWriteMember().run(ql.DBMS_4_SHOW_DATABASES)
+        return this.ctx.getWriteMember().run(ql.DBMS_4_SHOW_DATABASES, {}, SYSTEM_DB)
             .then(results => neo4j.unpackResults(results, {
                 required: ['name', 'status', 'default'],
             }))
             .then(results => results.map(r => new Database(r.name, r.status, r.default)))
             .catch(err => {
+                console.log('Show databases error',err);
                 const str = `${err}`;
                 // This is what Neo4j does when it has no idea what you're talking 
                 // about because you're issuing a >= 4.0 query to < 4.0.
@@ -361,7 +367,11 @@ export default class ClusterManager {
     stopDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getWriteMember().run(ql.DBMS_4_STOP_DATABASE, db)
+        return this.ctx.getWriteMember().run(`STOP DATABASE ${db.name}`, {}, SYSTEM_DB)
+            .then(results => {
+                console.log('stop results', results);
+                return results;
+            })
             .then(() => {
                 this.addEvent({
                     type: 'database',
@@ -374,7 +384,11 @@ export default class ClusterManager {
     startDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getWriteMember().run(ql.DBMS_4_START_DATABASE, db)
+        return this.ctx.getWriteMember().run(`START DATABASE ${db.name}`, {}, SYSTEM_DB)
+            .then(results => {
+                console.log('start results', results);
+                return results;
+            })
             .then(() => {
                 this.addEvent({
                     type: 'database',
@@ -387,20 +401,30 @@ export default class ClusterManager {
     dropDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getWriteMember().run(ql.DBMS_4_DROP_DATABASE, db)
+        return this.ctx.getWriteMember().run(`DROP DATABASE ${db.name}`, {}, SYSTEM_DB)
+            .then(results => {
+                console.log('drop results', results);
+                return results;
+            })
             .then(results => {
                 this.addEvent({
                     type: 'database',
                     message: `Dropped database ${db.name}`,
                 });
-            })
+            });
     }
 
     createDatabase(name) {
-        return this.ctx.getWriteMember().run(ql.DBMS_4_CREATE_DATABASE, { name })
-            .then(results => neo4j.unpackResults(results, {
-                required: ['name', 'status'],
-            }))
+        return this.ctx.getWriteMember().run(`CREATE DATABASE ${name}`, {}, SYSTEM_DB)
+            // TODO 2.0.0-alpha03 JS driver
+            // doesn't correctly read fields of the return type.
+            // .then(res => {
+            //     console.log(res);
+            //     return res;
+            // })
+            // .then(results => neo4j.unpackResults(results, {
+            //     required: ['name', 'status'],
+            // }))
             .then(results => {
                 sentry.info('Created database; results ', results);
                 this.addEvent({
