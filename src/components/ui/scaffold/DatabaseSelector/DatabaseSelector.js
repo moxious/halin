@@ -34,11 +34,12 @@ export default class DatabaseSelector extends Component {
 
     componentWillMount() {
         this.listenerFn = (e) => {
-            console.log('Listener in the DB selector fired with ', e);
             const dbs = window.halinContext.getClusterManager().databases();
 
             // The selected database could no longer exist, or it could now exist with a different
             // status.  For all of these reasons we must update the selection so the view knows.
+            // Never take the old selected, or you'll end up with wrong colored icon or
+            // some other issue.
             let selection = dbs.filter(db => db.getLabel() === this.state.selection.getLabel())[0];
             if (!selection) {
                 selection = dbs[0];
