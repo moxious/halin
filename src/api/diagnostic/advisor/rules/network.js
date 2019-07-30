@@ -56,14 +56,16 @@ const netAddrs = pkg => {
     pkg.nodes.forEach(node => {
         const who = node.basics.address;
 
-        const val = node.configuration['dbms.connectors.default_advertised_address'];
+        const k1 = 'dbms.connectors.default_advertised_address' // < 4.0
+        const k2 = 'dbms.default_advertised_address';  // ^4.0
+        const val = node.configuration[k1] || node.configuration[k2];
 
         if (val.match(/^10\.*/) || val.match(/^192\.168\.*/)) {
             findings.push(Advice.warn({
                 addr: who,
                 finding: `Your default_advertised_address is an internal reserved IP address.
                  This configuration is likely to cause problems for other users on other networks`,
-                advice: 'Set dbms.connectors.default_advertised_address to an externally valid IP or DNS name',
+                advice: 'Set default_advertised_address to an externally valid IP or DNS name',
             }));
         }
     });
