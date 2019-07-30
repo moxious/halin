@@ -49,7 +49,7 @@ export default {
     },
 
     hasMultiDatabase: node => {
-        const probePromise = node.run(queryLibrary.DBMS_4_SHOW_DATABASES)
+        const probePromise = node.run(queryLibrary.DBMS_4_SHOW_DATABASES, {}, 'system')
             .then(results => true)
             .catch(err => {
                 const str = `${err}`;
