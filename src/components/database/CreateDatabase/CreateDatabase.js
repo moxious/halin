@@ -5,19 +5,25 @@ import _ from 'lodash';
 import sentry from '../../../api/sentry';
 import status from '../../../api/status/index';
 
+const defaultState = {
+    open: false,
+    name: '',
+    pending: false,
+    message: null,
+    error: null,
+};
+
 class CreateDatabase extends Component {
-    state = {
-        open: false,
-        name: '',
-        pending: false,
-        message: null,
-        error: null,
-    };
+    state = _.cloneDeep(defaultState);
+
+    resetState() {
+        this.setState(_.cloneDeep(defaultState));
+    }
 
     formValid = () => {
         return this.state.name && 
             // Don't allow duplicate names
-            window.halinContext.databases().filter(db => db.name === this.state.name).length === 0;
+            window.halinContext.getClusterManager().databases().filter(db => db.name === this.state.name).length === 0;
     }
 
     ok = () => {
@@ -30,6 +36,10 @@ class CreateDatabase extends Component {
                     message: status.message('Success', `Created database ${this.state.name}`),
                     error: null,
                 });
+
+                if (this.props.onCreate) {
+                    return this.props.onCreate(this.state.name);
+                }
             })
             .catch(err => {
                 sentry.error('Failed to create database', err);
@@ -38,14 +48,24 @@ class CreateDatabase extends Component {
                     error: status.message('Error',
                         `Failed to create database ${this.state.name}: ${err}`),
                 });
+
+                if (this.props.onCancel) {
+                    return this.props.onCancel();
+                }
             })
             .finally(() => {
                 this.setState({ pending: false });
                 status.toastify(this);
-            });
+            })
+            .then(() => this.resetState());
     }
     
-    cancel = () => this.setState({ open: false });
+    cancel = () => {
+        this.resetState();
+        if (this.props.onCancel) {
+            return this.props.onCancel();
+        }
+    };
 
     componentWillReceiveProps(props) {
         this.setState({ open: props.open });

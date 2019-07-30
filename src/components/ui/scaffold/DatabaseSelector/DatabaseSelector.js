@@ -4,6 +4,7 @@ import { Sidebar, Segment, Menu, Tab, Divider } from 'semantic-ui-react';
 import DatabaseMenuItem from '../DatabaseMenuItem/DatabaseMenuItem';
 import AddDatabaseMenuItem from '../DatabaseMenuItem/AddDatabaseMenuItem';
 import DatabasePane from '../../../database/DatabasePane/DatabasePane';
+import uuid from 'uuid';
 
 import './DatabaseSelector.css';
 
@@ -14,24 +15,48 @@ export default class DatabaseSelector extends Component {
         direction: 'left',
         selection: null,
 
-        panes: () => ([
-            {
-                menuItem: 'Overview',
-                visible: () => true,
-                render: () => this.paneWrapper(
-                    <DatabasePane 
-                        node={window.halinContext.getWriteMember()} 
-                        database={this.state.selection} 
-                    />
-                ),
-            },
-        ]),
+        panes: () => {
+            const menuItem = this.state.selection.getLabel();
+            return [
+                {
+                    menuItem,
+                    visible: () => true,
+                    render: () => this.paneWrapper(
+                        <DatabasePane
+                            node={window.halinContext.getWriteMember()}
+                            database={this.state.selection}
+                        />
+                    ),
+                },
+            ];
+        },
     };
 
     componentWillMount() {
+        this.listenerFn = (e) => {
+            console.log('Listener in the DB selector fired with ', e);
+            const dbs = window.halinContext.getClusterManager().databases();
+
+            // The selected database could no longer exist, or it could now exist with a different
+            // status.  For all of these reasons we must update the selection so the view knows.
+            let selection = dbs.filter(db => db.getLabel() === this.state.selection.getLabel())[0];
+            if (!selection) {
+                selection = dbs[0];
+            }
+
+            // Whether or not the selection changed, change state and force refresh.
+            this.setState({ selection, id: uuid.v4() });
+        };
+
+        window.halinContext.getClusterManager().addListener(this.listenerFn);
+
         this.setState({
-            selection: window.halinContext.databases()[0],
+            selection: window.halinContext.getClusterManager().databases()[0],
         });
+    }
+
+    componentWillUnmount() {
+        window.halinContext.getClusterManager().removeListener(this.listenerFn);
     }
 
     paneWrapper = (obj, cls = 'secondary') =>
@@ -85,8 +110,8 @@ export default class DatabaseSelector extends Component {
                     width='thin'
                 >
                     {
-                        window.halinContext.databases().map((db, key) =>
-                            <DatabaseMenuItem 
+                        window.halinContext.getClusterManager().databases().map((db, key) =>
+                            <DatabaseMenuItem
                                 database={db} key={key}
                                 active={this.state.selected === db}
                                 onSelect={this.select} />)

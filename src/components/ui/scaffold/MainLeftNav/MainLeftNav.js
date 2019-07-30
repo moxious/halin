@@ -72,7 +72,10 @@ export default class MainLeftNav extends Component {
         } else if (this.state.section === 'diagnostics') {
             return this.segmentWrap(<DiagnosticsPane />);
         } else if (this.state.section === 'databases') {
-            return this.segmentWrap(<DatabaseSelector clickCount={this.state.toggleCounter} />);
+            return this.segmentWrap(
+                <DatabaseSelector 
+                    clickCount={this.state.toggleCounter} 
+                />);
         }
 
         return 'No child tab';

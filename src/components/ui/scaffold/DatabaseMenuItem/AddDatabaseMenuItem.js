@@ -23,6 +23,8 @@ export default class AddDatabaseMenuItem extends Component {
                 <Icon name='add' color='green' />
                 Create New Database
                 <CreateDatabase 
+                    onCreate={() => this.setState({ open: false })}
+                    onCancel={() => this.setState({ open: false })}
                     open={this.state.open} 
                     member={window.halinContext.getWriteMember()} 
                 />

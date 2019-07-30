@@ -33,14 +33,11 @@ export default class HalinContext {
         };
         this.debug = false;
         this.mgr = new ClusterManager(this);
+        this.mgr.addListener(e => this.onClusterEvent(e));
     }
 
     members() {
         return this.clusterMembers;
-    }
-
-    databases() {
-        return this.clusterDatabases;
     }
 
     getWriteMember() {
@@ -301,24 +298,13 @@ export default class HalinContext {
         return this.currentUser;
     }
 
-    checkDatabases() {
-        return this.getClusterManager().getDatabases()
-            .then(databases => {
-                this.clusterDatabases = databases;
-                return this.clusterDatabases;
-            });
-    }
-
     /**
      * Listener that fires in ClusterManager whenever a cluster-wide event happens.  This allows the
      * context to be aware of things changing around it and adjust.
      * @param {Object} event with keys date, payload, id, type
      */
     onClusterEvent(event) {
-        // Happens when databases get stopped/started/added/removed.
-        if (_.get(event, 'type') === 'database') {
-            return this.checkDatabases();
-        }
+        sentry.info('Cluster Event', event);
     }
 
     checkUser(driver /*, progressCallback */) {
@@ -483,7 +469,7 @@ export default class HalinContext {
                     ]);
                 })
                 // Checking databases must be after checking for a cluster, since we need to know who leader is
-                .then(() => this.checkDatabases())
+                .then(() => this.getClusterManager().getDatabases())
                 .then(() => {
                     this.getClusterManager().addEvent({
                         type: 'halin',

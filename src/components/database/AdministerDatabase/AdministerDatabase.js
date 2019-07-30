@@ -28,7 +28,7 @@ class AdministerDatabase extends Component {
 
     startButton() {
         return (
-            <Button disabled={this.state.pending} size='large' primary positive onClick={() => this.stop()}>
+            <Button disabled={this.state.pending} size='large' primary positive onClick={() => this.start()}>
                 <Icon name='play circle' />
                 Start
             </Button>
