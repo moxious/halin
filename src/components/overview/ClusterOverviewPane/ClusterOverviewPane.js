@@ -17,7 +17,7 @@ const ClusterOverviewPane = (props) => {
             <UsedMemory />
             <GCPauseTime />
             <PageCacheTracking />
-            {/* <TransactionsOpen /> */}
+            <TransactionsOpen />
             <OpenFileDescriptors />
         </Card.Group>
     );

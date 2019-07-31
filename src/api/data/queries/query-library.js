@@ -49,6 +49,7 @@ import DBMS_4_CREATE_DATABASE from './dbms/4.0/createDatabase';
 import DBMS_4_DROP_DATABASE from './dbms/4.0/dropDatabase';
 
 import DBMS_4_PAGE_CACHE from './dbms/4.0/pageCache';
+import DBMS_4_TRANSACTIONS from './dbms/4.0/transactions';
 
 import APOC_LOG_STREAM from './apoc/logStream';
 import APOC_VERSION from './apoc/version';
@@ -74,6 +75,7 @@ const allQueries = {
     JMX_MEMORY_STATS,
     JMX_GARBAGE_COLLECTOR,
     JMX_TRANSACTIONS,
+    DBMS_4_TRANSACTIONS,
     JMX_LAST_TRANSACTION_ID,
     
     OS_OPEN_FDS,
@@ -134,6 +136,10 @@ const find = (ctx, queryName) => {
 
     if (queryName === 'pageCache') {
         return is4 ? DBMS_4_PAGE_CACHE : JMX_PAGE_CACHE;
+    }
+
+    if (queryName === 'transactions') {
+        return is4 ? DBMS_4_TRANSACTIONS : JMX_TRANSACTIONS;
     }
 
     throw new Error('Cannot find query ' + queryName + 
