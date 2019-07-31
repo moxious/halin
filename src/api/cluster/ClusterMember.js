@@ -360,17 +360,19 @@ export default class ClusterMember {
 
         const start = new Date().getTime();
 
-        let getSessionPromise, poolSession;
+        let poolSession;
         
-        if (!database) {
-            getSessionPromise = this.pool.acquire();
-            poolSession = true;
-        } else {
-            getSessionPromise = Promise.resolve(this.driver.session({ database }));
-            poolSession = false;
-        }
+        const getSessionPromise = () => {
+            if (!database) {
+                poolSession = true;
+                return this.pool.acquire();
+            } 
 
-        return getSessionPromise
+            poolSession = false;
+            return Promise.resolve(this.driver.session({ database }));
+        };
+
+        return getSessionPromise()
             .then(session => {
                 s = session;
                 // #operability: transaction metadata is disabled because it causes errors
@@ -399,9 +401,9 @@ export default class ClusterMember {
                 throw err;
             })
             // Cleanup session.
-            .finally(() => {
+            .finally(p => {
                 return poolSession ? this.pool.release(s)
-                    .catch(e => sentry.fine('Pool release error', e)) : true;
+                    .catch(e => sentry.fine('Pool release error', e)) : p;
             });
     }
 }

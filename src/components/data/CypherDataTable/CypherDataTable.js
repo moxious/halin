@@ -94,7 +94,7 @@ class CypherDataTable extends Component {
 
     onUpdate = () => {
         if (this.props.onUpdate) {
-            this.props.onUpdate(this.state.items, this);
+            return this.props.onUpdate(this.state.items, this);
         }
     };
 
@@ -117,6 +117,7 @@ class CypherDataTable extends Component {
                         setTimeout(() => this.sampleData(), this.rate);
                     }
                 }
+                return items;
             })
             .catch(err => {
                 sentry.reportError(err, `CypherDataTable: error executing ${this.query}`);
