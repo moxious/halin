@@ -359,6 +359,10 @@ export default class ClusterManager {
 
     databases() { return this._dbs; }
 
+    getDefaultDatabase() {
+        return this.databases().filter(db => db.isDefault)[0];
+    }
+
     /**
      * Checks for which databases are online.  This triggers an 
      * actual query.
