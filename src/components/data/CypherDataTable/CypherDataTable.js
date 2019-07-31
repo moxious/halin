@@ -99,7 +99,7 @@ class CypherDataTable extends Component {
     };
 
     sampleData() {
-        return this.props.node.run(this.query, this.parameters)
+        return this.props.node.run(this.query, this.parameters, this.props.database)
             .then(results => {
                 // Unpack results, but only for columns with an accessor
                 // (as extra virtual columns may be defined)
