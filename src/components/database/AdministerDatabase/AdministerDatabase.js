@@ -10,8 +10,14 @@ class AdministerDatabase extends Component {
         dropConfirmOpen: false,
     };
 
+    canAdminister() {
+        // For safety we won't allow stop/start/drop of the default DB
+        // or the system DB where it would fail anyway.
+        return !this.props.database.isDefault && this.props.database.getLabel() !== 'system';
+    }
+
     stopButton() {
-        return <Button disabled={this.state.pending} size='large' primary negative onClick={() => this.stop()}>
+        return <Button disabled={this.state.pending || !this.canAdminister()} size='large' primary negative onClick={() => this.stop()}>
             <Icon name='stop circle' />
             Stop
         </Button>;
@@ -19,7 +25,7 @@ class AdministerDatabase extends Component {
 
     dropButton() {
         return (
-            <Button secondary disabled={this.state.pending} size='large' negative onClick={() => this.setState({ dropConfirmOpen: true })}>
+            <Button secondary disabled={this.state.pending || !this.canAdminister()} size='large' negative onClick={() => this.setState({ dropConfirmOpen: true })}>
                 <Icon name='delete' />
                 Drop
             </Button>
@@ -28,7 +34,7 @@ class AdministerDatabase extends Component {
 
     startButton() {
         return (
-            <Button disabled={this.state.pending} size='large' primary positive onClick={() => this.start()}>
+            <Button disabled={this.state.pending || !this.canAdminister()} size='large' primary positive onClick={() => this.start()}>
                 <Icon name='play circle' />
                 Start
             </Button>
@@ -94,6 +100,18 @@ class AdministerDatabase extends Component {
                     {this.props.database.isOnline() ? this.stopButton() : this.startButton()}
                     {this.dropButton()}
                 </div>
+
+                { !this.canAdminister() ?
+                
+                <div style={{paddingTop: '15px'}}>
+                    <h4>Reserved Database</h4>
+                    <p>Stopping, starting, and deleting databases is not
+                        permitted for the default database, or the system
+                        database.
+                    </p>
+                </div>
+                
+                : ''}
 
                 <Confirm
                     open={this.state.dropConfirmOpen}
