@@ -9,7 +9,6 @@ import ql from '../data/queries/query-library';
 import Database from '../Database';
 
 const SYSTEM_DB = 'system';
-const DEFAULT_DB = 'neo4j';
 
 /**
  * This is a controller for clusters.

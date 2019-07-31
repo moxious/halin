@@ -134,7 +134,6 @@ const find = (ctx, queryName) => {
 
     const version = ctx.getVersion();
     const is4 = version.major >= 4;
-    const is3 = version.major === 3;
 
     if (queryName === 'pageCache') {
         return is4 ? DBMS_4_PAGE_CACHE : JMX_PAGE_CACHE;
