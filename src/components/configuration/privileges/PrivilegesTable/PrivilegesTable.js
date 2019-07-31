@@ -1,14 +1,12 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
-import { Button, Confirm, Grid, Modal, Icon, Popup } from 'semantic-ui-react';
+import { Grid, Button } from 'semantic-ui-react';
 import uuid from 'uuid';
 import moment from 'moment';
 
 import api from '../../../../api';
 import CSVDownload from '../../../data/download/CSVDownload';
 import Explainer from '../../../ui/scaffold/Explainer/Explainer';
-
-const { status, sentry } = api;
 
 class PrivilegesTable extends Component {
     key = uuid.v4();
@@ -21,8 +19,7 @@ class PrivilegesTable extends Component {
         //     maxWidth: 100,
         //     Cell: ({ row }) => (
         //         <span>
-        //             {this.deleteUserButton(row)}
-        //             {this.changeUserPasswordButton(row)}
+        //             Something
         //         </span>
         //     ),
         // },
@@ -56,6 +53,10 @@ class PrivilegesTable extends Component {
         }
     }
 
+    onRecordsUpdate = (records /*, component */) => {
+        this.setState({ data: records });
+    };
+
     downloadCSVButton() {
         if (!this.state.data || this.state.data.length === 0) {
             return '';
@@ -71,6 +72,19 @@ class PrivilegesTable extends Component {
         );
     }
 
+    changePrivs(operation) {
+        console.log(operation);
+    }
+
+    privsButton = (label, icon, props={}) => 
+        <Button {...props} onClick={e => this.changePrivs(label)}>
+            <i className={'icon ' + icon}></i> {label}
+        </Button>
+
+    grantButton() { return this.privsButton('Grant', 'unlock', { primary: true }); }
+    denyButton() { return this.privsButton('Deny', 'lock', { negative: true }); }
+    revokeButton() { return this.privsButton('Revoke', 'remove circle', { negative: true }); }
+    
     render() {
         return (
             <div className="Neo4jPrivileges">
@@ -79,9 +93,19 @@ class PrivilegesTable extends Component {
                 <Grid>
                     <Grid.Row columns={1}>
                         <Grid.Column>
+                            <Button.Group size='small'>
+                                {this.grantButton()}
+                                {this.denyButton()}
+                                {this.revokeButton()}
+                                {this.downloadCSVButton()}
+                            </Button.Group>
+                        </Grid.Column>
+                    </Grid.Row>
+                    <Grid.Row columns={1}>
+                        <Grid.Column>
                             <CypherDataTable
                                 node={this.props.node}
-                                // onUpdate={this.onRecordsUpdate}
+                                onUpdate={this.onRecordsUpdate}
                                 showPagination={true}
                                 query={this.query}
                                 database='system'
