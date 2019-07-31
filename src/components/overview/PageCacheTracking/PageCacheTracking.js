@@ -76,7 +76,7 @@ class PageCacheTracking extends Component {
         const halin = window.halinContext;
 
         const addr = node.getBoltAddress();
-        const feed = halin.getDataFeed(_.merge({ node }, queryLibrary.JMX_PAGE_CACHE));
+        const feed = halin.getDataFeed(_.merge({ node }, queryLibrary.find(halin, 'pageCache')));
 
         feed.addAliases({ 
             faultsPerSecond: ClusterTimeseries.keyFor(addr, 'faultsPerSecond'),

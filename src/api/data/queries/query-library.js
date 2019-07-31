@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import JMX_ALL from './jmx/all';
 import JMX_GARBAGE_COLLECTOR from './jmx/garbageCollector';
 import JMX_MEMORY_STATS from './jmx/memoryStats';
@@ -46,6 +48,8 @@ import DBMS_4_STOP_DATABASE from './dbms/4.0/stopDatabase';
 import DBMS_4_CREATE_DATABASE from './dbms/4.0/createDatabase';
 import DBMS_4_DROP_DATABASE from './dbms/4.0/dropDatabase';
 
+import DBMS_4_PAGE_CACHE from './dbms/4.0/pageCache';
+
 import APOC_LOG_STREAM from './apoc/logStream';
 import APOC_VERSION from './apoc/version';
 
@@ -53,7 +57,7 @@ import APOC_VERSION from './apoc/version';
  * A collection of queries that other components can refer to.  By using the same
  * queries with various data feeds, they can be reused and centralized.
  */
-export default {
+const allQueries = {
     PING,
 
     CLUSTER_ROLE,
@@ -65,6 +69,8 @@ export default {
     JMX_STORE_SIZES,
     JMX_DISK_UTILIZATION,
     JMX_PAGE_CACHE,
+    DBMS_4_PAGE_CACHE,
+
     JMX_MEMORY_STATS,
     JMX_GARBAGE_COLLECTOR,
     JMX_TRANSACTIONS,
@@ -109,3 +115,29 @@ export default {
     APOC_LOG_STREAM,
     APOC_VERSION,
 };
+
+/**
+ * Load a query for a particular version of Neo4j by name.
+ * @param {HalinContext} ctx 
+ * @param {String} queryName 
+ * @returns {HalinQuery}
+ * @throws Error if no query can be found.
+ */
+const find = (ctx, queryName) => {
+    if (allQueries[queryName]) {
+        return allQueries[queryName];
+    }
+
+    const version = ctx.getVersion();
+    const is4 = version.major >= 4;
+    const is3 = version.major === 3;
+
+    if (queryName === 'pageCache') {
+        return is4 ? DBMS_4_PAGE_CACHE : JMX_PAGE_CACHE;
+    }
+
+    throw new Error('Cannot find query ' + queryName + 
+        ' in the query library');
+};
+
+export default _.merge({ find }, allQueries);
