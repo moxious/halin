@@ -4,6 +4,7 @@ import { Grid } from 'semantic-ui-react';
 import Neo4jUsers from '../users/Neo4jUsers/Neo4jUsers';
 import sentry from '../../../api/sentry/index';
 import Neo4jRoles from '../roles/Neo4jRoles/Neo4jRoles';
+import PrivilegesTable from '../privileges/PrivilegesTable/PrivilegesTable';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
 import uuid from 'uuid';
 
@@ -53,6 +54,14 @@ class PermissionsPane extends Component {
                                 node={this.props.node}
                                 refresh={this.state.childRefresh} />
                         </Grid.Column> : '' }
+                    </Grid.Row>
+
+                    <Grid.Row>
+                        <Grid.Column>
+                            <PrivilegesTable key={this.state.key}
+                                node={this.props.node}
+                                refresh={this.state.childRefresh} />
+                        </Grid.Column>
                     </Grid.Row>
                 </Grid>
             </div>

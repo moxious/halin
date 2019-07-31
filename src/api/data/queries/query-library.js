@@ -47,6 +47,7 @@ import DBMS_4_START_DATABASE from './dbms/4.0/startDatabase';
 import DBMS_4_STOP_DATABASE from './dbms/4.0/stopDatabase';
 import DBMS_4_CREATE_DATABASE from './dbms/4.0/createDatabase';
 import DBMS_4_DROP_DATABASE from './dbms/4.0/dropDatabase';
+import DBMS_4_SHOW_PRIVILEGES from './dbms/4.0/showPrivileges';
 
 import DBMS_4_PAGE_CACHE from './dbms/4.0/pageCache';
 import DBMS_4_TRANSACTIONS from './dbms/4.0/transactions';
@@ -113,6 +114,7 @@ const allQueries = {
     DBMS_4_STOP_DATABASE,
     DBMS_4_CREATE_DATABASE,
     DBMS_4_DROP_DATABASE,
+    DBMS_4_SHOW_PRIVILEGES,
 
     APOC_LOG_STREAM,
     APOC_VERSION,
