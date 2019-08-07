@@ -195,9 +195,9 @@ jobs:
               echo "Not deploying; not master branch."
             fi
       - run:
-        name: AWS Cache Invalidation
-        command: |
-           aws cloudfront create-invalidation --distribution-id E1WH29O1XG2QXT --paths '*'
+          name: AWS Cache Invalidation
+          command: |
+             aws cloudfront create-invalidation --distribution-id E1WH29O1XG2QXT --paths '*'
       - store_artifacts:
             path: coverage
             prefix: coverage      
