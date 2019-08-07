@@ -21,4 +21,4 @@
      }
 
      isOnline() { return this.status === 'online'; }
- };
+ }
