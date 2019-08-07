@@ -318,6 +318,10 @@ export default class ClusterMember {
                     this.dbms.nativeAuth = true;
                 }
 
+                if (this.dbms.multidatabase) {
+                    this.dbms.systemGraph = true;
+                }
+
                 // { major, minor, patch }
                 _.set(this.dbms, 'version', this.getVersion());
 
