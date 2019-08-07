@@ -19,18 +19,30 @@ describe('Query Library', function () {
     it('is an object', () => expect(ql).toBeInstanceOf(Object));
 
     Object.keys(ql).forEach(key => {
+        if (key === 'find') { return null; }
+
         describe(key, function () {
             const query = ql[key];
 
             it('is a HalinQuery', () => expect(query).toBeInstanceOf(HalinQuery));
             it('has a description', () => expect(query.getDescription()).toBeTruthy());
-            it('provides example results', () => expect(query.getExample().length).toBeGreaterThan(0));
-            it('has valid columns', () => {
-                expect(query.getColumns().length).toBeGreaterThan(0);
-                query.getColumns().map(c => expect(c.accessor, 'Has Accessor').toBeTruthy());
-                query.getColumns().map(c => expect(c.Header, 'Has Header').toBeTruthy());
-
+            it('provides example results (if applicable)', () => {
+                if (query.void) {
+                    expect(query.getExample().length).toEqual(0);
+                } else {
+                    expect(query.getExample().length).toBeGreaterThan(0);
+                }
             });
+            it('has valid columns', () => {
+                if (query.void) {
+                    expect(query.getColumns().length).toEqual(0);
+                } else {
+                    expect(query.getColumns().length).toBeGreaterThan(0);
+                    query.getColumns().map(c => expect(c.accessor, 'Has Accessor').toBeTruthy());
+                    query.getColumns().map(c => expect(c.Header, 'Has Header').toBeTruthy());
+                }
+            });
+
             it('has a positive rate', () => expect(query.getRate()).toBeGreaterThan(0));
 
             it('has an example result which covers its columns', () => {

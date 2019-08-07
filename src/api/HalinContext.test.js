@@ -76,8 +76,8 @@ describe('Halin Context', function () {
             expect(ctx.isCluster()).toBe(true));
         it('knows that it supports native auth', () =>
             expect(ctx.supportsNativeAuth()).toBe(true));
-        it('does not support system graph', () =>
-            expect(ctx.supportsSystemGraph()).toBe(false));
+        it('supports system graph', () =>
+            expect(ctx.supportsSystemGraph()).toBe(true));
         it('can get its base URI', () =>
             expect(ctx.getBaseURI()).toEqual(`bolt://${fakes.basics.host}:${fakes.basics.port}`));
         it('knows its current user', () => {

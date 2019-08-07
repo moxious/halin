@@ -43,6 +43,7 @@ class HalinQuery {
         this.parameters = props.parameters || {};
         this.legendOnlyColumns = props.legendOnlyColumns || [];
         this.exampleResult = props.exampleResult || [];
+        this.void = props.void || false;
 
         if (!this.query) { throw new Error('Missing query'); }
         if (_.isNil(this.columns)) { throw new Error('Missing columns'); }

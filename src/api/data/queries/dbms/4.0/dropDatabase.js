@@ -4,6 +4,7 @@ export default new HalinQuery({
     description: 'Drops a database',
     query: `DROP DATABASE $name`,
     bare: true,
+    void: true,
     parameters: {
         name: 'Name of the database',
     },
