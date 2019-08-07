@@ -27,6 +27,7 @@ jobs:
             cd $HOME && s3cmd --version
 
             pip install --upgrade --user awscli
+            bin/awscli
       - restore_cache:
           name: Restore Yarn Package Cache
           keys:
