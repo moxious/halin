@@ -73,7 +73,11 @@ class PrivilegesTable extends Component {
     }
 
     changePrivs(operation) {
-        console.log(operation);
+        this.setState({
+            pending: false,
+            message: null,
+            error: api.status.message('Not yet supported', `${operation} is coming soon!`),
+        }, () => api.status.toastify(this));
     }
 
     privsButton = (label, icon, props={}) => 
@@ -94,9 +98,9 @@ class PrivilegesTable extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <Button.Group size='small'>
-                                {this.grantButton()}
+                                {/* {this.grantButton()}
                                 {this.denyButton()}
-                                {this.revokeButton()}
+                                {this.revokeButton()} */}
                                 {this.downloadCSVButton()}
                             </Button.Group>
                         </Grid.Column>
