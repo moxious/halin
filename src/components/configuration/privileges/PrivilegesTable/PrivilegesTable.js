@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
-import { Grid, Button, Modal, Popup } from 'semantic-ui-react';
+import { Grid, Button, Modal } from 'semantic-ui-react';
 import uuid from 'uuid';
 import moment from 'moment';
+import _ from 'lodash';
 
 import api from '../../../../api';
 import CSVDownload from '../../../data/download/CSVDownload';
@@ -32,14 +33,16 @@ class PrivilegesTable extends Component {
                         {
                             this.privsButton(
                                 'Deny', 
-                                PrivilegeOperation.fromSystemPrivilege('DENY', row).properties(),
+                                _.merge({ locked: true }, 
+                                    PrivilegeOperation.fromSystemPrivilege('DENY', row).properties()),
                                 'lock', 
                                 buttonProps)
                         }
                         {
                             this.privsButton(
                                 'Revoke', 
-                                PrivilegeOperation.fromSystemPrivilege('REVOKE', row).properties(),
+                                _.merge({ locked: true }, 
+                                    PrivilegeOperation.fromSystemPrivilege('REVOKE', row).properties()),
                                 'remove circle', 
                                 buttonProps)
                         }
