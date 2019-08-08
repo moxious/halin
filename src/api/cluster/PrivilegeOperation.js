@@ -12,6 +12,16 @@ export default class PrivilegeOperation {
         this.role = props.role;
     }
 
+    properties() {
+        return {
+            operation: this.operation,
+            privilege: this.privilege,
+            database: this.database,
+            entity: this.entity,
+            role: this.role,
+        };
+    }
+
     validate() {
         let error = null;
 
@@ -22,6 +32,29 @@ export default class PrivilegeOperation {
         });
 
         return error;
+    }
+
+    /**
+     * Neo4j reports the privileges back in an awkward schema.  This function turns a row
+     * of { action, grant, resource, role, segment, graph } into one of these.
+     * @param {String} operation: one of GRANT, REVOKE, DENY
+     * @param {Object} row 
+     */
+    static fromSystemPrivilege(operation, row) {
+        const what = row.resource === 'all_properties' ? '(*)' : row.resource;
+        const privilege = `${row.action.toUpperCase()} ${what}`;
+
+        const props = {
+            operation,
+            database: row.graph,
+            entity: row.segment,
+            role: row.role,
+            privilege,
+        };
+
+        const op = new PrivilegeOperation(props);
+
+        return op;
     }
 
     buildQuery() {
