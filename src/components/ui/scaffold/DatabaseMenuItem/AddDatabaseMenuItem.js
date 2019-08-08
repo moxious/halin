@@ -16,8 +16,12 @@ export default class AddDatabaseMenuItem extends Component {
     }
 
     render() {
+        const ctx = window.halinContext;
+
+        const disabled = ctx.getVersion().major < 4;
+
         return (
-            <Menu.Item as='a'
+            <Menu.Item as='a' disabled={disabled}
                 active={this.props.active}
                 onClick={() => this.addDatabase()}>
                 <Icon name='add' color='green' />
