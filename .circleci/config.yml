@@ -27,7 +27,6 @@ jobs:
             cd $HOME && s3cmd --version
 
             pip install --upgrade --user awscli
-            bin/awscli
       - restore_cache:
           name: Restore Yarn Package Cache
           keys:
@@ -198,7 +197,7 @@ jobs:
       - run:
           name: AWS Cache Invalidation
           command: |
-             aws cloudfront create-invalidation --distribution-id E1WH29O1XG2QXT --paths '*'
+             ~/.local/bin/aws cloudfront create-invalidation --distribution-id E1WH29O1XG2QXT --paths '*'
       - store_artifacts:
             path: coverage
             prefix: coverage      
