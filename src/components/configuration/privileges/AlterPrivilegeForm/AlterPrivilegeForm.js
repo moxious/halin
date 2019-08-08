@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Form, Message } from 'semantic-ui-react';
+import { Form } from 'semantic-ui-react';
 import status from '../../../../api/status/index';
 import sentry from '../../../../api/sentry/index';
 import uuid from 'uuid';
@@ -80,7 +80,7 @@ class AlterPrivilegeForm extends Component {
 
         const mgr = window.halinContext.getClusterManager();
         const action = this.state.op.buildQuery();
-        
+
         return mgr.alterPrivilege(this.state.op)
             .then((clusterOpRes) => {
                 this.setState({
@@ -173,7 +173,6 @@ class AlterPrivilegeForm extends Component {
                         <Form.Select
                             fluid
                             options={entities}
-                            defaultValue={entities[0]}
                             style={this.inputStyle}
                             disabled={this.state.pending}
                             defaultValue={this.state.entity}
