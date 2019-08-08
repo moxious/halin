@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
-import { Grid, Button, Modal } from 'semantic-ui-react';
+import { Grid, Button, Modal, Popup } from 'semantic-ui-react';
 import uuid from 'uuid';
 import moment from 'moment';
 
@@ -8,22 +8,45 @@ import api from '../../../../api';
 import CSVDownload from '../../../data/download/CSVDownload';
 import Explainer from '../../../ui/scaffold/Explainer/Explainer';
 import AlterPrivilegeForm from '../AlterPrivilegeForm/AlterPrivilegeForm';
+import PrivilegeOperation from '../../../../api/cluster/PrivilegeOperation';
 
 class PrivilegesTable extends Component {
     key = uuid.v4();
     query = api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.query;
     displayColumns = [
-        // {
-        //     Header: 'Actions',
-        //     id: 'delete',
-        //     minWidth: 70,
-        //     maxWidth: 100,
-        //     Cell: ({ row }) => (
-        //         <span>
-        //             Something
-        //         </span>
-        //     ),
-        // },
+        {
+            Header: 'Actions',
+            id: 'delete',
+            minWidth: 70,
+            maxWidth: 100,
+            Cell: ({ row }) => {
+                const buttonProps = { 
+                    compact: true, 
+                    negative: true, 
+                    size: 'tiny',
+                    // Do not permit revoking/denying privileges to admin.
+                    disabled: row.role === 'admin',
+                };
+                return (
+                    <span>
+                        {
+                            this.privsButton(
+                                'Deny', 
+                                PrivilegeOperation.fromSystemPrivilege('DENY', row).properties(),
+                                'lock', 
+                                buttonProps)
+                        }
+                        {
+                            this.privsButton(
+                                'Revoke', 
+                                PrivilegeOperation.fromSystemPrivilege('REVOKE', row).properties(),
+                                'remove circle', 
+                                buttonProps)
+                        }
+                    </span>
+                );
+            },
+        },
     ].concat(api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.columns);
 
     state = {
@@ -81,28 +104,25 @@ class PrivilegesTable extends Component {
     //     }, () => api.status.toastify(this));
     // }
 
-    privsButton = (label, icon, props={}) => {
-        const button = 
-            <Button {...props} 
-                // onClick={e => this.changePrivs(label)}
-            >
-                <i className={'icon ' + icon}></i> {label}
-            </Button>
-        
+    privsButton = (label, privProps, icon, props = {}) => {
+        const compact = props.size === 'tiny' || props.compact;
+
+        const button = compact ?
+            <Button {...props} icon={icon} />
+            : <Button {...props}><i className={'icon ' + icon}></i>{label}</Button>
+
         return (
             <Modal closeIcon trigger={button}>
                 <Modal.Header>{label}</Modal.Header>
                 <Modal.Content>
-                    <AlterPrivilegeForm operation={label}/>
+                    <AlterPrivilegeForm {...privProps} />
                 </Modal.Content>
             </Modal>
         );
     };
 
-    grantButton() { return this.privsButton('Grant', 'unlock', { primary: true }); }
-    denyButton() { return this.privsButton('Deny', 'lock', { negative: true }); }
-    revokeButton() { return this.privsButton('Revoke', 'remove circle', { negative: true }); }
-    
+    grantButton() { return this.privsButton('Grant', { operation: 'GRANT' }, 'unlock', { primary: true }); }
+
     render() {
         return (
             <div className="Neo4jPrivileges">
@@ -113,8 +133,6 @@ class PrivilegesTable extends Component {
                         <Grid.Column>
                             <Button.Group size='small'>
                                 {this.grantButton()}
-                                {this.denyButton()}
-                                {this.revokeButton()}
                                 {this.downloadCSVButton()}
                             </Button.Group>
                         </Grid.Column>
