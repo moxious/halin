@@ -298,7 +298,7 @@ const neo4jDesktopDiagnostics = () => {
  * @return Promise{Object} a large, heavyweight diagnostic object suitable for
  * analysis or shipping to the user.
  */
-const runDiagnostics = halinContext => {
+const runDiagnostics = (halinContext, tag=uuid.v4()) => {
     const allNodeDiags = Promise.all(
         halinContext.members().map(clusterMember => 
             memberDiagnostics(halinContext, clusterMember)))
@@ -307,6 +307,7 @@ const runDiagnostics = halinContext => {
     const root = Promise.resolve({
         id: uuid.v4(),
         generated: moment().utc().toISOString(),
+        tag,
     });
 
     const halinDiags = halinDiagnostics(halinContext);
