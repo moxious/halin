@@ -197,7 +197,7 @@ jobs:
       - run:
           name: AWS Cache Invalidation
           command: |
-             ~/.local/bin/aws cloudfront create-invalidation --distribution-id E1WH29O1XG2QXT --paths '*'
+             ~/.local/bin/aws cloudfront create-invalidation --distribution-id E1WH29O1XG2QXT --paths '/*'
       - store_artifacts:
             path: coverage
             prefix: coverage      
