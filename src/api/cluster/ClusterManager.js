@@ -379,18 +379,28 @@ export default class ClusterManager {
                 return dbs;
             })
             .catch(err => {
-                console.log('Show databases error', err);
                 const str = `${err}`;
-                // This is what Neo4j does when it has no idea what you're talking 
-                // about because you're issuing a >= 4.0 query to < 4.0.
-                if (!str.indexOf('Invalid input')) {
+
+                // If either of these errors happened, no worries, the DB just doesn't support
+                // multidatabase and we know what to do.
+                // If it's any other error, that's interesting and should be reported as a potential
+                // problem.
+                const expectedErrors = [
+                    'Invalid input',
+                    'connected to the database that does not support multiple databases',
+                ];
+
+                let isAnExpectedError = expectedErrors.map(err => str.indexOf(err) > -1)
+                    .reduce((a, b) => a || b, false);
+                if (!isAnExpectedError) {
                     sentry.warn('ClusterManager#getDatabases() returned unexpected error', err);
                 }
 
                 sentry.info('Faking databases pre 4.0');
                 // Just like we fake single-node Neo4j instances as a cluster of one member,
                 // we fake non-multidb clusters as a multi-db of one database.  :)
-                return [new Database('neo4j', 'online', true)];
+                this._dbs = [new Database('neo4j', 'online', true)];
+                return this._dbs;
             });
     }
 
