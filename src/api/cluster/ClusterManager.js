@@ -362,6 +362,39 @@ export default class ClusterManager {
         return this.databases().filter(db => db.isDefault)[0];
     }
 
+    getRoles() {
+        return this.ctx.getWriteMember().run('call dbms.security.listRoles()', {})
+            .then(results => neo4j.unpackResults(results, {
+                required: ['role', 'users'],
+            }));
+    }
+
+    /**
+     * Alter privileges in the cluster.  These are generally all void operations.
+     * @param {PrivilegeOperation} op 
+     * @returns true if successful.
+     */
+    alterPrivilege(op) {
+        const error = op.validate();
+        if (error) { throw new Error(error); }
+        if (!this.ctx.getWriteMember().supportsSystemGraph()) {
+            throw new Error('You cannot modify fine-grained privileges on a DB that does not support system graph');
+        }
+
+        return this.ctx.getWriteMember().run(op.buildQuery(), {}, SYSTEM_DB)
+            .then(results => {
+                sentry.fine('Privilege results', results);
+                this.addEvent({
+                    type: 'privilege',
+                    message: op.buildQuery(),
+                    payload: [],
+                })
+                
+                // No results.
+                return clusterOpSuccess(this.ctx.getWriteMember(), []);
+            });
+    }
+
     /**
      * Checks for which databases are online.  This triggers an 
      * actual query.
