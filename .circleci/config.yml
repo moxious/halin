@@ -80,7 +80,7 @@ jobs:
               s3cmd modify "s3://$BUCKET/$SUBDIR/static/css/*.css" --mime-type="text/css"
               # Replace package file with the original
               cp package.orig package.json
-              echo "$FINAL_URL" | tee /tmp/artifacts/s3-deploy-build.txt
+              echo "$FINAL_URL"index.html | tee /tmp/artifacts/s3-deploy-build.txt
             fi
       - run:
           # This creates a runnable copy on S3 **per branch** (gets overwritten)
@@ -103,7 +103,7 @@ jobs:
             s3cmd modify "s3://$BUCKET/$SUBDIR/static/css/*.css" --mime-type="text/css"
             # Replace package file with the original
             cp package.orig package.json
-            echo "$FINAL_URL" | tee /tmp/artifacts/s3-deploy-branch.txt
+            echo "$FINAL_URL"index.html | tee /tmp/artifacts/s3-deploy-branch.txt
       - run: 
           name: Build Halin Docker Image
           command: docker build -t mdavidallen/halin:latest -f Dockerfile .
