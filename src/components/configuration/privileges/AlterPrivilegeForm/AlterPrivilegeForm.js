@@ -11,10 +11,6 @@ import _ from 'lodash';
 const optionify = v =>
     ({ key: uuid.v4(), text: v, value: v });
 
-const operations = ['GRANT', 'REVOKE', 'DENY'].map(optionify);
-const privileges = ['TRAVERSE', 'READ (*)', 'MATCH (*)', 'WRITE (*)'].map(optionify);
-const entities = ['NODES *', 'RELATIONSHIPS *'].map(optionify);
-
 class AlterPrivilegeForm extends Component {
     state = {
         pending: false,
@@ -25,6 +21,9 @@ class AlterPrivilegeForm extends Component {
         entity: 'NODES *',
         role: 'admin',
         op: null,
+        operations: ['GRANT', 'REVOKE', 'DENY'].map(optionify),
+        privileges: ['TRAVERSE', 'READ (*)', 'MATCH (*)', 'WRITE (*)'].map(optionify),
+        entities: ['NODES *', 'RELATIONSHIPS *', 'ELEMENTS *'].map(optionify),
     };
 
     constructor(props, context) {
@@ -42,6 +41,7 @@ class AlterPrivilegeForm extends Component {
         this.setState({ pending: true });
         return mgr.getRoles()
             .then(roleData => {
+                console.log('MY PROPS', this.props);
                 const roles = roleData.map(entry => optionify(entry.role));
 
                 const databases = mgr.databases().map(db => optionify(db.getLabel()))
@@ -122,17 +122,6 @@ class AlterPrivilegeForm extends Component {
         paddingBottom: '10px',
     };
 
-    chooseDefaultOperation() {
-        if (this.props.operation) {
-            const k = this.props.operation.toUpperCase();
-            const found = operations.filter(op => op.key === k)[0];
-
-            if (found) { return found; }
-        }
-
-        return operations[0];
-    }
-
     render() {
         if (this.state.pending) {
             return (<Spinner/>);
@@ -142,7 +131,7 @@ class AlterPrivilegeForm extends Component {
             <div className='AlterPrivilegeForm'>
                 <Form size="small" error={!this.valid()} style={{textAlign: 'left'}}>
                     <Form.Group widths='equal'>
-                        <Form.Select fluid options={operations} placeholder='Operation'
+                        <Form.Select fluid options={this.state.operations} placeholder='Operation'
                             style={this.inputStyle}
                             disabled={this.state.pending}
                             defaultValue={this.state.operation}
@@ -151,7 +140,7 @@ class AlterPrivilegeForm extends Component {
 
                         <Form.Select
                             fluid 
-                            options={privileges}
+                            options={this.state.privileges}
                             style={this.inputStyle}
                             disabled={this.state.pending}
                             defaultValue={this.state.privilege}
@@ -172,7 +161,7 @@ class AlterPrivilegeForm extends Component {
 
                         <Form.Select
                             fluid
-                            options={entities}
+                            options={this.state.entities}
                             style={this.inputStyle}
                             disabled={this.state.pending}
                             defaultValue={this.state.entity}
