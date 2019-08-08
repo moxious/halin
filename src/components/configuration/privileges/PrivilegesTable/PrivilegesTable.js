@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
-import { Grid, Button } from 'semantic-ui-react';
+import { Grid, Button, Modal } from 'semantic-ui-react';
 import uuid from 'uuid';
 import moment from 'moment';
 
 import api from '../../../../api';
 import CSVDownload from '../../../data/download/CSVDownload';
 import Explainer from '../../../ui/scaffold/Explainer/Explainer';
+import AlterPrivilegeForm from '../AlterPrivilegeForm/AlterPrivilegeForm';
 
 class PrivilegesTable extends Component {
     key = uuid.v4();
@@ -72,18 +73,31 @@ class PrivilegesTable extends Component {
         );
     }
 
-    changePrivs(operation) {
-        this.setState({
-            pending: false,
-            message: null,
-            error: api.status.message('Not yet supported', `${operation} is coming soon!`),
-        }, () => api.status.toastify(this));
-    }
+    // changePrivs(operation) {
+    //     this.setState({
+    //         pending: false,
+    //         message: null,
+    //         error: api.status.message('Not yet supported', `${operation} is coming soon!`),
+    //     }, () => api.status.toastify(this));
+    // }
 
-    privsButton = (label, icon, props={}) => 
-        <Button {...props} onClick={e => this.changePrivs(label)}>
-            <i className={'icon ' + icon}></i> {label}
-        </Button>
+    privsButton = (label, icon, props={}) => {
+        const button = 
+            <Button {...props} 
+                // onClick={e => this.changePrivs(label)}
+            >
+                <i className={'icon ' + icon}></i> {label}
+            </Button>
+        
+        return (
+            <Modal closeIcon trigger={button}>
+                <Modal.Header>{label}</Modal.Header>
+                <Modal.Content>
+                    <AlterPrivilegeForm operation={label}/>
+                </Modal.Content>
+            </Modal>
+        );
+    };
 
     grantButton() { return this.privsButton('Grant', 'unlock', { primary: true }); }
     denyButton() { return this.privsButton('Deny', 'lock', { negative: true }); }
@@ -98,9 +112,9 @@ class PrivilegesTable extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <Button.Group size='small'>
-                                {/* {this.grantButton()}
+                                {this.grantButton()}
                                 {this.denyButton()}
-                                {this.revokeButton()} */}
+                                {this.revokeButton()}
                                 {this.downloadCSVButton()}
                             </Button.Group>
                         </Grid.Column>
