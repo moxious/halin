@@ -37,7 +37,11 @@ export default class PrivilegeOperation {
 
     /**
      * Neo4j reports the privileges back in an awkward schema.  This function turns a row
-     * of { action, grant, resource, role, segment, graph } into one of these.
+     * of { action, grant, resource, role, segment, graph } into a PrivilegeOperation.
+     * 
+     * This function lets you take an existing privilege, and easily "undo" it, by applying
+     * a different operation to it.
+     * 
      * @param {String} operation: one of GRANT, REVOKE, DENY
      * @param {Object} row 
      */
@@ -82,13 +86,6 @@ export default class PrivilegeOperation {
         // to turn what Neo4j gives us with SHOW PRIVILEGES into something that
         // can be used to build a related privilege command.
         const entityFromSegment = s => {
-            const mapping = {
-                'NODE(*)': 'NODES *',
-                'RELATIONSHIP(*)': 'RELATIONSHIPS *',
-            };
-
-            if (mapping[s]) { return mapping[s]; }
-
             // Case:  turn "NODE(Foo) => NODES Foo"
             const re = new RegExp('(?<element>(NODE|RELATIONSHIP))\\((?<list>.*?)\\)');
             const match = s.match(re);
@@ -96,7 +93,7 @@ export default class PrivilegeOperation {
                 return `${match.groups.element}S ${match.groups.list}`;
             }
 
-            return mapping[s] || s;
+            return s;
         };
 
         const props = {
