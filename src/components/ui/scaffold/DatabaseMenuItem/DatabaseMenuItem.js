@@ -20,7 +20,17 @@ export default class DatabaseMenuItem extends Component {
     popupContent = () => {
         return (
             <div className='PopupContent'>
-                Popup content here.
+                {
+                    this.props.database.isDefault ? 
+                    <div>
+                        <Icon name='star' color='yellow' />
+                        This is the default database
+                    </div> :
+                    <div>
+                        <Icon name='star' color='grey' />
+                        Not the default database
+                    </div>
+                }
             </div>
         );
     };
