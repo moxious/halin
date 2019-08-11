@@ -3,6 +3,10 @@ import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
 import queryLibrary from '../../../api/data/queries/query-library';
 import hoc from '../../higherOrderComponents';
 
+/**
+ * @deprecated - this method is not supported by Neo4j 4.0, and the table layout is less than 
+ * ideal.
+ */
 class PageCache extends Component {
     state = {
         rate: 2000,
