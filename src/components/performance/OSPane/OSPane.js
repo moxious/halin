@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Grid } from 'semantic-ui-react';
 
-import PageCache from '../../diagnostic/PageCache/PageCache';
 import StorageCapacity from '../../diagnostic/StorageCapacity/StorageCapacity';
 import OSStats from '../OSStats/OSStats';
 import uuid from 'uuid';
@@ -22,18 +21,11 @@ const OSPane = (props) => {
                     </Grid.Column>
                 </Grid.Row>
 
-                <Grid.Row columns={2}>
+                <Grid.Row columns={1}>
                     <Grid.Column>
                         <StorageCapacity key={key} node={props.node} />
                     </Grid.Column>
-
-                    <Grid.Column>
-                        <PageCache key={`${key}1`} node={props.node} />
-                    </Grid.Column>
-                </Grid.Row>
-                
-                <Grid.Row>
-                </Grid.Row>
+                </Grid.Row>                
             </Grid>  
         </div>
     );
