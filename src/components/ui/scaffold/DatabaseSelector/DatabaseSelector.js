@@ -13,10 +13,10 @@ export default class DatabaseSelector extends Component {
         animation: 'push',
         visible: true,
         direction: 'left',
-        selection: null,
+        selected: null,
 
         panes: () => {
-            const menuItem = this.state.selection.getLabel();
+            const menuItem = this.state.selected.getLabel();
             return [
                 {
                     menuItem,
@@ -24,7 +24,7 @@ export default class DatabaseSelector extends Component {
                     render: () => this.paneWrapper(
                         <DatabasePane
                             node={window.halinContext.getWriteMember()}
-                            database={this.state.selection}
+                            database={this.state.selected}
                         />
                     ),
                 },
@@ -40,19 +40,19 @@ export default class DatabaseSelector extends Component {
             // status.  For all of these reasons we must update the selection so the view knows.
             // Never take the old selected, or you'll end up with wrong colored icon or
             // some other issue.
-            let selection = dbs.filter(db => db.getLabel() === this.state.selection.getLabel())[0];
-            if (!selection) {
-                selection = dbs[0];
+            let selected = dbs.filter(db => db.getLabel() === this.state.selected.getLabel())[0];
+            if (!selected) {
+                selected = dbs[0];
             }
 
             // Whether or not the selection changed, change state and force refresh.
-            this.setState({ selection, id: uuid.v4() });
+            this.setState({ selected, id: uuid.v4() });
         };
 
         window.halinContext.getClusterManager().addListener(this.listenerFn);
 
         this.setState({
-            selection: window.halinContext.getClusterManager().databases()[0],
+            selected: window.halinContext.getClusterManager().databases()[0],
         });
     }
 
@@ -65,7 +65,7 @@ export default class DatabaseSelector extends Component {
             <div className={`PaneWrapper ${cls}`}>{obj}</div>
         </Tab.Pane>;
 
-    select = (selection) => this.setState({ selection });
+    select = (selected) => this.setState({ selected });
 
     renderChildContent() {
         return (
@@ -114,7 +114,7 @@ export default class DatabaseSelector extends Component {
                         window.halinContext.getClusterManager().databases().map((db, key) =>
                             <DatabaseMenuItem
                                 database={db} key={key}
-                                active={this.state.selected === db}
+                                active={this.state.selected && this.state.selected.getLabel() === db.getLabel()}
                                 onSelect={this.select} />)
                     }
 
