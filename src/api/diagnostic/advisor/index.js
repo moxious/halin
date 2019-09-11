@@ -24,6 +24,7 @@ import versions from './rules/versions';
 import security from './rules/security';
 import plugins from './rules/plugins';
 import transactions from './rules/transactions';
+import retention from './rules/retention';
 
 const dummy = diag => {
     return [
@@ -65,6 +66,7 @@ const rules = [
     ...categorize(security, 'Security'),
     ...categorize(plugins, 'Plugins'),
     ...categorize(transactions, 'Transactions'),
+    ...categorize(retention, 'Disk'),
 ];
 
 /**
