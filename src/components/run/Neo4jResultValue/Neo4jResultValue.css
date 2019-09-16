@@ -1,0 +1,20 @@
+span.Neo4jValue {
+    font-family: "Courier New", Courier, monospace;
+    white-space: 'pre-wrap';
+    word-wrap: 'break-word';
+}
+
+span.Neo4jLabels {
+    color: #770088;
+}
+
+.ButtonLink {
+    text-align: left;
+    background-color: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+  
+.ButtonLink:hover, .ButtonLink:focus {
+    text-decoration: underline;
+}

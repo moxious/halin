@@ -1,0 +1,8 @@
+div.QueryInput.ReactCodeMirror {
+    color: red;
+    text-align: left;
+    border: 2px solid grey;
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 12px;
+}

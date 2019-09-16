@@ -22,6 +22,7 @@
     "@sentry/browser": "^4.4.1",
     "autobind-decorator": "2.2.1",
     "bluebird": "^3.5.3",
+    "cypher-codemirror": "^1.1.5",
     "generic-pool": "^3.6.1",
     "graph-app-kit": "^1.0.4",
     "lodash": "^4.17.11",

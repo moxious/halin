@@ -2007,6 +2007,11 @@ antlr4@4.6.0:
   resolved "https://neo.jfrog.io/neo/api/npm/npm/antlr4/-/antlr4-4.6.0.tgz#0d7e8b4b4692ebf1d9470ae59cf627428bcc6dec"
   integrity sha1-DX6LS0aS6/HZRwrlnPYnQovMbew=
 
+antlr4@4.7.0:
+  version "4.7.0"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/antlr4/-/antlr4-4.7.0.tgz#297f956ddc06f83397fc0990ecf2e0cf20bfbbee"
+  integrity sha1-KX+VbdwG+DOX/AmQ7PLgzyC/u+4=
+
 anymatch@^2.0.0:
   version "2.0.0"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/anymatch/-/anymatch-2.0.0.tgz#bcb24b4f37934d9aa7ac17b4adaf89e7c76ef2eb"
@@ -3746,12 +3751,28 @@ cypher-codemirror@^1.0.5:
   dependencies:
     cypher-editor-support "1.0.4"
 
+cypher-codemirror@^1.1.5:
+  version "1.1.5"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/cypher-codemirror/-/cypher-codemirror-1.1.5.tgz#93329f0a68ec93ed6f1e2f3426d6424248432ed1"
+  integrity sha1-kzKfCmjsk+1vHi80JtZCQkhDLtE=
+  dependencies:
+    cypher-editor-support "1.1.5"
+
 cypher-editor-support@1.0.4:
   version "1.0.4"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/cypher-editor-support/-/cypher-editor-support-1.0.4.tgz#c9b9f3d77d06ad734a09d1c0e646a6701ef9075f"
   integrity sha1-ybnz130GrXNKCdHA5kamcB75B18=
   dependencies:
     antlr4 "4.6.0"
+    fuzzaldrin "2.1.0"
+    lodash "4.17.4"
+
+cypher-editor-support@1.1.5:
+  version "1.1.5"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/cypher-editor-support/-/cypher-editor-support-1.1.5.tgz#b0824d88e6ffe3f1e57cff853c9253c62c6f53ff"
+  integrity sha1-sIJNiOb/4/HlfP+FPJJTxixvU/8=
+  dependencies:
+    antlr4 "4.7.0"
     fuzzaldrin "2.1.0"
     lodash "4.17.4"
 

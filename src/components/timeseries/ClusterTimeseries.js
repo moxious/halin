@@ -366,6 +366,16 @@ class ClusterTimeseries extends Component {
         );
     }
 
+    getData = () => {
+        const data = [];
+
+        data.push(this.nodes.map((addr) => this.state[addr].events.toArray()));
+       
+        console.log('DATA',data);
+        console.log('ZIPPED', _.zip(data));
+        return data;
+    };
+
     render() {
         const style = styler(this.nodes.map((addr, idx) => ({
             key: ClusterTimeseries.keyFor(addr, this.state.displayProperty),

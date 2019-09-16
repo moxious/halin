@@ -11,6 +11,7 @@ import LogsPane from '../../../db/LogsPane/LogsPane';
 import MetricsPane from '../../../db/metrics/MetricsPane/MetricsPane';
 import Tasks from '../../../performance/task/Tasks/Tasks';
 import ClusterMemberMenuItem from '../ClusterMemberMenuItem/ClusterMemberMenuItem';
+import QueryRunner from '../../../run/QueryRunner/QueryRunner';
 
 import './MemberSelector.css';
 
@@ -63,10 +64,17 @@ export default class MemberSelector extends Component {
                     <PerformancePane key={key} node={member} />),
             },
             {
-                menuItem: 'Queries',
+                menuItem: 'Tasks',
                 visible: () => member.isEnterprise(),
                 render: () => this.paneWrapper(
                     <Tasks key={key} node={member} />
+                ),
+            },
+            {
+                menuItem: 'Run',
+                visible: () => true,
+                render: () => this.paneWrapper(
+                    <QueryRunner key={key} node={member} />
                 ),
             },
             {
