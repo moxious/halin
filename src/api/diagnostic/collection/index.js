@@ -93,7 +93,7 @@ const gatherUsers = (halin, node) => () => {
     const defaultIfUnable = { users: [] };
 
     if (halin.supportsAuth() && halin.supportsNativeAuth()) {
-        const promise = node.run('CALL dbms.security.listUsers()', {})
+        const promise = node.run('CALL dbms.security.listUsers()', {}, neo4j.SYSTEM_DB)
             .then(results => neo4j.unpackResults(results, {
                 required: ['username', 'flags'],
                 optional: ['roles'],  // field doesn't exist in community
@@ -110,7 +110,7 @@ const gatherRoles = (halin, node) => () => {
     const defaultIfUnable = { roles: [] };
 
     if (halin.isEnterprise() && halin.supportsAuth()) {
-        const promise = node.run('CALL dbms.security.listRoles()', {})
+        const promise = node.run('CALL dbms.security.listRoles()', {}, neo4j.SYSTEM_DB)
             .then(results => neo4j.unpackResults(results, {
                 required: ['role', 'users'],
             }))
