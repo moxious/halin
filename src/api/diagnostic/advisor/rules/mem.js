@@ -66,11 +66,12 @@ const pageCacheSizing = pkg => {
             const multiplier = multipliers[sizing] || 1;
             pageCacheInBytes = base * multiplier;
         } else {
-            sentry.fine('PC bailout; size is weird', pageCache);
+            // In 4.0, value can be 'No Value'; earlier it can be ''
+            sentry.fine('PC bailout; size is unspecified or weird: "' + pageCache + '"');
             findings.push(Advice.warn({
                 addr, 
                 finding: `Cannot determine data sizing of page cache setting ${pageCache}`,
-                advice: 'Check your configuration and explicitly configure page cache'
+                advice: 'Check your configuration and explicitly configure page cache',
             }));
             return;
         }
