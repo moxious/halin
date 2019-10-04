@@ -1,6 +1,7 @@
 import sentry from '../sentry/index';
 import neo4jErrors from '../driver/errors';
 import queryLibrary from '../data/queries/query-library';
+import neo4j from '../../api/driver';
 
 /**
  * A feature probe is a bit of code that runs against a cluster node to determine whether or not
@@ -49,7 +50,7 @@ export default {
     },
 
     hasMultiDatabase: node => {
-        const probePromise = node.run(queryLibrary.DBMS_4_SHOW_DATABASES, {}, 'system')
+        const probePromise = node.run(queryLibrary.DBMS_4_SHOW_DATABASES, {}, neo4j.SYSTEM_DB)
             .then(results => true)
             .catch(err => {
                 const str = `${err}`;

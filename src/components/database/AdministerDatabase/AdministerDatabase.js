@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Button, Icon, Confirm } from 'semantic-ui-react';
 import status from '../../../api/status';
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
+import neo4j from '../../../api/driver';
 
 class AdministerDatabase extends Component {
     state = {
@@ -13,7 +14,7 @@ class AdministerDatabase extends Component {
     canAdminister() {
         // For safety we won't allow stop/start/drop of the default DB
         // or the system DB where it would fail anyway.
-        return !this.props.database.isDefault && this.props.database.getLabel() !== 'system';
+        return !this.props.database.isDefault && this.props.database.getLabel() !== neo4j.SYSTEM_DB;
     }
 
     stopButton() {

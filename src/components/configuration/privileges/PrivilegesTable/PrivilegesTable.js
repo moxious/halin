@@ -147,7 +147,7 @@ class PrivilegesTable extends Component {
                                 onUpdate={this.onRecordsUpdate}
                                 showPagination={true}
                                 query={this.query}
-                                database='system'
+                                database={api.driver.SYSTEM_DB}
                                 refresh={this.state.childRefresh}
                                 defaultPageSize={10}
                                 displayColumns={this.displayColumns}

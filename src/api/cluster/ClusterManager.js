@@ -8,8 +8,6 @@ import neo4j from '../driver/index';
 import ql from '../data/queries/query-library';
 import Database from '../Database';
 
-const SYSTEM_DB = 'system';
-
 /**
  * This is a controller for clusters.
  * 
@@ -381,7 +379,7 @@ export default class ClusterManager {
             throw new Error('You cannot modify fine-grained privileges on a DB that does not support system graph');
         }
 
-        return this.ctx.getWriteMember().run(op.buildQuery(), {}, SYSTEM_DB)
+        return this.ctx.getWriteMember().run(op.buildQuery(), {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.fine('Privilege results', results);
                 this.addEvent({
@@ -401,7 +399,7 @@ export default class ClusterManager {
      * @returns Array{Database}
      */
     getDatabases() {
-        return this.ctx.getWriteMember().run(ql.DBMS_4_SHOW_DATABASES, {}, SYSTEM_DB)
+        return this.ctx.getWriteMember().run(ql.DBMS_4_SHOW_DATABASES, {}, neo4j.SYSTEM_DB)
             .then(results => neo4j.unpackResults(results, {
                 required: ['name', 'status', 'default'],
             }))
@@ -440,7 +438,7 @@ export default class ClusterManager {
     stopDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getWriteMember().run(`STOP DATABASE ${db.name}`, {}, SYSTEM_DB)
+        return this.ctx.getWriteMember().run(`STOP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('stop results', results);
                 return results;
@@ -456,7 +454,7 @@ export default class ClusterManager {
     startDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getWriteMember().run(`START DATABASE ${db.name}`, {}, SYSTEM_DB)
+        return this.ctx.getWriteMember().run(`START DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('start results', results);
                 return results;
@@ -472,7 +470,7 @@ export default class ClusterManager {
     dropDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getWriteMember().run(`DROP DATABASE ${db.name}`, {}, SYSTEM_DB)
+        return this.ctx.getWriteMember().run(`DROP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('drop results', results);
                 return results;
@@ -485,7 +483,7 @@ export default class ClusterManager {
     }
 
     createDatabase(name) {
-        return this.ctx.getWriteMember().run(`CREATE DATABASE ${name}`, {}, SYSTEM_DB)
+        return this.ctx.getWriteMember().run(`CREATE DATABASE ${name}`, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('Created database; results ', results);
                 return results;
