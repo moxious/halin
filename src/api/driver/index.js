@@ -146,5 +146,6 @@ neo4j.unpackResults = unpackResults;
 neo4j.isNeo4jInt = isNeo4jInt;
 neo4j.handleNeo4jInt = handleNeo4jInt;
 neo4j.getSessionPool = getSessionPool;
+neo4j.SYSTEM_DB = 'system';
 
 export default neo4j;
