@@ -5,6 +5,7 @@ import moment from 'moment';
 
 import status from '../../../../api/status/index';
 import sentry from '../../../../api/sentry/index';
+import halin from '../../../../api';
 
 import CSVDownload from '../../../data/download/CSVDownload';
 import './Neo4jRoles.css';
@@ -196,6 +197,7 @@ class Neo4jRoles extends Component {
                                 showPagination={true}
                                 refresh={this.state.childRefresh}
                                 displayColumns={this.displayColumns}
+                                database={halin.driver.SYSTEM_DB}
                                 defaultPageSize={10}
                                 onUpdate={this.onRecordsUpdate}
                                 hideNodeLabel={true}

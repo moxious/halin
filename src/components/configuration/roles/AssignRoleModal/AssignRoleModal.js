@@ -3,6 +3,7 @@ import { Button, Modal, Dropdown, Grid } from 'semantic-ui-react';
 import status from '../../../../api/status/index';
 import _ from 'lodash';
 import sentry from '../../../../api/sentry/index';
+import halin from '../../../../api';
 
 class AssignRoleModal extends Component {
     state = {
@@ -17,8 +18,8 @@ class AssignRoleModal extends Component {
         this.state.onCancel = props.onCancel || (() => null);
     }
 
-    cypher(q, params={}) {
-        return this.props.node.run(q, params)
+    cypher(q, params={}, db) {
+        return this.props.node.run(q, params, db)
             .catch(err => {
                 sentry.reportError(err);
 
@@ -39,7 +40,7 @@ class AssignRoleModal extends Component {
             }
         };
 
-        return this.cypher('CALL dbms.security.listUsers()')
+        return this.cypher('CALL dbms.security.listUsers()', {}, halin.driver.SYSTEM_DB)
             .then(results => results.records)
             .then(records => {
                 // sentry.fine('Got users ', records);
@@ -61,7 +62,7 @@ class AssignRoleModal extends Component {
             return Promise.resolve([]);
         }
 
-        return this.cypher('CALL dbms.security.listRoles()')
+        return this.cypher('CALL dbms.security.listRoles()', {}, halin.driver.SYSTEM_DB)
             .then(results => results.records)
             .then(records => {
                 // Convert to dropdown option format.
@@ -86,7 +87,7 @@ class AssignRoleModal extends Component {
         return this.cypher(`
             CALL dbms.security.removeRoleFromUser({role}, {username})
             RETURN null as value
-        `, params);
+        `, params, halin.driver.SYSTEM_DB);
     }
 
     addRole(username, role) {
@@ -94,7 +95,7 @@ class AssignRoleModal extends Component {
         return this.cypher(`
             CALL dbms.security.addRoleToUser({role}, {username})
             RETURN null as value
-        `, params);
+        `, params, halin.driver.SYSTEM_DB);
     }
 
     ok = () => {
