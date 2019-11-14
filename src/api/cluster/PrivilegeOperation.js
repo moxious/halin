@@ -17,7 +17,10 @@ export default class PrivilegeOperation {
         return {
             operation: this.operation,
             privilege: this.privilege,
-            database: this.database,
+            // TODO: in 4.0 graphs and databases are the same, but this will not persist long
+            // term.
+            database: this.database || this.graph,
+            graph: this.graph,
             entity: this.entity,
             role: this.role,
         };
@@ -110,6 +113,7 @@ export default class PrivilegeOperation {
     }
 
     buildQuery() {
+        console.log('buildQuery', this);
         const op = this.operation;
         const priv = this.privilege;
         const db = this.database;
