@@ -185,17 +185,19 @@ class AlterPrivilegeForm extends Component {
             return (<Spinner />);
         }
 
+        const negative = this.state.operation === 'DENY' || this.state.operation === 'REVOKE';
+
         return (
             <div className='AlterPrivilegeForm'>
                 <Form size="small" error={!this.valid()} style={{ textAlign: 'left' }}>
                     <Form.Group>
                         <h3>Preview</h3>
-                        <h4>{this.state.op.buildQuery()}</h4>
+                        <h4>{new PrivilegeOperation(this.state).buildQuery()}</h4>
                     </Form.Group>
 
                     {!this.props.locked ? this.queryBuilderFormGroup() : ''}
 
-                    <Form.Button positive
+                    <Form.Button positive={!negative} negative={negative}
                         style={this.inputStyle}
                         disabled={this.state.pending || !this.valid()}
                         onClick={data => this.submit(data)}
