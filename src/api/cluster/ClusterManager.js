@@ -215,7 +215,7 @@ export default class ClusterManager {
 
         return this.clusterWideQuery(
             'CALL dbms.security.deleteRole({role})',
-            { role }
+            { role }, neo4j.SYSTEM_DB
         )
             .then(result => {
                 this.addEvent({
@@ -230,13 +230,13 @@ export default class ClusterManager {
     /** Specific to a particular node */
     addNodeRole(node, username, role) {
         sentry.info('ADD ROLE', { username, role });
-        return node.run('call dbms.security.addRoleToUser({role}, {username})', { username, role });
+        return node.run('call dbms.security.addRoleToUser($role, $username)', { username, role }, neo4j.SYSTEM_DB);
     }
 
     /** Specific to a particular node */
     removeNodeRole(node, username, role) {
         sentry.info('REMOVE ROLE', { username, role });
-        return node.run('call dbms.security.removeRoleFromUser({role}, {username})', { username, role });
+        return node.run('call dbms.security.removeRoleFromUser($role, $username)', { username, role }, neo4j.SYSTEM_DB);
     }
 
     /**
@@ -265,7 +265,7 @@ export default class ClusterManager {
         //   (b) role doesn't exist on that node
         //   (c) Underlying association query fails.
         const gatherRoles = (node) => {
-            return node.run(ql.DBMS_SECURITY_USER_ROLES, { username })
+            return node.run(ql.DBMS_SECURITY_USER_ROLES, { username }, neo4j.SYSTEM_DB)
                 .then(results => neo4j.unpackResults(results, {
                     required: ['value'],
                 }))
