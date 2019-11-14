@@ -123,7 +123,7 @@ export default class ClusterManager {
             // Guarantee that promise resolves.
             // it resolves to an object that indicates success
             // or failure.
-            return node.run(query, params)
+            return node.run(query, params, neo4j.SYSTEM_DB)
                 .then(results => clusterOpSuccess(node, results))
                 .catch(err => clusterOpFailure(node, err));
         });
@@ -361,7 +361,7 @@ export default class ClusterManager {
     }
 
     getRoles() {
-        return this.ctx.getWriteMember().run('call dbms.security.listRoles()', {})
+        return this.ctx.getWriteMember().run('call dbms.security.listRoles()', {}, neo4j.SYSTEM_DB)
             .then(results => neo4j.unpackResults(results, {
                 required: ['role', 'users'],
             }));
