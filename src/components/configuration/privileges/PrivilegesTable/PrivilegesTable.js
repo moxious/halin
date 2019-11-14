@@ -28,21 +28,23 @@ class PrivilegesTable extends Component {
                     // Do not permit revoking/denying privileges to admin.
                     disabled: row.role === 'admin',
                 };
+
+                const deny = PrivilegeOperation.fromSystemPrivilege('DENY', row);
+                const revoke = PrivilegeOperation.fromSystemPrivilege('REVOKE', row);
+
                 return (
                     <span>
                         {
                             this.privsButton(
                                 'Deny', 
-                                _.merge({ locked: true }, 
-                                    PrivilegeOperation.fromSystemPrivilege('DENY', row).properties()),
+                                _.merge({ locked: true }, deny.properties()),
                                 'lock', 
                                 buttonProps)
                         }
                         {
                             this.privsButton(
                                 'Revoke', 
-                                _.merge({ locked: true }, 
-                                    PrivilegeOperation.fromSystemPrivilege('REVOKE', row).properties()),
+                                _.merge({ locked: true }, revoke.properties()),
                                 'remove circle', 
                                 buttonProps)
                         }
