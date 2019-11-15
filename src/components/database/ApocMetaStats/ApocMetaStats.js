@@ -9,7 +9,7 @@ import hoc from '../../higherOrderComponents';
 import { List } from 'semantic-ui-react';
 import './ApocMetaStats.css';
 
-class ApocMetaStats extends React.Component {
+class ApocMetaStats extends Component {
     state = {
         relCount: 0,
         nodeCount: 0,
@@ -80,7 +80,7 @@ class ApocMetaStats extends React.Component {
 
 const Stats = hoc.apocOnlyComponent(ApocMetaStats);
 
-class ApocMetaStatsCard extends React.Component {
+class ApocMetaStatsCard extends Component {
     render() {
         return (
             <HalinCard id="ApocMetaStats">
