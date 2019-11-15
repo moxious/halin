@@ -21,6 +21,7 @@ export default class AppFooter extends PureComponent {
 
                 <List>                    
                     <List.Item><a target='halindocs' href='https://moxious.github.io/halin/'>Documentation</a></List.Item>
+                    <List.Item><a target='halindocs' href='https://github.com/moxious/halin/blob/master/release-notes.md#halin-release-notes'>Release Notes</a></List.Item>
                     <List.Item><a target='halindocs' href='https://github.com/moxious/halin'>Source Code (GitHub)</a></List.Item>
                 </List>
 
