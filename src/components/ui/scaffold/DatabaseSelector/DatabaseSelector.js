@@ -32,7 +32,7 @@ export default class DatabaseSelector extends Component {
         },
     };
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.listenerFn = (e) => {
             const dbs = window.halinContext.getClusterManager().databases();
 
@@ -82,7 +82,7 @@ export default class DatabaseSelector extends Component {
         );
     }
 
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         // Menu click counter from the nav above us acts as a toggle for
         // the left-hand slide-out menu.
         const visible = props.clickCount % 2 === 0;

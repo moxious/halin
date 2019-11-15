@@ -36,7 +36,7 @@ class AlterPrivilegeForm extends Component {
         return this.state.op && _.isNil(this.state.op.validate());
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         const mgr = window.halinContext.getClusterManager();
         // Load roles for dropdown content.
         this.setState({ pending: true });

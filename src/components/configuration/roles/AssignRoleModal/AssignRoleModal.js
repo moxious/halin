@@ -115,7 +115,7 @@ class AssignRoleModal extends Component {
         this.loadRoles();
     }
 
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         if (!_.isNil(props.open)) {
             if (props.open) {
                 // Load fresh data each time the dialog opens so that users

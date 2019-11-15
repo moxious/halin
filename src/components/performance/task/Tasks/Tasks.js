@@ -177,7 +177,7 @@ class Tasks extends Component {
         return window.halinContext.userIsAdmin() && v3_5_andUp(window.halinContext.getVersion());
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         // We use a different query according to supported features if 3.5 is present.
         const version = window.halinContext.getVersion();
         let query = queryLibrary.DBMS_34_TASKS.getQuery();

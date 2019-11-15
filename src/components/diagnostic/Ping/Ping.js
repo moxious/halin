@@ -18,7 +18,7 @@ export default class Ping extends Component {
         error: null,
     };
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.mounted = true;
         this.ping();
     }

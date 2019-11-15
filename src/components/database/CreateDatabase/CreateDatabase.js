@@ -67,7 +67,7 @@ class CreateDatabase extends Component {
         }
     };
 
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         this.setState({ open: props.open });
     }
 

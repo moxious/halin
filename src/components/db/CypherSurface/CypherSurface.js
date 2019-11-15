@@ -50,7 +50,7 @@ class CypherSurface extends Component {
         ],
     };
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         return this.props.node.getCypherSurface()
             .then(surface => {
                 this.setState({ surface });

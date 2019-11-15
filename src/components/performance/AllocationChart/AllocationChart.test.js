@@ -18,7 +18,7 @@ describe('AllocationChart', function() {
             <AllocationChart {...props} />,
             document.createElement('div'));
 
-        return component.componentWillReceiveProps(props);
+        return component.UNSAFE_componentWillReceiveProps(props);
     });
 
     it('sets state correctly', () => {

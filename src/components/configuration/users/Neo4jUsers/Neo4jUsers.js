@@ -112,7 +112,7 @@ class Neo4jUsers extends Component {
         });
     }
 
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         // If I receive a refresh signal, copy to child
         // which does data polling.  Man I wish there were a better way.
         const refresh = this.state.refresh;

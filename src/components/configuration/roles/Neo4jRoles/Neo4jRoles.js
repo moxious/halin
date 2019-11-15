@@ -54,7 +54,7 @@ class Neo4jRoles extends Component {
         refresh: 1,
     }
 
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         // If I receive a refresh signal, copy to child
         // which does data polling.  Man I wish there were a better way.
         const refresh = this.state.refresh;

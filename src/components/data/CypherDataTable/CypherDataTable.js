@@ -81,7 +81,7 @@ class CypherDataTable extends Component {
         }
     }
 
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         const refresh = this.state.refresh;
         if (refresh !== props.refresh) {
             this.setState({ refresh: props.refresh });
