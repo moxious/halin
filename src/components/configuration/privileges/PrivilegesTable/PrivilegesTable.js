@@ -3,7 +3,7 @@ import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
 import { Grid, Button, Modal } from 'semantic-ui-react';
 import uuid from 'uuid';
 import moment from 'moment';
-import _ from 'lodash';
+// import _ from 'lodash';
 
 import api from '../../../../api';
 import CSVDownload from '../../../data/download/CSVDownload';
