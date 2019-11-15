@@ -9,12 +9,13 @@ import api from '../../../../api';
 import CSVDownload from '../../../data/download/CSVDownload';
 import Explainer from '../../../ui/scaffold/Explainer/Explainer';
 import AlterPrivilegeForm from '../AlterPrivilegeForm/AlterPrivilegeForm';
-import PrivilegeOperation from '../../../../api/cluster/PrivilegeOperation';
+// import PrivilegeOperation from '../../../../api/cluster/PrivilegeOperation';
 
 class PrivilegesTable extends Component {
     key = uuid.v4();
     query = api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.query;
     displayColumns = [
+        /*
         {
             Header: 'Actions',
             id: 'delete',
@@ -52,6 +53,7 @@ class PrivilegesTable extends Component {
                 );
             },
         },
+        */
     ].concat(api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.columns);
 
     state = {
@@ -137,7 +139,7 @@ class PrivilegesTable extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <Button.Group size='small'>
-                                {this.grantButton()}
+                                {/* {this.grantButton()} */}
                                 {this.downloadCSVButton()}
                             </Button.Group>
                         </Grid.Column>
