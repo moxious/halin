@@ -366,8 +366,20 @@ export default class ClusterMember {
 
         let poolSession;
         
+        /*
+         * Sessions work differently depending on Neo4j 3 vs. 4.
+         * In 4, sessions can be bound to a particular database.  In 3
+         * they never are because 3 doesn't contain multidatabase functionality.
+         */
         const getSessionPromise = () => {
-            if (!database) {
+            // NOTE/GOTCHA: we are *intentionally* ignoring the 'database' parameter if
+            // major version is < 4, because a database specific query doesn't
+            // make sense in 3.5.x. 
+            // This comes up most commonly with system commands like
+            // call dbms.security.listUsers() which must be run against systemdb in
+            // Neo4j 4, but with 3.5.x if you try to run the query against a specific
+            // database, the driver will fail it because you're not using >= 4.
+            if (!database || this.getVersion().major < 4) {
                 poolSession = true;
                 return this.pool.acquire();
             } 
