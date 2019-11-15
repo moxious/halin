@@ -140,7 +140,7 @@ export default class ClusterManager {
         }
 
         return this.clusterWideQuery(
-            'CALL dbms.security.changeUserPassword({username}, {password}, false)',
+            'CALL dbms.security.changeUserPassword($username, $password, false)',
             { username, password }
         )
             .then(result => {
@@ -160,7 +160,7 @@ export default class ClusterManager {
         }
 
         return this.clusterWideQuery(
-            'CALL dbms.security.createUser({username}, {password}, false)',
+            'CALL dbms.security.createUser($username, $password, false)',
             { username, password }
         )
             .then(result => {
@@ -180,7 +180,7 @@ export default class ClusterManager {
         }
 
         return this.clusterWideQuery(
-            'CALL dbms.security.deleteUser({username})',
+            'CALL dbms.security.deleteUser($username)',
             { username }
         )
             .then(result => {
@@ -197,7 +197,7 @@ export default class ClusterManager {
         if (!role) { throw new Error('Must provide role'); }
 
         return this.clusterWideQuery(
-            'CALL dbms.security.createRole({role})',
+            'CALL dbms.security.createRole($role)',
             { role }
         )
             .then(result => {
@@ -214,7 +214,7 @@ export default class ClusterManager {
         if (!role) throw new Error('Must provide role');
 
         return this.clusterWideQuery(
-            'CALL dbms.security.deleteRole({role})',
+            'CALL dbms.security.deleteRole($role)',
             { role }, neo4j.SYSTEM_DB
         )
             .then(result => {
