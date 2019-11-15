@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Card } from 'semantic-ui-react';
 import './HalinCard.css';
 import Explainer from '../Explainer/Explainer';
+import _ from 'lodash';
 
 export default class HalinCard extends PureComponent {
     header() {
@@ -21,8 +22,10 @@ export default class HalinCard extends PureComponent {
     }
 
     render() {
+        const cardprops = _.pick(this.props, ['id']);
+
         return (
-            <Card fluid className='HalinCard'>
+            <Card fluid className='HalinCard' {...cardprops}>
                 { this.header() } 
                 
                 <div className='HalinCardContent'>

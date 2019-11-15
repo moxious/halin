@@ -60,6 +60,8 @@ const links = {
     authMaxFailedAttempts: new KBLink('Configuring maximum failed authorization attempts', 'https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_dbms.security.auth_max_failed_attempts'),
     enablingCSVMetrics: new KBLink('Enabling CSV Metrics', 'https://neo4j.com/docs/operations-manual/current/monitoring/metrics/expose/#metrics-enable'),
     changingCSVMetricIntervals: new KBLink('Configuring CSV Metrics and sampling intervals', 'https://neo4j.com/docs/operations-manual/current/monitoring/metrics/expose/#metrics-csv'),
+    countStore: new KBLink('Fast counts using the count store', 'https://neo4j.com/developer/kb/fast-counts-using-the-count-store/'),
+    apocDocs: new KBLink('APOC Documentation', 'https://neo4j.com/docs/labs/apoc/current/'),
 };
 
 export default {
@@ -81,6 +83,11 @@ export default {
     'security.log': render([
         'Log of security events. (Enterprise Edition only.)',
         links.logFiles,
+    ]),
+    ApocMetaStats: render([
+        'Basic statistics about your database content, that uses the Neo4j Count Store',
+        links.apocDocs,
+        links.countStore,
     ]),
     LogTroubleshooting: render([
         `Some installs of Neo4j may use journalctl to access logs, which may not be
