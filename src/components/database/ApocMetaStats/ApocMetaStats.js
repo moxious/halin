@@ -42,16 +42,17 @@ class ApocMetaStats extends React.Component {
                     relTypes: s.relTypes,
                 });
             })
-            .catch(err => console.error(err));
+            .catch(err => {
+                api.sentry.error('Error getting APOC meta stats', err);
+                this.setState({ error: err });
+            });
     }
 
-    render() {
+    content() {
         return (
-            <HalinCard id="ApocMetaStats">
-                <h3>Database Statistics <Explainer knowledgebase='ApocMetaStats' /></h3>
-
-                { this.state.nodeCount } nodes, { this.state.relCount } relationships, and 
-                &nbsp;{ this.state.propertyKeyCount } properties.
+            <div>
+                <p>{ this.state.nodeCount } nodes, { this.state.relCount } relationships, and 
+                &nbsp;{ this.state.propertyKeyCount } properties.</p>
 
                 <h4>Labels</h4>
                 <List id='label_list'>
@@ -68,6 +69,16 @@ class ApocMetaStats extends React.Component {
                             <List.Item key={i}>{rt}: {api.driver.handleNeo4jInt(this.state.relTypes[rt])}</List.Item>)
                     }
                 </List>
+            </div>
+        );
+    }
+
+    render() {
+        return (
+            <HalinCard id="ApocMetaStats">
+                <h3>Database Statistics <Explainer knowledgebase='ApocMetaStats' /></h3>
+
+                { this.state.error ? 'An error occurred, please check back later' : this.content() }
             </HalinCard>
         );
     };
