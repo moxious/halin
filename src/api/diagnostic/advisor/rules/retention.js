@@ -22,8 +22,10 @@ const logRetention = pkg => {
                 advice: 'Consult https://neo4j.com/docs/operations-manual/3.5/configuration/transaction-logs/ for more information',
             }));
         } else {
-            findings.push(Advice.pass(addr,
-                'You have customized the default transaction log retention policy. That\'s good!'));
+            findings.push(Advice.pass({
+                addr,
+                finding: 'You have customized the default transaction log retention policy. That\'s good!',
+            }));
         }
     });
 
