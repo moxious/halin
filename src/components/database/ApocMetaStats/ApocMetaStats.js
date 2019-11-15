@@ -48,7 +48,9 @@ class ApocMetaStats extends React.Component {
             });
     }
 
-    content() {
+    render() {
+        if (this.state.error) { return 'An error occurred, please check back later'; }
+
         return (
             <div>
                 <p>{ this.state.nodeCount } nodes, { this.state.relCount } relationships, and 
@@ -57,6 +59,7 @@ class ApocMetaStats extends React.Component {
                 <h4>Labels</h4>
                 <List id='label_list'>
                     { 
+                        Object.keys(this.state.labels).length === 0 ? 'None' : 
                         Object.keys(this.state.labels).map((label,i) => 
                             <List.Item key={i}>{label}: {api.driver.handleNeo4jInt(this.state.labels[label])} nodes</List.Item>)
                     }
@@ -65,6 +68,7 @@ class ApocMetaStats extends React.Component {
                 <h4>Relationships</h4>
                 <List id='rel_list'>
                     { 
+                        Object.keys(this.state.relTypes).length === 0 ? 'None' : 
                         Object.keys(this.state.relTypes).map((rt,i) => 
                             <List.Item key={i}>{rt}: {api.driver.handleNeo4jInt(this.state.relTypes[rt])}</List.Item>)
                     }
@@ -72,20 +76,24 @@ class ApocMetaStats extends React.Component {
             </div>
         );
     }
+}
 
+const Stats = hoc.apocOnlyComponent(ApocMetaStats);
+
+class ApocMetaStatsCard extends React.Component {
     render() {
         return (
             <HalinCard id="ApocMetaStats">
                 <h3>Database Statistics <Explainer knowledgebase='ApocMetaStats' /></h3>
 
-                { this.state.error ? 'An error occurred, please check back later' : this.content() }
+                <Stats {...this.props} />
             </HalinCard>
         );
     };
 }
 
-ApocMetaStats.props = {
+ApocMetaStatsCard.props = {
     node: PropTypes.object.isRequired,
 }
 
-export default hoc.apocOnlyComponent(ApocMetaStats);
+export default ApocMetaStatsCard;
