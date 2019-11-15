@@ -4,11 +4,14 @@ docker stop neo4j-empty
 
 PASSWORD=admin
 CWD=`pwd`
-NEO4J=neo4j:3.5.5
+#NEO4J=neo4j:3.5.5
+#NEO4J=neo4j:4.0.0-alpha09
+NEO4J=neo4j:4.0.0-alpha09mr02-enterprise
 
 docker run -d --name neo4j-empty --rm \
 	-p 127.0.0.1:7474:7474 \
         -p 127.0.0.1:7687:7687 \
+        --env=NEO4J_ACCEPT_LICENSE_AGREEMENT=yes \
         --env=NEO4J_dbms_memory_pagecache_size=1G \
         --env=NEO4J_dbms_memory_heap_initial__size=2G \
         --env=NEO4J_dbms_memory_heap_max__size=4G \
