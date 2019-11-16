@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Icon, Confirm } from 'semantic-ui-react';
+import { Button, Icon, Confirm, Message } from 'semantic-ui-react';
 import status from '../../../api/status';
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 import neo4j from '../../../api/driver';
@@ -102,21 +102,32 @@ class AdministerDatabase extends Component {
                     {this.dropButton()}
                 </div>
 
-                { !this.canAdminister() ?
-                
-                <div style={{paddingTop: '15px'}}>
-                    <h4>Reserved Database</h4>
-                    <p>Stopping, starting, and deleting databases is not
-                        permitted for the default database, or the system
-                        database.
+                {!this.canAdminister() ?
+
+                    <div style={{ paddingTop: '15px' }}>
+                        <h4>Reserved Database</h4>
+                        <p>Stopping, starting, and deleting databases is not
+                            permitted for the default database, or the system
+                            database.
                     </p>
-                </div>
-                
-                : ''}
+                    </div>
+
+                    : ''}
 
                 <Confirm
                     open={this.state.dropConfirmOpen}
-                    content='Are you sure?  This action will DESTROY ALL DATA IN THE DATABASE and cannot be undone'
+                    header='Drop Database'
+                    content={
+                            <Message negative icon>
+                                <Icon name='warning' />
+                                <Message.Content>
+                                    <Message.Header>CAUTION</Message.Header>
+                                    
+                                    <p>Are you sure?</p>
+                                    <p>This action will <strong>DESTROY ALL DATA IN THE DATABASE</strong> and cannot be undone!</p>
+                                </Message.Content>
+                            </Message>
+                    }
                     onCancel={cancel}
                     onConfirm={confirm}
                 />
