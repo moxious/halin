@@ -1,5 +1,11 @@
 # Halin Release Notes
 
+## 0.12.0
+
+- Initial support for Neo4j 4.0 as of MR03; multiple databases now supported!
+- New database pane that allows creating, deleting, stopping and starting databases.
+- Fixes #105, warn on default tx_log retention policy
+
 ## 0.11.3
 
 - Fixes #96, adds labels to GC Pause times
