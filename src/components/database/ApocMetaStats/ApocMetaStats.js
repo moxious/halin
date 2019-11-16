@@ -9,6 +9,53 @@ import hoc from '../../higherOrderComponents';
 import { List } from 'semantic-ui-react';
 import './ApocMetaStats.css';
 
+/**
+ * Gathers stats and returns a new state object.
+ * @param {ClusterMember} node 
+ * @param {Database} database 
+ */
+const gatherStats = (node, database) => {
+    if (!node || !database) { return null; }
+
+    if (database.getLabel() === api.driver.SYSTEM_DB) {
+        return Promise.resolve({
+            message: 'This database does not contain inspectable data',
+            error: null,
+        });
+    } else if(database.getStatus() !== 'online') {
+        return Promise.resolve({
+            message: 'This database is not online.  Please start it to see statistics.',
+            error: null,
+        });
+    }
+
+    return node.run('CALL apoc.meta.stats()', {}, database.getLabel())
+        .then(results => api.driver.unpackResults(results, {
+            required: ['labelCount', 'relTypeCount', 'propertyKeyCount',
+                'nodeCount', 'relCount', 'labels',
+                'relTypes', 'relTypesCount', 'stats'],
+        }))
+        .then(data => data[0] || null)
+        .then(result => {
+            const s = result.stats;
+
+            return {
+                relCount: api.driver.handleNeo4jInt(s.relCount),
+                nodeCount: api.driver.handleNeo4jInt(s.nodeCount),
+                labelCount: api.driver.handleNeo4jInt(s.labelCount),
+                propertyKeyCount: api.driver.handleNeo4jInt(s.propertyKeyCount),
+                labels: s.labels,
+                relTypes: s.relTypes,
+                message: null,
+                error: null,
+            };
+        })
+        .catch(err => {
+            api.sentry.error('Error getting APOC meta stats', err);
+            return { error: err, message: null };
+        });
+};
+
 class ApocMetaStats extends Component {
     state = {
         relCount: 0,
@@ -17,60 +64,43 @@ class ApocMetaStats extends Component {
         propertyKeyCount: 0,
         labels: {},
         relTypes: {},
+        message: null,
     };
 
-    componentDidMount(props) {
-        console.log('apoc props', this.props);
+    UNSAFE_componentWillReceiveProps(props) {
+        return gatherStats(props.node, props.database)
+            .then(state => this.setState(state));
+    }
 
-        return this.props.node.run('CALL apoc.meta.stats()', {}, this.props.database.getLabel())
-            .then(results => api.driver.unpackResults(results, {
-                required: ['labelCount', 'relTypeCount', 'propertyKeyCount',
-                    'nodeCount', 'relCount', 'labels', 
-                    'relTypes', 'relTypesCount', 'stats'],
-            }))
-            .then(data => data[0] || null)
-            .then(result => {
-                console.log('STATS', result.stats);
-                const s = result.stats;
-
-                this.setState({
-                    relCount: api.driver.handleNeo4jInt(s.relCount),
-                    nodeCount: api.driver.handleNeo4jInt(s.nodeCount),
-                    labelCount: api.driver.handleNeo4jInt(s.labelCount),
-                    propertyKeyCount: api.driver.handleNeo4jInt(s.propertyKeyCount),
-                    labels: s.labels,
-                    relTypes: s.relTypes,
-                });
-            })
-            .catch(err => {
-                api.sentry.error('Error getting APOC meta stats', err);
-                this.setState({ error: err });
-            });
+    componentDidMount() {
+        return gatherStats(this.props.node, this.props.database)
+            .then(state => this.setState(state));
     }
 
     render() {
-        if (this.state.error) { return 'An error occurred, please check back later'; }
+        if (this.state.error) { return `${this.state.error}`; }
+        if (this.state.message) { return <p>{this.state.message}</p>; }
 
         return (
             <div>
-                <p>{ this.state.nodeCount } nodes, { this.state.relCount } relationships, and 
-                &nbsp;{ this.state.propertyKeyCount } properties.</p>
+                <p>{this.state.nodeCount} nodes, {this.state.relCount} relationships, and
+                &nbsp;{this.state.propertyKeyCount} properties.</p>
 
                 <h4>Labels</h4>
                 <List id='label_list'>
-                    { 
-                        Object.keys(this.state.labels).length === 0 ? 'None' : 
-                        Object.keys(this.state.labels).map((label,i) => 
-                            <List.Item key={i}>{label}: {api.driver.handleNeo4jInt(this.state.labels[label])} nodes</List.Item>)
+                    {
+                        Object.keys(this.state.labels).length === 0 ? 'None' :
+                            Object.keys(this.state.labels).map((label, i) =>
+                                <List.Item key={i}>{label}: {api.driver.handleNeo4jInt(this.state.labels[label])} nodes</List.Item>)
                     }
                 </List>
 
                 <h4>Relationships</h4>
                 <List id='rel_list'>
-                    { 
-                        Object.keys(this.state.relTypes).length === 0 ? 'None' : 
-                        Object.keys(this.state.relTypes).map((rt,i) => 
-                            <List.Item key={i}>{rt}: {api.driver.handleNeo4jInt(this.state.relTypes[rt])}</List.Item>)
+                    {
+                        Object.keys(this.state.relTypes).length === 0 ? 'None' :
+                            Object.keys(this.state.relTypes).map((rt, i) =>
+                                <List.Item key={i}>{rt}: {api.driver.handleNeo4jInt(this.state.relTypes[rt])}</List.Item>)
                     }
                 </List>
             </div>
