@@ -81,7 +81,7 @@ class CypherDataTable extends Component {
         }
     }
 
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         const refresh = this.state.refresh;
         if (refresh !== props.refresh) {
             this.setState({ refresh: props.refresh });
@@ -94,12 +94,12 @@ class CypherDataTable extends Component {
 
     onUpdate = () => {
         if (this.props.onUpdate) {
-            this.props.onUpdate(this.state.items, this);
+            return this.props.onUpdate(this.state.items, this);
         }
     };
 
     sampleData() {
-        return this.props.node.run(this.query, this.parameters)
+        return this.props.node.run(this.query, this.parameters, this.props.database)
             .then(results => {
                 // Unpack results, but only for columns with an accessor
                 // (as extra virtual columns may be defined)
@@ -117,6 +117,7 @@ class CypherDataTable extends Component {
                         setTimeout(() => this.sampleData(), this.rate);
                     }
                 }
+                return items;
             })
             .catch(err => {
                 sentry.reportError(err, `CypherDataTable: error executing ${this.query}`);

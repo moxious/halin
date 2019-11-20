@@ -21,7 +21,7 @@ export default class AllocationChart extends Component {
         populated: false,
     };
 
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         // Take the free and total the user gave us and compute 
         // percentages, fill in the gaps.
         const newState = {

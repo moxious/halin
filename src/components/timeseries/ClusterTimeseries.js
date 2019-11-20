@@ -106,7 +106,7 @@ class ClusterTimeseries extends Component {
         ];
     }
 
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         this.setState({ 
             displayProperty: props.displayProperty,
 

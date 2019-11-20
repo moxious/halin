@@ -891,6 +891,14 @@
     core-js "^2.5.7"
     regenerator-runtime "^0.11.1"
 
+"@babel/polyfill@^7.7.0":
+  version "7.7.0"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/@babel/polyfill/-/polyfill-7.7.0.tgz#e1066e251e17606ec7908b05617f9b7f8180d8f3"
+  integrity sha1-4QZuJR4XYG7HkIsFYX+bf4GA2PM=
+  dependencies:
+    core-js "^2.6.5"
+    regenerator-runtime "^0.13.2"
+
 "@babel/preset-env@7.3.1":
   version "7.3.1"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/@babel/preset-env/-/preset-env-7.3.1.tgz#389e8ca6b17ae67aaf9a2111665030be923515db"
@@ -1086,6 +1094,13 @@
   version "7.4.4"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/@babel/runtime/-/runtime-7.4.4.tgz#dc2e34982eb236803aa27a07fea6857af1b9171d"
   integrity sha1-3C40mC6yNoA6onoH/qaFevG5Fx0=
+  dependencies:
+    regenerator-runtime "^0.13.2"
+
+"@babel/runtime@^7.5.5":
+  version "7.7.2"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/@babel/runtime/-/runtime-7.7.2.tgz#111a78002a5c25fc8e3361bedc9529c696b85a6a"
+  integrity sha1-ERp4ACpcJfyOM2G+3JUpxpa4Wmo=
   dependencies:
     regenerator-runtime "^0.13.2"
 
@@ -2422,15 +2437,6 @@ babel-plugin-transform-react-remove-prop-types@0.4.24:
   resolved "https://neo.jfrog.io/neo/api/npm/npm/babel-plugin-transform-react-remove-prop-types/-/babel-plugin-transform-react-remove-prop-types-0.4.24.tgz#f2edaf9b4c6a5fbe5c1d678bfb531078c1555f3a"
   integrity sha1-8u2vm0xqX75cHWeL+1MQeMFVXzo=
 
-babel-polyfill@^6.9.1:
-  version "6.26.0"
-  resolved "https://registry.yarnpkg.com/babel-polyfill/-/babel-polyfill-6.26.0.tgz#379937abc67d7895970adc621f284cd966cf2153"
-  integrity sha1-N5k3q8Z9eJWXCtxiHyhM2WbPIVM=
-  dependencies:
-    babel-runtime "^6.26.0"
-    core-js "^2.5.0"
-    regenerator-runtime "^0.10.5"
-
 babel-preset-jest@^23.2.0:
   version "23.2.0"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/babel-preset-jest/-/babel-preset-jest-23.2.0.tgz#8ec7a03a138f001a1a8fb1e8113652bf1a55da46"
@@ -2439,10 +2445,10 @@ babel-preset-jest@^23.2.0:
     babel-plugin-jest-hoist "^23.2.0"
     babel-plugin-syntax-object-rest-spread "^6.13.0"
 
-babel-preset-react-app@^7.0.1:
-  version "7.0.1"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/babel-preset-react-app/-/babel-preset-react-app-7.0.1.tgz#8dd7fef73fba124a6e140d245185ca657a943313"
-  integrity sha1-jdf+9z+6EkpuFA0kUYXKZXqUMxM=
+babel-preset-react-app@^7.0.2:
+  version "7.0.2"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/babel-preset-react-app/-/babel-preset-react-app-7.0.2.tgz#d01ae973edc93b9f1015cb0236dd55889a584308"
+  integrity sha1-0Brpc+3JO58QFcsCNt1ViJpYQwg=
   dependencies:
     "@babel/core" "7.2.2"
     "@babel/plugin-proposal-class-properties" "7.3.0"
@@ -2477,7 +2483,7 @@ babel-register@^6.26.0:
     mkdirp "^0.5.1"
     source-map-support "^0.4.15"
 
-babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.25.0, babel-runtime@^6.26.0, babel-runtime@^6.5.0:
+babel-runtime@^6.22.0, babel-runtime@^6.23.0, babel-runtime@^6.25.0, babel-runtime@^6.26.0:
   version "6.26.0"
   resolved "https://registry.yarnpkg.com/babel-runtime/-/babel-runtime-6.26.0.tgz#965c7058668e82b55d7bfe04ff2337bc8b5647fe"
   integrity sha1-llxwWGaOgrVde/4E/yM3vItWR/4=
@@ -2595,6 +2601,11 @@ bluebird@^3.5.1, bluebird@^3.5.3:
   version "3.5.3"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/bluebird/-/bluebird-3.5.3.tgz#7d01c6f9616c9a51ab0f8c549a79dfe6ec33efa7"
   integrity sha1-fQHG+WFsmlGrD4xUmnnf5uwz76c=
+
+bluebird@^3.7.1:
+  version "3.7.1"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/bluebird/-/bluebird-3.7.1.tgz#df70e302b471d7473489acf26a93d63b53f874de"
+  integrity sha1-33DjArRx10c0iazyapPWO1P4dN4=
 
 bn.js@^4.0.0, bn.js@^4.1.0, bn.js@^4.1.1, bn.js@^4.4.0:
   version "4.11.8"
@@ -3294,10 +3305,10 @@ concat-stream@^1.5.0:
     readable-stream "^2.2.2"
     typedarray "^0.0.6"
 
-confusing-browser-globals@^1.0.5:
-  version "1.0.5"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/confusing-browser-globals/-/confusing-browser-globals-1.0.5.tgz#0171050cfdd4261e278978078bc00c4d88e135f4"
-  integrity sha1-AXEFDP3UJh4niXgHi8AMTYjhNfQ=
+confusing-browser-globals@^1.0.6:
+  version "1.0.9"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/confusing-browser-globals/-/confusing-browser-globals-1.0.9.tgz#72bc13b483c0276801681871d4898516f8f54fdd"
+  integrity sha1-crwTtIPAJ2gBaBhx1ImFFvj1T90=
 
 connect-history-api-fallback@^1.3.0:
   version "1.4.0"
@@ -3399,6 +3410,11 @@ core-js@^2.5.7:
   version "2.5.7"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/core-js/-/core-js-2.5.7.tgz#f972608ff0cead68b841a16a932d0b183791814e"
   integrity sha1-+XJgj/DOrWi4QaFqky0LGDeRgU4=
+
+core-js@^2.6.5:
+  version "2.6.10"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/core-js/-/core-js-2.6.10.tgz#8a5b8391f8cc7013da703411ce5b585706300d7f"
+  integrity sha1-iluDkfjMcBPacDQRzltYVwYwDX8=
 
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -4524,12 +4540,12 @@ escodegen@^1.9.1:
   optionalDependencies:
     source-map "~0.6.1"
 
-eslint-config-react-app@^3.0.7:
-  version "3.0.7"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/eslint-config-react-app/-/eslint-config-react-app-3.0.7.tgz#d58c9216ff285e2b4de0eb8403c28b0600e45b3e"
-  integrity sha1-1YySFv8oXitN4OuEA8KLBgDkWz4=
+eslint-config-react-app@^3.0.8:
+  version "3.0.8"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/eslint-config-react-app/-/eslint-config-react-app-3.0.8.tgz#6f606828ba30bafee7d744c41cd07a3fea8f3035"
+  integrity sha1-b2BoKLowuv7n10TEHNB6P+qPMDU=
   dependencies:
-    confusing-browser-globals "^1.0.5"
+    confusing-browser-globals "^1.0.6"
 
 eslint-import-resolver-node@^0.3.1:
   version "0.3.1"
@@ -5171,18 +5187,17 @@ forever-agent@~0.6.1:
   resolved "https://registry.yarnpkg.com/forever-agent/-/forever-agent-0.6.1.tgz#fbc71f0c41adeb37f96c577ad1ed42d8fdacca91"
   integrity sha1-+8cfDEGt6zf5bFd60e1C2P2sypE=
 
-fork-ts-checker-webpack-plugin-alt@0.4.14:
-  version "0.4.14"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/fork-ts-checker-webpack-plugin-alt/-/fork-ts-checker-webpack-plugin-alt-0.4.14.tgz#1bd6c0d97b7d4682dde61255fcbd78b72f7473a0"
-  integrity sha1-G9bA2Xt9RoLd5hJV/L14ty90c6A=
+fork-ts-checker-webpack-plugin@1.0.0-alpha.6:
+  version "1.0.0-alpha.6"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/fork-ts-checker-webpack-plugin/-/fork-ts-checker-webpack-plugin-1.0.0-alpha.6.tgz#826c57048addf8a3253853615c84f3ff7beeaf45"
+  integrity sha1-gmxXBIrd+KMlOFNhXITz/3vur0U=
   dependencies:
     babel-code-frame "^6.22.0"
     chalk "^2.4.1"
     chokidar "^2.0.4"
-    lodash "^4.17.11"
     micromatch "^3.1.10"
     minimatch "^3.0.4"
-    resolve "^1.5.0"
+    semver "^5.6.0"
     tapable "^1.0.0"
 
 form-data@~2.3.2:
@@ -7361,6 +7376,11 @@ lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.5, lodash@^4.2.0:
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.11.tgz#b39ea6229ef607ecd89e2c8df12536891cac9b8d"
   integrity sha1-s56mIp72B+zYniyN8SU2iRysm40=
 
+lodash@^4.17.15:
+  version "4.17.15"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
+  integrity sha1-tEf2ZwoEVbv+7dETku/zMOoJdUg=
+
 loglevel@^1.4.1:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/loglevel/-/loglevel-1.5.1.tgz#189078c94ab9053ee215a0acdbf24244ea0f6502"
@@ -7735,15 +7755,10 @@ moment-duration-format@^1.3.0:
   resolved "https://neo.jfrog.io/neo/api/npm/npm/moment-duration-format/-/moment-duration-format-1.3.0.tgz#541771b5f87a049cc65540475d3ad966737d6908"
   integrity sha1-VBdxtfh6BJzGVUBHXTrZZnN9aQg=
 
-moment@^2.18.1, moment@^2.22.2:
+moment@^2.18.1, moment@^2.24.0:
   version "2.24.0"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
   integrity sha1-DQVdU/UFKqZTyfbraLtdEr9cK1s=
-
-moment@^2.9.0:
-  version "2.22.2"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.22.2.tgz#3c257f9839fc0e93ff53149632239eb90783ff66"
-  integrity sha1-PCV/mDn8DpP/UxSWMiOeuQeD/2Y=
 
 move-concurrently@^1.0.1:
   version "1.0.1"
@@ -7838,14 +7853,15 @@ neo-async@^2.5.0:
   resolved "https://neo.jfrog.io/neo/api/npm/npm/neo-async/-/neo-async-2.6.0.tgz#b9d15e4d71c6762908654b5183ed38b753340835"
   integrity sha1-udFeTXHGdikIZUtRg+04t1M0CDU=
 
-neo4j-driver@^1.7.2:
-  version "1.7.2"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/neo4j-driver/-/neo4j-driver-1.7.2.tgz#c72a6dfa6bd2106b00a42794dc52a82b227b48e0"
-  integrity sha1-xypt+mvSEGsApCeU3FKoKyJ7SOA=
+neo4j-driver@^4.0.0-beta01:
+  version "4.0.0-beta01"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/neo4j-driver/-/neo4j-driver-4.0.0-beta01.tgz#f1a89e7c09e1a0ebec314d614eeb7bf2e9c88f74"
+  integrity sha1-8aiefAnhoOvsMU1hTut78unIj3Q=
   dependencies:
-    babel-runtime "^6.26.0"
-    text-encoding "^0.6.4"
-    uri-js "^4.2.1"
+    "@babel/runtime" "^7.5.5"
+    rxjs "^6.5.2"
+    text-encoding-utf-8 "^1.0.2"
+    uri-js "^4.2.2"
 
 nice-try@^1.0.4:
   version "1.0.5"
@@ -8603,17 +8619,16 @@ pnp-webpack-plugin@1.2.1:
   dependencies:
     ts-pnp "^1.0.0"
 
-pondjs@^0.8.9:
-  version "0.8.9"
-  resolved "https://registry.yarnpkg.com/pondjs/-/pondjs-0.8.9.tgz#da835303fa76691a2abe13399761366df3c38c98"
-  integrity sha1-2oNTA/p2aRoqvhM5l2E2bfPDjJg=
+pondjs@^0.9.0:
+  version "0.9.0"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/pondjs/-/pondjs-0.9.0.tgz#5c931233f8ef56852914eb669506eaac62b0f13b"
+  integrity sha1-XJMSM/jvVoUpFOtmlQbqrGKw8Ts=
   dependencies:
-    babel-polyfill "^6.9.1"
-    babel-runtime "^6.5.0"
+    "@babel/polyfill" "^7.7.0"
     immutable "^3.6.4"
     immutable-devtools "0.0.4"
-    moment "^2.9.0"
-    underscore "^1.8.2"
+    moment "^2.24.0"
+    underscore "^1.9.1"
 
 portfinder@^1.0.9:
   version "1.0.13"
@@ -9561,10 +9576,10 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-app-polyfill@^0.2.1:
-  version "0.2.1"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-app-polyfill/-/react-app-polyfill-0.2.1.tgz#96c701a40b9671c8547f70bdbb4a47f4d5767790"
-  integrity sha1-lscBpAuWcchUf3C9u0pH9NV2d5A=
+react-app-polyfill@^0.2.2:
+  version "0.2.2"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-app-polyfill/-/react-app-polyfill-0.2.2.tgz#a903b61a8bfd9c5e5f16fc63bebe44d6922a44fb"
+  integrity sha1-qQO2Gov9nF5fFvxjvr5E1pIqRPs=
   dependencies:
     core-js "2.6.4"
     object-assign "4.1.1"
@@ -9586,10 +9601,10 @@ react-d3-components@^0.9.1:
     d3 "^3.5.3"
     prop-types "^15.6.0"
 
-react-dev-utils@^7.0.3:
-  version "7.0.3"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-dev-utils/-/react-dev-utils-7.0.3.tgz#f1316cfffd792fd41b0c28ad5db86c1d74484d6f"
-  integrity sha1-8TFs//15L9QbDCitXbhsHXRITW8=
+react-dev-utils@^8.0.0:
+  version "8.0.0"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-dev-utils/-/react-dev-utils-8.0.0.tgz#7c5b227a45a32ea8ff7fbc318f336cf9e2c6e34c"
+  integrity sha1-fFsiekWjLqj/f7wxjzNs+eLG40w=
   dependencies:
     "@babel/code-frame" "7.0.0"
     address "1.0.3"
@@ -9600,6 +9615,7 @@ react-dev-utils@^7.0.3:
     escape-string-regexp "1.0.5"
     filesize "3.6.1"
     find-up "3.0.0"
+    fork-ts-checker-webpack-plugin "1.0.0-alpha.6"
     global-modules "2.0.0"
     globby "8.0.2"
     gzip-size "5.0.0"
@@ -9609,7 +9625,7 @@ react-dev-utils@^7.0.3:
     loader-utils "1.2.3"
     opn "5.4.0"
     pkg-up "2.0.0"
-    react-error-overlay "^5.1.3"
+    react-error-overlay "^5.1.4"
     recursive-readdir "2.2.2"
     shell-quote "1.6.1"
     sockjs-client "1.3.0"
@@ -9655,20 +9671,20 @@ react-dnd@3.0.2:
     prop-types "^15.5.10"
     shallowequal "^1.0.2"
 
-react-dom@^16.6.3:
-  version "16.6.3"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-dom/-/react-dom-16.6.3.tgz#8fa7ba6883c85211b8da2d0efeffc9d3825cccc0"
-  integrity sha1-j6e6aIPIUhG42i0O/v/J04JczMA=
+react-dom@^16.12.0:
+  version "16.12.0"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-dom/-/react-dom-16.12.0.tgz#0da4b714b8d13c2038c9396b54a92baea633fe11"
+  integrity sha1-DaS3FLjRPCA4yTlrVKkrrqYz/hE=
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.2"
-    scheduler "^0.11.2"
+    scheduler "^0.18.0"
 
-react-error-overlay@^5.1.3:
-  version "5.1.3"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-error-overlay/-/react-error-overlay-5.1.3.tgz#16fcbde75ed4dc6161dc6dc959b48e92c6ffa9ad"
-  integrity sha1-Fvy9517U3GFh3G3JWbSOksb/qa0=
+react-error-overlay@^5.1.4:
+  version "5.1.6"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-error-overlay/-/react-error-overlay-5.1.6.tgz#0cd73407c5d141f9638ae1e0c63e7b2bf7e9929d"
+  integrity sha1-DNc0B8XRQfljiuHgxj57K/fpkp0=
 
 react-graph-vis@^1.0.2:
   version "1.0.2"
@@ -9709,10 +9725,10 @@ react-minimal-pie-chart@^4.0.0:
   dependencies:
     prop-types "^15.5.7"
 
-react-scripts@^2.1.5:
-  version "2.1.5"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-scripts/-/react-scripts-2.1.5.tgz#0740507db0a06d518c231caa1ef4e908bd8ebce5"
-  integrity sha1-B0BQfbCgbVGMIxyqHvTpCL2OvOU=
+react-scripts@^2.1.8:
+  version "2.1.8"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-scripts/-/react-scripts-2.1.8.tgz#21195bb928b2c0462aa98b2d32edf7d034cff2a9"
+  integrity sha1-IRlbuSiywEYqqYstMu330DTP8qk=
   dependencies:
     "@babel/core" "7.2.2"
     "@svgr/webpack" "4.1.0"
@@ -9721,21 +9737,20 @@ react-scripts@^2.1.5:
     babel-jest "23.6.0"
     babel-loader "8.0.5"
     babel-plugin-named-asset-import "^0.3.1"
-    babel-preset-react-app "^7.0.1"
+    babel-preset-react-app "^7.0.2"
     bfj "6.1.1"
     case-sensitive-paths-webpack-plugin "2.2.0"
     css-loader "1.0.0"
     dotenv "6.0.0"
     dotenv-expand "4.2.0"
     eslint "5.12.0"
-    eslint-config-react-app "^3.0.7"
+    eslint-config-react-app "^3.0.8"
     eslint-loader "2.1.1"
     eslint-plugin-flowtype "2.50.1"
     eslint-plugin-import "2.14.0"
     eslint-plugin-jsx-a11y "6.1.2"
     eslint-plugin-react "7.12.4"
     file-loader "2.0.0"
-    fork-ts-checker-webpack-plugin-alt "0.4.14"
     fs-extra "7.0.1"
     html-webpack-plugin "4.0.0-alpha.2"
     identity-obj-proxy "3.0.0"
@@ -9750,8 +9765,8 @@ react-scripts@^2.1.5:
     postcss-loader "3.0.0"
     postcss-preset-env "6.5.0"
     postcss-safe-parser "4.0.1"
-    react-app-polyfill "^0.2.1"
-    react-dev-utils "^7.0.3"
+    react-app-polyfill "^0.2.2"
+    react-dev-utils "^8.0.0"
     resolve "1.10.0"
     sass-loader "7.1.0"
     style-loader "0.23.1"
@@ -9794,10 +9809,10 @@ react-test-renderer@^16.8.3:
     react-is "^16.8.3"
     scheduler "^0.13.3"
 
-react-timeseries-charts@^0.15.3:
-  version "0.15.5"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-timeseries-charts/-/react-timeseries-charts-0.15.5.tgz#f04a32bc95300ac88bf01021655b566d62a936b1"
-  integrity sha1-8EoyvJUwCsiL8BAhZVtWbWKpNrE=
+react-timeseries-charts@^0.16.1:
+  version "0.16.1"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/react-timeseries-charts/-/react-timeseries-charts-0.16.1.tgz#46675a41a7806155a0b5a1342e3b811172845a5c"
+  integrity sha1-RmdaQaeAYVWgtaE0LjuBEXKEWlw=
   dependencies:
     array.prototype.fill "^1.0.1"
     babel-runtime "^6.23.0"
@@ -9855,15 +9870,14 @@ react-virtualized@^9.19.1:
     prop-types "^15.6.0"
     react-lifecycles-compat "^3.0.4"
 
-react@^16.6.3:
-  version "16.6.3"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/react/-/react-16.6.3.tgz#25d77c91911d6bbdd23db41e70fb094cc1e0871c"
-  integrity sha1-Jdd8kZEda73SPbQecPsJTMHghxw=
+react@^16.12.0:
+  version "16.12.0"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/react/-/react-16.12.0.tgz#0c0a9c6a142429e3614834d5a778e18aa78a0b83"
+  integrity sha1-DAqcahQkKeNhSDTVp3jhiqeKC4M=
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.2"
-    scheduler "^0.11.2"
 
 read-pkg-up@^1.0.1:
   version "1.0.1"
@@ -9991,11 +10005,6 @@ regenerate@^1.4.0:
   version "1.4.0"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/regenerate/-/regenerate-1.4.0.tgz#4a856ec4b56e4077c557589cae85e7a4c8869a11"
   integrity sha1-SoVuxLVuQHfFV1icroXnpMiGmhE=
-
-regenerator-runtime@^0.10.5:
-  version "0.10.5"
-  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.10.5.tgz#336c3efc1220adcedda2c9fab67b5a7955a33658"
-  integrity sha1-M2w+/BIgrc7dosn6tntaeVWjNlg=
 
 regenerator-runtime@^0.11.0, regenerator-runtime@^0.11.1:
   version "0.11.1"
@@ -10237,7 +10246,7 @@ resolve@1.1.7:
   resolved "https://registry.yarnpkg.com/resolve/-/resolve-1.1.7.tgz#203114d82ad2c5ed9e8e0411b3932875e889e97b"
   integrity sha1-IDEU2CrSxe2ejgQRs5ModeiJ6Xs=
 
-resolve@1.10.0, resolve@^1.5.0, resolve@^1.6.0, resolve@^1.8.1, resolve@^1.9.0:
+resolve@1.10.0, resolve@^1.6.0, resolve@^1.8.1, resolve@^1.9.0:
   version "1.10.0"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/resolve/-/resolve-1.10.0.tgz#3bdaaeaf45cc07f375656dfd2e54ed0810b101ba"
   integrity sha1-O9qur0XMB/N1ZW39LlTtCBCxAbo=
@@ -10339,6 +10348,13 @@ rxjs@^6.1.0, rxjs@^6.4.0:
   dependencies:
     tslib "^1.9.0"
 
+rxjs@^6.5.2:
+  version "6.5.3"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/rxjs/-/rxjs-6.5.3.tgz#510e26317f4db91a7eb1de77d9dd9ba0a4899a3a"
+  integrity sha1-UQ4mMX9NuRp+sd532d2boKSJmjo=
+  dependencies:
+    tslib "^1.9.0"
+
 safe-buffer@5.1.1, safe-buffer@^5.0.1, safe-buffer@^5.1.0, safe-buffer@^5.1.1:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/safe-buffer/-/safe-buffer-5.1.1.tgz#893312af69b2123def71f57889001671eeb2c853"
@@ -10394,18 +10410,18 @@ sax@^1.2.4, sax@~1.2.4:
   resolved "https://registry.yarnpkg.com/sax/-/sax-1.2.4.tgz#2816234e2378bddc4e5354fab5caa895df7100d9"
   integrity sha1-KBYjTiN4vdxOU1T6tcqold9xANk=
 
-scheduler@^0.11.2:
-  version "0.11.3"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/scheduler/-/scheduler-0.11.3.tgz#b5769b90cf8b1464f3f3cfcafe8e3cd7555a2d6b"
-  integrity sha1-tXabkM+LFGTz88/K/o4811VaLWs=
-  dependencies:
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
-
 scheduler@^0.13.3:
   version "0.13.3"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/scheduler/-/scheduler-0.13.3.tgz#bed3c5850f62ea9c716a4d781f9daeb9b2a58896"
   integrity sha1-vtPFhQ9i6pxxak14H52uubKliJY=
+  dependencies:
+    loose-envify "^1.1.0"
+    object-assign "^4.1.1"
+
+scheduler@^0.18.0:
+  version "0.18.0"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/scheduler/-/scheduler-0.18.0.tgz#5901ad6659bc1d8f3fdaf36eb7a67b0d6746b1c4"
+  integrity sha1-WQGtZlm8HY8/2vNut6Z7DWdGscQ=
   dependencies:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
@@ -11221,10 +11237,10 @@ test-exclude@^4.2.1:
     read-pkg-up "^1.0.1"
     require-main-filename "^1.0.1"
 
-text-encoding@^0.6.4:
-  version "0.6.4"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/text-encoding/-/text-encoding-0.6.4.tgz#e399a982257a276dae428bb92845cb71bdc26d19"
-  integrity sha1-45mpgiV6J22uQou5KEXLcb3CbRk=
+text-encoding-utf-8@^1.0.2:
+  version "1.0.2"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/text-encoding-utf-8/-/text-encoding-utf-8-1.0.2.tgz#585b62197b0ae437e3c7b5d0af27ac1021e10d13"
+  integrity sha1-WFtiGXsK5Dfjx7XQryesECHhDRM=
 
 text-table@0.2.0, text-table@^0.2.0:
   version "0.2.0"
@@ -11463,7 +11479,7 @@ uglify-to-browserify@~1.0.0:
   resolved "https://registry.yarnpkg.com/uglify-to-browserify/-/uglify-to-browserify-1.0.2.tgz#6e0924d6bda6b5afe349e39a6d632850a0f882b7"
   integrity sha1-bgkk1r2mta/jSeOabWMoUKD4grc=
 
-underscore@^1.8.2, underscore@^1.8.3:
+underscore@^1.8.3, underscore@^1.9.1:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.9.1.tgz#06dce34a0e68a7babc29b365b8e74b8925203961"
   integrity sha1-BtzjSg5op7q8KbNluOdLiSUgOWE=
@@ -11577,7 +11593,7 @@ upper-case@^1.1.1:
   resolved "https://registry.yarnpkg.com/upper-case/-/upper-case-1.1.3.tgz#f6b4501c2ec4cdd26ba78be7222961de77621598"
   integrity sha1-9rRQHC7EzdJrp4vnIilh3ndiFZg=
 
-uri-js@^4.2.1, uri-js@^4.2.2:
+uri-js@^4.2.2:
   version "4.2.2"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/uri-js/-/uri-js-4.2.2.tgz#94c540e1ff772956e2299507c010aea6c8838eb0"
   integrity sha1-lMVA4f93KVbiKZUHwBCupsiDjrA=

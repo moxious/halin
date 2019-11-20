@@ -135,7 +135,7 @@ export default class ClusterMember {
      * false otherwise.
      */
     isEnterprise() {
-        return this.dbms.edition === 'enterprise';
+        return this.dbms.edition === 'enterprise' || this.dbms.edition === 'commercial';
     }
 
     isCommunity() {
@@ -156,6 +156,10 @@ export default class ClusterMember {
      */
     csvMetricsEnabled() {
         return this.dbms.csvMetricsEnabled;
+    }
+
+    supportsMultiDatabase() {
+        return this.dbms.multidatabase;
     }
 
     /**
@@ -289,6 +293,8 @@ export default class ClusterMember {
                 .then(metrics => { this.metrics = metrics; }),
             () => featureProbes.hasDBStats(this)
                 .then(result => { this.dbms.hasDBStats = result }),
+            () => featureProbes.hasMultiDatabase(this)
+                .then(result => { this.dbms.multidatabase = result }),
             () => this.getMaxHeap().then(maxHeap => {
                 this.dbms.maxHeap = maxHeap;
             }),
@@ -310,6 +316,10 @@ export default class ClusterMember {
                     // does.  It fails because community doesn't have the concept of
                     // auth providers.
                     this.dbms.nativeAuth = true;
+                }
+
+                if (this.dbms.multidatabase) {
+                    this.dbms.systemGraph = true;
                 }
 
                 // { major, minor, patch }
@@ -343,16 +353,42 @@ export default class ClusterMember {
      * that we can track the cluster node's responsiveness and performance over time.
      * @param {String | HalinQuery} query a cypher query
      * @param {Object} params parameters to pass to the query.
+     * @param database the name of the database to run the query against
      * @returns {Promise} which resolves to a neo4j driver result set
      */
-    run(query, params = {}) {
+    run(query, params = {}, database=null) {
         if (!this.driver) { throw new Error('ClusterMember has no driver!'); }
         if (!query) { throw new Error('Missing query'); }
 
         let s;
 
         const start = new Date().getTime();
-        return this.pool.acquire()
+
+        let poolSession;
+        
+        /*
+         * Sessions work differently depending on Neo4j 3 vs. 4.
+         * In 4, sessions can be bound to a particular database.  In 3
+         * they never are because 3 doesn't contain multidatabase functionality.
+         */
+        const getSessionPromise = () => {
+            // NOTE/GOTCHA: we are *intentionally* ignoring the 'database' parameter if
+            // major version is < 4, because a database specific query doesn't
+            // make sense in 3.5.x. 
+            // This comes up most commonly with system commands like
+            // call dbms.security.listUsers() which must be run against systemdb in
+            // Neo4j 4, but with 3.5.x if you try to run the query against a specific
+            // database, the driver will fail it because you're not using >= 4.
+            if (!database || this.getVersion().major < 4) {
+                poolSession = true;
+                return this.pool.acquire();
+            } 
+
+            poolSession = false;
+            return Promise.resolve(this.driver.session({ database }));
+        };
+
+        return getSessionPromise()
             .then(session => {
                 s = session;
                 // #operability: transaction metadata is disabled because it causes errors
@@ -381,9 +417,9 @@ export default class ClusterMember {
                 throw err;
             })
             // Cleanup session.
-            .finally(() => {
-                return this.pool.release(s)
-                    .catch(e => sentry.fine('Pool release error', e));
+            .finally(p => {
+                return poolSession ? this.pool.release(s)
+                    .catch(e => sentry.fine('Pool release error', e)) : p;
             });
     }
 }

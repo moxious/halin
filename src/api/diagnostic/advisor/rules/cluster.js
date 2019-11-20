@@ -1,4 +1,4 @@
-import InspectionResult from '../InspectionResult';
+import Advice from '../Advice';
 import metarule from './metarule';
 import util from '../../../data/util';
 
@@ -6,17 +6,16 @@ const clusterSize = metarule.clusterOnlyRule(pkg => {
     const findings = [];
 
     if (pkg.nodes.length % 2 === 0) {
-        findings.push(new InspectionResult(InspectionResult.WARN,
-            'overall',
-            `You have an even number of cluster nodes (${pkg.nodes.length})`,
-            null,
-            'Consider using an odd number of nodes to better balance'));
+        findings.push(Advice.warn({
+            addr: Advice.CLUSTER,
+            finding: `You have an even number of cluster nodes (${pkg.nodes.length})`,
+            advice: 'Consider using an odd number of nodes to better balance',
+        }));
     } else {
-        findings.push(new InspectionResult(InspectionResult.PASS, 
-            'overall',
-            `You have an odd number of cluster nodes (${pkg.nodes.length})`,
-            null,
-            'N/A'));
+        findings.push(Advice.pass({
+            addr: Advice.CLUSTER,
+            finding: `You have an odd number of cluster nodes (${pkg.nodes.length})`,
+        }));
     }
 
     return findings;
@@ -34,17 +33,23 @@ const nonStandardRoutingTTL = pkg => {
         const inMs = util.timeAbbreviation2Milliseconds(val);
 
         if (Number.isNaN(Number(inMs))) {
-            findings.push(InspectionResult(InspectionResult.ERROR,
-                addr, `Configuration key ${key} has an invalid value: ${val}`,
-                null, `Consider setting this to the default value ${val}`));
+            findings.push(Advice.error({
+                addr, 
+                finding: `Configuration key ${key} has an invalid value: ${val}`,
+                advice: `Consider setting this to the default value ${val}`
+            }));
         } else if(inMs < util.timeAbbreviation2Milliseconds(recommended)) {
-            findings.push(new InspectionResult(InspectionResult.WARN,
-                addr, `Configuration key ${key} is set to a lower than default value`,
-                null, `Consider using the default (${recommended}) unless you are sure you know this
-                is right for you.  Inappropriately low values may cause performance issues.`));
+            findings.push(Advice.warn({
+                addr, 
+                finding: `Configuration key ${key} is set to a lower than default value`,
+                advice: `Consider using the default (${recommended}) unless you are sure you know this
+                is right for you.  Inappropriately low values may cause performance issues.`,
+            }));
         } else {
-            findings.push(new InspectionResult(InspectionResult.PASS, addr,
-                'Cluster routing TTL looks good!', null, 'N/A'));
+            findings.push(Advice.pass({
+                addr,
+                finding: 'Cluster routing TTL looks good!',
+            }));
         }
     });
 
@@ -56,23 +61,24 @@ const clusterShouldHaveWriter = pkg => {
     const writers = pkg.nodes.filter(n => n.basics.writer);
 
     if (writers.length === 1) {
-        findings.push(new InspectionResult(InspectionResult.PASS,
-            'overall',
-            `You have exactly 1 writer in your cluster (${writers[0].basics.label}).  Good!`, null, 'N/A'));
+        findings.push(Advice.pass({
+            addr: Advice.CLUSTER,
+            finding: `You have exactly 1 writer in your cluster (${writers[0].basics.label}).  Good!`,
+        }));
     } else if (writers.length === 0) {
-        findings.push(new InspectionResult(InspectionResult.ERROR,
-            'overall',
-            `Your cluster lacks a member which can write`,
-            null, 
-            `This could be evidence of misconfiguration,
-            a leader re-election in process, or too many node failures.  Investigate!`));
+        findings.push(Advice.error({
+            addr: Advice.CLUSTER,
+            finding: `Your cluster lacks a member which can write`,
+            advice: `This could be evidence of misconfiguration,
+            a leader re-election in process, or too many node failures.  Investigate!`,
+        }));
     } else if(writers.length > 1) {
-        findings.push(new InspectionResult(InspectionResult.ERROR,
-            'overall',
-            `Your cluster has more than one write member`,
-            null, 
-            `This should never occur, and indicates either a bug in Halin or a misconfiguration of
-            your cluster.  Please investigate.`));
+        findings.push(Advice.error({
+            addr: Advice.OVERALL,
+            finding: `Your cluster has more than one write member`,
+            advice: `This should never occur, and indicates either a bug in Halin or a misconfiguration of
+            your cluster.  Please investigate.`,
+        }));
     }
 
     return findings;

@@ -1,4 +1,4 @@
-import InspectionResult from '../InspectionResult';
+import Advice from '../Advice';
 import _ from 'lodash';
 
 const apocRule = pkg => {
@@ -8,13 +8,16 @@ const apocRule = pkg => {
         const addr = node.basics.address;
 
         if (_.get(node, 'basics.dbms.apoc')) {
-            findings.push(new InspectionResult(InspectionResult.PASS, addr,
-                'You are using APOC.  Good!',
-                null, 'N/A'));
+            findings.push(Advice.pass({
+                addr,
+                finding: 'You are using APOC.  Good!',
+            }));
         } else {
-            findings.push(new InspectionResult(InspectionResult.INFO, addr,
-                'You are not using APOC', null,
-                'Consider installing it to add features to your database! https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases'));
+            findings.push(Advice.info({
+                addr,
+                finding: 'You are not using APOC',
+                advice: 'Consider installing it to add features to your database! https://github.com/neo4j-contrib/neo4j-apoc-procedures/releases',
+            }));
         }
     });
 

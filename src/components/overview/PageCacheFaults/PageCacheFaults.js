@@ -10,7 +10,7 @@ class PageCacheFaults extends Component {
         displayProperty: 'faultsPerSecond',
     };
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.start = new Date().getTime();
         this.pollStartTime = new Date().getTime();
         this.faultsAsOfLastObservation = -1;

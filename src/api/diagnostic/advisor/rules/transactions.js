@@ -1,4 +1,4 @@
-import InspectionResult from '../InspectionResult';
+import Advice from '../Advice';
 import _ from 'lodash';
 
 /**
@@ -37,7 +37,6 @@ const makeRaceChart = pkg => {
     const ahead = restMembers.filter(m => getLastTXID(m) > leadingValue)
         .map(makeRaceChartEntry);
 
-
     return {
         leader: makeRaceChartEntry(writeMember),
         even,
@@ -51,8 +50,7 @@ const transactionGapRule = pkg => {
 
     // There's no race, and no possible gap in single-node clusters.
     if (pkg.nodes.length === 1) {
-        findings.push(new InspectionResult(InspectionResult.PASS, 'overall',
-            'All cluster members are even in transaction replication', null, 'N/A'));
+        findings.push(Advice.pass({ finding: 'All cluster members are even in transaction replication' }));
         return findings;
     }
 
@@ -64,36 +62,42 @@ const transactionGapRule = pkg => {
     const leadValue = memb.value;
 
     // Identify the lead value.
-    findings.push(new InspectionResult(InspectionResult.INFO, leadAddr,
-        `Last Transaction ID is ${leadValue}`, null, 'N/A'));
+    findings.push(Advice.info({ 
+        addr: leadAddr,
+        finding: `Last Transaction ID is ${leadValue}`,
+    }));
 
     chart.even.forEach(entry => {
         // console.log('EVEN', entry);
-        findings.push(new InspectionResult(InspectionResult.PASS, entry.member.basics.address,
-            `This member is even with transaction replication at TXID ${leadValue}. Good!`, 
-            null, 'N/A'));
+        findings.push(Advice.pass({
+            addr: entry.member.basics.address,
+            finding: `This member is even with transaction replication at TXID ${leadValue}. Good!`,
+        }));
     });
 
     chart.behind.forEach(entry => {
         const LAG_THRESHOLD = 20;
         const addr = entry.member.basics.address;
 
-        const level = entry.laggingBy >= LAG_THRESHOLD ? InspectionResult.ERROR : InspectionResult.WARN;
+        const level = entry.laggingBy >= LAG_THRESHOLD ? Advice.ERROR : Advice.WARN;
 
-        findings.push(new InspectionResult(level, addr,
-            `This member is lagging the leader by ${entry.laggingBy} transactions`,
-            `Small amounts of lag indicate regular cluster replication; larger amounts may indicate
+        findings.push(new Advice({
+            level, 
+            addr,
+            finding: `This member is lagging the leader by ${entry.laggingBy} transactions`,
+            advice: `Small amounts of lag indicate regular cluster replication; larger amounts may indicate
             a network or configuration problem, and may result in stale data on querying this member`,
-            'N/A'));
+        }));
     });
 
     chart.ahead.forEach(entry => {
         const addr = entry.member.basics.address;
-        findings.push(new InspectionResult(InspectionResult.ERROR, addr,
-            `This member is ahead of the leader by ${-1 * entry.laggingBy} transactions`,
-            `This should never occur.  Either Halin has incorrectly determined the cluster leader,
+        findings.push(Advice.error({
+            addr,
+            finding: `This member is ahead of the leader by ${-1 * entry.laggingBy} transactions`,
+            advice: `This should never occur.  Either Halin has incorrectly determined the cluster leader,
             or your database is misconfigured.  This should be investigated.`,
-            'N/A'));
+        }));
     });
 
     return findings;

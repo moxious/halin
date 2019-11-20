@@ -10,7 +10,7 @@ class PageCacheFlushes extends Component {
         displayProperty: 'flushesPerSecond',
     };
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.start = new Date().getTime();
         this.pollStartTime = new Date().getTime();
         this.nodeObservations = {};

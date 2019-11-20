@@ -60,6 +60,8 @@ const links = {
     authMaxFailedAttempts: new KBLink('Configuring maximum failed authorization attempts', 'https://neo4j.com/docs/operations-manual/current/reference/configuration-settings/#config_dbms.security.auth_max_failed_attempts'),
     enablingCSVMetrics: new KBLink('Enabling CSV Metrics', 'https://neo4j.com/docs/operations-manual/current/monitoring/metrics/expose/#metrics-enable'),
     changingCSVMetricIntervals: new KBLink('Configuring CSV Metrics and sampling intervals', 'https://neo4j.com/docs/operations-manual/current/monitoring/metrics/expose/#metrics-csv'),
+    countStore: new KBLink('Fast counts using the count store', 'https://neo4j.com/developer/kb/fast-counts-using-the-count-store/'),
+    apocDocs: new KBLink('APOC Documentation', 'https://neo4j.com/docs/labs/apoc/current/'),
 };
 
 export default {
@@ -81,6 +83,11 @@ export default {
     'security.log': render([
         'Log of security events. (Enterprise Edition only.)',
         links.logFiles,
+    ]),
+    ApocMetaStats: render([
+        'Basic statistics about your database content, that uses the Neo4j Count Store',
+        links.apocDocs,
+        links.countStore,
     ]),
     LogTroubleshooting: render([
         `Some installs of Neo4j may use journalctl to access logs, which may not be
@@ -212,6 +219,17 @@ export default {
         `Process load shows how much load is caused by the Neo4j process itself, subject to the same rolling average`,
         links.performanceTuning,
         links.systemLoadAverage,
+    ]),
+    Privileges: render([
+        `Privileges control the access rights to graph elements using a combined 
+        whitelist/blacklist mechanism. It is possible to grant access, deny access, 
+        or both. The user will be able to access a resource if they have a grant 
+        (whitelist) and do not have a deny (blacklist) relevant to that resource. 
+        If there are no read privileges provided at all, then the user will be 
+        denied access to the entire graph, and this will generate an error. 
+        All other combinations of GRANT and DENY will result in the matching 
+        subgraph being visible, which will appear to the user as if they have a 
+        smaller database (smaller graph).`,
     ]),
     Tasks: render([
         `Neo4j Tasks is a combination of three kinds of information:  connections,

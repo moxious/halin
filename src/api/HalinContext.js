@@ -33,6 +33,7 @@ export default class HalinContext {
         };
         this.debug = false;
         this.mgr = new ClusterManager(this);
+        this.mgr.addListener(e => this.onClusterEvent(e));
     }
 
     members() {
@@ -179,6 +180,10 @@ export default class HalinContext {
         return this.getWriteMember().supportsSystemGraph();
     }
 
+    supportsMultiDatabase() {
+        return this.getWriteMember().supportsMultiDatabase();
+    }
+
     /**
      * Returns true if the context supports authorization overall.
      */
@@ -291,6 +296,15 @@ export default class HalinContext {
 
     getCurrentUser() {
         return this.currentUser;
+    }
+
+    /**
+     * Listener that fires in ClusterManager whenever a cluster-wide event happens.  This allows the
+     * context to be aware of things changing around it and adjust.
+     * @param {Object} event with keys date, payload, id, type
+     */
+    onClusterEvent(event) {
+        sentry.info('Cluster Event', event);
     }
 
     checkUser(driver /*, progressCallback */) {
@@ -454,6 +468,8 @@ export default class HalinContext {
                         this.checkForCluster(active, progressCallback),
                     ]);
                 })
+                // Checking databases must be after checking for a cluster, since we need to know who leader is
+                .then(() => this.getClusterManager().getDatabases())
                 .then(() => {
                     this.getClusterManager().addEvent({
                         type: 'halin',

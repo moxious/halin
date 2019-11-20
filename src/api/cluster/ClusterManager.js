@@ -6,6 +6,7 @@ import uuid from 'uuid';
 import Ring from 'ringjs';
 import neo4j from '../driver/index';
 import ql from '../data/queries/query-library';
+import Database from '../Database';
 
 /**
  * This is a controller for clusters.
@@ -40,7 +41,7 @@ const clusterOpFailure = (node, err) => {
 const packageClusterOpResults = results => {
     // Overall we're a success only if all underlying promises
     // were.  Otherwise we failed.
-    const success = 
+    const success =
         results.filter(r => r.success).length === results.length;
 
     // Incude results so that we can see individual
@@ -54,6 +55,24 @@ export default class ClusterManager {
     constructor(halinCtx) {
         this.ctx = halinCtx;
         this.eventLog = new Ring(MAX_EVENTS);
+        this.listeners = [];
+    }
+
+    addListener(listener) {
+        if (this.listeners.indexOf(listener) === -1) {
+            this.listeners.push(listener);
+        }
+
+        return this.listeners;
+    }
+
+    removeListener(listener) {
+        const idx = this.listeners.indexOf(listener);
+        if (idx > -1) {
+            this.listeners.splice(idx, 1);
+        }
+
+        return this.listeners;
     }
 
     addEvent(event) {
@@ -67,6 +86,10 @@ export default class ClusterManager {
         _.set(data, 'payload', event.payload || null);
         _.set(data, 'id', uuid.v4());
         this.eventLog.push(data);
+
+        // Notify listeners.
+        this.listeners.forEach(f => f(event));
+        return event;
     }
 
     getEventLog() {
@@ -92,15 +115,15 @@ export default class ClusterManager {
      * query.  
      */
     clusterWideQuery(query, params) {
-        const membersToRunAgainst = this.ctx.supportsSystemGraph() ? 
-            [ this.ctx.getWriteMember() ] : 
+        const membersToRunAgainst = this.ctx.supportsSystemGraph() ?
+            [this.ctx.getWriteMember()] :
             this.ctx.members();
 
         const promises = membersToRunAgainst.map(node => {
             // Guarantee that promise resolves.
             // it resolves to an object that indicates success
             // or failure.
-            return node.run(query, params)
+            return node.run(query, params, neo4j.SYSTEM_DB)
                 .then(results => clusterOpSuccess(node, results))
                 .catch(err => clusterOpFailure(node, err));
         });
@@ -117,8 +140,8 @@ export default class ClusterManager {
         }
 
         return this.clusterWideQuery(
-            'CALL dbms.security.changeUserPassword({username}, {password}, false)',
-            { username, password }            
+            'CALL dbms.security.changeUserPassword($username, $password, false)',
+            { username, password }
         )
             .then(result => {
                 this.addEvent({
@@ -137,7 +160,7 @@ export default class ClusterManager {
         }
 
         return this.clusterWideQuery(
-            'CALL dbms.security.createUser({username}, {password}, false)',
+            'CALL dbms.security.createUser($username, $password, false)',
             { username, password }
         )
             .then(result => {
@@ -148,7 +171,7 @@ export default class ClusterManager {
                 });
                 return result;
             })
-    } 
+    }
 
     deleteUser(user) {
         const { username } = user;
@@ -157,7 +180,7 @@ export default class ClusterManager {
         }
 
         return this.clusterWideQuery(
-            'CALL dbms.security.deleteUser({username})',
+            'CALL dbms.security.deleteUser($username)',
             { username }
         )
             .then(result => {
@@ -174,7 +197,7 @@ export default class ClusterManager {
         if (!role) { throw new Error('Must provide role'); }
 
         return this.clusterWideQuery(
-            'CALL dbms.security.createRole({role})',
+            'CALL dbms.security.createRole($role)',
             { role }
         )
             .then(result => {
@@ -191,8 +214,8 @@ export default class ClusterManager {
         if (!role) throw new Error('Must provide role');
 
         return this.clusterWideQuery(
-            'CALL dbms.security.deleteRole({role})',
-            { role }
+            'CALL dbms.security.deleteRole($role)',
+            { role }, neo4j.SYSTEM_DB
         )
             .then(result => {
                 this.addEvent({
@@ -207,13 +230,13 @@ export default class ClusterManager {
     /** Specific to a particular node */
     addNodeRole(node, username, role) {
         sentry.info('ADD ROLE', { username, role });
-        return node.run('call dbms.security.addRoleToUser({role}, {username})', { username, role });
+        return node.run('call dbms.security.addRoleToUser($role, $username)', { username, role }, neo4j.SYSTEM_DB);
     }
 
     /** Specific to a particular node */
     removeNodeRole(node, username, role) {
         sentry.info('REMOVE ROLE', { username, role });
-        return node.run('call dbms.security.removeRoleFromUser({role}, {username})', { username, role });
+        return node.run('call dbms.security.removeRoleFromUser($role, $username)', { username, role }, neo4j.SYSTEM_DB);
     }
 
     /**
@@ -223,7 +246,7 @@ export default class ClusterManager {
      */
     associateUserToRoles(user, roles) {
         sentry.info(`CM associate ${user} to ${roles}`);
-        if (!_.isArray(roles)) { 
+        if (!_.isArray(roles)) {
             throw new Error('roles must be an array');
         } if (!_.isObject(user) || !user.username) {
             throw new Error('user must be an object with username');
@@ -242,7 +265,7 @@ export default class ClusterManager {
         //   (b) role doesn't exist on that node
         //   (c) Underlying association query fails.
         const gatherRoles = (node) => {
-            return node.run(ql.DBMS_SECURITY_USER_ROLES, { username })
+            return node.run(ql.DBMS_SECURITY_USER_ROLES, { username }, neo4j.SYSTEM_DB)
                 .then(results => neo4j.unpackResults(results, {
                     required: ['value'],
                 }))
@@ -250,7 +273,7 @@ export default class ClusterManager {
                 // rather than array of objects.
                 .then(results => results.map(r => r.value))
                 .then(r => {
-                    sentry.fine('gather roles made',r);
+                    sentry.fine('gather roles made', r);
                     return r;
                 });
         };
@@ -269,17 +292,17 @@ export default class ClusterManager {
             const toPreserve = new Set(
                 [...oldRoles].filter(x => newRoles.has(x))
             );
-    
+
             sentry.fine('Determine differences',
-                'rolesHere=',rolesHere, 'newRoles=', newRoles);
-            sentry.fine('Role modification: ', 
-                node.getBoltAddress(), 'adding', 
-                [...toAdd], 
-                'removing', [...toDelete], 
+                'rolesHere=', rolesHere, 'newRoles=', newRoles);
+            sentry.fine('Role modification: ',
+                node.getBoltAddress(), 'adding',
+                [...toAdd],
+                'removing', [...toDelete],
                 'preserving', [...toPreserve]);
-            return { 
-                toAdd: [...toAdd], 
-                toDelete: [...toDelete], 
+            return {
+                toAdd: [...toAdd],
+                toDelete: [...toDelete],
                 toPreserve: [...toPreserve],
             };
         };
@@ -290,7 +313,7 @@ export default class ClusterManager {
             const addPromises = [...toAdd].map(role => this.addNodeRole(node, username, role));
             const delPromises = [...toDelete].map(role => this.removeNodeRole(node, username, role));
 
-            const allRolePromises = 
+            const allRolePromises =
                 addPromises.concat(delPromises);
 
             // TODO -- not wrapped in a TX.  It's possible for adding some roles to fail, others
@@ -329,5 +352,146 @@ export default class ClusterManager {
 
         return Promise.all(allPromises)
             .then(packageClusterOpResults);
+    }
+
+    databases() { return this._dbs; }
+
+    getDefaultDatabase() {
+        return this.databases().filter(db => db.isDefault)[0];
+    }
+
+    getRoles() {
+        return this.ctx.getWriteMember().run('call dbms.security.listRoles()', {}, neo4j.SYSTEM_DB)
+            .then(results => neo4j.unpackResults(results, {
+                required: ['role', 'users'],
+            }));
+    }
+
+    /**
+     * Alter privileges in the cluster.  These are generally all void operations.
+     * @param {PrivilegeOperation} op 
+     * @returns true if successful.
+     */
+    alterPrivilege(op) {
+        const error = op.validate();
+        if (error) { throw new Error(error); }
+        if (!this.ctx.getWriteMember().supportsSystemGraph()) {
+            throw new Error('You cannot modify fine-grained privileges on a DB that does not support system graph');
+        }
+
+        return this.ctx.getWriteMember().run(op.buildQuery(), {}, neo4j.SYSTEM_DB)
+            .then(results => {
+                sentry.fine('Privilege results', results);
+                this.addEvent({
+                    type: 'privilege',
+                    message: op.buildQuery(),
+                    payload: [],
+                })
+                
+                // No results.
+                return clusterOpSuccess(this.ctx.getWriteMember(), []);
+            });
+    }
+
+    /**
+     * Checks for which databases are online.  This triggers an 
+     * actual query.
+     * @returns Array{Database}
+     */
+    getDatabases() {
+        return this.ctx.getWriteMember().run(ql.DBMS_4_SHOW_DATABASES, {}, neo4j.SYSTEM_DB)
+            .then(results => neo4j.unpackResults(results, {
+                required: ['name', 'status', 'default'],
+            }))
+            .then(results => results.map(r => new Database(r.name, r.status, r.default)))
+            .then(dbs => {
+                console.log('got dbs',dbs);
+                this._dbs = dbs;
+                return dbs;
+            })
+            .catch(err => {
+                const str = `${err}`;
+
+                // If either of these errors happened, no worries, the DB just doesn't support
+                // multidatabase and we know what to do.
+                // If it's any other error, that's interesting and should be reported as a potential
+                // problem.
+                const expectedErrors = [
+                    'Invalid input',
+                    'connected to the database that does not support multiple databases',
+                ];
+
+                let isAnExpectedError = expectedErrors.map(err => str.indexOf(err) > -1)
+                    .reduce((a, b) => a || b, false);
+                if (!isAnExpectedError) {
+                    sentry.warn('ClusterManager#getDatabases() returned unexpected error', err);
+                }
+
+                sentry.info('Faking databases pre 4.0');
+                // Just like we fake single-node Neo4j instances as a cluster of one member,
+                // we fake non-multidb clusters as a multi-db of one database.  :)
+                this._dbs = [new Database('neo4j', 'online', true)];
+                return this._dbs;
+            });
+    }
+
+    stopDatabase(db) {
+        if (!db || !db.name) { throw new Error('Invalid or missing database'); }
+
+        return this.ctx.getWriteMember().run(`STOP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
+            .then(results => {
+                sentry.info('stop results', results);
+                return results;
+            })
+            .then(() => this.getDatabases())
+            .then(() => this.addEvent({
+                type: 'database',
+                message: `Stopped database ${db.name}`,
+                payload: db,
+            }));
+    }
+
+    startDatabase(db) {
+        if (!db || !db.name) { throw new Error('Invalid or missing database'); }
+
+        return this.ctx.getWriteMember().run(`START DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
+            .then(results => {
+                sentry.info('start results', results);
+                return results;
+            })
+            .then(() => this.getDatabases())
+            .then(() => this.addEvent({
+                type: 'database',
+                message: `Started database ${db.name}`,
+                payload: db,
+            }));
+    }
+
+    dropDatabase(db) {
+        if (!db || !db.name) { throw new Error('Invalid or missing database'); }
+
+        return this.ctx.getWriteMember().run(`DROP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
+            .then(results => {
+                sentry.info('drop results', results);
+                return results;
+            })
+            .then(() => this.getDatabases())
+            .then(() => this.addEvent({
+                type: 'database',
+                message: `Dropped database ${db.name}`,
+            }));
+    }
+
+    createDatabase(name) {
+        return this.ctx.getWriteMember().run(`CREATE DATABASE ${name}`, {}, neo4j.SYSTEM_DB)
+            .then(results => {
+                sentry.info('Created database; results ', results);
+                return results;
+            })
+            .then(() => this.getDatabases())
+            .then(() => this.addEvent({
+                    type: 'database',
+                    message: `Created database ${name}`,
+                }));
     }
 }

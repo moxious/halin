@@ -62,7 +62,7 @@ export default class MetricsChart extends PureComponent {
         return timewindow.displayTimeRange(new TimeRange(new Date(startTime), new Date(endTime)));
     }
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         // This is a default/guess of which key into the map to use to display this metric.
         // Will be revised.
         this.mapKey = 'value';

@@ -12,7 +12,7 @@
  * Instead they should just operate on the diagnostic package.
  */
 import _ from 'lodash';
-import InspectionResult from './InspectionResult';
+import Advice from './Advice';
 
 import memory from './rules/mem';
 import cluster from './rules/cluster';
@@ -21,16 +21,18 @@ import indexAndConstraint from './rules/index-and-constraint';
 import users from './rules/users';
 import config from './rules/config';
 import versions from './rules/versions';
-import security from './rules/security';
+import security from './rules/security/';
 import plugins from './rules/plugins';
 import transactions from './rules/transactions';
+import retention from './rules/retention';
 
 const dummy = diag => {
     return [
-        new InspectionResult(InspectionResult.INFO, 'overall',
-            `You're running Halin ${diag.halin.version}, good for you!`,
-            null,
-            'You\'re already ahead of the game.'),
+        Advice.info({
+            addr: Advice.CLUSTER,
+            finding: `You're running Halin ${diag.halin.version}, good for you!`,
+            advice: 'You\'re already ahead of the game.'
+        }),
     ];
 }
 
@@ -42,9 +44,9 @@ const categorize = (ruleFunctions, categoryName) => {
     // at the same time.
     const categorizeResults = (f, category) => 
         pkg => 
-            (f(pkg) || []).map(inspectionResult => {
-                inspectionResult.category = categoryName;
-                return inspectionResult;
+            (f(pkg) || []).map(itemOfAdvice => {
+                itemOfAdvice.category = categoryName;
+                return itemOfAdvice;
             });
 
     return ruleFunctions.map(f => categorizeResults(f));
@@ -65,12 +67,13 @@ const rules = [
     ...categorize(security, 'Security'),
     ...categorize(plugins, 'Plugins'),
     ...categorize(transactions, 'Transactions'),
+    ...categorize(retention, 'Disk'),
 ];
 
 /**
  * Generate advisor recommendations for a diagnostic package.
  * @param {Object} diagPackage the diagnostic package produced by Halin Context
- * @returns {Array} an array of InspectionResult objects.
+ * @returns {Array} an array of Advice objects.
  */
 const generateRecommendations = diagPackage => {
     if (_.isNil(diagPackage) || !_.isObject(diagPackage) || !diagPackage.halin) {
@@ -78,7 +81,7 @@ const generateRecommendations = diagPackage => {
     }
 
     // Rule functions take a diagnostic package and produce an array of zero
-    // or more InspectionResult objects.
+    // or more Advice objects.
     const allResults = _.flatten(rules.map(rule => rule(diagPackage)));
 
     // In case any rule returned a falsy value, toss it out, otherwise

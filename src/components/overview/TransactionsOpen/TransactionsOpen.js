@@ -13,7 +13,7 @@ class TransactionsOpen extends Component {
     state = {
         key: uuid.v4(),
         rate: 2000,
-        query: queryLibrary.JMX_TRANSACTIONS.query,
+        query: queryLibrary.find(window.halinContext, 'transactions').query,
         displayProperty: 'open',
         options: [
             { text: 'Open', value: 'open' },

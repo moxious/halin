@@ -20,9 +20,13 @@ jobs:
             curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
             sudo python get-pip.py
             sudo pip install setuptools
+
+            pip --version            
             
             cd s3cmd-2.0.2 && sudo python setup.py install
             cd $HOME && s3cmd --version
+
+            pip install --upgrade --user awscli
       - restore_cache:
           name: Restore Yarn Package Cache
           keys:
@@ -53,7 +57,8 @@ jobs:
             # Take careful note of runInBand https://jestjs.io/docs/en/troubleshooting.html#tests-are-extremely-slow-on-docker-and-or-continuous-integration-ci-server
             yarn test --runInBand
       - run: 
-          name: Deploy to S3 (Build Branch)
+          # This creates a runnable copy on S3 **per build**
+          name: Deploy to S3 (BUILD)
           command: |
             if [ "${CIRCLE_BRANCH}" = "master" ]; then
               echo "Skipping branch build; master will be deployed"
@@ -75,8 +80,30 @@ jobs:
               s3cmd modify "s3://$BUCKET/$SUBDIR/static/css/*.css" --mime-type="text/css"
               # Replace package file with the original
               cp package.orig package.json
-              echo "$FINAL_URL" | tee /tmp/artifacts/s3-deploy-branch.txt
+              echo "$FINAL_URL"index.html | tee /tmp/artifacts/s3-deploy-build.txt
             fi
+      - run:
+          # This creates a runnable copy on S3 **per branch** (gets overwritten)
+          name: Deploy to S3 (BRANCH)
+          command: |
+            export SUBDIR="${CIRCLE_BRANCH}"
+            export BUCKET=halin.graphapp.io
+            export HOMEPAGE=http://halin.graphapp.io/
+            export BASE_URL=http://halin.graphapp.io/
+            export FINAL_URL="$BASE_URL$SUBDIR/"
+            cp package.json package.orig
+            # Have to monkeypatch the "homepage" field so that the react build will
+            # work.
+            cat package.json | sed s,$HOMEPAGE,$FINAL_URL, > package.branch
+            cp package.branch package.json
+            cp package.branch /tmp/artifacts/package.branch.json
+            npm run build
+            s3cmd put --recursive -P dist/* "s3://$BUCKET/$SUBDIR/"
+            # Thinking this is a bug in s3 that has to be overcome: https://stackoverflow.com/questions/53708938/s3cmd-flagging-css-with-wrong-mime-type
+            s3cmd modify "s3://$BUCKET/$SUBDIR/static/css/*.css" --mime-type="text/css"
+            # Replace package file with the original
+            cp package.orig package.json
+            echo "$FINAL_URL"index.html | tee /tmp/artifacts/s3-deploy-branch.txt
       - run: 
           name: Build Halin Docker Image
           command: docker build -t mdavidallen/halin:latest -f Dockerfile .
@@ -167,6 +194,10 @@ jobs:
             else
               echo "Not deploying; not master branch."
             fi
+      - run:
+          name: AWS Cache Invalidation
+          command: |
+             ~/.local/bin/aws cloudfront create-invalidation --distribution-id E1WH29O1XG2QXT --paths '/*'
       - store_artifacts:
             path: coverage
             prefix: coverage      

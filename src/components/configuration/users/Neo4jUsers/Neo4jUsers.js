@@ -3,7 +3,7 @@ import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
 import { Button, Confirm, Grid, Modal, Icon, Popup } from 'semantic-ui-react';
 import uuid from 'uuid';
 import moment from 'moment';
-
+import halin from '../../../../api';
 import sentry from '../../../../api/sentry/index';
 import status from '../../../../api/status/index';
 
@@ -112,7 +112,7 @@ class Neo4jUsers extends Component {
         });
     }
 
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         // If I receive a refresh signal, copy to child
         // which does data polling.  Man I wish there were a better way.
         const refresh = this.state.refresh;
@@ -313,6 +313,7 @@ class Neo4jUsers extends Component {
                                 query={this.query}
                                 refresh={this.state.childRefresh}
                                 defaultPageSize={10}
+                                database={halin.driver.SYSTEM_DB}
                                 displayColumns={this.displayColumns}
                                 hideNodeLabel={true}
                             />

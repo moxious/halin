@@ -5,6 +5,7 @@ import moment from 'moment';
 
 import status from '../../../../api/status/index';
 import sentry from '../../../../api/sentry/index';
+import halin from '../../../../api';
 
 import CSVDownload from '../../../data/download/CSVDownload';
 import './Neo4jRoles.css';
@@ -53,7 +54,7 @@ class Neo4jRoles extends Component {
         refresh: 1,
     }
 
-    componentWillReceiveProps(props) {
+    UNSAFE_componentWillReceiveProps(props) {
         // If I receive a refresh signal, copy to child
         // which does data polling.  Man I wish there were a better way.
         const refresh = this.state.refresh;
@@ -196,6 +197,7 @@ class Neo4jRoles extends Component {
                                 showPagination={true}
                                 refresh={this.state.childRefresh}
                                 displayColumns={this.displayColumns}
+                                database={halin.driver.SYSTEM_DB}
                                 defaultPageSize={10}
                                 onUpdate={this.onRecordsUpdate}
                                 hideNodeLabel={true}

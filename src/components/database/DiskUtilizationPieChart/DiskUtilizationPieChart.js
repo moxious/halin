@@ -7,6 +7,10 @@ import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 import CypherPieChart from '../../data/CypherPieChart/CypherPieChart';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
+// In Neo4j 4 they took away ability to see components of store sizes, and replaced
+// it with a JMX component that just gives total bytes of storage for an entire
+// database, e.g. "neo4j.metrics:name=neo4j.neo4j.store.size.total"
+// So this component isn't really useful >= Neo4j 4.0.
 const DiskUtilizationPieChart = (props) => {
     return (
         <HalinCard>

@@ -22,7 +22,7 @@ class PageCacheTracking extends Component {
         ],
     };
 
-    componentWillMount() {
+    UNSAFE_componentWillMount() {
         this.start = new Date().getTime();
         this.pollStartTime = new Date().getTime();
         this.faultsAsOfLastObservation = -1;
@@ -76,7 +76,7 @@ class PageCacheTracking extends Component {
         const halin = window.halinContext;
 
         const addr = node.getBoltAddress();
-        const feed = halin.getDataFeed(_.merge({ node }, queryLibrary.JMX_PAGE_CACHE));
+        const feed = halin.getDataFeed(_.merge({ node }, queryLibrary.find(halin, 'pageCache')));
 
         feed.addAliases({ 
             faultsPerSecond: ClusterTimeseries.keyFor(addr, 'faultsPerSecond'),

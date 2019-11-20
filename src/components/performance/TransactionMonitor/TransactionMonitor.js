@@ -12,9 +12,9 @@ class TransactionMonitor extends Component {
     state = {
         key: uuid.v4(),
         rate: 1000,
-        query: queryLibrary.JMX_TRANSACTIONS.query,
-        displayColumns: queryLibrary.JMX_TRANSACTIONS.columns,
-        legendOnlyColumns: queryLibrary.JMX_TRANSACTIONS.legendOnlyColumns,
+        query: queryLibrary.find(window.halinContext, 'transactions').query,
+        displayColumns: queryLibrary.find(window.halinContext, 'transactions').columns,
+        legendOnlyColumns: queryLibrary.find(window.halinContext, 'transactions').legendOnlyColumns,
     };
 
     onUpdate = (/* childQueryState */) => {

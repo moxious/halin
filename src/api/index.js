@@ -15,6 +15,7 @@ import sentry from './sentry';
 import palette from './palette';
 import datautil from './data/util';
 import timewindow from './timeseries/timewindow';
+import status from './status/index';
 
 export default {
     HalinContext,
@@ -26,6 +27,7 @@ export default {
     driver,
     queryLibrary,
     sentry,
+    status,
 
     neo4jDesktop,
 
