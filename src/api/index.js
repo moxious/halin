@@ -8,7 +8,7 @@ import driver from './driver';
 import ClusterMember from './cluster/ClusterMember';
 import ClusterManager from './cluster/ClusterManager';
 
-import DataFeed from './data/DataFeed';
+import DataFeed from './data/feeds/DataFeed';
 import queryLibrary from './data/queries/query-library';
 import neo4jDesktop from './neo4jDesktop';
 import sentry from './sentry';
