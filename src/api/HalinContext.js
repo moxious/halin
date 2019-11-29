@@ -7,7 +7,7 @@ import ClusterManager from './cluster/ClusterManager';
 import queryLibrary from './data/queries/query-library';
 import sentry from './sentry/index';
 import ClusterMember from './cluster/ClusterMember';
-import DataFeed from './data/DataFeed';
+import DataFeed from './data/feeds/DataFeed';
 import neo4j from './driver';
 import neo4jErrors from './driver/errors';
 import errors from './driver/errors';
@@ -29,7 +29,8 @@ export default class HalinContext {
         this.clusterMembers = null;
         this.driverOptions = {
             connectionTimeout: 15000,
-            trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
+            // trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
+            trust: 'TRUST_SYSTEM_CA_SIGNED_CERTIFICATES',
         };
         this.debug = false;
         this.mgr = new ClusterManager(this);
