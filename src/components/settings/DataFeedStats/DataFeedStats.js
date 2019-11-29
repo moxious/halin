@@ -1,39 +1,61 @@
 import React, { Component } from 'react';
-import { Accordion, Label } from 'semantic-ui-react';
-import { LineChart } from 'react-d3-components';
 import _ from 'lodash';
+import ReactTable from 'react-table';
 
 import datautil from '../../../api/data/util';
-import queryLibrary from '../../../api/data/queries/query-library';
-
-import NodeLabel from '../../ui/scaffold/NodeLabel/NodeLabel';
-
-const simpleLabel = (key, value) => 
-    <Label>
-        {key}
-        <Label.Detail>{value}</Label.Detail>
-    </Label>;
-
-const getDescription = label => {
-    const q = queryLibrary[label];
-    const defaultDescription = 'No description of this query is available';
-
-    if(q) {
-        return q.getDescription() || defaultDescription;
-    }
-
-    return defaultDescription;
-};
 
 export default class DataFeedStats extends Component {
-    state = { activeIndex: null };
-
-    handleClick = (e, titleProps) => {
-      const { index } = titleProps
-      const { activeIndex } = this.state
-      const newIndex = activeIndex === index ? -1 : index
-  
-      this.setState({ activeIndex: newIndex })
+    state = {
+        displayColumns: [
+            {
+                Header: 'Member',
+                id: 'member',
+                accessor: (row) => {
+                    console.log('ROW', row);
+                    return row.node.getLabel();
+                }
+            },
+            {
+                Header: 'Feed',
+                id: 'feed',
+                accessor: 'label'
+            },
+            {
+                Header: 'Rate (ms)',
+                accessor: 'rate',
+            },
+            {
+                Header: 'Best (ms)',
+                id: 'min',
+                accessor: (row) => datautil.roundToPlaces(row.min, 2)
+            },
+            {
+                Header: 'Worst (ms)',
+                id: 'max',
+                accessor: (row) => datautil.roundToPlaces(row.max, 2)
+            },
+            {
+                Header: 'Avg (ms)',
+                id: 'mean',
+                accessor: (row) => datautil.roundToPlaces(row.mean, 2)
+            },
+            {
+                Header: 'Listeners',
+                accessor: 'listeners',
+            },
+            {
+                Header: 'Augmentation Functions',
+                accessor: 'augFns',
+            },
+            {
+                Header: 'Aliases',
+                accessor: 'aliases',
+            },
+            {
+                Header: 'Packets',
+                accessor: 'packets',
+            },
+        ],
     };
 
     dataFeedStats() {
@@ -56,64 +78,22 @@ export default class DataFeedStats extends Component {
     }
 
     render() {
-        const style = { textAlign: 'left' };
         return (
-            <Accordion fluid styled exclusive={false}>
-                {
-                    this.dataFeedStats().map((stats, idx) =>
-                        <div key={idx}>
-                            <Accordion.Title
-                                onClick={this.handleClick}
-                                index={idx} style={style}
-                                active={this.state.activeIndex === idx}
-                            >
-                                <NodeLabel node={stats.node} />
-                                <Label>{stats.label}</Label>
-                                <Label>
-                                    Best
-                                            <Label.Detail>
-                                        {datautil.roundToPlaces(stats.min, 2)}ms
-                                            </Label.Detail>
-                                </Label>
-                                <Label>
-                                    Avg. Response Time
-                                            <Label.Detail>
-                                        {datautil.roundToPlaces(stats.mean, 2)}ms
-                                            </Label.Detail>
-                                </Label>
-                                <Label>
-                                    Worst
-                                            <Label.Detail>
-                                        {datautil.roundToPlaces(stats.max, 2)}ms
-                                            </Label.Detail>
-                                </Label>
-                            </Accordion.Title>
-                            <Accordion.Content
-                                active={this.state.activeIndex === idx}
-                                index={idx}>
+            <ReactTable className='-striped -highlight'
+                data={this.dataFeedStats()}
+                // By default, filter only catches data if the value STARTS WITH
+                // the entered string.  This makes it less picky.
+                defaultFilterMethod={(filter, row /* , column */) => {
+                    const id = filter.pivotId || filter.id
+                    return row[id] !== undefined ? String(row[id]).indexOf(filter.value) > -1 : true
+                }}
 
-                                <p>{ getDescription(stats.label) }</p>
-
-                                { simpleLabel('Listeners', stats.listeners) }
-                                { simpleLabel('Augmentation Functions', stats.augFns) }
-                                { simpleLabel('Aliases', stats.aliases) }
-                                { simpleLabel('Packets', stats.packets) }
-
-                                <h5>Response Timings</h5>
-
-                                <LineChart
-                                    data={this.lineChartData(stats.timings)}
-                                    width={600}
-                                    height={200}
-                                    margin={{top: 10, bottom: 50, left: 50, right: 10}}/>
-
-                                <h5>Query</h5>
-                                <pre style={style}>{stats.query}</pre>
-                            </Accordion.Content>
-                        </div>)
-                }
-            </Accordion>
-        )
+                sortable={true}
+                filterable={true}
+                defaultPageSize={20}
+                showPagination={true}
+                columns={this.state.displayColumns}
+            />
+        );
     }
-
 }
