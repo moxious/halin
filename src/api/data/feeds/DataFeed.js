@@ -1,10 +1,10 @@
 import Ring from 'ringjs';
 import { TimeEvent, TimeRange } from 'pondjs';
 import _ from 'lodash';
-import queryLibrary from './queries/query-library';
-import sentry from '../sentry/index';
-import Metric from '../Metric';
-import neo4j from '../driver';
+import queryLibrary from '../queries/query-library';
+import sentry from '../../sentry/index';
+import Metric from '../../Metric';
+import neo4j from '../../driver';
 import math from 'mathjs';
 
 const actualNumber = i => !_.isNaN(i) && !(i === Infinity) && !(i === -Infinity);
@@ -196,6 +196,7 @@ export default class DataFeed extends Metric {
 
         return {
             name: this.name,
+            rate: this.rate,
             label: this.label,
             address: this.node.getBoltAddress(),
             lastObservation: this.state && this.state.data ? this.state.data[0] : null,
@@ -286,6 +287,11 @@ export default class DataFeed extends Metric {
     }
 
     /**
+     * Get the cluster member associated with this data feed.
+     */
+    member() { return this.node; }
+
+    /**
      * Take a single sample of data.
      * @returns {Promise} that when resolving calls the onData function and returns
      * its result.
@@ -358,6 +364,7 @@ export default class DataFeed extends Metric {
                 newEvents.push(event);
                 this.state.lastDataArrived = new Date();
                 this.state.data = [data];
+                this.state.current = event;
                 this.state.time = t;
                 this.state.event = newEvents;
                 this.state.error = undefined;

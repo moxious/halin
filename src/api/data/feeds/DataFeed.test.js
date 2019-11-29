@@ -1,5 +1,5 @@
 import DataFeed from './DataFeed';
-import fakes from '../../testutils/fakes';
+import fakes from '../../../testutils/fakes';
 import Ring from 'ringjs';
 
 describe('DataFeed', function () {
