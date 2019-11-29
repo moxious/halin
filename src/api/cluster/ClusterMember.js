@@ -251,7 +251,7 @@ export default class ClusterMember {
             });
     }
 
-    getMaxHeap() {
+    runGetMaxHeap() {
         return this.run(queryLibrary.DBMS_GET_MAX_HEAP)
             .then(results => {
                 const rec = results.records[0];
@@ -263,6 +263,42 @@ export default class ClusterMember {
                 }
                 throw err;
             })
+    }
+
+    /**
+     * Returns the member's max heap in bytes, or -1 if it cannot be 
+     * determined.
+     */
+    getMaxHeap() {
+        const val = _.get(this.dbms, 'maxHeap');
+
+        if (val) {
+            const sizes = {
+                k: 1000,
+                m: 1000 * 1000,
+                g: 1000 * 1000 * 1000,
+                t: 1000 * 1000 * 1000 * 1000,
+            };
+            
+            const keys = Object.keys(sizes);
+            for(let i=0; i<keys.length; i++) {
+                const size = keys[i];
+
+                if (val.endsWith(size)) {
+                    const numeric = Number(val.substring(0, val.length - 1));
+                    const multiplier = sizes[size];
+
+                    if (Number.isNaN(numeric)) {
+                        sentry.error(`Heap size value ${val} is not numeric`);
+                        return -1;
+                    }
+
+                    return numeric * multiplier;
+                }
+            }
+        }
+
+        return -1;
     }
 
     checkComponents() {
@@ -295,7 +331,7 @@ export default class ClusterMember {
                 .then(result => { this.dbms.hasDBStats = result }),
             () => featureProbes.hasMultiDatabase(this)
                 .then(result => { this.dbms.multidatabase = result }),
-            () => this.getMaxHeap().then(maxHeap => {
+            () => this.runGetMaxHeap().then(maxHeap => {
                 this.dbms.maxHeap = maxHeap;
             }),
             () => this.getMaxPhysicalMemory().then(maxPhysMemory => {
