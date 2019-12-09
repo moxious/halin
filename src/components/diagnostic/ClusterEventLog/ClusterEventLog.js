@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import ReactTable from 'react-table';
 import _ from 'lodash';
 import moment from 'moment';
-import hoc from '../../higherOrderComponents';
 
 class ClusterEventLog extends Component {
     state = {
@@ -34,7 +33,7 @@ class ClusterEventLog extends Component {
         // console.log('CEV items', events);
         return (
             <div className='ClusterEventLog'>
-                <h3>Cluster Event Log</h3>
+                <h3>Event Log</h3>
 
                 <ReactTable className='-striped -highlight'
                     data={events}
@@ -48,4 +47,4 @@ class ClusterEventLog extends Component {
     }
 }
 
-export default hoc.clusterOnlyComponent(ClusterEventLog);
+export default ClusterEventLog;

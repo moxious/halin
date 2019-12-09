@@ -19,7 +19,7 @@ class DiagnosticPane extends Component {
                 <Grid divided='vertically'>
                     <Grid.Row columns={1}>
                         <Grid.Column>
-                            <h3>Cluster Diagnostics <Explainer knowledgebase='Diagnostics'/></h3>
+                            <h3>Diagnostics <Explainer knowledgebase='Diagnostics' /></h3>
 
                             <GeneratePackage
                                 key={this.state.key}
@@ -28,12 +28,11 @@ class DiagnosticPane extends Component {
                         </Grid.Column>
                     </Grid.Row>
 
-                    {window.halinContext.isCluster() ?
-                        <Grid.Row columns={1}>
-                            <Grid.Column>
-                                <ClusterEventLog />
-                            </Grid.Column>
-                        </Grid.Row> : ''}
+                    <Grid.Row columns={1}>
+                        <Grid.Column>
+                            <ClusterEventLog />
+                        </Grid.Column>
+                    </Grid.Row>
 
                     <Grid.Row columns={1}>
                         <Grid.Column>
