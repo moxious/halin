@@ -8,7 +8,7 @@ import HalinContext from '../../../api/HalinContext';
 
 import Spinner from '../scaffold/Spinner/Spinner';
 import HalinToast from '../scaffold/HalinToast/HalinToast';
-import Troubleshooting from '../../neo4jDesktop/Troubleshooting';
+import Troubleshooting from '../../initialConnection/Troubleshooting';
 
 import './Halin.css';
 
