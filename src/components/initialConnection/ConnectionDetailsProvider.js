@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import ShimConnectModal from './ShimConnectModal';
 import HalinContext from '../../api/HalinContext';
 
-class Neo4jDesktopStandIn extends Component {
+export default class ConnectionDetailsProvider extends Component {
     state = {
         username: null,
         password: null,
@@ -42,6 +42,4 @@ class Neo4jDesktopStandIn extends Component {
             />
         )
     }
-}
-
-export default Neo4jDesktopStandIn;
+};
