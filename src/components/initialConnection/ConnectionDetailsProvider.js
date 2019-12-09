@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import ShimConnectModal from './ShimConnectModal';
-import neo4jDesktop from '../../api/neo4jDesktop';
+import HalinContext from '../../api/HalinContext';
 
-class Neo4jDesktopStandIn extends Component {
+export default class ConnectionDetailsProvider extends Component {
     state = {
         username: null,
         password: null,
@@ -16,16 +16,13 @@ class Neo4jDesktopStandIn extends Component {
     }
 
     onSubmit = ({ username, password, host, port, encrypted }) => {
-        window.neo4jDesktopApi = {
-            getContext: () =>
-                Promise.resolve(neo4jDesktop.buildFakeContext({
-                    host: host.trim(),
-                    port,
-                    username,
-                    password,
-                    encrypted,
-                    name: this.props.name || 'shim',
-                })),
+        HalinContext.connectionDetails = {
+            host: host.trim(),
+            port,
+            username,
+            password,
+            encrypted,
+            name: this.props.name || 'shim',
         };
 
         this.setState({ username, password, host, port, encrypted });
@@ -45,6 +42,4 @@ class Neo4jDesktopStandIn extends Component {
             />
         )
     }
-}
-
-export default Neo4jDesktopStandIn;
+};

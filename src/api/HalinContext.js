@@ -2,7 +2,6 @@ import _ from 'lodash';
 import Promise from 'bluebird';
 import uuid from 'uuid';
 
-import nd from './neo4jDesktop/index';
 import ClusterManager from './cluster/ClusterManager';
 import queryLibrary from './data/queries/query-library';
 import sentry from './sentry/index';
@@ -20,9 +19,9 @@ import errors from './driver/errors';
  * The main app will attach it to the window object as a global.
  */
 export default class HalinContext {
+    static connectionDetails = null;
+
     constructor() {
-        this.project = null;
-        this.graph = null;
         this.drivers = {};
         this.dataFeeds = {};
         this.pollRate = 1000;
@@ -238,11 +237,9 @@ export default class HalinContext {
     /**
      * Check to see if the active database is a cluster.  In this context cluster means that it's Neo4j Enterprise
      * and the dbms.cluster.* procedures are present (e.g. not mode=SINGLE).
-     * @param {Object} activeDb 
      */
-    checkForCluster(activeDb, progressCallback) {
+    checkForCluster(progressCallback) {
         const session = this.base.driver.session();
-        // sentry.debug('activeDb', activeDb);
 
         const report = str => progressCallback ? progressCallback(str) : null;
 
@@ -265,9 +262,16 @@ export default class HalinContext {
                     // Halin will look at single node databases
                     // running in desktop as clusters of size 1.
                     // #operability I wish Neo4j treated mode=SINGLE as a cluster of 1 and exposed dbms.cluster.*
+
+                    const host = this.base.host;
+                    const port = this.base.port;
+                    const addresses = [
+                        `bolt://${host}:${port}`,
+                    ];
+
                     const rec = {
                         id: uuid.v4(),
-                        addresses: nd.getAddressesForGraph(activeDb.graph),
+                        addresses,
                         role: 'SINGLE',
                         database: 'default',
                     };
@@ -346,43 +350,14 @@ export default class HalinContext {
             .finally(() => session.close());
     }
 
-    static getProjectFromEnvironment() {
-        return {
-            name: process.env.GRAPH_NAME || 'environment',
-            graphs: [
-                HalinContext.getGraphFromEnvironment(),
-            ],
-        };
-    }
-
-    static getGraphFromEnvironment() {
+    static getConnectionDetailsFromEnvironment() {
         const encryption = process.env.ENCRYPTION_REQUIRED ? 'REQUIRED' : 'OPTIONAL';
         const host = process.env.NEO4J_HOST || 'localhost';
         const port = process.env.NEO4J_PORT || 7687;
         const username = process.env.NEO4J_USERNAME || 'neo4j';
         const password = process.env.NEO4J_PASSWORD || 'admin';
-
         return {
-            name: process.env.GRAPH_NAME || 'environment',
-            status: process.env.GRAPH_STATUS || 'ACTIVE',
-            databaseStatus: process.env.DATABASE_STATUS || 'RUNNING',
-            databaseType: process.env.DATABASE_TYPE || 'neo4j',
-            id: process.env.DATABASE_UUID || uuid.v4(),
-            connection: {
-                configuration: {
-                    path: '.',
-                    protocols: {
-                        bolt: {
-                            host,
-                            port,
-                            username,
-                            password,
-                            enabled: true,
-                            tlsLevel: encryption,
-                        },
-                    },
-                },
-            },
+            host, port, username, password, enabled: true, tlsLevel: encryption,
         };
     }
 
@@ -394,12 +369,10 @@ export default class HalinContext {
      * Returns a promise that resolves to the HalinContext object completed,
      * or rejects.
      * 
-     * There are three major code paths here:
-     * (1) Running in Neo4j desktop, use that API to figure what graph to 
-     * connect to.
-     * (2) Running in browser (not desktop) -- in which case we needed to
+     * There are two major code paths here:
+     * (1) Running in browser -- in which case we needed to
      * fake the neo4j desktop API facade prior to this step
-     * (3) Running in terminal (and window object isn't even defined)
+     * (2) Running in terminal (and window object isn't even defined)
      */
     initialize(progressCallback = null) {
         let inBrowser = true;
@@ -425,29 +398,19 @@ export default class HalinContext {
             if (!inBrowser) {
                 // No need to fake a neo4jdesktop API.  Construct
                 // needed context directly from env vars.
-                getGraphSpecificsPromise = Promise.resolve({
-                    project: HalinContext.getProjectFromEnvironment(),
-                    graph: HalinContext.getGraphFromEnvironment(),
-                });
+                getGraphSpecificsPromise = Promise.resolve(
+                    HalinContext.getConnectionDetailsFromEnvironment());
             } else {
-                getGraphSpecificsPromise = nd.getFirstActive();
+                getGraphSpecificsPromise = Promise.resolve(_.cloneDeep(HalinContext.connectionDetails));
             }
 
             report('Getting database connection');
-            return getGraphSpecificsPromise.then(active => {
-                    if (_.isNil(active)) {
-                        // In the web version, this will never happen because the
-                        // shim will fake an active DB.  In Neo4j Desktop this 
-                        // **will** happen if the user launches Halin without an 
-                        // activated database.
+            return getGraphSpecificsPromise.then(details => {
+                    if (_.isNil(details)) {
                         throw new Error('In order to launch Halin, you must have an active database connection');
                     }
 
-                    // sentry.fine('FIRST ACTIVE', active);
-                    this.project = active.project;
-                    this.graph = active.graph;
-
-                    this.base = _.cloneDeep(active.graph.connection.configuration.protocols.bolt);
+                    this.base = _.cloneDeep(details);
 
                     if (!this.base.password) {
                         // See https://github.com/moxious/halin/issues/100
@@ -465,7 +428,7 @@ export default class HalinContext {
                     // sentry.fine('HalinContext created', this);
                     return Promise.all([
                         this.checkUser(this.base.driver, progressCallback),
-                        this.checkForCluster(active, progressCallback),
+                        this.checkForCluster(progressCallback),
                     ]);
                 })
                 // Checking databases must be after checking for a cluster, since we need to know who leader is
