@@ -30,7 +30,7 @@ class ClusterEventLog extends Component {
         const events = _.sortBy(
             _.clone(window.halinContext.getClusterManager().getEventLog()),
             'date').reverse();
-        // console.log('CEV items', events);
+
         return (
             <div className='ClusterEventLog'>
                 <h3>Event Log</h3>
@@ -40,7 +40,8 @@ class ClusterEventLog extends Component {
                     sortable={true}
                     filterable={true}
                     columns={this.state.displayColumns}
-                    defaultPageSize={8}
+                    showPagination={events.length > 10}
+                    defaultPageSize={Math.min(events.length, 10)}
                 />
             </div>
         );
