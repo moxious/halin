@@ -6,9 +6,7 @@ import uuid from 'uuid';
 import _ from 'lodash';
 
 import sentry from '../api/sentry/index';
-
 import queryFakes from './queryfakes';
-import neo4jDesktop from '../api/neo4jDesktop/';
 
 sentry.disable();
 
@@ -135,6 +133,7 @@ const HalinContext = (returnData = []) => {
         getCurrentUser: sinon.fake.returns({
             username: 'neo4j', roles: ['admin'],
         }),
+        connectionDetails: basics,
     };
 };
 
@@ -151,11 +150,6 @@ const Driver = (data = []) => {
         id: uuid.v4(),
         session: sinon.fake.returns(Session(data)),
     };
-};
-
-window.neo4jDesktopApi = {
-    getContext: () =>
-        Promise.resolve(neo4jDesktop.buildFakeContext(basics)),
 };
 
 export default {
