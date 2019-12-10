@@ -45,7 +45,6 @@ describe('Halin Context', function () {
     });
 
     it('can initialize', () => {
-        // Reads from Neo4jDesktop fake API shim which is created by fakes.
         return ctx.initialize()
             .then(() => {
                 expect(ctx.base.host).toEqual(fakes.basics.host);

@@ -396,8 +396,7 @@ export default class HalinContext {
             let getGraphSpecificsPromise = null;
 
             if (!inBrowser) {
-                // No need to fake a neo4jdesktop API.  Construct
-                // needed context directly from env vars.
+                // Get connection details from the environment variables directly.
                 getGraphSpecificsPromise = Promise.resolve(
                     HalinContext.getConnectionDetailsFromEnvironment());
             } else {

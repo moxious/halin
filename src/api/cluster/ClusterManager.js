@@ -427,7 +427,7 @@ export default class ClusterManager {
                     sentry.warn('ClusterManager#getDatabases() returned unexpected error', err);
                 }
 
-                sentry.info('Faking databases pre 4.0');
+                sentry.info('Pre Neo4j 4.0, all clusters have a single database "neo4j"');
                 // Just like we fake single-node Neo4j instances as a cluster of one member,
                 // we fake non-multidb clusters as a multi-db of one database.  :)
                 this._dbs = [new Database('neo4j', 'online', true)];
