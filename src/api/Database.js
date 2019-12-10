@@ -49,6 +49,10 @@ export default class Database {
         };
     }
 
+    isDefault() {
+        return this.backingStatuses[0].default;
+    }
+
     static pre4DummyDatabase() {
         return new Database([{
             name: 'neo4j',
