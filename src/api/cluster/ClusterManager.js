@@ -357,7 +357,7 @@ export default class ClusterManager {
     databases() { return this._dbs; }
 
     getDefaultDatabase() {
-        return this.databases().filter(db => db.isDefault)[0];
+        return this.databases().filter(db => db.isDefault())[0];
     }
 
     getRoles() {
@@ -407,7 +407,10 @@ export default class ClusterManager {
                     'default', 'error',
                 ],
             }))
-            .then(results => Database.fromArrayOfResults(results))
+            .then(results => {
+                this._dbs = Database.fromArrayOfResults(results);
+                return this._dbs;
+            })
             .catch(err => {
                 const str = `${err}`;
 
