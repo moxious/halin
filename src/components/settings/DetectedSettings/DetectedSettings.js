@@ -38,7 +38,7 @@ export default class DetectedSettings extends PureComponent {
             this.lineItem(ctx.supportsDBStats(), 'DB Stats'),
             this.lineItem(ctx.supportsMetrics(), 'Metrics'),
             this.lineItem(ctx.isCluster(), 'Clustered'),
-            this.lineItem(ctx.isNeo4jCloud(), 'Neo4j Cloud'),
+            this.lineItem(ctx.isNeo4jAura(), 'Neo4j Aura'),
         ];
 
         const listify = someStuff =>

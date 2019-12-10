@@ -137,7 +137,7 @@ export default class HalinContext {
     /**
      * @returns true if the HalinContext is attached to a Neo4j Cloud instance, false otherwise.
      */
-    isNeo4jCloud() {
+    isNeo4jAura() {
         const uri = this.getBaseURI();
         return (uri || '').toLowerCase().indexOf('databases.neo4j.io') > -1;
     }
