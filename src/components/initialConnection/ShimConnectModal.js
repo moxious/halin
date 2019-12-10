@@ -83,10 +83,6 @@ class ConnectForm extends Component {
 
     onSubmit = () => this.props.onSubmit(this.state);
 
-    componentWillMount() {
-        // sentry.fine('ShimConnectModal: running outside of Neo4j Desktop');
-    }
-
     render() {
         const { open, onClose } = this.props;
         return (
