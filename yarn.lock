@@ -7583,10 +7583,10 @@ neo-async@^2.5.0:
   resolved "https://neo.jfrog.io/neo/api/npm/npm/neo-async/-/neo-async-2.6.0.tgz#b9d15e4d71c6762908654b5183ed38b753340835"
   integrity sha1-udFeTXHGdikIZUtRg+04t1M0CDU=
 
-neo4j-driver@^4.0.0-beta01:
-  version "4.0.0-beta01"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/neo4j-driver/-/neo4j-driver-4.0.0-beta01.tgz#f1a89e7c09e1a0ebec314d614eeb7bf2e9c88f74"
-  integrity sha1-8aiefAnhoOvsMU1hTut78unIj3Q=
+neo4j-driver@^4.0.0:
+  version "4.0.0"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/neo4j-driver/-/neo4j-driver-4.0.0.tgz#02ea92136171cb608217c13165b15515fa31b79c"
+  integrity sha1-AuqSE2Fxy2CCF8ExZbFVFfoxt5w=
   dependencies:
     "@babel/runtime" "^7.5.5"
     rxjs "^6.5.2"
