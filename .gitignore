@@ -28,3 +28,4 @@ src/creds/*
 reports
 code-signing
 neo4j-*
+testrig
