@@ -18,7 +18,8 @@ const segmentStyle = {
     paddingRight: 0,
 };
 
-const hoverPopup = (popupText, childElement, key) => childElement;
+const hoverPopup = (popupText, childElement, key) => 
+    <div key={key}>{childElement}</div>;
     // <Popup inverted key={key}
     //     on='hover'
     //     position='center right'
