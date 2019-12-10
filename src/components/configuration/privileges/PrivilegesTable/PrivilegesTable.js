@@ -3,28 +3,27 @@ import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
 import { Grid, Button, Modal } from 'semantic-ui-react';
 import uuid from 'uuid';
 import moment from 'moment';
-// import _ from 'lodash';
+import _ from 'lodash';
 
 import api from '../../../../api';
 import CSVDownload from '../../../data/download/CSVDownload';
 import Explainer from '../../../ui/scaffold/Explainer/Explainer';
 import AlterPrivilegeForm from '../AlterPrivilegeForm/AlterPrivilegeForm';
-// import PrivilegeOperation from '../../../../api/cluster/PrivilegeOperation';
+import PrivilegeOperation from '../../../../api/cluster/PrivilegeOperation';
 
 class PrivilegesTable extends Component {
     key = uuid.v4();
     query = api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.query;
     displayColumns = [
-        /*
         {
             Header: 'Actions',
             id: 'delete',
             minWidth: 70,
             maxWidth: 100,
             Cell: ({ row }) => {
-                const buttonProps = { 
-                    compact: true, 
-                    negative: true, 
+                const buttonProps = {
+                    compact: true,
+                    negative: true,
                     size: 'tiny',
                     // Do not permit revoking/denying privileges to admin.
                     disabled: row.role === 'admin',
@@ -37,23 +36,22 @@ class PrivilegesTable extends Component {
                     <span>
                         {
                             this.privsButton(
-                                'Deny', 
+                                'Deny',
                                 _.merge({ locked: true }, deny.properties()),
-                                'lock', 
+                                'lock',
                                 buttonProps)
                         }
                         {
                             this.privsButton(
-                                'Revoke', 
+                                'Revoke',
                                 _.merge({ locked: true }, revoke.properties()),
-                                'remove circle', 
+                                'remove circle',
                                 buttonProps)
                         }
                     </span>
                 );
             },
         },
-        */
     ].concat(api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.columns);
 
     state = {
@@ -128,7 +126,11 @@ class PrivilegesTable extends Component {
         );
     };
 
-    grantButton() { return this.privsButton('Grant', { operation: 'GRANT' }, 'unlock', { primary: true }); }
+    grantButton() {
+        return this.privsButton('Grant', {
+            operation: 'GRANT'
+        }, 'unlock', { primary: true });
+    }
 
     render() {
         return (
@@ -139,7 +141,7 @@ class PrivilegesTable extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <Button.Group size='small'>
-                                {/* {this.grantButton()} */}
+                                {this.grantButton()}
                                 {this.downloadCSVButton()}
                             </Button.Group>
                         </Grid.Column>
