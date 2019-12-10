@@ -27,6 +27,18 @@ export default class Database {
         this.role = obj.role;
     }
 
+    asJSON() {
+        return {
+            name: this.name,
+            address: this.address,
+            role: this.role,
+            default: this.default,
+            requestedStatus: this.requestedStatus,
+            currentStatus: this.currentStatus,
+            error: this.error,
+        };
+    }
+
     getLabel() {
         return this.name;
     }

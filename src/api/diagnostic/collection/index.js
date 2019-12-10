@@ -260,14 +260,21 @@ const halinDiagnostics = halinContext => {
                 node: uri,
                 _config: _.get(halinContext.drivers[uri], '_config') || null,
             })),
-            activeProject: cleanup(halinContext.project),
-            activeGraph: cleanup(halinContext.graph),
             dataFeeds: _.values(halinContext.dataFeeds).map(df => df.stats()),
             ...appPkg,
         }
     };
 
     return Promise.resolve(halin);
+};
+
+const clusterManagerDiagnostics = halinContext => {
+    const getDatabasesPromise = halinContext.getClusterManager()
+        .getDatabases()
+        .then(dbs => dbs.map(db => db.asJSON()))
+        .then(arrayOfDBJSON => ({ databases: arrayOfDBJSON }));
+
+    return getDatabasesPromise;
 };
 
 /**
@@ -311,11 +318,12 @@ const runDiagnostics = (halinContext, tag=uuid.v4()) => {
     });
 
     const halinDiags = halinDiagnostics(halinContext);
+    const clusterManagerDiags = clusterManagerDiagnostics(halinContext);
     const neo4jDesktopDiags = neo4jDesktopDiagnostics(halinContext);
 
     // Each object resolves to a diagnostic object with 1 key, and sub properties.
     // All diagnostics are just a merge of those objects.
-    return Promise.all([root, halinDiags, allNodeDiags, neo4jDesktopDiags])
+    return Promise.all([root, halinDiags, clusterManagerDiags, allNodeDiags, neo4jDesktopDiags])
         .then(arrayOfObjects => _.merge(...arrayOfObjects))
 };
 
