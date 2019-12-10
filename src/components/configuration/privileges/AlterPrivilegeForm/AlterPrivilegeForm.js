@@ -23,7 +23,7 @@ class AlterPrivilegeForm extends Component {
         role: 'admin',
         op: null,
         operations: ['GRANT', 'REVOKE', 'DENY'].map(optionify),
-        privileges: ['TRAVERSE', 'READ (*)', 'MATCH (*)', 'WRITE (*)'].map(optionify),
+        privileges: ['TRAVERSE', 'READ {*}', 'MATCH {*}', 'WRITE {*}'].map(optionify),
         entities: ['NODES *', 'RELATIONSHIPS *', 'ELEMENTS *'].map(optionify),
     };
 
