@@ -28,18 +28,21 @@ class TransactionsOpen extends Component {
         return {};
     };
 
-    dataFeedMaker = node => {
+    dataFeedMaker = member => {
         const halin = window.halinContext;
 
-        const addr = node.getBoltAddress();
+        const addr = member.getBoltAddress();
         const allColumns = _.cloneDeep(queryLibrary.JMX_TRANSACTIONS.columns)
             .concat(_.cloneDeep(queryLibrary.JMX_TRANSACTIONS.legendOnlyColumns));
 
         const feed = halin.getDataFeed({
-            node,
+            node: member,
             query: this.state.query,
             rate: this.state.rate,
             displayColumns: allColumns,
+            params: {
+                db: halin.getClusterManager().getDefaultDatabase().name,
+            },
         });
 
         feed.addAliases({
@@ -49,7 +52,7 @@ class TransactionsOpen extends Component {
             concurrent: ClusterTimeseries.keyFor(addr, 'concurrent'),
         });
 
-        feed.addAugmentationFunction(this.augmentData(node));
+        feed.addAugmentationFunction(this.augmentData(member));
         return feed;
     };
 
