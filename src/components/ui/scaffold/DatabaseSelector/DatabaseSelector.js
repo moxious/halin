@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Sidebar, Segment, Menu, Tab, Divider } from 'semantic-ui-react';
+import { Sidebar, Segment, Menu, Tab, Icon, Divider } from 'semantic-ui-react';
 
 import DatabaseMenuItem from '../DatabaseMenuItem/DatabaseMenuItem';
-import AddDatabaseMenuItem from '../DatabaseMenuItem/AddDatabaseMenuItem';
+import CreateDatabase from '../../../database/CreateDatabase/CreateDatabase';
 import DatabasePane from '../../../database/DatabasePane/DatabasePane';
 import uuid from 'uuid';
 
@@ -14,6 +14,7 @@ export default class DatabaseSelector extends Component {
         visible: true,
         direction: 'left',
         selected: null,
+        create: false,
 
         panes: () => {
             const menuItem = this.state.selected.getLabel();
@@ -30,6 +31,14 @@ export default class DatabaseSelector extends Component {
                 },
             ];
         },
+
+        createPanes: () => [{
+            menuItem: 'Create Database',
+            visible: () => true,
+            render: () => this.paneWrapper(
+                <CreateDatabase 
+                    member={window.halinContext.getWriteMember()} />),
+        }],
     };
 
     UNSAFE_componentWillMount() {
@@ -46,13 +55,14 @@ export default class DatabaseSelector extends Component {
             }
 
             // Whether or not the selection changed, change state and force refresh.
-            this.setState({ selected, id: uuid.v4() });
+            this.setState({ selected, id: uuid.v4(), create: false });
         };
 
         window.halinContext.getClusterManager().addListener(this.listenerFn);
 
         this.setState({
             selected: window.halinContext.getClusterManager().databases()[0],
+            create: false,
         });
     }
 
@@ -65,7 +75,7 @@ export default class DatabaseSelector extends Component {
             <div className={`PaneWrapper ${cls}`}>{obj}</div>
         </Tab.Pane>;
 
-    select = (selected) => this.setState({ selected });
+    select = (selected) => this.setState({ selected, create: false });
 
     renderChildContent() {
         return (
@@ -77,7 +87,11 @@ export default class DatabaseSelector extends Component {
             }}
                 menu={{ secondary: true, pointing: true }}
                 // Limit to panes which are visible under the given config.
-                panes={this.state.panes(this.state.member).filter(p => p.visible())}
+                panes={
+                    this.state.create ? 
+                    this.state.createPanes() : 
+                    this.state.panes(this.state.member).filter(p => p.visible())
+                }
             />
         );
     }
@@ -118,7 +132,13 @@ export default class DatabaseSelector extends Component {
                                 onSelect={this.select} />)
                     }
 
-                    <AddDatabaseMenuItem />
+                    <Menu.Item as='a' disabled={window.halinContext.getVersion().major < 4}
+                        active={false}
+                        onClick={() => this.setState({ create: true })}>
+                        <Icon name='add' color='green' />
+                        Create New Database
+                    </Menu.Item>
+
                     <Divider horizontal inverted />
                 </Sidebar>
                 <Sidebar.Pusher id="MemberPane" dimmed={false} className={
