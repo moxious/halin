@@ -96,7 +96,7 @@ export default class HalinContext {
         }
         const driver = neo4j.driver(addr,
             neo4j.auth.basic(username, password), allOptions);
-
+        sentry.fine('Driver', addr);
         this.drivers[addr] = driver;
         return driver;
     }
@@ -195,46 +195,6 @@ export default class HalinContext {
     }
 
     /**
-     * Starts a slow data feed for the node's cluster role.  In this way, if the leader
-     * changes, we can detect it.
-     */
-    watchForClusterRoleChange(clusterMember) {
-        const roleFeed = this.getDataFeed(_.merge({
-            node: clusterMember,
-        }, queryLibrary.CLUSTER_ROLE));
-
-        const addr = clusterMember.getBoltAddress();
-        const onRoleData = (newData /* , dataFeed */) => {
-            const newRole = newData.data[0].role;
-
-            // Something in cluster topology just changed...
-            if (newRole !== clusterMember.role) {
-                const oldRole = clusterMember.role;
-                clusterMember.role = newRole;
-
-                const event = {
-                    message: `Role change from ${oldRole} to ${newRole}`,
-                    type: 'rolechange',
-                    address: clusterMember.getBoltAddress(),
-                    payload: {
-                        old: oldRole,
-                        new: newRole,
-                    },
-                };
-
-                this.getClusterManager().addEvent(event);
-            }
-        };
-
-        const onError = (err /*, dataFeed */) => 
-            sentry.reportError(err, `HalinContext: failed to get cluster role for ${addr}`);
-
-        roleFeed.addListener(onRoleData);
-        roleFeed.onError = onError;
-        return roleFeed;
-    }
-
-    /**
      * Check to see if the active database is a cluster.  In this context cluster means that it's Neo4j Enterprise
      * and the dbms.cluster.* procedures are present (e.g. not mode=SINGLE).
      */
@@ -253,8 +213,7 @@ export default class HalinContext {
                 return this.clusterMembers.map(clusterMember => {
                     const driver = this.driverFor(clusterMember.getBoltAddress());
                     clusterMember.setDriver(driver);
-                    report(`Member ${clusterMember.getLabel()} initialized`);
-                    return this.watchForClusterRoleChange(clusterMember);
+                    return report(`Member ${clusterMember.getLabel()} initialized`);
                 });
             })
             .catch(err => {
