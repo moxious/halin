@@ -40,6 +40,7 @@ export default class Database {
 
         this.name = arrOfResults[0].name;
         this.backingStatuses = arrOfResults;
+        this.created = new Date();
     }
 
     asJSON() {
@@ -103,8 +104,12 @@ export default class Database {
         return this.backingStatuses.filter(e => e.error).length > 0;
     }
 
+    getMemberStatuses() {
+        return this.backingStatuses;
+    }
+
     getStatuses() {
-        return this.backingStatuses.map(s => s.currentStatus);
+        return _.uniq(this.backingStatuses.map(s => s.currentStatus));
     }
 
     getStatus() {
