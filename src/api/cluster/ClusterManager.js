@@ -404,14 +404,10 @@ export default class ClusterManager {
                 required: [
                     'name', 'address', 'role',
                     'requestedStatus', 'currentStatus',
-                    'default', 'error'],
+                    'default', 'error',
+                ],
             }))
-            .then(results => results.map(r => new Database(r)))
-            .then(dbs => {
-                console.log('got dbs', dbs);
-                this._dbs = dbs;
-                return dbs;
-            })
+            .then(results => Database.fromArrayOfResults(results))
             .catch(err => {
                 const str = `${err}`;
 
@@ -433,16 +429,7 @@ export default class ClusterManager {
                 sentry.info('Pre Neo4j 4.0, all clusters have a single database "neo4j"');
                 // Just like we fake single-node Neo4j instances as a cluster of one member,
                 // we fake non-multidb clusters as a multi-db of one database.  :)
-                this._dbs = [
-                    new Database({
-                        name: 'neo4j',
-                        currentStatus: 'online',
-                        requestedStatus: 'online',
-                        default: true,
-                        error: null,
-                        address: ''
-                    }),
-                ];
+                this._dbs = [Database.pre4DummyDatabase()];
                 return this._dbs;
             });
     }
