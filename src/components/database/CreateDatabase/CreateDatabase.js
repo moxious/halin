@@ -6,7 +6,6 @@ import sentry from '../../../api/sentry';
 import status from '../../../api/status/index';
 
 const defaultState = {
-    open: false,
     name: '',
     pending: false,
     message: null,
@@ -21,18 +20,17 @@ class CreateDatabase extends Component {
     }
 
     formValid = () => {
-        return this.state.name && 
+        return this.state.name &&
             // Don't allow duplicate names
             window.halinContext.getClusterManager().databases().filter(db => db.name === this.state.name).length === 0;
     }
 
-    ok = () => {
-        console.log('TODO -- logic to create database named ', this.state.name);
+    ok = (e) => {
+        console.log('OK', e);
         this.setState({ pending: true });
         return window.halinContext.getClusterManager().createDatabase(this.state.name)
             .then(() => {
-                this.setState({ 
-                    open: false, 
+                this.setState({
                     message: status.message('Success', `Created database ${this.state.name}`),
                     error: null,
                 });
@@ -43,32 +41,17 @@ class CreateDatabase extends Component {
             })
             .catch(err => {
                 sentry.error('Failed to create database', err);
-                this.setState({ 
-                    message: null, 
+                this.setState({
+                    message: null,
                     error: status.message('Error',
                         `Failed to create database ${this.state.name}: ${err}`),
                 });
-
-                if (this.props.onCancel) {
-                    return this.props.onCancel();
-                }
             })
             .finally(() => {
                 this.setState({ pending: false });
                 status.toastify(this);
             })
             .then(() => this.resetState());
-    }
-    
-    cancel = () => {
-        this.resetState();
-        if (this.props.onCancel) {
-            return this.props.onCancel();
-        }
-    };
-
-    UNSAFE_componentWillReceiveProps(props) {
-        this.setState({ open: props.open });
     }
 
     handleChange(field, event) {
@@ -88,37 +71,29 @@ class CreateDatabase extends Component {
 
     render() {
         return (
-            <Modal className='CreateDatabaseModal' open={this.state.open}>
-                <Modal.Header>Create Database</Modal.Header>
-                <Modal.Content>
-                    <Form error={this.formHasErrors()} size='small' style={{ textAlign: 'left' }}>
-                        <Form.Input 
-                            fluid 
-                            disabled={this.state.pending}
-                            onChange={e => this.handleChange('name', e)}
-                            label='Database Name' />
+            <div className='CreateDatabaseModal'>
+                <Form error={this.formHasErrors()} size='small' style={{ textAlign: 'left' }}>
+                    <Form.Input
+                        fluid
+                        disabled={this.state.pending}
+                        onChange={e => this.handleChange('name', e)}
+                        label='Database Name' />
 
-                        <Message
-                            error
-                            header={ this.state.error ? 'Error' : 'Invalid database name' }
-                            content={
-                                <div>
-                                    Database names may consist only of simple letters and numbers,
-                                    and may not match any other existing database name.
-                                </div>
-                            }/>
-                    </Form>
-                </Modal.Content>
+                    <Message
+                        error
+                        header={this.state.error ? 'Error' : 'Invalid database name'}
+                        content={
+                            <div>
+                                Database names may consist only of simple letters and numbers,
+                                and may not match any other existing database name.
+                            </div>
+                        } />
+                </Form>
 
-                <Modal.Actions>
-                    <Button basic color='red' onClick={this.cancel}>
-                        Cancel
-                    </Button>
-                    <Button basic color='green' disabled={!this.formValid()} onClick={this.ok}>
-                        OK
-                    </Button>
-                </Modal.Actions>
-            </Modal>
+                <Button basic color='green' disabled={!this.formValid()} onClick={this.ok}>
+                    Create
+                </Button>
+            </div>
         );
     }
 }
