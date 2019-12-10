@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 /**
  * A database is a graph that can be stored within Neo4j.
  * 
@@ -5,20 +7,41 @@
  * the HalinContext will fake a single database.
  */
 
- export default class Database {
-     constructor(name, status, isDefault=false) {
-         this.name = name;
-         this.status = status;
-         this.isDefault = isDefault;
-     }
+export default class Database {
+    constructor(obj) {
+        const keys = ['name', 'address', 'role', 'requestedStatus', 'currentStatus',
+            'default', 'error'];
 
-     getLabel() { 
-         return this.name;
-     }
+        keys.forEach(k => {
+            if (_.isNil(obj[k])) {
+                throw new Error(`Initializing Database objects requires key ${k}`);
+            }
+        });
 
-     getStatus() {
-         return this.status;
-     }
+        this.name = obj.name;
+        this.requestedStatus = obj.requestedStatus;
+        this.currentStatus = obj.currentStatus;
+        this.default = obj.default;
+        this.error = obj.error;
+        this.address = obj.address;
+        this.role = obj.role;
+    }
 
-     isOnline() { return this.status === 'online'; }
- }
+    getLabel() {
+        return this.name;
+    }
+
+    isReconciling() {
+        return this.currentStatus !== this.requestedStatus;
+    }
+
+    isOnline() {
+        return this.currentStatus === 'online';
+    }
+
+    getStatus() {
+        return this.currentStatus;
+    }
+
+    isOnline() { return this.currentStatus === 'online'; }
+}

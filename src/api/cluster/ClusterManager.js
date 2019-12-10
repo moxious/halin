@@ -387,7 +387,7 @@ export default class ClusterManager {
                     message: op.buildQuery(),
                     payload: [],
                 })
-                
+
                 // No results.
                 return clusterOpSuccess(this.ctx.getWriteMember(), []);
             });
@@ -401,11 +401,14 @@ export default class ClusterManager {
     getDatabases() {
         return this.ctx.getWriteMember().run(ql.DBMS_4_SHOW_DATABASES, {}, neo4j.SYSTEM_DB)
             .then(results => neo4j.unpackResults(results, {
-                required: ['name', 'status', 'default'],
+                required: [
+                    'name', 'address', 'role',
+                    'requestedStatus', 'currentStatus',
+                    'default', 'error'],
             }))
-            .then(results => results.map(r => new Database(r.name, r.status, r.default)))
+            .then(results => results.map(r => new Database(r)))
             .then(dbs => {
-                console.log('got dbs',dbs);
+                console.log('got dbs', dbs);
                 this._dbs = dbs;
                 return dbs;
             })
@@ -430,7 +433,16 @@ export default class ClusterManager {
                 sentry.info('Pre Neo4j 4.0, all clusters have a single database "neo4j"');
                 // Just like we fake single-node Neo4j instances as a cluster of one member,
                 // we fake non-multidb clusters as a multi-db of one database.  :)
-                this._dbs = [new Database('neo4j', 'online', true)];
+                this._dbs = [
+                    new Database({
+                        name: 'neo4j',
+                        currentStatus: 'online',
+                        requestedStatus: 'online',
+                        default: true,
+                        error: null,
+                        address: ''
+                    }),
+                ];
                 return this._dbs;
             });
     }
@@ -490,8 +502,8 @@ export default class ClusterManager {
             })
             .then(() => this.getDatabases())
             .then(() => this.addEvent({
-                    type: 'database',
-                    message: `Created database ${name}`,
-                }));
+                type: 'database',
+                message: `Created database ${name}`,
+            }));
     }
 }

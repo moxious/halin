@@ -6,19 +6,31 @@ export default new HalinQuery({
     bare: true, // Do not disclaim
     columns: [
         { Header: 'Name', accessor: 'name' },
-        { Header: 'Status', accessor: 'status' },
+        { Header: 'Address', accessor: 'address' },
+        { Header: 'Role', accessor: 'role' },        
+        { Header: 'Requested Status', accessor: 'requestedStatus' },
+        { Header: 'Current Status', accessor: 'currentStatus', },
+        { Header: 'Error', accessor: 'error' },
         { Header: 'Default?', accessor: 'default' },
     ],
     // Because it's from listConfig, value comes as a string **not** a boolean.
     exampleResult: [ 
         {
             name: 'neo4j',
-            status: 'online',
+            address: '0.0.0.0:7687',
+            role: 'standalone',
+            requestedStatus: 'online',
+            currentStatus: 'online',
+            error: '',
             default: true,
         },
         {
             name: 'system',
-            status: 'online',
+            address: '0.0.0.0:7687',
+            role: 'standalone',
+            requestedStatus: 'online',
+            currentStatus: 'online',
+            error: '',
             default: true,
         },
     ],

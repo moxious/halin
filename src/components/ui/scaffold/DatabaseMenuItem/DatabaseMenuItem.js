@@ -10,7 +10,7 @@ export default class DatabaseMenuItem extends Component {
     statusIcon = (db) => {
         let color = 'red';
 
-        if (db.status === 'online') {
+        if (db.isOnline()) {
             color = 'green';
         }
 
