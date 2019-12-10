@@ -47,10 +47,6 @@ export default class Database {
         return this.currentStatus !== this.requestedStatus;
     }
 
-    isOnline() {
-        return this.currentStatus === 'online';
-    }
-
     getStatus() {
         return this.currentStatus;
     }
