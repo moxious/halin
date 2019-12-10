@@ -238,6 +238,9 @@ export default {
         links.txManagement,
         links.connectionManagement,
     ]),
+    Database: render([
+        'A Neo4j Database contains nodes and edges',
+    ]),
     TransactionsOpen: render([
         'Any query that updates the graph will run in a transaction. An updating query will always either fully succeed, or not succeed at all.',
         'This component shows only the transactions on the default configured database.',
