@@ -24,10 +24,27 @@ export default class ClusterMember {
      * Input is a record that comes back from dbms.cluster.overview()
      */
     constructor(record) {
+        if (record.has('databases')) {
+            // >= Neo4j 4.0
+            // TODO: Raft roles can't separate in 4.0. If you're the leader for one
+            // DB you're the leader for all of them and so forth.
+            // THIS IS A LIMITED ASSUMPTION FOR 4.0 AND WILL CHANGE.
+            // But this assumption is specifically why any role is fine to take as
+            // the cluster member's role.
+            const dbs = record.get('databases');
+            Object.keys(dbs).forEach(dbName => {
+                const role = dbs[dbName];
+                this.role = role;
+            });
+            this.database = dbs;
+        } else {
+            this.role = (record.get('role') || '').trim();
+            this.database = record.get('database');
+        }
+
         this.id = record.get('id');
-        this.addresses = record.get('addresses');        
-        this.role = (record.get('role') || '').trim();
-        this.database = record.get('database');
+        this.addresses = record.get('addresses');
+        this.groups = record.get('groups');
         this.dbms = {};
         this.driver = null;
         this.observations = new Ring(MAX_OBSERVATIONS);
@@ -69,6 +86,7 @@ export default class ClusterMember {
             writer: this.canWrite(),
             database: this.database,
             id: this.id,
+            groups: this.groups,
             label: this.getLabel(),
             dbms: this.dbms,
             performance: this.performance(),
@@ -123,10 +141,10 @@ export default class ClusterMember {
     isFollower() { return this.role === 'FOLLOWER'; }
     isSingle() { return this.role === 'SINGLE'; }
     isReadReplica() { return this.role === 'READ_REPLICA'; }
-    isCore() { 
+    isCore() {
         return this.isLeader() || this.isSingle();
     }
-    canWrite() { 
+    canWrite() {
         return this.isLeader() || this.isSingle();
     }
 
@@ -215,13 +233,13 @@ export default class ClusterMember {
         }
 
         return featureProbes.getAvailableMetrics(this)
-            .then(metrics => { 
+            .then(metrics => {
                 this.metrics = metrics;
                 return metrics;
             });
     }
 
-    getVersion() {        
+    getVersion() {
         if (_.isNil(_.get(this.dbms, 'versions'))) {
             return { major: 'unknown', minor: 'unknown', patch: 'unknown' };
         } else if (this.dbms.versions.length > 1) {
@@ -277,8 +295,8 @@ export default class ClusterMember {
             () => featureProbes.getNameVersionsEdition(this)
                 .then(result => { this.dbms = _.merge(_.cloneDeep(this.dbms), result); }),
             () => featureProbes.supportsNativeAuth(this)
-                .then(result => { 
-                    this.dbms.nativeAuth = result.nativeAuth; 
+                .then(result => {
+                    this.dbms.nativeAuth = result.nativeAuth;
                     this.dbms.systemGraph = result.systemGraph;
                 }),
             () => featureProbes.authEnabled(this)
@@ -328,7 +346,8 @@ export default class ClusterMember {
                 const e = new Date().getTime() - s;
                 sentry.fine(this.getLabel(), 'initialization', e, 'ms elapsed');
                 return whatever;
-            });
+            })
+            .then(() => this.watchForClusterRoleChange());
     }
 
     _txSuccess(time) {
@@ -356,7 +375,7 @@ export default class ClusterMember {
      * @param database the name of the database to run the query against
      * @returns {Promise} which resolves to a neo4j driver result set
      */
-    run(query, params = {}, database=null) {
+    run(query, params = {}, database = null) {
         if (!this.driver) { throw new Error('ClusterMember has no driver!'); }
         if (!query) { throw new Error('Missing query'); }
 
@@ -365,7 +384,7 @@ export default class ClusterMember {
         const start = new Date().getTime();
 
         let poolSession;
-        
+
         /*
          * Sessions work differently depending on Neo4j 3 vs. 4.
          * In 4, sessions can be bound to a particular database.  In 3
@@ -382,7 +401,7 @@ export default class ClusterMember {
             if (!database || this.getVersion().major < 4) {
                 poolSession = true;
                 return this.pool.acquire();
-            } 
+            }
 
             poolSession = false;
             return Promise.resolve(this.driver.session({ database }));
@@ -402,7 +421,7 @@ export default class ClusterMember {
                 if (query instanceof HalinQuery) {
                     return session.run(query.getQuery(), params);
                 }
-                
+
                 return session.run(query, params, transactionConfig);
             })
             .then(results => {
@@ -421,5 +440,51 @@ export default class ClusterMember {
                 return poolSession ? this.pool.release(s)
                     .catch(e => sentry.fine('Pool release error', e)) : p;
             });
+    }
+
+    /**
+     * Starts a slow data feed for the node's cluster role.  In this way, if the leader
+     * changes, we can detect it.
+     */
+    watchForClusterRoleChange(clusterMember) {
+
+        console.log('watchForClusterRoleChange TBD');
+
+        return Promise.resolve(true);
+
+        // const roleFeed = this.getDataFeed(_.merge({
+        //     node: clusterMember,
+        // }, queryLibrary.CLUSTER_ROLE));
+
+        // const addr = clusterMember.getBoltAddress();
+        // const onRoleData = (newData /* , dataFeed */) => {
+        //     const newRole = newData.data[0].role;
+
+        //     // Something in cluster topology just changed...
+        //     if (newRole !== clusterMember.role) {
+        //         const oldRole = clusterMember.role;
+        //         clusterMember.role = newRole;
+
+        //         const event = {
+        //             message: `Role change from ${oldRole} to ${newRole}`,
+        //             type: 'rolechange',
+        //             address: clusterMember.getBoltAddress(),
+        //             payload: {
+        //                 old: oldRole,
+        //                 new: newRole,
+        //             },
+        //         };
+
+        //         this.getClusterManager().addEvent(event);
+        //     }
+        // };
+
+        // const onError = (err /*, dataFeed */) =>
+        //     sentry.reportError(err, `HalinContext: failed to get cluster role for ${addr}`);
+
+        // roleFeed.addListener(onRoleData);
+        // roleFeed.onError = onError;
+        // return roleFeed;
+
     }
 }
