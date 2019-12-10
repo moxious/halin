@@ -110,7 +110,7 @@ export default class MainLeftNav extends Component {
             },
             {
                 section: 'members',
-                text: 'Cluster Members',
+                text: 'Members',
                 visible: () => true,
                 icon: <Icon size={size} name='tv' />,
             },
@@ -122,13 +122,13 @@ export default class MainLeftNav extends Component {
             },
             {
                 section: 'users',
-                text: 'Permissions Management',
+                text: 'Permissions',
                 visible: () => window.halinContext.userIsAdmin(),
                 icon: <Icon size={size} name='group' />,
             },
             {
                 section: 'diagnostics',
-                text: 'Cluster Diagnostic Tools',
+                text: 'Diagnostics',
                 visible: () => true,
                 icon: <Icon size={size} name='wrench' />,
             },
