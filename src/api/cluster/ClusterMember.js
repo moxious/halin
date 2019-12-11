@@ -27,7 +27,7 @@ export default class ClusterMember {
         if (record.has('databases')) {
             // >= Neo4j 4.0
             // TODO: Raft roles can't separate in 4.0. If you're the leader for one
-            // DB you're the leader for all of them and so forth.
+            // DB you're th e leader for all of them and so forth.
             // THIS IS A LIMITED ASSUMPTION FOR 4.0 AND WILL CHANGE.
             // But this assumption is specifically why any role is fine to take as
             // the cluster member's role.
@@ -36,10 +36,17 @@ export default class ClusterMember {
                 const role = dbs[dbName];
                 this.role = role;
             });
+
+            // Maps database name to member role
             this.database = dbs;
         } else {
             this.role = (record.get('role') || '').trim();
-            this.database = record.get('database');
+            const key = record.get('database');
+            const value = this.role;
+            const obj = { [key]: value };
+
+            // Maps database name to member role
+            this.database = obj;
         }
 
         this.id = record.get('id');
@@ -49,6 +56,26 @@ export default class ClusterMember {
         this.driver = null;
         this.observations = new Ring(MAX_OBSERVATIONS);
         this.errors = {};
+    }
+
+    /**
+     * When Neo4j is in standalone mode (non CC) Halin fakes this as a cluster of 1 member.
+     * This provides some basic details (id, addresses, role, database) and creates a member
+     * from that.
+     * @param {Object} details 
+     */
+    static makeStandalone(halin, details) {
+        // Psuedo object behaves like a cypher result record.
+        // Somewhere, a strong typing enthusiast is screaming. ;)
+        const get = key => details[key];
+        const has = key => !_.isNil(details[key]);
+        details.get = get;
+        details.has = has;
+
+        const member = new ClusterMember(details);
+        const driver = halin.driverFor(member.getBoltAddress());
+        member.setDriver(driver);
+        return member;
     }
 
     /**
@@ -141,11 +168,16 @@ export default class ClusterMember {
     isFollower() { return this.role === 'FOLLOWER'; }
     isSingle() { return this.role === 'SINGLE'; }
     isReadReplica() { return this.role === 'READ_REPLICA'; }
+
     isCore() {
         return this.isLeader() || this.isSingle();
     }
-    canWrite() {
-        return this.isLeader() || this.isSingle();
+
+    canWrite(db = null) {
+        if (this.isSingle()) { return true; }
+
+        if (db === null) { return this.isLeader(); }
+        return this.database[db] === 'LEADER';
     }
 
     /**
@@ -346,8 +378,7 @@ export default class ClusterMember {
                 const e = new Date().getTime() - s;
                 sentry.fine(this.getLabel(), 'initialization', e, 'ms elapsed');
                 return whatever;
-            })
-            .then(() => this.watchForClusterRoleChange());
+            });
     }
 
     _txSuccess(time) {
@@ -440,51 +471,5 @@ export default class ClusterMember {
                 return poolSession ? this.pool.release(s)
                     .catch(e => sentry.fine('Pool release error', e)) : p;
             });
-    }
-
-    /**
-     * Starts a slow data feed for the node's cluster role.  In this way, if the leader
-     * changes, we can detect it.
-     */
-    watchForClusterRoleChange(clusterMember) {
-
-        console.log('watchForClusterRoleChange TBD');
-
-        return Promise.resolve(true);
-
-        // const roleFeed = this.getDataFeed(_.merge({
-        //     node: clusterMember,
-        // }, queryLibrary.CLUSTER_ROLE));
-
-        // const addr = clusterMember.getBoltAddress();
-        // const onRoleData = (newData /* , dataFeed */) => {
-        //     const newRole = newData.data[0].role;
-
-        //     // Something in cluster topology just changed...
-        //     if (newRole !== clusterMember.role) {
-        //         const oldRole = clusterMember.role;
-        //         clusterMember.role = newRole;
-
-        //         const event = {
-        //             message: `Role change from ${oldRole} to ${newRole}`,
-        //             type: 'rolechange',
-        //             address: clusterMember.getBoltAddress(),
-        //             payload: {
-        //                 old: oldRole,
-        //                 new: newRole,
-        //             },
-        //         };
-
-        //         this.getClusterManager().addEvent(event);
-        //     }
-        // };
-
-        // const onError = (err /*, dataFeed */) =>
-        //     sentry.reportError(err, `HalinContext: failed to get cluster role for ${addr}`);
-
-        // roleFeed.addListener(onRoleData);
-        // roleFeed.onError = onError;
-        // return roleFeed;
-
     }
 }
