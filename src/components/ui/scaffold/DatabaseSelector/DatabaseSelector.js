@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Sidebar, Segment, Menu, Tab, Icon, Divider } from 'semantic-ui-react';
-
+import sentry from '../../../../api/sentry';
 import DatabaseMenuItem from '../DatabaseMenuItem/DatabaseMenuItem';
 import CreateDatabase from '../../../database/CreateDatabase/CreateDatabase';
 import DatabasePane from '../../../database/DatabasePane/DatabasePane';
@@ -53,9 +53,12 @@ export default class DatabaseSelector extends Component {
             if (!selected) {
                 selected = dbs[0];
             }
-
+            
             // Whether or not the selection changed, change state and force refresh.
-            this.setState({ selected, id: uuid.v4(), create: false });
+            if (!this.state.create) {
+                sentry.fine('DatabaseSelector: force selection', selected);
+                this.setState({ selected, id: uuid.v4(), create: false });
+            }
         };
 
         window.halinContext.getClusterManager().addListener(this.listenerFn);
