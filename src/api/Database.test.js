@@ -1,4 +1,3 @@
-import api from './index';
 import Database from './Database';
 
 const makeRecord = (database, host, status, role='FOLLOWER', def) => ({
