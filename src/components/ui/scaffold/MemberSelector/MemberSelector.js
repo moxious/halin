@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Sidebar, Segment, Menu, Tab, Divider } from 'semantic-ui-react';
 import uuid from 'uuid';
 
-import PerformancePane from '../../../performance/PerformancePane/PerformancePane';
+import ClusterMemberOverview from '../../../performance/ClusterMemberOverview/ClusterMemberOverview';
 import Neo4jConfiguration from '../../../configuration/Neo4jConfiguration/Neo4jConfiguration';
 import OSPane from '../../../performance/OSPane/OSPane';
 import PluginPane from '../../../db/PluginPane/PluginPane';
@@ -57,10 +57,10 @@ export default class MemberSelector extends Component {
             // objects.  
             // https://stackoverflow.com/questions/29074690/react-why-components-constructor-is-called-only-once
             {
-                menuItem: 'Performance',
+                menuItem: 'Overview',
                 visible: () => true,
                 render: () => this.paneWrapper(
-                    <PerformancePane key={key} node={member} />),
+                    <ClusterMemberOverview key={key} node={member} />),
             },
             {
                 menuItem: 'Queries',

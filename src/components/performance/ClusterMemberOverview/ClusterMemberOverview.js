@@ -8,9 +8,9 @@ import SystemLoad from '../SystemLoad/SystemLoad';
 import TransactionMonitor from '../TransactionMonitor/TransactionMonitor';
 // import DiskUtilizationPieChart from '../../database/DiskUtilizationPieChart/DiskUtilizationPieChart';
 
-const PerformancePane = (props) => {
+const ClusterMemberOverview = (props) => {
     return (
-        <Card.Group itemsPerRow={2} className="PerformancePane">
+        <Card.Group itemsPerRow={2} className="ClusterMemberOverview">
             <SystemLoad node={props.node} />
             <MemoryMonitor node={props.node} />
             <TransactionMonitor node={props.node} />
@@ -19,8 +19,8 @@ const PerformancePane = (props) => {
     );
 }
 
-PerformancePane.props = {
+ClusterMemberOverview.props = {
     node: PropTypes.object.isRequired, // TODO: shape?
 }
 
-export default PerformancePane;
+export default ClusterMemberOverview;
