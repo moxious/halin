@@ -60,7 +60,7 @@ export default class MemberSelector extends Component {
                 menuItem: 'Overview',
                 visible: () => true,
                 render: () => this.paneWrapper(
-                    <ClusterMemberOverview key={key} node={member} />),
+                    <ClusterMemberOverview key={key} member={member} />),
             },
             {
                 menuItem: 'Queries',
