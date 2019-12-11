@@ -10,6 +10,9 @@ import Spinner from '../../ui/scaffold/Spinner/Spinner';
 import NodeLabel from '../../ui/scaffold/NodeLabel/NodeLabel';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
+/**
+ * @deprecated
+ */
 export default class Ping extends Component {
     state = {
         allResults: [],
