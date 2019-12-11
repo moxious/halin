@@ -1,5 +1,8 @@
 import _ from 'lodash';
 import sentry from '../api/sentry';
+import ClusterMember from '../api/cluster/ClusterMember';
+import Parser from 'uri-parser';
+
 /**
  * A database is a graph that can be stored within Neo4j.
  * 
@@ -14,6 +17,12 @@ import sentry from '../api/sentry';
  */
 
 export default class Database {
+    /**
+     * This is the name of the database for Neo4j prior to 4, when multidb wasn't available.
+     */
+    static SINGLEDB_NAME = 'neo4j';
+    static STATUS_ONLINE = 'online';
+
     constructor(arrOfResults) {
         if (!_.isArray(arrOfResults)) {
             throw new Error('Databases must be initialized with an array of results from SHOW DATABASES');
@@ -56,9 +65,9 @@ export default class Database {
 
     static pre4DummyDatabase() {
         return new Database([{
-            name: 'neo4j',
-            currentStatus: 'online',
-            requestedStatus: 'online',
+            name: Database.SINGLEDB_NAME,
+            currentStatus: Database.STATUS_ONLINE,
+            requestedStatus: Database.STATUS_ONLINE,
             role: 'LEADER',
             default: true,
             error: '',
@@ -111,6 +120,50 @@ export default class Database {
 
     getStatuses() {
         return _.uniq(this.backingStatuses.map(s => s.currentStatus));
+    }
+
+    /**
+     * Return the ClusterMember who is the leader of this database.
+     * @param {HalinContext} a halin context object
+     * @returns {ClusterMember} the leader, or nil if there is none.
+     * @throws {Error} when there is no leader, or there are multiples (inconsistent cluster)
+     */
+    getLeader(halin) {
+        const leaders = this.getMemberStatuses()
+            .filter(s => s.role.toUpperCase() === ClusterMember.ROLE_LEADER);
+
+        if (leaders.length === 0) {
+            throw new Error(`Database ${this.name} has no leader; election may be underway`);
+        } else if(leaders.length > 1) {
+            throw new Error(`Database ${this.name} has more than one leader; inconsistent cluster`);
+        }
+
+        const leaderAddress = leaders[0].address;
+        // #operability It's very hard to match database addresses to cluster members.
+        // The database address is yielded like:  '1.2.3.4:7687'.  But cluster members
+        // (via dbms.cluster.overview or other methods) don't expose addresess like that,
+        // they identify themselves with protocol like 'bolt'.  So to find the corresponding
+        // member, we have to parse the URIs and see whose host and port matches.
+        const parsed = Parser.parse(leaderAddress);
+
+        const found = halin.members().filter(member => {
+            const candidate = Parser.parse(member.getBoltAddress());
+            if (parsed.host === candidate.host && parsed.port === candidate.port) {
+                // Winner winner chicken dinner
+                return true;
+            }
+            return false;
+        });
+
+        if (found.length === 1) {
+            return found[0];
+        } else if (found.length > 1) {
+            throw new Error('Inconsistent cluster member address table; > 1 leader matching address');
+        }
+
+        const addrs = halin.members().map(m => m.getBoltAddress());
+        sentry.error(`Searching for leader address ${leaderAddress} failed among ${addrs.join(', ')}`);
+        return null;
     }
 
     getStatus() {
