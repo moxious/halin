@@ -14,6 +14,7 @@ const fakeAMember = (role='FOLLOWER') => {
         id: i,
         addresses: [httpAddress, boltAddress],
         role,
+        groups: [],
         database: 'ABC',
     };
     const fakeRecord = fakes.record(entry);

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Modal, Form, Message } from 'semantic-ui-react';
+import { Button, Form, Message } from 'semantic-ui-react';
 import _ from 'lodash';
 import sentry from '../../../api/sentry';
 import status from '../../../api/status/index';

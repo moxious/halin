@@ -33,7 +33,7 @@ describe('Halin Context', function () {
         expect(ctx.mgr).toBeTruthy();
     });
 
-    it('has a members accessor', () => expect(ctx.members()).toEqual(ctx.clusterMembers));
+    it('has a members accessor', () => expect(ctx.members()).toEqual(ctx.memberSet.clusterMembers));
     it('exposes a poll rate', () => expect(ctx.getPollRate()).toEqual(ctx.pollRate));
     it('exposes a cluster manager', () => expect(ctx.getClusterManager()).toBeInstanceOf(ClusterManager));
     it('can get a driver for an address', () => {

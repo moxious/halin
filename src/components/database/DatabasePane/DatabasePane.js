@@ -11,8 +11,8 @@ import DatabaseOverview from '../DatabaseOverview/DatabaseOverview';
 const DatabasePane = (props) => {
     return (
         <Card.Group itemsPerRow={2} className="DatabasePane">
-            <AdministerDatabase {...props} />
             <DatabaseOverview {...props} />
+            <AdministerDatabase {...props} />
             { window.halinContext.supportsAPOC() ? <ApocMetaStats {...props} /> : '' }
             { 
                 // Due to JMX changes in 4.0, this component isn't workable >= 4.0.

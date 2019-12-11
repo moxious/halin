@@ -9,6 +9,7 @@ describe('ClusterMember', function () {
     const entry = {
         id: 'XYZ',
         addresses: [httpAddress, boltAddress],
+        groups: [],
         role: 'LEADER',
         database: 'ABC',        
     };
@@ -23,7 +24,7 @@ describe('ClusterMember', function () {
         expect(c.id).toEqual(entry.id);
         expect(c.addresses).toEqual(entry.addresses);
         expect(c.role).toEqual(entry.role);
-        expect(c.database).toEqual(entry.database);
+        expect(c.database.ABC).toEqual('LEADER');
     });
 
     it('exposes getObservations', () => {
