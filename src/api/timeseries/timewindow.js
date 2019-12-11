@@ -32,10 +32,10 @@ const displayTimeRange = (scrollingRange) => {
     // Complex case: if the user asked to see a range that doesn't overlap at all with the data
     // that we have, then reset what they asked.
     if (userSelectedRange && scrollingRange && userSelectedRange.disjoint(scrollingRange)) {
-        sentry.debug('User selected range ', 
-            userSelectedRange, 
-            'does not overlap with scrolling range',
-            scrollingRange, '...resetting');
+        // sentry.debug('User selected range ', 
+        //     userSelectedRange, 
+        //     'does not overlap with scrolling range',
+        //     scrollingRange, '...resetting');
         setTimeWindow(null);
     } else if(userSelectedRange.begin() >= new Date()) {
         // In this case, the user is scrolled into the future that the time window hasn't filled yet.

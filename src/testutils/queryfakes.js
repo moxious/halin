@@ -2,6 +2,16 @@ import _ from 'lodash';
 import neo4j from '../api/driver/index';
 import HalinQuery from '../api/data/queries/HalinQuery';
 
+const makeDBRecord = (database, host, status, role='FOLLOWER', def) => ({
+    name: database,
+    address: host,
+    role,
+    requestedStatus: status,
+    currentStatus: status,
+    error: '',
+    default: def,
+});
+
 const queries = {
     'RETURN true AS value': [
         { value: true },
@@ -53,17 +63,25 @@ const queries = {
     ],
     'CALL dbms.cluster.overview': [
         {
-            id: 'A', addresses: ['bolt://testhost-A:7777'], role: 'LEADER', groups: [], database: 'DB',
+            id: 'A', addresses: ['bolt://testhostA:7777'], role: 'LEADER', groups: [], database: 'DB',
         },
         {
-            id: 'B', addresses: ['bolt://testhost-B:7777'], role: 'FOLLOWER', groups: [], database: 'DB',
+            id: 'B', addresses: ['bolt://testhostB:7777'], role: 'FOLLOWER', groups: [], database: 'DB',
         },
         {
-            id: 'C', addresses: ['bolt://testhost-C:7777'], role: 'FOLLOWER', groups: [], database: 'DB',
+            id: 'C', addresses: ['bolt://testhostC:7777'], role: 'FOLLOWER', groups: [], database: 'DB',
         }
     ],
     'call dbms.cluster.role()': [
         { role: 'LEADER' },
+    ],
+    'SHOW DATABASES': [
+        makeDBRecord('system', 'testhostA:7777', 'online', 'LEADER', false),
+        makeDBRecord('system', 'testhostB:7777', 'online', 'FOLLOWER', false),
+        makeDBRecord('system', 'testhostC:7777', 'online', 'FOLLOWER', false),
+        makeDBRecord('mydb', 'testhostA:7777', 'online', 'FOLLOWER', true),
+        makeDBRecord('mydb', 'testhostB:7777', 'online', 'LEADER', true),
+        makeDBRecord('mydb', 'testhostC:7777', 'online', 'FOLLOWER', true),    
     ],
 };
 

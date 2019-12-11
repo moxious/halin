@@ -31,7 +31,6 @@ export default class ClusterMemberSet {
         report('Checking cluster status');
         return session.run(queryLibrary.CLUSTER_OVERVIEW.query)
             .then(results => {
-                console.log('RESULTS',results);
                 this.clusterMembers = results.records.map(rec => new ClusterMember(rec));
 
                 // Note that in the case of community or mode=SINGLE, because the cluster overview fails,
@@ -67,9 +66,6 @@ export default class ClusterMemberSet {
                 }
             })
             .then(() => report('Verifying connectivity with members...'))
-            .then(() => {
-                console.log('At this point members are ', this.members());
-            })
             .then(() => 
                 Promise.all(this.members().map(member => this.ping(halin, member))))
             .then(() => report('Checking components/features for each cluster member...'))
@@ -125,7 +121,7 @@ export default class ClusterMemberSet {
      * changes, we can detect it.
      */
     watchForClusterRoleChange(clusterMember) {
-        console.log('watchForClusterRoleChange TBD');
+        // console.log('watchForClusterRoleChange TBD');
 
         return Promise.resolve(true);
         // TODO
