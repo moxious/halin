@@ -59,8 +59,9 @@ export default class Database {
             name: 'neo4j',
             currentStatus: 'online',
             requestedStatus: 'online',
+            role: 'LEADER',
             default: true,
-            error: null,
+            error: '',
             address: '',
         }]);
     }
