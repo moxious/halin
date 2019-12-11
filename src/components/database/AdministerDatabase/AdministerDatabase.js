@@ -14,7 +14,7 @@ class AdministerDatabase extends Component {
     canAdminister() {
         // For safety we won't allow stop/start/drop of the default DB
         // or the system DB where it would fail anyway.
-        return !this.props.database.isDefault && this.props.database.getLabel() !== neo4j.SYSTEM_DB;
+        return !this.props.database.isDefault() && this.props.database.getLabel() !== neo4j.SYSTEM_DB;
     }
 
     stopButton() {
