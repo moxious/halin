@@ -8,6 +8,8 @@ import uuid from 'uuid';
 /**
  * This class is a wrapper for a set of ClusterMember objects, and handles housekeeping
  * about keeping them up to date with the evolving cluster state.
+ * #operability Neo4j doesn't really expose a "Cluster" abstraction, so this is a part of
+ * the abstraction that Halin puts on top to make all of this possible.
  */
 export default class ClusterMemberSet {
     constructor() {
