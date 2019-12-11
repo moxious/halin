@@ -116,7 +116,7 @@ export default class ClusterManager {
      */
     clusterWideQuery(query, params) {
         const membersToRunAgainst = this.ctx.supportsSystemGraph() ?
-            [this.ctx.getWriteMember()] :
+            [this.ctx.getSystemDBWriter()] :
             this.ctx.members();
 
         const promises = membersToRunAgainst.map(node => {
@@ -369,7 +369,7 @@ export default class ClusterManager {
     }
 
     getRoles() {
-        return this.ctx.getWriteMember().run('call dbms.security.listRoles()', {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run('call dbms.security.listRoles()', {}, neo4j.SYSTEM_DB)
             .then(results => neo4j.unpackResults(results, {
                 required: ['role', 'users'],
             }));
@@ -383,11 +383,11 @@ export default class ClusterManager {
     alterPrivilege(op) {
         const error = op.validate();
         if (error) { throw new Error(error); }
-        if (!this.ctx.getWriteMember().supportsSystemGraph()) {
+        if (!this.ctx.getSystemDBWriter().supportsSystemGraph()) {
             throw new Error('You cannot modify fine-grained privileges on a DB that does not support system graph');
         }
 
-        return this.ctx.getWriteMember().run(op.buildQuery(), {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(op.buildQuery(), {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.fine('Privilege results', results);
                 this.addEvent({
@@ -397,7 +397,7 @@ export default class ClusterManager {
                 })
 
                 // No results.
-                return clusterOpSuccess(this.ctx.getWriteMember(), []);
+                return clusterOpSuccess(this.ctx.getSystemDBWriter(), []);
             });
     }
 
@@ -407,7 +407,7 @@ export default class ClusterManager {
      * @returns Array{Database}
      */
     getDatabases() {
-        return this.ctx.getWriteMember().run(ql.DBMS_4_SHOW_DATABASES, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(ql.DBMS_4_SHOW_DATABASES, {}, neo4j.SYSTEM_DB)
             .then(results => neo4j.unpackResults(results, {
                 required: [
                     'name', 'address', 'role',
@@ -448,7 +448,7 @@ export default class ClusterManager {
     stopDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getWriteMember().run(`STOP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(`STOP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('stop results', results);
                 return results;
@@ -464,7 +464,7 @@ export default class ClusterManager {
     startDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getWriteMember().run(`START DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(`START DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('start results', results);
                 return results;
@@ -480,7 +480,7 @@ export default class ClusterManager {
     dropDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getWriteMember().run(`DROP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(`DROP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('drop results', results);
                 return results;
@@ -493,7 +493,7 @@ export default class ClusterManager {
     }
 
     createDatabase(name) {
-        return this.ctx.getWriteMember().run(`CREATE DATABASE ${name}`, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(`CREATE DATABASE ${name}`, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('Created database; results ', results);
                 return results;
