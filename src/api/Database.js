@@ -89,7 +89,6 @@ export default class Database {
             resultingDBs.push(new Database(dbs[dbName]));
         });
 
-        console.log(resultingDBs);
         return resultingDBs;
     }
 
@@ -104,7 +103,7 @@ export default class Database {
     isReconciling() {
         let reconciling = false;
         this.backingStatuses.forEach(s => {
-            reconciling = reconciling || (this.currentStatus !== this.requestedStatus);
+            reconciling = reconciling || (s.currentStatus !== s.requestedStatus);
         });
 
         return reconciling;
