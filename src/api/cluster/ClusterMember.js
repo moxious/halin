@@ -24,6 +24,7 @@ export default class ClusterMember {
     static ROLE_LEADER = 'LEADER';
     static ROLE_FOLLOWER = 'FOLLOWER';
     static ROLE_REPLICA = 'READ_REPLICA';
+    static ROLE_SINGLE = 'SINGLE';
 
     /**
      * Input is a record that comes back from dbms.cluster.overview()
@@ -116,12 +117,12 @@ export default class ClusterMember {
     performance() {
         const obs = this.observations.toArray().map(i => i.y);
         return {
-            stdev: math.std(...obs),
-            mean: math.mean(...obs),
-            median: math.median(...obs),
-            mode: math.mode(...obs),
-            min: math.min(...obs),
-            max: math.max(...obs),
+            stdev: obs.length > 0 ? math.std(...obs) : 0,
+            mean: obs.length > 0 ? math.mean(...obs) : 0,
+            median: obs.length > 0 ? math.median(...obs) : 0,
+            mode: obs.length > 0 ? math.mode(...obs) : 0,
+            min: obs.length > 0 ? math.min(...obs) : 0,
+            max: obs.length > 0 ? math.max(...obs) : 0,
             errors: this.errors,
             observations: this.observations.toArray(),
         };
@@ -186,13 +187,13 @@ export default class ClusterMember {
             .map(parsed => parsed.protocol);
     }
 
-    isLeader() { return this.role === 'LEADER'; }
-    isFollower() { return this.role === 'FOLLOWER'; }
-    isSingle() { return this.role === 'SINGLE'; }
-    isReadReplica() { return this.role === 'READ_REPLICA'; }
+    isLeader() { return this.role === ClusterMember.ROLE_LEADER; }
+    isFollower() { return this.role === ClusterMember.ROLE_FOLLOWER; }
+    isSingle() { return this.role === ClusterMember.ROLE_SINGLE; }
+    isReadReplica() { return this.role === ClusterMember.ROLE_REPLICA; }
 
     isCore() {
-        return this.isLeader() || this.isSingle();
+        return this.isLeader() || this.isFollower() || this.isSingle();
     }
 
     /**

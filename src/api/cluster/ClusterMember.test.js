@@ -1,6 +1,8 @@
 import ClusterMember from './ClusterMember';
 import fakes from '../../testutils/fakes';
 import Ring from 'ringjs';
+import uuid from 'uuid';
+import neo4j from '../driver/';
 
 describe('ClusterMember', function () {
     const host = 'foo-host';
@@ -18,6 +20,7 @@ describe('ClusterMember', function () {
 
     beforeEach(() => {
         c = new ClusterMember(fakeRecord);
+        c.setDriver(fakes.Driver());
     });
 
     it('can be constructed', () => {
@@ -25,6 +28,47 @@ describe('ClusterMember', function () {
         expect(c.addresses).toEqual(entry.addresses);
         expect(c.role).toEqual(entry.role);
         expect(c.database.ABC).toEqual('LEADER');
+    });
+
+    it('can calculate its performance', () => {
+        // Fake data for observations with a single record
+        c.observations.push({ x: new Date(), y: 1 });
+        c.observations.push({ x: new Date(), y: 1 });
+        c.observations.push({ x: new Date(), y: 1 });
+
+        const perf = c.performance();
+        expect(perf).toBeTruthy();
+        const props = [
+            'stdev', 'mean', 'median', 'mode', 'min', 'max', 'observations',
+        ];
+
+        
+        props.forEach(p => expect(perf).toHaveProperty(p));
+    });
+
+    it('can make a JSON representation of itself', () => {
+        const j = c.asJSON();
+
+        const keys = [
+            'address', 'role', 'id', 'groups', 'label', 'dbms', 'performance',
+            'pool', 'database',
+        ];
+
+        keys.forEach(k => expect(j).toHaveProperty(k));
+    });
+
+    it('can be constructed with a Neo4j 4.0 entry', () => {
+        const m = new ClusterMember(fakes.record({
+            id: 'XYZ',
+            addresses: [httpAddress, boltAddress],
+            groups: [],
+            databases: {
+                foo: ClusterMember.ROLE_LEADER,
+                bar: ClusterMember.ROLE_FOLLOWER,
+            },
+        }));
+
+        expect(m.getDatabaseRoles().foo).toEqual(ClusterMember.ROLE_LEADER);
     });
 
     it('exposes getObservations', () => {
@@ -43,7 +87,9 @@ describe('ClusterMember', function () {
     it('knows its role', () => {
         expect(c.isLeader()).toEqual(true);
         expect(c.isFollower()).toEqual(false);
+        expect(c.isReadReplica()).toEqual(false);
         expect(c.canWrite()).toEqual(true);
+        expect(c.isCore()).toEqual(true);
     });
 
     it('keeps stats in observations', () => {
