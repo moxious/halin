@@ -42,7 +42,7 @@ export default class Database {
 
         // All records must pertain to the same database name, otherwise we're mixing
         // inputs and you get nonsense.
-        const names = _.uniqBy('name', arrOfResults);
+        const names = _.uniq(arrOfResults.map(r => r.name));
         if (names.length > 1) {
             throw new Error('Inconsistent multi-name array of results');
         }
@@ -143,11 +143,11 @@ export default class Database {
         // (via dbms.cluster.overview or other methods) don't expose addresess like that,
         // they identify themselves with protocol like 'bolt'.  So to find the corresponding
         // member, we have to parse the URIs and see whose host and port matches.
-        const parsed = Parser.parse(leaderAddress);
+        const [leaderHost, leaderPort] = leaderAddress.split(':');
 
         const found = halin.members().filter(member => {
             const candidate = Parser.parse(member.getBoltAddress());
-            if (parsed.host === candidate.host && parsed.port === candidate.port) {
+            if (leaderHost === candidate.host && leaderPort === candidate.port) {
                 // Winner winner chicken dinner
                 return true;
             }
@@ -160,8 +160,8 @@ export default class Database {
             throw new Error('Inconsistent cluster member address table; > 1 leader matching address');
         }
 
-        const addrs = halin.members().map(m => m.getBoltAddress());
-        sentry.error(`Searching for leader address ${leaderAddress} failed among ${addrs.join(', ')}`);
+        const addrs = halin.members().map(m => m.getBoltAddress()).map(x => Parser.parse(x)).map(x => JSON.stringify(_.pick(x, ['host', 'port'])));
+        sentry.error(`Searching for leader address ${leaderAddress} (host=${leaderHost} port=${leaderPort}) failed among ${addrs.join(', ')}`);
         return null;
     }
 

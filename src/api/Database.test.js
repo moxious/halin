@@ -1,23 +1,11 @@
 import Database from './Database';
+import HalinContext from './HalinContext';
+import fakes from './../testutils/fakes';
+import neo4j from './driver/index';
+import sinon from 'sinon';
+import queryFakes from './../testutils/queryfakes';
 
-const makeRecord = (database, host, status, role='FOLLOWER', def) => ({
-    name: database,
-    address: host,
-    role,
-    requestedStatus: status,
-    currentStatus: status,
-    error: '',
-    default: def,
-})
-
-const showDatabaseResults = [
-    makeRecord('system', 'core1:7687', 'online', 'LEADER', false),
-    makeRecord('system', 'core2:7687', 'online', 'FOLLOWER', false),
-    makeRecord('system', 'core3:7687', 'online', 'FOLLOWER', false),
-    makeRecord('mydb', 'core1:7687', 'online', 'FOLLOWER', true),
-    makeRecord('mydb', 'core2:7687', 'online', 'LEADER', true),
-    makeRecord('mydb', 'core3:7687', 'online', 'FOLLOWER', true),
-];
+const showDatabaseResults = queryFakes['SHOW DATABASES'];  
 
 describe('Database', function() {
     let dbs;
@@ -107,5 +95,53 @@ describe('Database', function() {
         const obj = system.asJSON();
         expect(obj).toBeTruthy();
         expect(obj.name).toEqual('system');
+    });
+
+    it('requires an array of results to construct', () => {
+        expect(() => new Database('foo')).toThrow(Error);
+    });
+
+    it('will not create a database with mismatched records', () => {
+        expect(() => new Database([
+            makeRecord('system', 'core1:7687', 'online', 'LEADER', false),
+            makeRecord('otherdb', 'core1:7687', 'online', 'LEADER', true),
+        ])).toThrow(Error);
+    });  
+
+    it('will not create a database with missing information', () => {
+        expect(() => new Database([
+            {
+                name: 'system',
+                currentStatus: 'online',
+            },
+        ])).toThrow(Error);
+    });
+
+    describe('ClusterMember awareness / mapping', function() {
+        let ctx;
+
+        beforeEach(() => {
+            neo4j.driver = sinon.fake.returns(fakes.Driver());
+            HalinContext.connectionDetails = fakes.basics;
+
+            dbs = Database.fromArrayOfResults(showDatabaseResults);
+        
+            system = dbs.filter(d => d.name === 'system')[0];
+            mydb = dbs.filter(d => d.name === 'mydb')[0];   
+
+            ctx = new HalinContext();
+            return ctx.initialize();            
+        });
+
+        it('can get the leader for a database', () => {
+            const leader = system.getLeader(ctx);
+            expect(leader).toBeTruthy();
+            // See queryfakes responses to SHOW DATABASES
+            expect(leader.getBoltAddress()).toContain('testhostA:7777');
+
+            const otherLeader = mydb.getLeader(ctx);
+            expect(otherLeader).toBeTruthy();
+            expect(otherLeader.getBoltAddress()).toContain('testhostB:7777');
+        });
     });
 });
