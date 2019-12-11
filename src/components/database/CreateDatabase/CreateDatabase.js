@@ -36,6 +36,7 @@ class CreateDatabase extends Component {
 
         return window.halinContext.getClusterManager().createDatabase(this.state.name)
             .then(() => {
+                sentry.info(`Success creating ${this.state.name}`);
                 message = status.message('Success', `Created database ${this.state.name}`);
                 error = null;
             })
@@ -46,6 +47,7 @@ class CreateDatabase extends Component {
                 message = null;
             })
             .finally(() => {
+                sentry.fine(`Resetting create form`);
                 this.setState({ pending: false, error, message, name: '' });
                 status.toastify(this);
             });
