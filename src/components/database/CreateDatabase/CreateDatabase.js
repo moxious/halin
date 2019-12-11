@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Form, Message } from 'semantic-ui-react';
+import { Form, Message } from 'semantic-ui-react';
 import _ from 'lodash';
 import sentry from '../../../api/sentry';
 import status from '../../../api/status/index';
+import Spinner from '../../ui/scaffold/Spinner/Spinner';
 
 const defaultState = {
     name: '',
@@ -20,44 +21,34 @@ class CreateDatabase extends Component {
     }
 
     formValid = () => {
-        return this.state.name &&
+        const nameValid = this.state.name && this.state.name.match(/^[A-Za-z0-9]+$/);
+
+        return nameValid &&
             // Don't allow duplicate names
             window.halinContext.getClusterManager().databases().filter(db => db.name === this.state.name).length === 0;
     }
 
-    ok = (e) => {
-        console.log('OK', e);
+    handleSubmit = () => {
+        console.log('Creating database', this.state.name);
         this.setState({ pending: true });
+        
+        let message, error;
+
         return window.halinContext.getClusterManager().createDatabase(this.state.name)
             .then(() => {
-                this.setState({
-                    message: status.message('Success', `Created database ${this.state.name}`),
-                    error: null,
-                });
-
-                if (this.props.onCreate) {
-                    return this.props.onCreate(this.state.name);
-                }
+                message = status.message('Success', `Created database ${this.state.name}`);
+                error = null;
             })
             .catch(err => {
                 sentry.error('Failed to create database', err);
-                this.setState({
-                    message: null,
-                    error: status.message('Error',
-                        `Failed to create database ${this.state.name}: ${err}`),
-                });
+                error = status.message('Error',
+                    `Failed to create database ${this.state.name}: ${err}`);
+                message = null;
             })
             .finally(() => {
-                this.setState({ pending: false });
+                this.setState({ pending: false, error, message, name: '' });
                 status.toastify(this);
-            })
-            .then(() => this.resetState());
-    }
-
-    handleChange(field, event) {
-        const mod = {};
-        mod[field] = event.target.value;
-        this.setState(mod);
+            });
     }
 
     formHasErrors = () => {
@@ -69,15 +60,30 @@ class CreateDatabase extends Component {
         return !this.formValid();
     };
 
+    handleChange = (e, { name, value }) => {
+        this.setState({ [name]: value });
+    };
+
     render() {
         return (
             <div className='CreateDatabaseModal'>
-                <Form error={this.formHasErrors()} size='small' style={{ textAlign: 'left' }}>
-                    <Form.Input
-                        fluid
-                        disabled={this.state.pending}
-                        onChange={e => this.handleChange('name', e)}
-                        label='Database Name' />
+                <Form
+                    error={this.formHasErrors()}
+                    style={{ textAlign: 'left' }}>
+
+                    <Form.Group>
+                        <Form.Input
+                            name='name'
+                            value={this.state.name}
+                            onChange={this.handleChange}
+                            label='Database Name' />
+                    </Form.Group>
+
+                    <Form.Button 
+                        disabled={!this.state.name || this.formHasErrors()}
+                        onClick={this.handleSubmit}
+                        type='submit' 
+                        content='Create' />
 
                     <Message
                         error
@@ -90,9 +96,7 @@ class CreateDatabase extends Component {
                         } />
                 </Form>
 
-                <Button basic color='green' disabled={!this.formValid()} onClick={this.ok}>
-                    Create
-                </Button>
+                {this.state.pending ? <Spinner /> : ''}
             </div>
         );
     }
