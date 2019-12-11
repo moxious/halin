@@ -492,6 +492,14 @@ export default class ClusterManager {
             }));
     }
 
+    /**
+     * Create a new Database (multidb Neo4j >= 4.0 only)
+     * #operability - the system CREATE DATABASE returns immediately, but it may be 1-2 minutes
+     * before the database is replicated, available, and has a leader election in place.  This means
+     * after CREATE DATABASE (which returns nothing) there's no way to tell if anything is happening
+     * unless you poll show databases.
+     * @param {String} name of the database you want to create
+     */
     createDatabase(name) {
         return this.ctx.getSystemDBWriter().run(`CREATE DATABASE ${name}`, {}, neo4j.SYSTEM_DB)
             .then(results => {
