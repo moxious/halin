@@ -133,6 +133,7 @@ const HalinContext = (returnData = []) => {
         getCurrentUser: sinon.fake.returns({
             username: 'neo4j', roles: ['admin'],
         }),
+        driverFor: () => Driver(),
         connectionDetails: basics,
     };
 };
