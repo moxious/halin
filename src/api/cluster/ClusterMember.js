@@ -84,6 +84,40 @@ export default class ClusterMember {
         return member;
     }
 
+    getId() { return this.id; }
+
+    /**
+     * Merges changes with an existing member of the same ID
+     * @param {ClusterMember} changes 
+     * @returns true if something changed, false otherwise.
+     */
+    merge(changes) {
+        if (!changes.getId() === this.getId()) {
+            throw new Error('Cannot merge changes with a different member ID');
+        }
+
+        // The things that change are addresses, groups, and critically, databases which tells us who is leader
+        // of what.
+        let changed = false;
+
+        if (!_.isEqual(this.addresses, changes.addresses)) {
+            this.addresses = _.cloneDeep(changes.addresses);
+            changed = true;
+        }
+
+        if (!_.isEqual(this.groups, changes.groups)) {
+            this.groups = _.cloneDeep(changes.groups);
+            changed = true;
+        }
+
+        if (!_.isEqual(this.database, changes.database)) {
+            this.database = _.cloneDeep(changes.database);
+            changed = true;
+        }
+
+        return changed;
+    }
+
     /**
      * Returns the roles this member plays for a given set of databases.  Object is
      * a mapping of database name (string) to database role (leader, follower, etc)

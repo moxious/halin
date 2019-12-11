@@ -5,6 +5,8 @@ import errors from '../driver/errors';
 import sentry from '../sentry';
 import uuid from 'uuid';
 
+const REFRESH_INTERVAL = 5000;
+
 /**
  * This class is a wrapper for a set of ClusterMember objects, and handles housekeeping
  * about keeping them up to date with the evolving cluster state.
@@ -14,32 +16,27 @@ import uuid from 'uuid';
 export default class ClusterMemberSet {
     constructor() {
         this.clusterMembers = [];
+        this.clustered = false;
+        this.timeout = null;
     }
 
     members() { return this.clusterMembers; }
 
     shutdown() {
+        if (this.timeout) { clearTimeout(this.timeout); }
+
         return Promise.all(this.clusterMembers.map(member => member.shutdown()))
             .catch(err => sentry.reportError(err, 'Failure to shut down cluster members', err));
     }
 
-    initialize(halin, driver, progressCallback) {
+    initialize(halin, driver, report = () => null) {
         const session = driver.session();
-
-        const report = str => progressCallback ? progressCallback(str) : null;
 
         report('Checking cluster status');
         return session.run(queryLibrary.CLUSTER_OVERVIEW.query)
             .then(results => {
-                this.clusterMembers = results.records.map(rec => new ClusterMember(rec));
-
-                // Note that in the case of community or mode=SINGLE, because the cluster overview fails,
-                // this will never take place.  Watching for cluster role changes doesn't apply in those cases.
-                return this.clusterMembers.map(clusterMember => {
-                    const driver = halin.driverFor(clusterMember.getBoltAddress());
-                    clusterMember.setDriver(driver);
-                    return report(`Member ${clusterMember.getLabel()} initialized`);
-                });
+                this.clustered = true;
+                return this._mergeChanges(halin, results.records.map(rec => new ClusterMember(rec)), report);
             })
             .catch(err => {
                 if (errors.noProcedure(err)) {
@@ -47,6 +44,8 @@ export default class ClusterMemberSet {
                     // running in desktop as clusters of size 1.
                     // #operability I wish Neo4j treated mode=SINGLE as a cluster of 1 and exposed dbms.cluster.*
                     const base = halin.getBaseDetails();
+
+                    this.clustered = false;
 
                     const host = base.host;
                     const port = base.port;
@@ -65,13 +64,22 @@ export default class ClusterMemberSet {
                     throw err;
                 }
             })
-            .then(() => report('Verifying connectivity with members...'))
-            .then(() => 
-                Promise.all(this.members().map(member => this.ping(halin, member))))
-            .then(() => report('Checking components/features for each cluster member...'))
-            .then(() => Promise.all(this.members().map(member => member.checkComponents())))
-            .then(() => Promise.all(this.members().map(member => this.watchForClusterRoleChange(member))))
+            .then(() => this.scheduleRefresh(halin))
             .finally(() => session.close());
+    }
+
+    scheduleRefresh(halin) {
+        if (this.timeout) {
+            clearTimeout(this.timeout);
+        }
+
+        // You don't need to refresh non-clustered databases there's only one member to talk to.
+        if (!this.clustered) {
+            return false;
+        }
+
+        this.timeout = setTimeout(() => this.refresh(halin), REFRESH_INTERVAL);
+        return this.timeout;
     }
 
     /**
@@ -114,6 +122,92 @@ export default class ClusterMemberSet {
             pingFeed.addListener(onPingData);
             pingFeed.onError = onError;
         });
+    }
+
+    /**
+     * PRIVATE takes a new set of cluster members from a refresh, and merges those changes into
+     * the current set.  We do not replace the current set with the new set, because the current set
+     * has other state information (such as observations) we've accumulated about it.
+     * @param {Array<ClusterMember>} newSet 
+     */
+    _mergeChanges(halin, newSet, report = () => null) {
+        sentry.fine('MERGE CHANGES', newSet);
+        const matched = {};
+
+        const lookup = (id, set) => set.filter(m => m.getId() === id)[0];
+
+        const currentSet = new Set(this.members().map(m => m.getId()));
+        const candidateSet = new Set(newSet.map(m => m.getId()));
+
+        const exitingMembers = new Set([...currentSet].filter(id => !candidateSet.has(id)));
+        const enteringMembers = new Set([...candidateSet].filter(id => !currentSet.has(id)));
+        const changingMembers = new Set([...currentSet].filter(id => candidateSet.has(id)));
+
+        const promises = [];
+
+        exitingMembers.forEach(exitingId => {
+            const member = lookup(exitingId, this.members());
+
+            const event = {
+                message: `Cluster member exited.`,
+                type: 'exit',
+                address: member.getBoltAddress(),
+                payload: {},
+            };
+
+            this.clusterMembers = _.remove(this.members(), m => m.getId() === exitingId);
+            halin.getClusterManager().addEvent(event);
+        });
+
+        enteringMembers.forEach(enteringId => {
+            const member = lookup(enteringId, newSet);
+
+            // SETUP ACTIONS FOR ANY NEW MEMBER
+            const driver = halin.driverFor(member.getBoltAddress());
+            member.setDriver(driver);
+            const setup = this.ping(halin, member)
+                .then(() => member.checkComponents());
+
+            promises.push(setup);
+            
+            const event = {
+                message: `Cluster member entered.`,
+                type: 'enter',
+                address: member.getBoltAddress(),
+                payload: {},
+            };
+
+            this.clusterMembers.push(member);
+            halin.getClusterManager().addEvent(event);
+        });
+
+        changingMembers.forEach(changingId => {
+            const member = lookup(changingId, this.members());
+            const changes = lookup(changingId, newSet);
+
+            if (member.merge(changes)) {
+                const event = {
+                    message: `Cluster member changed database assignments, groups, or addresses.`,
+                    type: 'change',
+                    address: member.getBoltAddress(),
+                    payload: {},
+                };
+    
+                halin.getClusterManager().addEvent(event);    
+            }
+        });
+
+        return promises.length > 0 ? Promise.all(promises) : Promise.resolve(true);
+    }
+
+    refresh(halin) {
+        sentry.fine('Refreshing cluster member set');
+        return halin.getSystemDBWriter().run(queryLibrary.CLUSTER_OVERVIEW.query)
+            .then(results => this._mergeChanges(halin, results.records.map(r => new ClusterMember(r))))
+            .then(() => this.scheduleRefresh(halin))
+            .catch(err => {
+                sentry.error('Error refreshing cluster member set', err);
+            });
     }
 
     /**
