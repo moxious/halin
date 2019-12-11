@@ -163,6 +163,5 @@ export default class ClusterMemberSet {
         // roleFeed.addListener(onRoleData);
         // roleFeed.onError = onError;
         // return roleFeed;
-
     }
 }
