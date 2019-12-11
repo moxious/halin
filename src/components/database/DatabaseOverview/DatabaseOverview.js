@@ -22,7 +22,6 @@ class DatabaseOverview extends Component {
     }
 
     render() {
-        console.log(this.props);
         const leader = this.props.database.getLeader(window.halinContext);
 
         return (
