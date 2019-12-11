@@ -1,16 +1,12 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
-import uuid from 'uuid';
-
-import ClusterManager from './cluster/ClusterManager';
-import queryLibrary from './data/queries/query-library';
 import sentry from './sentry/index';
-import ClusterMember from './cluster/ClusterMember';
-import ClusterMemberSet from './cluster/ClusterMemberSet';
-import DataFeed from './data/DataFeed';
 import neo4j from './driver';
 import neo4jErrors from './driver/errors';
-import errors from './driver/errors';
+
+import ClusterManager from './cluster/ClusterManager';
+import ClusterMemberSet from './cluster/ClusterMemberSet';
+import DataFeed from './data/DataFeed';
 
 /**
  * HalinContext is a controller object that keeps track of state and permits diagnostic
@@ -18,6 +14,17 @@ import errors from './driver/errors';
  * 
  * It creates its own drivers and does not use the Neo4j Desktop API provided drivers.
  * The main app will attach it to the window object as a global.
+ * 
+ * The main 3 functions this object provides are:
+ * - A ClusterMemberSet corresponding to who is in the cluster
+ * - A ClusterManager that allows bulk operations cluster wide
+ * - A set of driver management functions so that you can talk to any particular node
+ * you need.
+ * 
+ * This last one is important, because HalinContext acts as the broker of the mapping between
+ * a set of databases and a set of cluster members.  As of Neo4j 4.0, there is a many-to-many
+ * mapping between these items.  In order to route the right query the right way, while being
+ * connected to each node individually, this mapping has to be maintained.
  */
 export default class HalinContext {
     static connectionDetails = null;
@@ -54,8 +61,13 @@ export default class HalinContext {
     }
 
     /**
-     * @returns {ClusterMember} that is the leader for systemdb.  You'd want to
-     * know this if you're running a mutating query on systemdb (privileges and such)
+     * Get the leader of systemdb.  You'd want to
+     * know this if you're running a mutating query on systemdb (privileges and such).
+     * Pre Neo4j 4.0, this concept didn't exist, and systemdb didn't exist.  If you're
+     * connected to a pre Neo4j 4.0 database, then there is only *1* leader, and you'll
+     * get that member.  If you're connected to a standalone database, you'll get the
+     * only member.
+     * @returns {ClusterMember} that is the leader for systemdb.  
      */
     getSystemDBWriter() {
         return this.memberSet.members().filter(cm => cm.canWrite(neo4j.SYSTEM_DB))[0];
