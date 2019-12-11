@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import moment from 'moment';
+import _ from 'lodash';
 
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
 import { List } from 'semantic-ui-react';
-import moment from 'moment';
 
 class DatabaseOverview extends Component {
     status(s) {
@@ -22,13 +23,15 @@ class DatabaseOverview extends Component {
 
     render() {
         console.log(this.props);
+        const leader = this.props.database.getLeader(window.halinContext);
+
         return (
             <HalinCard id="DatabaseOverview">
                 <h3>Database Overview <Explainer knowledgebase='Database' /></h3>
                
                 <List>
                     {
-                        this.props.database.getMemberStatuses().map((s, i) => 
+                        _.sortBy(this.props.database.getMemberStatuses(), ['address']).map((s, i) => 
                             <List.Item key={i}>
                                 {s.address}&nbsp;
                                 <strong>{(''+s.role).toUpperCase()}</strong>&nbsp;
@@ -36,10 +39,10 @@ class DatabaseOverview extends Component {
                                 &nbsp;{ this.errorInformation(s) }
                             </List.Item>)
                     }
-
                 </List>
 
                 <p>Last updated: { moment(this.props.database.created).format() }</p>
+                <p>Leader ID: {leader.id}</p>
             </HalinCard>
         );
     };
