@@ -354,7 +354,15 @@ export default class ClusterManager {
             .then(packageClusterOpResults);
     }
 
+    /**
+     * Returns the last cached set of databases, does *not* re-query for databases.
+     * @returns Array<Database>
+     */
     databases() { return this._dbs; }
+
+    getDatabaseByName(name) {
+        return this._dbs.filter(db => db.name === name)[0];
+    }
 
     getDefaultDatabase() {
         return this.databases().filter(db => db.isDefault())[0];
