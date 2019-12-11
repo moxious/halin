@@ -9,6 +9,7 @@ import neo4jErrors from '../driver/errors';
 import queryLibrary from '../data/queries/query-library';
 import sentry from '../sentry';
 import HalinQuery from '../data/queries/HalinQuery';
+import score from '../cluster/health/score';
 
 const MAX_OBSERVATIONS = 100;
 
@@ -20,6 +21,10 @@ const MAX_OBSERVATIONS = 100;
  *  - Gather performance data about how responsive it is
  */
 export default class ClusterMember {
+    static ROLE_LEADER = 'LEADER';
+    static ROLE_FOLLOWER = 'FOLLOWER';
+    static ROLE_REPLICA = 'READ_REPLICA';
+
     /**
      * Input is a record that comes back from dbms.cluster.overview()
      */
@@ -76,6 +81,23 @@ export default class ClusterMember {
         const driver = halin.driverFor(member.getBoltAddress());
         member.setDriver(driver);
         return member;
+    }
+
+    /**
+     * Returns the roles this member plays for a given set of databases.  Object is
+     * a mapping of database name (string) to database role (leader, follower, etc)
+     * @returns {Object} database name/role mappings
+     */
+    getDatabaseRoles() {
+        return _.cloneDeep(this.database);
+    }
+
+    /**
+     * Returns an object with health score information about the current status of this
+     * member.  This is done by examining response rates from various datafeeds.
+     */
+    getHealthScore(halin) {
+        return score.feedFreshness(halin, this);
     }
 
     /**
@@ -173,6 +195,15 @@ export default class ClusterMember {
         return this.isLeader() || this.isSingle();
     }
 
+    /**
+     * Determine whether or not this member can write to this database.
+     * If the database is standalone, the answer is always yes no matter the input.
+     * If the database is clustered, then this will return if it's the leader (pre Neo4j 4.0)
+     * and for Neo4j >= 4.0 (multidatabase) will return true only if that machine is leader
+     * for that database.
+     * 
+     * @param {String} db database name
+     */
     canWrite(db = null) {
         if (this.isSingle()) { return true; }
 
