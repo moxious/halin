@@ -106,10 +106,8 @@ class AdministerDatabase extends Component {
 
                     <div style={{ paddingTop: '15px' }}>
                         <h4>Reserved Database</h4>
-                        <p>Stopping, starting, and deleting databases is not
-                            permitted for the default database, or the system
-                            database.
-                    </p>
+                        <p>Halin does not permit stopping, starting, or deleting 
+                           the default database, or system</p>
                     </div>
 
                     : ''}

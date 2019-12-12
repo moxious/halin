@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { Menu, Icon } from 'semantic-ui-react';
+import { Icon } from 'semantic-ui-react';
+import PropTypes from 'prop-types';
 
-export default class DatabaseStatusIcon extends Component {
+class DatabaseStatusIcon extends Component {
     state = {
         currentState: null,
         status: 'online',
@@ -23,3 +24,9 @@ export default class DatabaseStatusIcon extends Component {
         return <Icon name='database' color={color} />;
     }
 };
+
+DatabaseStatusIcon.props = {
+    db: PropTypes.object,
+};
+
+export default DatabaseStatusIcon;

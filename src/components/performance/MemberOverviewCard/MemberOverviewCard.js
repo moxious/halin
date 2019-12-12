@@ -65,9 +65,10 @@ class MemberOverviewCard extends Component {
     render() {
 
         return (
-            <HalinCard owner={this} id='MemberOverviewCard'>
-                <h3>Member Overview</h3>
-
+            <HalinCard owner={this} 
+                header='Overview' 
+                knowledgebase='ClusterMember' 
+                id='MemberOverviewCard'>
                 {this.databaseList()}
 
                 <Grid>

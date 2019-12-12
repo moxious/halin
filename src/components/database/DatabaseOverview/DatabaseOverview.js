@@ -5,7 +5,6 @@ import { Label, List } from 'semantic-ui-react';
 import _ from 'lodash';
 
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
-import Explainer from '../../ui/scaffold/Explainer/Explainer';
 import ClusterMemberStatusIcon from '../../ui/scaffold/ClusterMemberStatusIcon/ClusterMemberStatusIcon';
 
 class DatabaseOverview extends Component {
@@ -54,9 +53,7 @@ class DatabaseOverview extends Component {
         const leader = this.props.database.getLeader(window.halinContext);
 
         return (
-            <HalinCard id="DatabaseOverview">
-                <h3>Database Overview <Explainer knowledgebase='Database' /></h3>
-
+            <HalinCard id="DatabaseOverview" header='Overview' knowledgebase='Database'>
                 {this.membersByRole()}
 
                 <List>

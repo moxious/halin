@@ -98,6 +98,14 @@ class CreateDatabase extends Component {
                         } />
                 </Form>
 
+                <Message>
+                    <Message.Header>Notice</Message.Header>
+
+                    <p>This feature schedules creation of a database.  After you create,
+                        it may take a bit of time for the database to appear in Halin.
+                    </p>
+                </Message>
+
                 {this.state.pending ? <Spinner /> : ''}
             </div>
         );
@@ -105,7 +113,7 @@ class CreateDatabase extends Component {
 }
 
 CreateDatabase.props = {
-    member: PropTypes.object,
+    member: PropTypes.object.isRequired,
 };
 
 export default CreateDatabase;

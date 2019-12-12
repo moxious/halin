@@ -4,7 +4,7 @@ import sentry from '../api/sentry';
 import queryLibrary from './data/queries/query-library';
 import neo4j from './driver';
 
-const REFRESH_INTERVAL = 15000;
+const REFRESH_INTERVAL = 5000;
 
 /**
  * This class is a wrapper for a set of ClusterMember objects, and handles housekeeping

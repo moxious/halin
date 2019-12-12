@@ -165,12 +165,23 @@ export default {
         or all of your files reside on the same disk.`,
         links.configuringDataOnDisk,
     ]),
+    ClusterMember: render([
+        'A member is a single machine or container that participates in a Neo4j cluster.',
+        'In the case of stand-alone or single instance Neo4j, Halin treats this as a cluster with 1 member.',
+    ]),
     ClusterMemory: render([
         'The heap space is used for query execution, transaction state, management of the graph etc. The size needed for the heap is very dependent on the nature of the usage of Neo4j. For example, long-running queries, or very complicated queries, are likely to require a larger heap than simpler queries.',
         'Generally speaking, in order to aid performance, we want to configure a large enough heap to sustain concurrent operations.',
         'In case of performance issues we may have to tune our queries, and monitor their memory usage, in order to determine whether the heap needs to be increased.',
         'The heap memory size is determined by the parameters dbms.memory.heap.initial_size and dbms.memory.heap.max_size. It is recommended to set these two parameters to the same value. This will help avoid unwanted full garbage collection pauses.',
         links.memoryConfiguration,
+    ]),
+    EventLog: render([
+        `Halin keeps a record of all significant events it saw since it connected to
+        your Neo4j instance.  This includes leader re-elections, creation of databases,
+        users, roles, and so on.`,
+        `The event log only pertains to the period of time you're running Halin, because
+        halin does not save data locally.`,
     ]),
     GarbageCollection: render([
         'Slow garbage collection is an indication of performance problems.',
