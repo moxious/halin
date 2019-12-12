@@ -84,7 +84,7 @@ export default class Database {
         return this.backingStatuses[0].default;
     }
 
-    static pre4DummyDatabase() {
+    static pre4DummyDatabase(halin) {
         return new Database([{
             name: Database.SINGLEDB_NAME,
             currentStatus: Database.STATUS_ONLINE,
@@ -92,7 +92,7 @@ export default class Database {
             role: 'LEADER',
             default: true,
             error: '',
-            address: '',
+            address: halin ? halin.getBaseURI() : '0.0.0.0',
         }]);
     }
 

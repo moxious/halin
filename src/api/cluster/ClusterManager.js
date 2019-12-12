@@ -426,7 +426,7 @@ export default class ClusterManager {
                 sentry.info('Pre Neo4j 4.0, all clusters have a single database "neo4j"');
                 // Just like we fake single-node Neo4j instances as a cluster of one member,
                 // we fake non-multidb clusters as a multi-db of one database.  :)
-                this._dbs = [Database.pre4DummyDatabase()];
+                this._dbs = [Database.pre4DummyDatabase(this.ctx)];
                 return this._dbs;
             });
     }

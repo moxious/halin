@@ -168,7 +168,7 @@ export default class DatabaseSet {
                 sentry.info('Pre Neo4j 4.0, all clusters have a single database "neo4j"');
                 // Just like we fake single-node Neo4j instances as a cluster of one member,
                 // we fake non-multidb clusters as a multi-db of one database.  :)
-                return this._mergeChanges(halin, [Database.pre4DummyDatabase()]);
+                return this._mergeChanges(halin, [Database.pre4DummyDatabase(halin)]);
             })
             .finally(() => this.scheduleRefresh(halin));
     }
