@@ -140,12 +140,13 @@ export default class DatabaseSelector extends Component {
                                 onSelect={this.select} />)
                     }
 
-                    <Menu.Item as='a' disabled={window.halinContext.getVersion().major < 4}
+                    { window.halinContext.getVersion().major >= 4 ? 
+                    <Menu.Item as='a'
                         active={false}
                         onClick={() => this.setState({ create: true })}>
                         <Icon name='add' color='green' />
                         Create New Database
-                    </Menu.Item>
+                    </Menu.Item> : '' }
 
                     <Divider horizontal inverted />
                 </Sidebar>
