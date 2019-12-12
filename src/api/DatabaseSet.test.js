@@ -1,4 +1,3 @@
-import DatabaseSet from './DatabaseSet';
 import queryfakes from '../testutils/queryfakes';
 import Database from './Database';
 import neo4j from './driver';

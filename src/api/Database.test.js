@@ -103,8 +103,8 @@ describe('Database', function() {
 
     it('will not create a database with mismatched records', () => {
         expect(() => new Database([
-            makeRecord('system', 'core1:7687', 'online', 'LEADER', false),
-            makeRecord('otherdb', 'core1:7687', 'online', 'LEADER', true),
+            queryFakes.makeDBRecord('system', 'core1:7687', 'online', 'LEADER', false),
+            queryFakes.makeDBRecord('otherdb', 'core1:7687', 'online', 'LEADER', true),
         ])).toThrow(Error);
     });  
 

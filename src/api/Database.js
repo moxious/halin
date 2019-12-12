@@ -58,7 +58,7 @@ export default class Database {
      * @throws {Error} if the names don't match
      */
     merge(changes) {
-        if (!changes instanceof Database || !changes.name === this.name) {
+        if (!(changes instanceof Database) || changes.name !== this.name) {
             throw new Error('Cannot merge with a different or non-Database');
         }
 

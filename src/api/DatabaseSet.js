@@ -173,7 +173,7 @@ export default class DatabaseSet {
             .finally(() => this.scheduleRefresh(halin));
     }
 
-    initialize(halin, driver, report = () => null) {
+    initialize(halin) {
         return this.refresh(halin);
     }
 }

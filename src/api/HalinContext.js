@@ -320,7 +320,7 @@ export default class HalinContext {
      * fake the neo4j desktop API facade prior to this step
      * (2) Running in terminal (and window object isn't even defined)
      */
-    initialize(progressCallback = msg => console.log(msg)) {
+    initialize(progressCallback = () => null) {
         let inBrowser = true;
 
         const report = str => {
