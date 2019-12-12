@@ -131,9 +131,7 @@ export default class ClusterMemberSet {
      * @param {Array<ClusterMember>} newSet 
      */
     _mergeChanges(halin, newSet, report = () => null) {
-        sentry.fine('MERGE CHANGES', newSet);
-        const matched = {};
-
+        // sentry.fine('MERGE CHANGES', newSet);
         const lookup = (id, set) => set.filter(m => m.getId() === id)[0];
 
         const currentSet = new Set(this.members().map(m => m.getId()));
@@ -208,50 +206,5 @@ export default class ClusterMemberSet {
             .catch(err => {
                 sentry.error('Error refreshing cluster member set', err);
             });
-    }
-
-    /**
-     * Starts a slow data feed for the node's cluster role.  In this way, if the leader
-     * changes, we can detect it.
-     */
-    watchForClusterRoleChange(clusterMember) {
-        // console.log('watchForClusterRoleChange TBD');
-
-        return Promise.resolve(true);
-        // TODO
-
-        // const roleFeed = this.getDataFeed(_.merge({
-        //     node: clusterMember,
-        // }, queryLibrary.CLUSTER_ROLE));
-
-        // const addr = clusterMember.getBoltAddress();
-        // const onRoleData = (newData /* , dataFeed */) => {
-        //     const newRole = newData.data[0].role;
-
-        //     // Something in cluster topology just changed...
-        //     if (newRole !== clusterMember.role) {
-        //         const oldRole = clusterMember.role;
-        //         clusterMember.role = newRole;
-
-        //         const event = {
-        //             message: `Role change from ${oldRole} to ${newRole}`,
-        //             type: 'rolechange',
-        //             address: clusterMember.getBoltAddress(),
-        //             payload: {
-        //                 old: oldRole,
-        //                 new: newRole,
-        //             },
-        //         };
-
-        //         this.getClusterManager().addEvent(event);
-        //     }
-        // };
-
-        // const onError = (err /*, dataFeed */) =>
-        //     sentry.reportError(err, `HalinContext: failed to get cluster role for ${addr}`);
-
-        // roleFeed.addListener(onRoleData);
-        // roleFeed.onError = onError;
-        // return roleFeed;
     }
 }
