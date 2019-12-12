@@ -1,5 +1,5 @@
 import Database from './Database';
-import _ from 'lodash';
+// import _ from 'lodash';
 import sentry from '../api/sentry';
 import queryLibrary from './data/queries/query-library';
 import neo4j from './driver';
@@ -85,29 +85,27 @@ export default class DatabaseSet {
         exitingDatabases.forEach(existingLabel => {
             const member = lookup(existingLabel, this.databases());
 
-            const event = {
+            events.push({
                 message: `Database ${member.getLabel()} exited.`,
                 type: 'exit',
                 address: 'cluster',
                 payload: member.asJSON(),
-            };
+            });
 
             this.remove(member);
-            events.push(event);
         });
 
         enteringDatabases.forEach(enteringLabel => {
             const member = lookup(enteringLabel, newSet);
            
-            const event = {
+            events.push({
                 message: `Database ${member.getLabel()} entered.`,
                 type: 'enter',
                 address: 'cluster',
                 payload: member.asJSON(),
-            };
+            });
 
             this.dbs.push(member);
-            events.push(event);
         });
 
         changingDatabases.forEach(changingLabel => {
@@ -115,14 +113,12 @@ export default class DatabaseSet {
             const changes = lookup(changingLabel, newSet);
             
             if (member.merge(changes)) {
-                const event = {
+                events.push({
                     message: `Database ${member.getLabel()} changed status.`,
                     type: 'change',
-                    address: member.getBoltAddress(),
+                    address: 'cluster',
                     payload: member.asJSON(),
-                };
-    
-                events.add(event);
+                });
             }
         });
 
