@@ -44,7 +44,7 @@ export default class DatabaseSelector extends Component {
     UNSAFE_componentWillMount() {
         this.listenerFn = (e) => {
             const dbs = window.halinContext.databases();
-
+            console.log('DatabaseSelectorListener fired', dbs);
             // The selected database could no longer exist, or it could now exist with a different
             // status.  For all of these reasons we must update the selection so the view knows.
             // Never take the old selected, or you'll end up with wrong colored icon or
@@ -58,6 +58,11 @@ export default class DatabaseSelector extends Component {
             if (!this.state.create) {
                 sentry.fine('DatabaseSelector: force selection', selected);
                 this.setState({ selected, id: uuid.v4(), create: false });
+            } else {
+                // This is silly, to force state refresh.  We got a new list of
+                // databases, but the selection didn't change and we're still in
+                // create mode.
+                this.setState({ id: uuid.v4(), create: true });
             }
         };
 
