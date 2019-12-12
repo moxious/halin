@@ -85,7 +85,14 @@ export default class HalinContext {
      * @returns {ClusterMember} that is the leader for systemdb.  
      */
     getSystemDBWriter() {
-        return this.memberSet.members().filter(cm => cm.canWrite(neo4j.SYSTEM_DB))[0];
+        const writer = this.memberSet.members().filter(cm => cm.canWrite(neo4j.SYSTEM_DB))[0];
+
+        if (!writer) {
+            const str = JSON.stringify(this.memberSet.members().map(m => m.asJSON()), null, 2);
+            // throw new Error(`No systemdb writer in all of ${str}`);
+        }
+
+        return writer;
     }
 
     getPollRate() {
@@ -312,7 +319,7 @@ export default class HalinContext {
      * fake the neo4j desktop API facade prior to this step
      * (2) Running in terminal (and window object isn't even defined)
      */
-    initialize(progressCallback = null) {
+    initialize(progressCallback = msg => console.log(msg)) {
         let inBrowser = true;
 
         const report = str => {
