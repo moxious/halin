@@ -52,7 +52,9 @@ export default class ClusterMember {
             this.database = dbs;
         } else {
             this.role = (record.get('role') || '').trim();
-            const key = record.get('database');
+            // TODO -- pre-Neo4j 4.0, do we ever need this value?
+            // I can't think of a use for it.
+            // const key = record.get('database');
             const value = this.role;
 
             // We're going to rename to neo4j because that's the default
