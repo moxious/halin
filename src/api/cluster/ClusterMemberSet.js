@@ -128,7 +128,7 @@ export default class ClusterMemberSet {
         let idx = -1;
 
         for(let i=0; i<this.clusterMembers.length; i++) {
-            if (this.clusterMembers[i].getId() === member.Id()) {
+            if (this.clusterMembers[i].getId() === member.getId()) {
                 idx = i;
                 break;
             }

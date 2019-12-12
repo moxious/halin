@@ -6,6 +6,12 @@ import neo4j from '../driver/index';
 import sinon from 'sinon';
 import queryfakes from '../../testutils/queryfakes';
 
+const copySet = a => {
+    const newSet = [];
+    a.forEach(m => newSet.push(m));
+    return newSet;
+};
+
 describe('ClusterMemberSet', function () {
     let ctx;
     let memberSet;
@@ -55,5 +61,17 @@ describe('ClusterMemberSet', function () {
         arr.forEach(member => {
             expect(member instanceof ClusterMember).toBeTruthy();
         });
+    });
+
+    it('can remove a member', () => {
+        const newSet = copySet(memberSet.members());
+        const removed = newSet.pop();
+        const howMany = memberSet.members().length;
+
+        return memberSet._mergeChanges(ctx, newSet)
+            .then(() => {
+                expect(memberSet.members().length).toEqual(howMany - 1);
+                expect(memberSet.members().filter(m => m.getId() === removed.getId())[0]).toBeFalsy();
+            });
     });
 });
