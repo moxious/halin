@@ -82,14 +82,15 @@ export default class HalinContext {
      * connected to a pre Neo4j 4.0 database, then there is only *1* leader, and you'll
      * get that member.  If you're connected to a standalone database, you'll get the
      * only member.
-     * @returns {ClusterMember} that is the leader for systemdb.  
+     * @returns {ClusterMember} that is the leader for systemdb.
+     * @throws {Error} when there is no writer of systemdb
      */
     getSystemDBWriter() {
         const writer = this.memberSet.members().filter(cm => cm.canWrite(neo4j.SYSTEM_DB))[0];
 
         if (!writer) {
             const str = JSON.stringify(this.memberSet.members().map(m => m.asJSON()), null, 2);
-            // throw new Error(`No systemdb writer in all of ${str}`);
+            throw new Error(`No systemdb writer in all of ${str}`);
         }
 
         return writer;
