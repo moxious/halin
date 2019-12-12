@@ -269,9 +269,7 @@ const halinDiagnostics = halinContext => {
 };
 
 const clusterManagerDiagnostics = halinContext => {
-    const getDatabasesPromise = halinContext.getClusterManager()
-        .getDatabases()
-        .then(dbs => dbs.map(db => db.asJSON()))
+    const getDatabasesPromise = Promise.resolve(halinContext.databases().map(db => db.asJSON()))
         .then(arrayOfDBJSON => ({ databases: arrayOfDBJSON }));
 
     return getDatabasesPromise;

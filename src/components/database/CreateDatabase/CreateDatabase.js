@@ -25,7 +25,7 @@ class CreateDatabase extends Component {
 
         return nameValid &&
             // Don't allow duplicate names
-            window.halinContext.getClusterManager().databases().filter(db => db.name === this.state.name).length === 0;
+            window.halinContext.databases().filter(db => db.name === this.state.name).length === 0;
     }
 
     handleSubmit = () => {

@@ -41,7 +41,7 @@ class TransactionsOpen extends Component {
             rate: this.state.rate,
             displayColumns: allColumns,
             params: {
-                db: halin.getClusterManager().getDefaultDatabase().name,
+                db: halin.getDatabaseSet().getDefaultDatabase().name,
             },
         });
 

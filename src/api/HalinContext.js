@@ -59,6 +59,9 @@ export default class HalinContext {
         return this.dbSet.databases();
     }
 
+    getMemberSet() { return this.memberSet; }
+    getDatabaseSet() { return this.dbSet; }
+
     getWriteMember() {
         const writer = this.memberSet.members().filter(cm => cm.canWrite())[0];
 
@@ -366,7 +369,6 @@ export default class HalinContext {
                     ]);
                 })
                 // Checking databases must be after checking for a cluster, since we need to know who leader is
-                .then(() => this.getClusterManager().getDatabases())
                 .then(() => this.dbSet.initialize(this))
                 .then(() => {
                     this.getClusterManager().addEvent({

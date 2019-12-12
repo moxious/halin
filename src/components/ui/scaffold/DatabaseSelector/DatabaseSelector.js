@@ -43,7 +43,7 @@ export default class DatabaseSelector extends Component {
 
     UNSAFE_componentWillMount() {
         this.listenerFn = (e) => {
-            const dbs = window.halinContext.getClusterManager().databases();
+            const dbs = window.halinContext.databases();
 
             // The selected database could no longer exist, or it could now exist with a different
             // status.  For all of these reasons we must update the selection so the view knows.
@@ -64,7 +64,7 @@ export default class DatabaseSelector extends Component {
         window.halinContext.getClusterManager().addListener(this.listenerFn);
 
         this.setState({
-            selected: window.halinContext.getClusterManager().databases()[0],
+            selected: window.halinContext.databases()[0],
             create: false,
         });
     }
@@ -128,7 +128,7 @@ export default class DatabaseSelector extends Component {
                     width='thin'
                 >
                     {
-                        window.halinContext.getClusterManager().databases().map((db, key) =>
+                        window.halinContext.databases().map((db, key) =>
                             <DatabaseMenuItem
                                 database={db} key={key}
                                 active={this.state.selected && this.state.selected.getLabel() === db.getLabel()}

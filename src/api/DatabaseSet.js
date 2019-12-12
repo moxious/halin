@@ -28,6 +28,14 @@ export default class DatabaseSet {
         clearTimeout(this.timeout);
     }
 
+    getDatabaseByName(name) {
+        return this.databases().filter(db => db.name === name)[0];
+    }
+
+    getDefaultDatabase() {
+        return this.databases().filter(db => db.isDefault())[0];
+    }
+
     scheduleRefresh(halin) {
         if (this.timeout) {
             clearTimeout(this.timeout);

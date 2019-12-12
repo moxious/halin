@@ -354,20 +354,6 @@ export default class ClusterManager {
             .then(packageClusterOpResults);
     }
 
-    /**
-     * Returns the last cached set of databases, does *not* re-query for databases.
-     * @returns Array<Database>
-     */
-    databases() { return this._dbs; }
-
-    getDatabaseByName(name) {
-        return this._dbs.filter(db => db.name === name)[0];
-    }
-
-    getDefaultDatabase() {
-        return this.databases().filter(db => db.isDefault())[0];
-    }
-
     getRoles() {
         return this.ctx.getSystemDBWriter().run('call dbms.security.listRoles()', {}, neo4j.SYSTEM_DB)
             .then(results => neo4j.unpackResults(results, {
@@ -453,7 +439,7 @@ export default class ClusterManager {
                 sentry.info('stop results', results);
                 return results;
             })
-            .then(() => this.getDatabases())
+            .then(() => this.ctx.getDatabaseSet().refresh())
             .then(() => this.addEvent({
                 type: 'database',
                 message: `Stopped database ${db.name}`,
@@ -469,7 +455,7 @@ export default class ClusterManager {
                 sentry.info('start results', results);
                 return results;
             })
-            .then(() => this.getDatabases())
+            .then(() => this.ctx.getDatabaseSet().refresh())
             .then(() => this.addEvent({
                 type: 'database',
                 message: `Started database ${db.name}`,
@@ -485,7 +471,7 @@ export default class ClusterManager {
                 sentry.info('drop results', results);
                 return results;
             })
-            .then(() => this.getDatabases())
+            .then(() => this.ctx.getDatabaseSet().refresh())
             .then(() => this.addEvent({
                 type: 'database',
                 message: `Dropped database ${db.name}`,
@@ -506,7 +492,7 @@ export default class ClusterManager {
                 sentry.info('Created database; results ', results);
                 return results;
             })
-            .then(() => this.getDatabases())
+            .then(() => this.ctx.getDatabaseSet().refresh())
             .then(() => this.addEvent({
                 type: 'database',
                 message: `Created database ${name}`,

@@ -45,7 +45,7 @@ class AlterPrivilegeForm extends Component {
                 console.log('MY PROPS', this.props);
                 const roles = roleData.map(entry => optionify(entry.role));
 
-                const databases = mgr.databases().map(db => optionify(db.getLabel()))
+                const databases = window.halinContext.databases().map(db => optionify(db.getLabel()))
                     .concat([optionify('*')]);
 
                 const database = this.props.database || databases[0].value;
