@@ -15,7 +15,7 @@ export default new HalinQuery({
     // Because it's from listConfig, value comes as a string **not** a boolean.
     exampleResult: [ 
         {
-            grant: 'GRANTED',
+            access: 'GRANTED',
             action: 'read',
             resource: 'all_properties',
             graph: '*',

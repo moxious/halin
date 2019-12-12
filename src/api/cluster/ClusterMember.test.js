@@ -1,8 +1,6 @@
 import ClusterMember from './ClusterMember';
 import fakes from '../../testutils/fakes';
 import Ring from 'ringjs';
-import uuid from 'uuid';
-import neo4j from '../driver/';
 
 describe('ClusterMember', function () {
     const host = 'foo-host';
@@ -27,7 +25,7 @@ describe('ClusterMember', function () {
         expect(c.id).toEqual(entry.id);
         expect(c.addresses).toEqual(entry.addresses);
         expect(c.role).toEqual(entry.role);
-        expect(c.database.ABC).toEqual('LEADER');
+        expect(c.database.neo4j).toEqual('LEADER');
     });
 
     it('can calculate its performance', () => {
