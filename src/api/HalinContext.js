@@ -6,6 +6,7 @@ import neo4jErrors from './driver/errors';
 
 import ClusterManager from './cluster/ClusterManager';
 import ClusterMemberSet from './cluster/ClusterMemberSet';
+import DatabaseSet from './DatabaseSet';
 import DataFeed from './data/DataFeed';
 
 /**
@@ -34,6 +35,7 @@ export default class HalinContext {
         this.dataFeeds = {};
         this.pollRate = 1000;
         this.memberSet = new ClusterMemberSet();
+        this.dbSet = new DatabaseSet();
         this.driverOptions = {
             connectionTimeout: 15000,
             trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
@@ -43,8 +45,18 @@ export default class HalinContext {
         this.mgr.addListener(e => this.onClusterEvent(e));
     }
 
+    /**
+     * @returns {Array[ClusterMember]}
+     */
     members() {
         return this.memberSet.members();
+    }
+
+    /**
+     * @returns {Array[Database]}
+     */
+    databases() { 
+        return this.dbSet.databases();
     }
 
     getWriteMember() {
@@ -355,6 +367,7 @@ export default class HalinContext {
                 })
                 // Checking databases must be after checking for a cluster, since we need to know who leader is
                 .then(() => this.getClusterManager().getDatabases())
+                .then(() => this.dbSet.initialize(this))
                 .then(() => {
                     this.getClusterManager().addEvent({
                         type: 'halin',
