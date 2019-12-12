@@ -39,7 +39,7 @@
     "react-sortable-tree": "^2.2.0",
     "react-table": "^6.8.6",
     "react-timeseries-charts": "^0.16.1",
-    "react-toastify": "^5.1.0",
+    "react-toastify": "^5.4.1",
     "ringjs": "^0.0.1",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^0.88.2",
