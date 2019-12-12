@@ -142,6 +142,7 @@ export default class ClusterMemberSet {
         const changingMembers = new Set([...currentSet].filter(id => candidateSet.has(id)));
 
         const promises = [];
+        const payload = m => ({ address: m.getBoltAddress(), database: m.getDatabaseRoles() });
 
         exitingMembers.forEach(exitingId => {
             const member = lookup(exitingId, this.members());
@@ -150,7 +151,7 @@ export default class ClusterMemberSet {
                 message: `Cluster member exited.`,
                 type: 'exit',
                 address: member.getBoltAddress(),
-                payload: {},
+                payload: payload(member),
             };
 
             this.clusterMembers = _.remove(this.members(), m => m.getId() === exitingId);
@@ -172,7 +173,7 @@ export default class ClusterMemberSet {
                 message: `Cluster member entered.`,
                 type: 'enter',
                 address: member.getBoltAddress(),
-                payload: {},
+                payload: payload(member),
             };
 
             this.clusterMembers.push(member);
@@ -188,7 +189,7 @@ export default class ClusterMemberSet {
                     message: `Cluster member changed database assignments, groups, or addresses.`,
                     type: 'change',
                     address: member.getBoltAddress(),
-                    payload: {},
+                    payload: payload(member),
                 };
     
                 halin.getClusterManager().addEvent(event);    
@@ -199,7 +200,7 @@ export default class ClusterMemberSet {
     }
 
     refresh(halin) {
-        sentry.fine('Refreshing cluster member set');
+        // sentry.fine('Refreshing cluster member set');
         return halin.getSystemDBWriter().run(queryLibrary.CLUSTER_OVERVIEW.query)
             .then(results => this._mergeChanges(halin, results.records.map(r => new ClusterMember(r))))
             .then(() => this.scheduleRefresh(halin))
