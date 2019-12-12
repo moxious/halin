@@ -1,16 +1,17 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
+import { Label, List } from 'semantic-ui-react';
 import _ from 'lodash';
 
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
-import { List } from 'semantic-ui-react';
+import ClusterMemberStatusIcon from '../../ui/scaffold/ClusterMemberStatusIcon/ClusterMemberStatusIcon';
 
 class DatabaseOverview extends Component {
     status(s) {
         if (s.currentStatus !== s.requestedStatus) {
-            return `Transitioning from ${s.currentStatus} -&gt; ${s.requestedStatus}`;
+            return `Transitioning from ${s.currentStatus} → ${s.requestedStatus}`;
         }
 
         return s.currentStatus;
@@ -21,27 +22,61 @@ class DatabaseOverview extends Component {
         return `Error Information: ${s.error}`;
     }
 
+    membersByRole() {
+        const byRole = this.props.database.getMembersByRole(window.halinContext);
+        const roles = Object.keys(byRole);
+        roles.sort();
+        console.log('ROLES', roles);
+        console.log('byRole', byRole);
+        const roleList = (role, i) =>
+            byRole[role].map((member, ki) => {
+                return (
+                    <List.Item key={ki}>
+                        <Label>
+                            <ClusterMemberStatusIcon member={member} />
+                            {member.getBoltAddress()}
+                            <Label.Detail>{role}</Label.Detail>
+                        </Label>
+                    </List.Item>
+                );
+            });
+
+        return (
+            <List>
+                {
+                    roles.map((role, i) => roleList(role, i))
+                }
+            </List>
+        )
+    }
+
     render() {
         const leader = this.props.database.getLeader(window.halinContext);
 
         return (
             <HalinCard id="DatabaseOverview">
                 <h3>Database Overview <Explainer knowledgebase='Database' /></h3>
-               
+
+                {this.membersByRole()}
+
                 <List>
                     {
-                        _.sortBy(this.props.database.getMemberStatuses(), ['address']).map((s, i) => 
+                        _.sortBy(this.props.database.getMemberStatuses(), ['address']).map((s, i) =>
                             <List.Item key={i}>
                                 {s.address}&nbsp;
-                                <strong>{(''+s.role).toUpperCase()}</strong>&nbsp;
-                                &nbsp;Status: { this.status(s) }
-                                &nbsp;{ this.errorInformation(s) }
+                                <strong>{('' + s.role).toUpperCase()}</strong>&nbsp;
+                                &nbsp;Status: {this.status(s)}
+                                &nbsp;{this.errorInformation(s)}
                             </List.Item>)
                     }
                 </List>
 
-                <p>Last updated: { moment(this.props.database.created).format() }</p>
-                <p>Leader ID: {leader.id}</p>
+                <p>Last updated: {moment(this.props.database.created).format()}</p>
+                { leader ? 
+                    <p>Leader ID: {leader.id}</p> : 
+                    <p><strong>No leader detected</strong>; 
+                        &nbsp;database may be starting, stopping, or 
+                    &nbsp;undergoing leader election</p> }
             </HalinCard>
         );
     };

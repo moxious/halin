@@ -142,6 +142,24 @@ export default class Database {
         return _.uniq(this.backingStatuses.map(s => s.currentStatus));
     }
 
+    getMembersByRole(halin) {
+        const members = halin.members();
+        const results = {};
+
+        members.forEach(member => {
+            const roles = member.getDatabaseRoles();
+            const roleHere = roles[this.name] || 'DATABASE OFFLINE';
+
+            if (!(roleHere in results)) {
+                results[roleHere] = [member];
+            } else {
+                results[roleHere].push(member);
+            }
+        });
+
+        return results;
+    }
+
     /**
      * Return the ClusterMember who is the leader of this database.
      * @param {HalinContext} a halin context object
@@ -162,9 +180,9 @@ export default class Database {
                     r === ClusterMember.ROLE_SINGLE;
             });
 
-        if (leaders.length === 0) {
-            console.error('Member statuses', this.getMemberStatuses());
-            throw new Error(`Database ${this.name} has no leader; election may be underway`);
+        if (leaders.length === 0) {            
+            sentry.warn(`Database ${this.name} has no leader; election may be underway`);
+            return null;
         } else if(leaders.length > 1) {
             const leadersStr = JSON.stringify(leaders, null, 2);
             throw new Error(`Database ${this.name} has more than one leader (${leadersStr}); inconsistent cluster`);
