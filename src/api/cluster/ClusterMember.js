@@ -10,6 +10,7 @@ import queryLibrary from '../data/queries/query-library';
 import sentry from '../sentry';
 import HalinQuery from '../data/queries/HalinQuery';
 import score from '../cluster/health/score';
+import Database from '../Database';
 
 const MAX_OBSERVATIONS = 100;
 
@@ -53,7 +54,11 @@ export default class ClusterMember {
             this.role = (record.get('role') || '').trim();
             const key = record.get('database');
             const value = this.role;
-            const obj = { [key]: value };
+
+            // We're going to rename to neo4j because that's the default
+            // database name for older Neo4j's, but still keep what it told
+            // us.
+            const obj = { [Database.SINGLEDB_NAME]: value };
 
             // Maps database name to member role
             this.database = obj;
