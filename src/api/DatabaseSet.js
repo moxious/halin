@@ -4,7 +4,7 @@ import sentry from '../api/sentry';
 import queryLibrary from './data/queries/query-library';
 import neo4j from './driver';
 
-const REFRESH_INTERVAL = 5000;
+const REFRESH_INTERVAL = 15000;
 
 /**
  * This class is a wrapper for a set of ClusterMember objects, and handles housekeeping
@@ -26,6 +26,7 @@ export default class DatabaseSet {
 
     shutdown() {
         clearTimeout(this.timeout);
+        return true;
     }
 
     getDatabaseByName(name) {
@@ -50,6 +51,23 @@ export default class DatabaseSet {
         return this.timeout;
     }
 
+    remove(db) {
+        let idx = -1;
+
+        for(let i=0; i<this.dbs.length; i++) {
+            if (this.dbs[i].getLabel() === db.getLabel()) {
+                idx = i;
+                break;
+            }
+        }
+
+        if (idx > -1) {
+            this.dbs.splice(idx, 1);
+        }
+
+        return idx > -1;
+    }
+
     _mergeChanges(halin, newSet) {
         // sentry.fine('MERGE CHANGES', newSet);
 
@@ -62,6 +80,8 @@ export default class DatabaseSet {
         const enteringDatabases = new Set([...candidateSet].filter(id => !currentSet.has(id)));
         const changingDatabases = new Set([...currentSet].filter(id => candidateSet.has(id)));
 
+        const events = [];
+
         exitingDatabases.forEach(existingLabel => {
             const member = lookup(existingLabel, this.databases());
 
@@ -72,8 +92,8 @@ export default class DatabaseSet {
                 payload: member.asJSON(),
             };
 
-            this.dbs = _.remove(this.databases(), m => m.getLabel() === existingLabel);
-            halin.getClusterManager().addEvent(event);
+            this.remove(member);
+            events.push(event);
         });
 
         enteringDatabases.forEach(enteringLabel => {
@@ -87,13 +107,13 @@ export default class DatabaseSet {
             };
 
             this.dbs.push(member);
-            halin.getClusterManager().addEvent(event);
+            events.push(event);
         });
 
         changingDatabases.forEach(changingLabel => {
             const member = lookup(changingLabel, this.databases());
             const changes = lookup(changingLabel, newSet);
-
+            
             if (member.merge(changes)) {
                 const event = {
                     message: `Database ${member.getLabel()} changed status.`,
@@ -102,10 +122,13 @@ export default class DatabaseSet {
                     payload: member.asJSON(),
                 };
     
-                halin.getClusterManager().addEvent(event);    
+                events.add(event);
             }
         });
 
+        // Add events at the end after the data structures have been changed,
+        // so listeners can get the effects.
+        events.forEach(event => halin.getClusterManager().addEvent(event));
         return Promise.resolve(true);
     }
 

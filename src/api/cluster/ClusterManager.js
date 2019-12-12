@@ -439,7 +439,7 @@ export default class ClusterManager {
                 sentry.info('stop results', results);
                 return results;
             })
-            .then(() => this.ctx.getDatabaseSet().refresh())
+            .then(() => this.ctx.getDatabaseSet().refresh(this.ctx))
             .then(() => this.addEvent({
                 type: 'database',
                 message: `Stopped database ${db.name}`,
@@ -455,7 +455,7 @@ export default class ClusterManager {
                 sentry.info('start results', results);
                 return results;
             })
-            .then(() => this.ctx.getDatabaseSet().refresh())
+            .then(() => this.ctx.getDatabaseSet().refresh(this.ctx))
             .then(() => this.addEvent({
                 type: 'database',
                 message: `Started database ${db.name}`,
@@ -471,7 +471,7 @@ export default class ClusterManager {
                 sentry.info('drop results', results);
                 return results;
             })
-            .then(() => this.ctx.getDatabaseSet().refresh())
+            .then(() => this.ctx.getDatabaseSet().refresh(this.ctx))
             .then(() => this.addEvent({
                 type: 'database',
                 message: `Dropped database ${db.name}`,
@@ -492,7 +492,7 @@ export default class ClusterManager {
                 sentry.info('Created database; results ', results);
                 return results;
             })
-            .then(() => this.ctx.getDatabaseSet().refresh())
+            .then(() => this.ctx.getDatabaseSet().refresh(this.ctx))
             .then(() => this.addEvent({
                 type: 'database',
                 message: `Created database ${name}`,

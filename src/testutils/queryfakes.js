@@ -62,14 +62,33 @@ const queries = {
         { value: 'true' },
     ],
     'CALL dbms.cluster.overview': [
+        // Note consistency between leader status here and SHOW DATABASES
         {
-            id: 'A', addresses: ['bolt://testhostA:7777'], role: 'LEADER', groups: [], database: 'DB',
+            id: 'A', 
+            addresses: ['bolt://testhostA:7777'], 
+            groups: [], 
+            databases: {
+                system: 'LEADER',
+                mydb: 'FOLLOWER'
+            },
         },
         {
-            id: 'B', addresses: ['bolt://testhostB:7777'], role: 'FOLLOWER', groups: [], database: 'DB',
+            id: 'B', 
+            addresses: ['bolt://testhostB:7777'], 
+            groups: [], 
+            databases: {
+                system: 'FOLLOWER',
+                mydb: 'LEADER',
+            },
         },
         {
-            id: 'C', addresses: ['bolt://testhostC:7777'], role: 'FOLLOWER', groups: [], database: 'DB',
+            id: 'C', 
+            addresses: ['bolt://testhostC:7777'], 
+            groups: [], 
+            databases: {
+                system: 'FOLLOWER',
+                mydb: 'FOLLOWER,'
+            },
         }
     ],
     'call dbms.cluster.role()': [
@@ -87,6 +106,7 @@ const queries = {
 
 export default {
     ...queries,
+    makeDBRecord,
     response: (query /* , params */) => {
         let queryText = query;
         if (query instanceof HalinQuery) {

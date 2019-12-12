@@ -149,13 +149,25 @@ export default class Database {
      * @throws {Error} when there is no leader, or there are multiples (inconsistent cluster)
      */
     getLeader(halin) {
+        if (halin.members().length === 1) {
+            // In standalone mode...it's pretty obvious.
+            return halin.members()[0];
+        }
+
         const leaders = this.getMemberStatuses()
-            .filter(s => s.role.toUpperCase() === ClusterMember.ROLE_LEADER);
+            .filter(s => {
+                const r = s.role.toUpperCase();
+                return r === ClusterMember.ROLE_LEADER ||
+                    r === ClusterMember.ROLE_STANDALONE ||
+                    r === ClusterMember.ROLE_SINGLE;
+            });
 
         if (leaders.length === 0) {
+            console.error('Member statuses', this.getMemberStatuses());
             throw new Error(`Database ${this.name} has no leader; election may be underway`);
         } else if(leaders.length > 1) {
-            throw new Error(`Database ${this.name} has more than one leader; inconsistent cluster`);
+            const leadersStr = JSON.stringify(leaders, null, 2);
+            throw new Error(`Database ${this.name} has more than one leader (${leadersStr}); inconsistent cluster`);
         }
 
         const leaderAddress = leaders[0].address;

@@ -29,7 +29,7 @@ export default class ClusterMemberSet {
             .catch(err => sentry.reportError(err, 'Failure to shut down cluster members', err));
     }
 
-    initialize(halin, driver, report = () => null) {
+    initialize(halin, driver, report = (msg) => console.log(msg)) {
         const session = driver.session();
 
         report('Checking cluster status');
@@ -58,7 +58,7 @@ export default class ClusterMemberSet {
                         database: 'default',
                     };
 
-                    this.clusterMembers = [ClusterMember.makeStandalone(halin, rec)];
+                    return this._mergeChanges(halin, [ClusterMember.makeStandalone(halin, rec)]);
                 } else {
                     sentry.reportError(err);
                     throw err;
@@ -124,6 +124,23 @@ export default class ClusterMemberSet {
         });
     }
 
+    remove(member) {
+        let idx = -1;
+
+        for(let i=0; i<this.clusterMembers.length; i++) {
+            if (this.clusterMembers[i].getId() === member.Id()) {
+                idx = i;
+                break;
+            }
+        }
+
+        if (idx > -1) {
+            this.clusterMembers.splice(idx, 1);
+        }
+
+        return idx > -1;
+    }
+
     /**
      * PRIVATE takes a new set of cluster members from a refresh, and merges those changes into
      * the current set.  We do not replace the current set with the new set, because the current set
@@ -144,18 +161,19 @@ export default class ClusterMemberSet {
         const promises = [];
         const payload = m => ({ address: m.getBoltAddress(), database: m.getDatabaseRoles() });
 
+        const events = [];
+
         exitingMembers.forEach(exitingId => {
             const member = lookup(exitingId, this.members());
 
-            const event = {
+            events.push({
                 message: `Cluster member exited.`,
                 type: 'exit',
                 address: member.getBoltAddress(),
                 payload: payload(member),
-            };
+            });
 
-            this.clusterMembers = _.remove(this.members(), m => m.getId() === exitingId);
-            halin.getClusterManager().addEvent(event);
+            this.remove(member);
         });
 
         enteringMembers.forEach(enteringId => {
@@ -169,15 +187,14 @@ export default class ClusterMemberSet {
 
             promises.push(setup);
             
-            const event = {
+            events.push({
                 message: `Cluster member entered.`,
                 type: 'enter',
                 address: member.getBoltAddress(),
                 payload: payload(member),
-            };
+            })
 
             this.clusterMembers.push(member);
-            halin.getClusterManager().addEvent(event);
         });
 
         changingMembers.forEach(changingId => {
@@ -185,16 +202,17 @@ export default class ClusterMemberSet {
             const changes = lookup(changingId, newSet);
 
             if (member.merge(changes)) {
-                const event = {
+                events.push({
                     message: `Cluster member changed database assignments, groups, or addresses.`,
                     type: 'change',
                     address: member.getBoltAddress(),
                     payload: payload(member),
-                };
-    
-                halin.getClusterManager().addEvent(event);    
+                });
             }
         });
+
+        // Fire events at the end so listeners see any data structure changes
+        events.forEach(event => halin.getClusterManager().addEvent(event));
 
         return promises.length > 0 ? Promise.all(promises) : Promise.resolve(true);
     }

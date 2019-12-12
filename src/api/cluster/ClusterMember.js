@@ -24,7 +24,11 @@ export default class ClusterMember {
     static ROLE_LEADER = 'LEADER';
     static ROLE_FOLLOWER = 'FOLLOWER';
     static ROLE_REPLICA = 'READ_REPLICA';
+
+    // #operability: between 3.5 and 4.0 they renamed the role...these are effectively the same
+    // thing
     static ROLE_SINGLE = 'SINGLE';
+    static ROLE_STANDALONE = 'STANDALONE';
 
     /**
      * Input is a record that comes back from dbms.cluster.overview()
@@ -227,7 +231,7 @@ export default class ClusterMember {
 
     isLeader() { return this.role === ClusterMember.ROLE_LEADER; }
     isFollower() { return this.role === ClusterMember.ROLE_FOLLOWER; }
-    isSingle() { return this.role === ClusterMember.ROLE_SINGLE; }
+    isSingle() { return this.role === ClusterMember.ROLE_SINGLE || this.role === ClusterMember.ROLE_STANDALONE; }
     isReadReplica() { return this.role === ClusterMember.ROLE_REPLICA; }
 
     isCore() {
