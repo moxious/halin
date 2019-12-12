@@ -90,6 +90,7 @@ export default class ClusterMember {
      * Merges changes with an existing member of the same ID
      * @param {ClusterMember} changes 
      * @returns true if something changed, false otherwise.
+     * @throws {Error} if the IDs don't match
      */
     merge(changes) {
         if (!changes.getId() === this.getId()) {
@@ -102,16 +103,19 @@ export default class ClusterMember {
 
         if (!_.isEqual(this.addresses, changes.addresses)) {
             this.addresses = _.cloneDeep(changes.addresses);
+            sentry.fine(`${this.getBoltAddress()} addresses changed: `, this.addresses, changes.addresses);
             changed = true;
         }
 
         if (!_.isEqual(this.groups, changes.groups)) {
             this.groups = _.cloneDeep(changes.groups);
+            sentry.fine(`${this.getBoltAddress()} groups changed`, this.groups, changes.groups);
             changed = true;
         }
 
         if (!_.isEqual(this.database, changes.database)) {
             this.database = _.cloneDeep(changes.database);
+            sentry.fine(`${this.getBoltAddress()} database changed`, this.database, changes.database);
             changed = true;
         }
 
