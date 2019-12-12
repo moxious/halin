@@ -25,8 +25,6 @@ class DatabaseOverview extends Component {
         const byRole = this.props.database.getMembersByRole(window.halinContext);
         const roles = Object.keys(byRole);
         roles.sort();
-        console.log('ROLES', roles);
-        console.log('byRole', byRole);
         const roleList = (role, i) =>
             byRole[role].map((member, ki) => {
                 return (
