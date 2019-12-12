@@ -31,7 +31,6 @@ export default class Database {
         const keys = ['name', 'address', 'role', 'requestedStatus', 'currentStatus',
             'default', 'error'];
 
-        
         arrOfResults.forEach(obj => {
             keys.forEach(k => {
                 if (_.isNil(obj[k])) {
@@ -50,6 +49,28 @@ export default class Database {
         this.name = arrOfResults[0].name;
         this.backingStatuses = arrOfResults;
         this.created = new Date();
+    }
+
+    /**
+     * Merges changes with an existing database of the same name
+     * @param {Database} changes the new one to take changes from
+     * @returns true if something changed, false otherwise.
+     * @throws {Error} if the names don't match
+     */
+    merge(changes) {
+        if (!changes instanceof Database || !changes.name === this.name) {
+            throw new Error('Cannot merge with a different or non-Database');
+        }
+
+        let changed = false;
+        if (!_.isEqual(this.backingStatuses, changes.backingStatuses)) {
+            this.backingStatuses = _.cloneDeep(changes.backingStatuses);
+            sentry.fine(`Database ${this.name} statuses changed`);
+            changed = true;
+        }
+
+        this.created = changes.created;
+        return changed;
     }
 
     asJSON() {
