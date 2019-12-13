@@ -1,10 +1,18 @@
 import _ from 'lodash';
+import sentry from '../../api/sentry';
 
 /**
  * A Privilege operation represents a change to a privilege in the graph.
  * See Neo4j 4.0 docs on GRANT/DENY/REVOKE, this structure mirrors that.
  */
 export default class PrivilegeOperation {
+    static OP_GRANT = 'GRANT';
+    static PRIV_TRAVERSE = 'TRAVERSE';
+    static ENTITY_NODES = 'NODES *';
+    static VALID_OPERATIONS = ['GRANT', 'REVOKE', 'DENY'];
+    static VALID_PRIVILEGES = ['TRAVERSE', 'READ {*}', 'MATCH {*}', 'WRITE'];
+    static VALID_ENTITIES = ['NODES *', 'RELATIONSHIPS *', 'ELEMENTS *'];
+
     constructor(props) {
         this.operation = props.operation;
         this.privilege = props.privilege;
@@ -113,7 +121,7 @@ export default class PrivilegeOperation {
     }
 
     buildQuery() {
-        console.log('buildQuery', this);
+        sentry.fine('buildQuery', this);
         const op = this.operation;
         const priv = this.privilege;
         const db = this.database;
@@ -123,6 +131,14 @@ export default class PrivilegeOperation {
         const graphToken = (db === '*') ? 'GRAPHS' : 'GRAPH';
 
         const preposition = (op === 'REVOKE') ? 'FROM' : 'TO';
+
+        /**
+         * WRITE does not support ELEMENTS
+         * https://neo4j.com/docs/cypher-manual/4.0-preview/administration/security/subgraph/#administration-security-subgraph-write
+         */
+        if (priv.indexOf('WRITE') > -1) {
+            return `${op} ${priv} ON ${graphToken} ${db} ${preposition} ${role}`;    
+        }
 
         return `${op} ${priv} ON ${graphToken} ${db} ${entity} ${preposition} ${role}`;
     }

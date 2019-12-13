@@ -17,14 +17,14 @@ class AlterPrivilegeForm extends Component {
         message: null,
         error: null,
         formError: null,
-        operation: 'GRANT',
-        privilege: 'TRAVERSE',
-        entity: 'NODES *',
+        operation: PrivilegeOperation.OP_GRANT,
+        privilege: PrivilegeOperation.PRIV_TRAVERSE,
+        entity: PrivilegeOperation.ENTITY_NODES,
         role: 'admin',
         op: null,
-        operations: ['GRANT', 'REVOKE', 'DENY'].map(optionify),
-        privileges: ['TRAVERSE', 'READ {*}', 'MATCH {*}', 'WRITE {*}'].map(optionify),
-        entities: ['NODES *', 'RELATIONSHIPS *', 'ELEMENTS *'].map(optionify),
+        operations: PrivilegeOperation.VALID_OPERATIONS.map(optionify),
+        privileges: PrivilegeOperation.VALID_PRIVILEGES.map(optionify),
+        entities: PrivilegeOperation.VALID_ENTITIES.map(optionify),
     };
 
     constructor(props, context) {
@@ -161,7 +161,7 @@ class AlterPrivilegeForm extends Component {
                     fluid
                     options={this.state.entities}
                     style={this.inputStyle}
-                    disabled={this.state.pending}
+                    disabled={this.state.pending || this.state.privilege.indexOf('WRITE')>-1}
                     defaultValue={this.state.entity}
                     onChange={(e, d) => this.handleChange('entity', e, d)}
                     label='Entity'
