@@ -1,6 +1,10 @@
 import ClusterMember from './ClusterMember';
 import fakes from '../../testutils/fakes';
+import HalinContext from '../HalinContext';
+import sinon from 'sinon';
+import neo4j from '../driver/index';
 import Ring from 'ringjs';
+import _ from 'lodash';
 
 describe('ClusterMember', function () {
     const host = 'foo-host';
@@ -11,7 +15,7 @@ describe('ClusterMember', function () {
         addresses: [httpAddress, boltAddress],
         groups: [],
         role: 'LEADER',
-        database: 'ABC',        
+        database: 'ABC',
     };
     const fakeRecord = fakes.record(entry);
     let c;
@@ -40,7 +44,6 @@ describe('ClusterMember', function () {
             'stdev', 'mean', 'median', 'mode', 'min', 'max', 'observations',
         ];
 
-        
         props.forEach(p => expect(perf).toHaveProperty(p));
     });
 
@@ -105,5 +108,48 @@ describe('ClusterMember', function () {
                 expect(obs).toHaveProperty('y');
             });
         });
+    });
+
+    it('will not merge changes with a different member', () => {
+        const different = _.cloneDeep(entry);
+        different.id = 'I AM SOMETHING ELSE';
+        const other = new ClusterMember(fakes.record(different));
+        other.setDriver(fakes.Driver());
+
+        expect(() => c.merge(different)).toThrow(Error);
+    });
+
+    it('can merge changes', () => {
+        const different = _.cloneDeep(entry);
+        different.address = 'I changed!';
+        different.groups = ['foo'];
+        const other = new ClusterMember(fakes.record(different));
+        other.setDriver(fakes.Driver());
+
+        c.merge(other);
+
+        expect(c.addresses).toEqual(different.addresses);
+        expect(c.groups).toEqual(different.groups);
+    });
+
+    it('can make a standalone entry, and attach a driver', () => {
+        HalinContext.connectionDetails = fakes.basics;
+        const ctx = new HalinContext();
+        neo4j.driver = sinon.fake.returns(fakes.Driver());
+
+        return ctx.initialize()
+            .then(() => {
+                const c = ClusterMember.makeStandalone(ctx, entry);
+                expect(c).toBeTruthy();
+                expect(c.driver).toBeTruthy();
+                expect(c.pool).toBeTruthy();        
+            });
+    });
+
+    describe('Feature Probes', function () {
+        it('supportsAuth probe', () => expect(c.supportsAuth()).toBeFalsy());
+        it('supportsDBStats probe', () => expect(c.supportsDBStats()).toBeFalsy());  
+        it('csvMetricsEnabled probe', () => expect(c.csvMetricsEnabled()).toBeFalsy());
+        it('supportsMultiDatabase probe', () => expect(c.supportsMultiDatabase()).toBeFalsy());
     });
 });
