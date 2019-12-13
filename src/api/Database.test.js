@@ -117,6 +117,30 @@ describe('Database', function() {
         ])).toThrow(Error);
     });
 
+    it('can merge with another', () => {
+        const duplicateSet = Database.fromArrayOfResults(showDatabaseResults);
+        const dupMydb = duplicateSet.filter(d => d.name === 'mydb')[0];
+        
+        // A replica just joined!
+        dupMydb.backingStatuses.push({
+            name: 'mydb',
+            address: 'whatever',
+            role: 'READ_REPLICA',
+            requestedStatus: 'online',
+            currentStatus: 'online',
+            error: '',
+            default: true,
+        });
+
+        const changed = mydb.merge(dupMydb);
+        expect(changed).toBeTruthy();
+        const found = mydb.backingStatuses.filter(s => s.role === 'READ_REPLICA')[0];
+        expect(found).toBeTruthy();
+    });
+
+    it('will not merge with a different database', () =>
+        expect(() => system.merge(mydb)).toThrow(Error));
+
     describe('ClusterMember awareness / mapping', function() {
         let ctx;
 
@@ -132,6 +156,16 @@ describe('Database', function() {
             ctx = new HalinContext();
             return ctx.initialize();            
         });
+
+        it('will get members by role', () => {
+            const members = system.getMembersByRole(ctx);
+    
+            expect(members.LEADER instanceof Array).toBeTruthy();
+            expect(members.FOLLOWER instanceof Array).toBeTruthy();
+            
+            expect(members.LEADER[0]).toBeTruthy();
+            expect(members.FOLLOWER.length).toEqual(2);
+        });   
 
         it('can get the leader for a database', () => {
             const leader = system.getLeader(ctx);
