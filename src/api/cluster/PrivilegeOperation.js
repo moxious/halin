@@ -6,9 +6,25 @@ import sentry from '../../api/sentry';
  * See Neo4j 4.0 docs on GRANT/DENY/REVOKE, this structure mirrors that.
  */
 export default class PrivilegeOperation {
-    static OP_GRANT = 'GRANT';
-    static PRIV_TRAVERSE = 'TRAVERSE';
-    static ENTITY_NODES = 'NODES *';
+    static OPERATIONS = {
+        GRANT: 'GRANT',
+        REVOKE: 'REVOKE',
+        DENY: 'DENY',
+    };
+
+    static PRIVILEGES = {
+        TRAVERSE: 'TRAVERSE',
+        READ_ALL: 'READ {*}',
+        MATCH_ALL: 'MATCH {*}',
+        WRITE: 'WRITE',
+    };
+
+    static ENTITIES = {
+        ALL_NODES: 'NODES *',
+        ALL_RELS: 'RELATIONSHIPS *',
+        ALL_ELEMENTS: 'ELEMENTS *',
+    };
+
     static VALID_OPERATIONS = ['GRANT', 'REVOKE', 'DENY'];
     static VALID_PRIVILEGES = ['TRAVERSE', 'READ {*}', 'MATCH {*}', 'WRITE'];
     static VALID_ENTITIES = ['NODES *', 'RELATIONSHIPS *', 'ELEMENTS *'];
