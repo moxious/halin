@@ -14,7 +14,7 @@ const style = {
  */
 const MemberLabel = (props) => {
     return (
-        <Label icon style={style}>
+        <Label style={style}>
             <ClusterMemberStatusIcon {...props}/>
             {props.member ? props.member.getLabel() : 'NONE' }
             { props.detail ? <Label.Detail>{props.detail}</Label.Detail> : '' }
