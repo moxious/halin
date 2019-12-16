@@ -37,11 +37,10 @@ export default class ClusterMember {
     constructor(record) {
         if (record.has('databases')) {
             // >= Neo4j 4.0
-            // TODO: Raft roles can't separate in 4.0. If you're the leader for one
-            // DB you're th e leader for all of them and so forth.
-            // THIS IS A LIMITED ASSUMPTION FOR 4.0 AND WILL CHANGE.
-            // But this assumption is specifically why any role is fine to take as
-            // the cluster member's role.
+            // TODO: Raft roles can separate in 4.0. If you're the leader for one
+            // DB you're not necessarily the leader for all of them.
+            // Under 4.0 asking whether a node is "the leader" is a bit of a 
+            // meaningless question, but this is maintained for backwards compat.
             const dbs = record.get('databases');
             Object.keys(dbs).forEach(dbName => {
                 const role = dbs[dbName];
