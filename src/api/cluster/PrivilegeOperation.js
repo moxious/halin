@@ -196,7 +196,7 @@ export default class PrivilegeOperation {
     }
 
     buildQuery() {
-        sentry.fine('buildQuery', this);
+        // sentry.fine('buildQuery', this);
         const op = this.operation;
         const priv = this.privilege;
         const db = this.database;

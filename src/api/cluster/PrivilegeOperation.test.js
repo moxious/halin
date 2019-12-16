@@ -136,6 +136,30 @@ describe('Privilege Operations', function() {
             },
             expected: 'REVOKE READ {*} ON GRAPH neo4j RELATIONSHIPS * FROM test',
         },
+        {
+            reversalAction: 'GRANT',
+            op: {
+                access: 'DENIED',
+                action: 'read',
+                resource: 'all_properties',
+                graph: 'neo4j',
+                segment: 'NODE(Address)',
+                role: 'microuser',
+            },
+            expected: 'GRANT READ {*} ON GRAPH neo4j NODES Address TO microuser',
+        },
+        {
+            reversalAction: 'GRANT',
+            op: {
+                access: 'DENIED',
+                action: 'traverse',
+                resource: 'graph',
+                graph: 'neo4j',
+                segment: 'RELATIONSHIP(PHONE)',
+                role: 'microuser',
+            },
+            expected: 'GRANT TRAVERSE ON GRAPH neo4j RELATIONSHIPS PHONE TO microuser',
+        }
     ];
 
     scenarios.forEach(scenario => {
