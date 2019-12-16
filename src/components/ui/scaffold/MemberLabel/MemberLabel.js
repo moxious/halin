@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import ClusterMemberStatusIcon from '../ClusterMemberStatusIcon/ClusterMemberStatusIcon';
 
-import { Label, Popup } from 'semantic-ui-react';
+import { Label } from 'semantic-ui-react';
 
 const style = {
     hover: 'none',
@@ -12,22 +12,18 @@ const style = {
  * A simple UI label that can be attached to other elements, to indicate which Neo4j node
  * some data came from.
  */
-const NodeLabel = (props) => {
+const MemberLabel = (props) => {
     return (
-        <Popup trigger={
-            <Label icon style={style}>
-                <ClusterMemberStatusIcon {...props}/>
-                {props.member ? props.member.getLabel() : 'NONE' }
-                { props.detail ? <Label.Detail>{props.detail}</Label.Detail> : '' }
-            </Label>
-        } content={
-            props.member ? props.member.getLabel() : 'N/A'
-        }/>
+        <Label icon style={style}>
+            <ClusterMemberStatusIcon {...props}/>
+            {props.member ? props.member.getLabel() : 'NONE' }
+            { props.detail ? <Label.Detail>{props.detail}</Label.Detail> : '' }
+        </Label>
     );
 }
 
-NodeLabel.props = {
+MemberLabel.props = {
     member: PropTypes.object.isRequired,
 };
 
-export default NodeLabel;
+export default MemberLabel;
