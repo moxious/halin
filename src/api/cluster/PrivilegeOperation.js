@@ -12,6 +12,23 @@ export default class PrivilegeOperation {
         DENY: 'DENY',
     };
 
+    static DATABASE_OPERATIONS = {
+        ACCCESS: 'ACCESS',
+        START: 'START',
+        STOP: 'STOP',
+        CREATE_INDEX: 'CREATE INDEX',
+        DROP_INDEX: 'DROP INDEX',
+        INDEX_MANAGEMENT: 'INDEX MANAGEMENT',
+        CREATE_CONSTRAINT: 'CREATE CONSTRAINT',
+        DROP_CONSTRAINT: 'DROP CONSTRAINT',
+        CONSTRAINT_MANAGEMENT: 'CONSTRAINT MANAGEMENT',
+        CREATE_LABEL: 'CREATE NEW NODE LABEL',
+        CREATE_RELATIONSHIP: 'CREATE NEW RELATIONSHIP TYPE',
+        CREATE_PROPERTY: 'CREATE NEW PROPERTY NAME',
+        NAME_MANAGEMENT: 'NAME MANAGEMENT',
+        ALL: 'ALL DATABASE PRIVILEGES',
+    };
+
     static PRIVILEGES = {
         TRAVERSE: 'TRAVERSE',
         READ_ALL: 'READ {*}',
@@ -25,8 +42,9 @@ export default class PrivilegeOperation {
         ALL_ELEMENTS: 'ELEMENTS *',
     };
 
-    static VALID_OPERATIONS = ['GRANT', 'REVOKE', 'DENY'];
-    static VALID_PRIVILEGES = ['TRAVERSE', 'READ {*}', 'MATCH {*}', 'WRITE'];
+    static VALID_OPERATIONS = ['GRANT', 'REVOKE', 'DENY'];        
+    static VALID_PRIVILEGES = ['TRAVERSE', 'READ {*}', 'MATCH {*}', 'WRITE']
+        .concat(Object.values(PrivilegeOperation.DATABASE_OPERATIONS));
     static VALID_ENTITIES = ['NODES *', 'RELATIONSHIPS *', 'ELEMENTS *'];
 
     constructor(props) {
@@ -35,6 +53,20 @@ export default class PrivilegeOperation {
         this.database = props.database;
         this.entity = props.entity;
         this.role = props.role;
+    }
+
+    /**
+     * In the construction of certain queries, the entity portion isn't
+     * used.  This lets you determine whether the entity portion applies
+     * based on the privilege in question.
+     * @param {String} priv 
+     */
+    static allowsEntity(priv) {
+        if (priv === 'WRITE' || Object.values(PrivilegeOperation.DATABASE_OPERATIONS).indexOf(priv) > -1) {
+            return false;
+        }
+
+        return true;
     }
 
     properties() {
@@ -153,7 +185,9 @@ export default class PrivilegeOperation {
          * https://neo4j.com/docs/cypher-manual/4.0-preview/administration/security/subgraph/#administration-security-subgraph-write
          */
         if (priv.indexOf('WRITE') > -1) {
-            return `${op} ${priv} ON ${graphToken} ${db} ${preposition} ${role}`;    
+            return `${op} ${priv} ON ${graphToken} ${db} ${preposition} ${role}`;
+        } else if(Object.values(PrivilegeOperation.DATABASE_OPERATIONS).indexOf(priv) > -1) {
+            return `${op} ${priv} ON DATABASE ${db} ${preposition} ${role}`;
         }
 
         return `${op} ${priv} ON ${graphToken} ${db} ${entity} ${preposition} ${role}`;
