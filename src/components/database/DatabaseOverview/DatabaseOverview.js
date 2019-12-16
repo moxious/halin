@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import { Label, List } from 'semantic-ui-react';
+import { List } from 'semantic-ui-react';
 import _ from 'lodash';
 
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
-import ClusterMemberStatusIcon from '../../ui/scaffold/ClusterMemberStatusIcon/ClusterMemberStatusIcon';
+import MemberLabel from '../../ui/scaffold/MemberLabel/MemberLabel';
 
 class DatabaseOverview extends Component {
     status(s) {
@@ -29,11 +29,7 @@ class DatabaseOverview extends Component {
             byRole[role].map((member, ki) => {
                 return (
                     <List.Item key={ki}>
-                        <Label>
-                            <ClusterMemberStatusIcon member={member} />
-                            {member.getBoltAddress()}
-                            <Label.Detail>{role}</Label.Detail>
-                        </Label>
+                        <MemberLabel member={member} detail={role}/>
                     </List.Item>
                 );
             });
