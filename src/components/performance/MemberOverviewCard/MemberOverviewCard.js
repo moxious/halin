@@ -38,11 +38,20 @@ class MemberOverviewCard extends Component {
         const roles = this.props.member.getDatabaseRoles();
         const databases = Object.keys(roles);
         const set = window.halinContext.getDatabaseSet();
-        databases.sort();
+        const allNames = set.databases().map(d => d.getLabel());
+        allNames.sort();
 
-        const items = databases.map((dbName, k) => {
+        const items = allNames.map((dbName, k) => {
             const db = set.getDatabaseByName(dbName);
-            const role = roles[dbName];
+
+            // #operability dbms.cluster.overview is how we know which member
+            // has which DB role.  But in the SINGLE setup, you can't call
+            // that proc, meaning you can't get its leader/follower status for
+            // various DBs.  So roles[dbName] = null happens when you're asking
+            // about some other database in a non-clustered setup.  If the value
+            // is missing, it means it wasn't knowable at startup time, and we're
+            // a SINGLE database.
+            const role = roles[dbName] || 'SINGLE';
 
             return (
                 <List.Item key={k}>
