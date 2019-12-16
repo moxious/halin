@@ -59,4 +59,17 @@ describe('Privilege Operations', function() {
         // https://neo4j.com/docs/cypher-manual/4.0-preview/administration/security/subgraph/#administration-security-subgraph-write
         expect(q).toEqual('GRANT WRITE ON GRAPH foo TO blorko');
     });
+
+    it('can generate GRANTs from existing privileges (database permissions)', () => {
+        const op = PrivilegeOperation.fromSystemPrivilege('GRANT', {
+            segment: 'database',
+            action: 'create_index',
+            graph: 'foo',
+            access: 'DENIED',
+            role: 'blorko',
+            resource: '',
+        });
+
+        expect(op.buildQuery()).toEqual('GRANT CREATE INDEX ON DATABASE foo TO blorko');        
+    });
 });

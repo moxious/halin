@@ -1,6 +1,23 @@
 import _ from 'lodash';
 import sentry from '../../api/sentry';
 
+const dbOps = {
+    ACCCESS: 'ACCESS',
+    START: 'START',
+    STOP: 'STOP',
+    CREATE_INDEX: 'CREATE INDEX',
+    DROP_INDEX: 'DROP INDEX',
+    INDEX_MANAGEMENT: 'INDEX MANAGEMENT',
+    CREATE_CONSTRAINT: 'CREATE CONSTRAINT',
+    DROP_CONSTRAINT: 'DROP CONSTRAINT',
+    CONSTRAINT_MANAGEMENT: 'CONSTRAINT MANAGEMENT',
+    CREATE_LABEL: 'CREATE NEW NODE LABEL',
+    CREATE_RELATIONSHIP: 'CREATE NEW RELATIONSHIP TYPE',
+    CREATE_PROPERTY: 'CREATE NEW PROPERTY NAME',
+    NAME_MANAGEMENT: 'NAME MANAGEMENT',
+    ALL: 'ALL DATABASE PRIVILEGES',
+};
+
 /**
  * A Privilege operation represents a change to a privilege in the graph.
  * See Neo4j 4.0 docs on GRANT/DENY/REVOKE, this structure mirrors that.
@@ -12,22 +29,7 @@ export default class PrivilegeOperation {
         DENY: 'DENY',
     };
 
-    static DATABASE_OPERATIONS = {
-        ACCCESS: 'ACCESS',
-        START: 'START',
-        STOP: 'STOP',
-        CREATE_INDEX: 'CREATE INDEX',
-        DROP_INDEX: 'DROP INDEX',
-        INDEX_MANAGEMENT: 'INDEX MANAGEMENT',
-        CREATE_CONSTRAINT: 'CREATE CONSTRAINT',
-        DROP_CONSTRAINT: 'DROP CONSTRAINT',
-        CONSTRAINT_MANAGEMENT: 'CONSTRAINT MANAGEMENT',
-        CREATE_LABEL: 'CREATE NEW NODE LABEL',
-        CREATE_RELATIONSHIP: 'CREATE NEW RELATIONSHIP TYPE',
-        CREATE_PROPERTY: 'CREATE NEW PROPERTY NAME',
-        NAME_MANAGEMENT: 'NAME MANAGEMENT',
-        ALL: 'ALL DATABASE PRIVILEGES',
-    };
+    static DATABASE_OPERATIONS = dbOps;
 
     static PRIVILEGES = {
         TRAVERSE: 'TRAVERSE',
@@ -55,6 +57,10 @@ export default class PrivilegeOperation {
         this.role = props.role;
     }
 
+    static isDatabaseOperation(priv) {
+        return Object.values(PrivilegeOperation.DATABASE_OPERATIONS).indexOf(priv) > -1;
+    }
+
     /**
      * In the construction of certain queries, the entity portion isn't
      * used.  This lets you determine whether the entity portion applies
@@ -62,7 +68,7 @@ export default class PrivilegeOperation {
      * @param {String} priv 
      */
     static allowsEntity(priv) {
-        if (priv === 'WRITE' || Object.values(PrivilegeOperation.DATABASE_OPERATIONS).indexOf(priv) > -1) {
+        if (priv === 'WRITE' || PrivilegeOperation.isDatabaseOperation(priv)) {
             return false;
         }
 
@@ -106,13 +112,30 @@ export default class PrivilegeOperation {
      */
     static fromSystemPrivilege(operation, row) {
         const actionToVerb = a => {
+            // #operability the output of show privileges doesn't match actual
+            // permissions names when granting, which is confusing.
             const mapping = {
                 read: 'READ',
                 write: 'WRITE',
                 find: 'TRAVERSE',
+                create_propertykey: dbOps.CREATE_PROPERTY,
+                create_reltype: dbOps.CREATE_RELATIONSHIP,
+                create_label: dbOps.CREATE_LABEL,
+
+                drop_constraint: dbOps.DROP_CONSTRAINT,
+                constraint_management: dbOps.CONSTRAINT_MANAGEMENT,
+                create_constraint: dbOps.CREATE_CONSTRAINT,
+
+                create_index: dbOps.CREATE_INDEX,
+                drop_index: dbOps.DROP_INDEX,
+
+                name_management: dbOps.NAME_MANAGEMENT,
+                start_database: dbOps.START,
+                stop_database: dbOps.STOP,
+                access: dbOps.ACCCESS,
             };
 
-            return mapping[a] || a.toUpperCase();
+            return mapping[a.toLowerCase()] || a.toUpperCase();
         };
 
         const resourceToWhat = r => {
@@ -120,7 +143,7 @@ export default class PrivilegeOperation {
             // When you say TRAVERSE the "resource" will appear as "graph".
             const mapping = {
                 graph: '',
-                all_properties: '(*)',
+                all_properties: '{*}',
             };
 
             const v = mapping[r];
@@ -133,12 +156,12 @@ export default class PrivilegeOperation {
                 return `(${match.groups.list})`;
             }
 
-            return v;
+            return v ? v : '';
         };
 
         const verb = actionToVerb(row.action);
         const what = resourceToWhat(row.resource);
-        const privilege = `${verb} ${what}`;
+        const privilege = what ? `${verb} ${what}` : verb;
 
         // If you did GRANT MATCH (*) ON foo NODES * TO role
         // That "NODES *" would turn into segment=NODE(*) so we're reversing that mapping
@@ -146,13 +169,17 @@ export default class PrivilegeOperation {
         // can be used to build a related privilege command.
         const entityFromSegment = s => {
             // Case:  turn "NODE(Foo) => NODES Foo"
+            // #operability: grant syntax is NODES{*} but return in the table is NODES(*)
+            // which is super annoying to have to translate back and forth, and users
+            // may not know the difference.
             const re = new RegExp('(?<element>(NODE|RELATIONSHIP))\\((?<list>.*?)\\)');
             const match = s.match(re);
             if (match && match.groups && match.groups.list) {
                 return `${match.groups.element}S ${match.groups.list}`;
             }
 
-            return s;
+            // Sometimes entity doesn't apply.
+            return 'DATABASE';
         };
 
         const props = {
@@ -173,10 +200,18 @@ export default class PrivilegeOperation {
         const op = this.operation;
         const priv = this.privilege;
         const db = this.database;
-        const entity = this.entity;
+
+        // When the entity is 'DATABASE' effectively the entity doesn't apply.
+        // For example when GRANT START ON DATABASE FOO TO ROLE
+        const entity = this.entity === 'DATABASE' ? '' : this.entity;
         const role = this.role;
 
-        const graphToken = (db === '*') ? 'GRAPHS' : 'GRAPH';
+        let graphToken = (db === '*') ? 'GRAPHS' : 'GRAPH';
+
+        // #operability when referring to database privileges the syntax is different.
+        if (PrivilegeOperation.isDatabaseOperation(priv)) {
+            graphToken = 'DATABASE';
+        }
 
         const preposition = (op === 'REVOKE') ? 'FROM' : 'TO';
 
