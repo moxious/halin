@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import ClusterMemberStatusIcon from '../ClusterMemberStatusIcon/ClusterMemberStatusIcon';
 
-import { Image, Popup } from 'semantic-ui-react';
+import { Label, Popup } from 'semantic-ui-react';
 
 const style = {
     hover: 'none',
@@ -14,18 +15,19 @@ const style = {
 const NodeLabel = (props) => {
     return (
         <Popup trigger={
-            <div className="ui image label" style={style}>
-                <Image src="img/neo4j_logo_globe.png" size="mini"/>
-                {props.node ? props.node.getLabel() + ' ' + props.node.role : 'NONE' }
-            </div>
+            <Label icon style={style}>
+                <ClusterMemberStatusIcon {...props}/>
+                {props.member ? props.member.getLabel() : 'NONE' }
+                { props.detail ? <Label.Detail>{props.detail}</Label.Detail> : '' }
+            </Label>
         } content={
-            props.node ? props.node.getLabel() : 'N/A'
+            props.member ? props.member.getLabel() : 'N/A'
         }/>
     );
 }
 
 NodeLabel.props = {
-    node: PropTypes.object,
+    member: PropTypes.object.isRequired,
 };
 
 export default NodeLabel;

@@ -75,7 +75,7 @@ export default class Ping extends Component {
         const message = status.formatStatusMessage(this);
 
         const rows = [
-            { header: 'Machine', show: true, render: r => <NodeLabel node={r.clusterMember} /> },
+            { header: 'Machine', show: true, render: r => <NodeLabel member={r.clusterMember} /> },
             { header: 'Role', show: true, render: r => r.clusterMember.role },
             { header: 'Result (ms)', show: true, render: r => r.elapsedMs },
             { header: 'Status', show: true, render: r => <SignalMeter strength={datautil.signalStrengthFromPing(r.elapsedMs, r.err) } /> },

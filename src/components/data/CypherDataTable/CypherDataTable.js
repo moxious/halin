@@ -196,7 +196,7 @@ class CypherDataTable extends Component {
                                 onExpandedChange={this.onExpandedChange}
                             />
 
-                            { this.nodeLabel ? <NodeLabel node={this.props.node}/> : '' }
+                            { this.nodeLabel ? <NodeLabel member={this.props.node}/> : '' }
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>

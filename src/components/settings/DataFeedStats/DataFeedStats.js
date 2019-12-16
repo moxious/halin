@@ -67,7 +67,7 @@ export default class DataFeedStats extends Component {
                                 index={idx} style={style}
                                 active={this.state.activeIndex === idx}
                             >
-                                <NodeLabel node={stats.node} />
+                                <NodeLabel member={stats.node} />
                                 <Label>{stats.label}</Label>
                                 <Label>
                                     Best

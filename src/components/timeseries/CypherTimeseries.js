@@ -299,7 +299,7 @@ class CypherTimeseries extends Component {
                         <Label.Detail>{datautil.roundToPlaces(this.getChartMin(), 2)}</Label.Detail>
                     </Label>
 
-                    <NodeLabel node={this.props.node}/>
+                    <NodeLabel member={this.props.node}/>
                 </Grid.Row>
                 { this.renderLegendOnlyColumns() }
             </Grid>;
