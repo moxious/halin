@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 
 const style = {
     containerStyle: {
-        width: 30,
-        height: 30,
+        width: 60,
+        height: 60,
         padding: '2px',
         margin: '10px',
         display: 'flex',
