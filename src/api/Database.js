@@ -130,6 +130,18 @@ export default class Database {
         return reconciling;
     }
 
+    /**
+     * Get any errors if present
+     * @return {Object} mapping member address to reported error string.
+     */
+    getErrors() {
+        const errors = {};        
+        this.backingStatuses.forEach(status => {
+            errors[status.address] = status.error;
+        });
+        return errors;
+    }
+
     hasError() {
         return this.backingStatuses.filter(e => e.error).length > 0;
     }
