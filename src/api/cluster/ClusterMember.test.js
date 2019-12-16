@@ -142,7 +142,8 @@ describe('ClusterMember', function () {
                 const c = ClusterMember.makeStandalone(ctx, entry);
                 expect(c).toBeTruthy();
                 expect(c.driver).toBeTruthy();
-                expect(c.pool).toBeTruthy();        
+                expect(c.pool).toBeTruthy();
+                expect(c.standalone).toBeTruthy();
             });
     });
 

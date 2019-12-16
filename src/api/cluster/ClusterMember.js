@@ -66,6 +66,7 @@ export default class ClusterMember {
             this.database = obj;
         }
 
+        this.standalone = record.has('standalone') ? record.get('standalone') : false;
         this.id = record.get('id');
         this.addresses = record.get('addresses');
         this.groups = record.get('groups');
@@ -88,6 +89,7 @@ export default class ClusterMember {
         const has = key => !_.isNil(details[key]);
         details.get = get;
         details.has = has;
+        details.standalone = true;
 
         const member = new ClusterMember(details);
         const driver = halin.driverFor(member.getBoltAddress());
