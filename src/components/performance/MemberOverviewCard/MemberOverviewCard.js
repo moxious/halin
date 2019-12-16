@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
-import { List, Grid, Label, Table, Header } from 'semantic-ui-react';
+import { List, Grid, Label } from 'semantic-ui-react';
 import util from '../../../api/data/util.js';
 import DatabaseStatusIcon from '../../ui/scaffold/DatabaseStatusIcon/DatabaseStatusIcon';
 import './MemberOverviewCard.css';
