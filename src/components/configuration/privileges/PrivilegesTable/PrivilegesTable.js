@@ -11,6 +11,16 @@ import Explainer from '../../../ui/scaffold/Explainer/Explainer';
 import AlterPrivilegeForm from '../AlterPrivilegeForm/AlterPrivilegeForm';
 import PrivilegeOperation from '../../../../api/cluster/PrivilegeOperation';
 
+const negativeButtonProps = row => ({
+    compact: true,
+    negative: true,
+    size: 'tiny',
+    // Do not permit revoking/denying privileges to admin.
+    disabled: row.role === 'admin',
+});
+
+const positiveButtonProps = row => _.merge(_.cloneDeep(negativeButtonProps(row)), { negative: null, positive: true });
+
 class PrivilegesTable extends Component {
     key = uuid.v4();
     query = api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.query;
@@ -21,35 +31,36 @@ class PrivilegesTable extends Component {
             minWidth: 70,
             maxWidth: 100,
             Cell: ({ row }) => {
-                const buttonProps = {
-                    compact: true,
-                    negative: true,
-                    size: 'tiny',
-                    // Do not permit revoking/denying privileges to admin.
-                    disabled: row.role === 'admin',
-                };
 
                 const deny = PrivilegeOperation.fromSystemPrivilege('DENY', row);
                 const revoke = PrivilegeOperation.fromSystemPrivilege('REVOKE', row);
+                const grant = PrivilegeOperation.fromSystemPrivilege('GRANT', row);
 
-                return (
-                    <span>
-                        {
-                            this.privsButton(
-                                'Deny',
-                                _.merge({ locked: true }, deny.properties()),
-                                'lock',
-                                buttonProps)
-                        }
-                        {
-                            this.privsButton(
-                                'Revoke',
-                                _.merge({ locked: true }, revoke.properties()),
-                                'remove circle',
-                                buttonProps)
-                        }
-                    </span>
-                );
+                if (row.access === 'GRANTED') {
+                    return (
+                        <span>
+                            {
+                                this.privsButton(
+                                    'Deny',
+                                    _.merge({ locked: true }, deny.properties()),
+                                    'lock',
+                                    negativeButtonProps(row))
+                            }
+                            {
+                                this.privsButton(
+                                    'Revoke',
+                                    _.merge({ locked: true }, revoke.properties()),
+                                    'remove circle',
+                                    negativeButtonProps(row))
+                            }
+                        </span>
+                    );
+                }
+
+                return this.privsButton('Grant',
+                    _.merge({ locked: true }, grant.properties()),
+                        'unlock',
+                        positiveButtonProps(row));
             },
         },
     ].concat(api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.columns);
