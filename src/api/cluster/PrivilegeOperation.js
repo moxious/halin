@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import sentry from '../../api/sentry';
+// import sentry from '../../api/sentry';
 
 const dbOps = {
     ACCCESS: 'ACCESS',
