@@ -88,6 +88,10 @@ export default class HalinContext {
     getSystemDBWriter() {
         const writer = this.memberSet.members().filter(cm => cm.canWrite(neo4j.SYSTEM_DB))[0];
 
+        if (this.getVersion().major <= 4) {
+            return this.getWriteMember();
+        }
+
         if (!writer) {
             const str = JSON.stringify(this.memberSet.members().map(m => m.asJSON()), null, 2);
             throw new Error(`No systemdb writer in all of ${str}`);
