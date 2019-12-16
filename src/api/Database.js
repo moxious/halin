@@ -206,7 +206,7 @@ export default class Database {
         // (via dbms.cluster.overview or other methods) don't expose addresess like that,
         // they identify themselves with protocol like 'bolt'.  So to find the corresponding
         // member, we have to parse the URIs and see whose host and port matches.
-        const [leaderHost, leaderPort] = leaderAddress.split(':');
+        const [leaderHost, leaderPort] = leaderAddress.replace('bolt://', '').split(':');       
 
         const found = halin.members().filter(member => {
             const candidate = Parser.parse(member.getBoltAddress());
