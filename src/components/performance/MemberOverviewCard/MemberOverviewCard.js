@@ -35,8 +35,7 @@ class MemberOverviewCard extends Component {
     }
 
     databaseList() {
-        const roles = this.props.member.getDatabaseRoles();
-        const databases = Object.keys(roles);
+        const roles = this.props.member.getDatabaseRoles();        
         const set = window.halinContext.getDatabaseSet();
         const allNames = set.databases().map(d => d.getLabel());
         allNames.sort();
