@@ -34,7 +34,7 @@ class ClusterMemberStatusIcon extends Component {
         else { iconName = 'circle'; }  // Follower
 
         return (
-            <Icon name={iconName} color={color} />
+            <Icon className='ClusterMemberStatusIcon' name={iconName} color={color} />
         );
     }
 
@@ -46,7 +46,7 @@ class ClusterMemberStatusIcon extends Component {
 }
 
 ClusterMemberStatusIcon.props = {
-    database: PropTypes.object.isRequired,
+    member: PropTypes.object.isRequired,
 };
 
 export default ClusterMemberStatusIcon;
