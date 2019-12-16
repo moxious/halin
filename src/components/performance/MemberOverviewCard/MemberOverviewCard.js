@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
-import { List, Grid, Label } from 'semantic-ui-react';
+import { List, Grid, Label, Table, Header } from 'semantic-ui-react';
 import util from '../../../api/data/util.js';
 import DatabaseStatusIcon from '../../ui/scaffold/DatabaseStatusIcon/DatabaseStatusIcon';
 import './MemberOverviewCard.css';
@@ -63,11 +63,12 @@ class MemberOverviewCard extends Component {
     }
 
     render() {
+        const left = { textAlign: 'left' };
 
         return (
-            <HalinCard owner={this} 
-                header='Overview' 
-                knowledgebase='ClusterMember' 
+            <HalinCard owner={this}
+                header='Overview'
+                knowledgebase='ClusterMember'
                 id='MemberOverviewCard'>
                 {this.databaseList()}
 
@@ -76,30 +77,31 @@ class MemberOverviewCard extends Component {
                         <Grid.Column width={4}>
                             <SignalMeter strength={util.signalStrengthFromFreshRatio(this.state.fresh, this.state.total)} />
                         </Grid.Column>
+                        
                         <Grid.Column width={12}>
-                            <p>{`${this.state.fresh} of ${this.state.total} fresh`};&nbsp;
-                                {this.state.performance.observations.length} observations; mean response
-                                &nbsp;{util.roundToPlaces(this.state.performance.mean, 0)}ms with stdev {util.roundToPlaces(this.state.performance.stdev, 0)}ms</p>
+                            <List style={left}>
+                                <List.Item>
+                                    <List.Icon name='tags' />
+                                    <List.Content>{this.props.member.id}</List.Content>
+                                </List.Item>
+
+                                {this.props.member.groups && this.props.member.groups.length > 0 ? <List.Item>
+                                    <List.Icon name='group' />
+                                    <List.Content>{this.props.member.groups}</List.Content>
+                                </List.Item> : ''}
+
+                                <List.Item>
+                                    <List.Icon name='address book' />
+                                    <List.Content>{this.props.member.addresses.join(', ')}</List.Content>
+                                </List.Item>
+                            </List>
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>
 
-                <List style={{ textAlign: 'left' }}>
-                    <List.Item>
-                        <List.Icon name='tags' />
-                        <List.Content>{this.props.member.id}</List.Content>
-                    </List.Item>
-
-                    {this.props.member.groups && this.props.member.groups.length > 0 ? <List.Item>
-                        <List.Icon name='group' />
-                        <List.Content>{this.props.member.groups}</List.Content>
-                    </List.Item> : ''}
-
-                    <List.Item>
-                        <List.Icon name='address book' />
-                        <List.Content>{this.props.member.addresses.join(', ')}</List.Content>
-                    </List.Item>
-                </List>
+                <p style={left}>
+                    {this.state.performance.observations.length} observations;&nbsp;
+                    mean {util.roundToPlaces(this.state.performance.mean, 0)}ms stdev {util.roundToPlaces(this.state.performance.stdev, 0)}ms</p>
             </HalinCard>
         );
     }
