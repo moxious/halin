@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { Icon } from 'semantic-ui-react';
+import { Icon, Popup } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
+import neo4j from '../../../../api/driver';
 
 class ClusterMemberStatusIcon extends Component {
     state = {
@@ -25,12 +26,14 @@ class ClusterMemberStatusIcon extends Component {
     }
 
     render() {
-        const role = this.props.member.role.toLowerCase();
+        const canWriteSystem = this.props.member.canWrite(neo4j.SYSTEM_DB);
+        const isReplica = this.props.member.isReadReplica();
+
         const color = this.colorFor(this.state.score);
 
         let iconName;
-        if (role === 'leader') { iconName = 'star'; }
-        else if (role === 'read_replica') { iconName = 'copy'; }
+        if (canWriteSystem) { iconName = 'star'; }
+        else if (isReplica) { iconName = 'copy'; }
         else { iconName = 'circle'; }  // Follower
 
         return (

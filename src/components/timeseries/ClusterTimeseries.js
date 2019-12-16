@@ -7,7 +7,7 @@ import {
     Stream,
 } from 'pondjs';
 import uuid from 'uuid';
-
+import neo4j from '../../api/driver';
 import palette from '../../api/palette';
 import datautil from '../../api/data/util';
 import timewindow from '../../api/timeseries/timewindow';
@@ -301,7 +301,7 @@ class ClusterTimeseries extends Component {
             return 'transparent';
         }
 
-        if (window.halinContext.members()[idx].role === 'LEADER') {
+        if (window.halinContext.members()[idx].canWrite(neo4j.SYSTEM_DB)) {
             return LEADER_COLOR;
         }
 
