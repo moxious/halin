@@ -161,7 +161,7 @@ class AlterPrivilegeForm extends Component {
                     fluid
                     options={this.state.entities}
                     style={this.inputStyle}
-                    disabled={this.state.pending || this.state.privilege.indexOf('WRITE')>-1}
+                    disabled={this.state.pending || !PrivilegeOperation.allowsEntity(this.state.privilege)}
                     defaultValue={this.state.entity}
                     onChange={(e, d) => this.handleChange('entity', e, d)}
                     label='Entity'
