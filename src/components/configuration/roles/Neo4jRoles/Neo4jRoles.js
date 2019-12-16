@@ -200,7 +200,7 @@ class Neo4jRoles extends Component {
                                 database={halin.driver.SYSTEM_DB}
                                 defaultPageSize={10}
                                 onUpdate={this.onRecordsUpdate}
-                                hideNodeLabel={true}
+                                hideMemberLabel={true}
                             />
                         </Grid.Column>
                     </Grid.Row>

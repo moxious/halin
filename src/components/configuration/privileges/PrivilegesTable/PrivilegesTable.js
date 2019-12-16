@@ -145,7 +145,7 @@ class PrivilegesTable extends Component {
                                 refresh={this.state.childRefresh}
                                 defaultPageSize={10}
                                 displayColumns={this.displayColumns}
-                                hideNodeLabel={true}
+                                hideMemberLabel={true}
                             />
                         </Grid.Column>
                     </Grid.Row>

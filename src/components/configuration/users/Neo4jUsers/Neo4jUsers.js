@@ -315,7 +315,7 @@ class Neo4jUsers extends Component {
                                 defaultPageSize={10}
                                 database={halin.driver.SYSTEM_DB}
                                 displayColumns={this.displayColumns}
-                                hideNodeLabel={true}
+                                hideMemberLabel={true}
                             />
                         </Grid.Column>
                     </Grid.Row>
