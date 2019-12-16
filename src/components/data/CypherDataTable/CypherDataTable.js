@@ -8,7 +8,7 @@ import neo4j from '../../../api/driver';
 import sentry from '../../../api/sentry/index';
 
 import ColumnSelector from '../ColumnSelector/ColumnSelector';
-import NodeLabel from '../../ui/scaffold/NodeLabel/NodeLabel';
+import MemberLabel from '../../ui/scaffold/MemberLabel/MemberLabel';
 import Spinner from '../../ui/scaffold/Spinner/Spinner';
 import CSVDownload from '../download/CSVDownload';
 import './CypherDataTable.css';
@@ -52,7 +52,7 @@ class CypherDataTable extends Component {
         this.sortable = _.isNil(props.sortable) ? true : props.sortable;
         this.filterable = _.isNil(props.filterable) ? true : props.filterable;
         this.pageSizeOptions = _.isNil(props.pageSizeOptions) ? [5, 10, 20, 25, 50, 100] : props.pageSizeOptions;
-        this.nodeLabel = props.hideNodeLabel ? false : true;
+        this.nodeLabel = props.hideMemberLabel ? false : true;
 
         // Callbacks
         const assignCallback = key => {
@@ -196,7 +196,7 @@ class CypherDataTable extends Component {
                                 onExpandedChange={this.onExpandedChange}
                             />
 
-                            { this.nodeLabel ? <NodeLabel member={this.props.node}/> : '' }
+                            { this.nodeLabel ? <MemberLabel member={this.props.node}/> : '' }
                         </Grid.Column>
                     </Grid.Row>
                 </Grid>

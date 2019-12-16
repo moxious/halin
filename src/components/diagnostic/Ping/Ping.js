@@ -7,7 +7,7 @@ import sentry from '../../../api/sentry/index';
 
 import SignalMeter from '../../data/SignalMeter/SignalMeter';
 import Spinner from '../../ui/scaffold/Spinner/Spinner';
-import NodeLabel from '../../ui/scaffold/NodeLabel/NodeLabel';
+import MemberLabel from '../../ui/scaffold/MemberLabel/MemberLabel';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
 /**
@@ -75,7 +75,7 @@ export default class Ping extends Component {
         const message = status.formatStatusMessage(this);
 
         const rows = [
-            { header: 'Machine', show: true, render: r => <NodeLabel member={r.clusterMember} /> },
+            { header: 'Machine', show: true, render: r => <MemberLabel member={r.clusterMember} /> },
             { header: 'Role', show: true, render: r => r.clusterMember.role },
             { header: 'Result (ms)', show: true, render: r => r.elapsedMs },
             { header: 'Status', show: true, render: r => <SignalMeter strength={datautil.signalStrengthFromPing(r.elapsedMs, r.err) } /> },

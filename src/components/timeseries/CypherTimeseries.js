@@ -12,7 +12,7 @@ import api from '../../api';
 import uuid from 'uuid';
 import Spinner from '../ui/scaffold/Spinner/Spinner';
 import { styler, Charts, Legend, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
-import NodeLabel from '../ui/scaffold/NodeLabel/NodeLabel';
+import MemberLabel from '../ui/scaffold/MemberLabel/MemberLabel';
 import './CypherTimeseries.css';
 
 const {
@@ -299,7 +299,7 @@ class CypherTimeseries extends Component {
                         <Label.Detail>{datautil.roundToPlaces(this.getChartMin(), 2)}</Label.Detail>
                     </Label>
 
-                    <NodeLabel member={this.props.node}/>
+                    <MemberLabel member={this.props.node}/>
                 </Grid.Row>
                 { this.renderLegendOnlyColumns() }
             </Grid>;
