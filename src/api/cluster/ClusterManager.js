@@ -498,4 +498,33 @@ export default class ClusterManager {
                 message: `Created database ${name}`,
             }));
     }
+
+    /**
+     * Gets the total amount of data on disk used by the various databases.  Applies to Neo4j >= 4.0.
+     * @returns {Object} that is a map of databaseName => total disk size in bytes.
+     * @throws {Error} if using this on a database that is pre-Neo4j 4.0
+     */
+    getDatabaseStoreSizes() {
+        if (this.ctx.getVersion().major < 4) {
+            throw new Error('This operation only applies to Neo4j >= 4.0');
+        }
+
+        const databaseNames = this.ctx.databases().map(db => db.getLabel());
+
+        const storeSizes = {};
+
+        // Run the store size fetch on each database, collecting results into a single map.
+        const fetchAllSizes = Promise.all(Promise.map(databaseNames, name => {
+            return this.ctx.getSystemDBWriter().run(ql.JMX_4_TOTAL_STORE_SIZE, { db: name })
+                .then(results => neo4j.unpackResults(results, {
+                    required: ['sizeInBytes'],
+                }))
+                .then(results => {
+                    const val = _.get(results[0], 'sizeInBytes') || 0;
+                    storeSizes[name] = val;
+                });
+        }, { concurrency: 3 }));
+
+        return fetchAllSizes.then(() => storeSizes);
+    }
 }
