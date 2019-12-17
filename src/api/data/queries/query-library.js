@@ -12,6 +12,8 @@ import JMX_DISK_UTILIZATION from './jmx/diskUtilization';
 import JMX_TRANSACTIONS from './jmx/transactions';
 import JMX_LAST_TRANSACTION_ID from './jmx/lastCommittedTx';
 
+import JMX_4_TOTAL_STORE_SIZE from './jmx/4.0/totalStoreSize';
+
 import PING from './basic/ping';
 import CLUSTER_ROLE from './cluster/role';
 import CLUSTER_OVERVIEW from './cluster/overview';
@@ -71,6 +73,7 @@ const allQueries = {
     JMX_STORE_SIZES,
     JMX_DISK_UTILIZATION,
     JMX_PAGE_CACHE,
+    JMX_4_TOTAL_STORE_SIZE,
     DBMS_4_PAGE_CACHE,
 
     JMX_MEMORY_STATS,
