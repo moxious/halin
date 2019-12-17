@@ -16,16 +16,12 @@ import './MemberSelector.css';
 
 // Defines how cluster members are sorted and ordered.
 // Rules:
-// - Display the leader first.
 // - Display core members next
 // - Display read replicas last.
 // - Within a section, core or read replica, order by label.
 // In case mode=SINGLE, we don't really have to care about ordering
 // because there will only be one.
 const memberOrdering = (a, b) => {
-    if (a.isLeader()) { return -1; }
-    if (b.isLeader()) { return 1; }
-
     const aMode = a.isCore() ? 'core' : 'replica';
     const bMode = b.isCore() ? 'core' : 'replica';
 
