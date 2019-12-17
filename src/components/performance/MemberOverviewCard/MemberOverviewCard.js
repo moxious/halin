@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
-import { List, Grid, Label } from 'semantic-ui-react';
+import { List, Grid, Label, Icon } from 'semantic-ui-react';
 import util from '../../../api/data/util.js';
+import ClusterMember from '../../../api/cluster/ClusterMember';
 import DatabaseStatusIcon from '../../ui/scaffold/DatabaseStatusIcon/DatabaseStatusIcon';
 import './MemberOverviewCard.css';
+import _ from 'lodash';
+import api from '../../../api';
 
 import SignalMeter from '../../data/SignalMeter/SignalMeter';
 
@@ -16,6 +19,8 @@ class MemberOverviewCard extends Component {
         fresh: 1,
         notFresh: 0,
         performance: { observations: [] },
+        storeSizes: {},
+        totalSize: null,
     };
 
     sampleFeeds() {
@@ -27,11 +32,35 @@ class MemberOverviewCard extends Component {
     componentDidMount() {
         this.mounted = true;
         this.interval = setInterval(() => this.sampleFeeds(), 500);
+        
+        if (window.halinContext.getVersion().major >= 4) {
+            return window.halinContext.getClusterManager().getDatabaseStoreSizes()
+                .then(storeSizes => {                    
+                    const totalSize = Object.values(storeSizes).reduce((a, b) => a+b, 0);
+                    this.setState({ storeSizes, totalSize });
+                })
+                .catch(err => {
+                    this.setState({ error: err, storeSizes: {} });
+                    api.sentry.error('Error getting store sizes', err);
+                });
+        }
     }
 
     componentWillUnmount() {
         this.mounted = false;
         clearInterval(this.interval);
+    }
+
+    static iconFor(role) {
+        const icons = {
+            [ClusterMember.ROLE_LEADER]: 'star',
+            [ClusterMember.ROLE_FOLLOWER]: 'circle',
+            [ClusterMember.ROLE_REPLICA]: 'copy',
+        };
+
+        const name = icons[role] || 'circle';
+
+        return <Icon name={name} />;
     }
 
     databaseList() {
@@ -57,6 +86,11 @@ class MemberOverviewCard extends Component {
                     <Label>
                         <DatabaseStatusIcon db={db} />
                         {dbName}
+                        {
+                            !_.isNil(this.state.storeSizes[dbName]) ? 
+                            <Label.Detail>{util.humanDataSize(this.state.storeSizes[dbName])}</Label.Detail>
+                            : ''
+                        }
                         <Label.Detail>{role}</Label.Detail>
                     </Label>
                 </List.Item>
@@ -72,12 +106,13 @@ class MemberOverviewCard extends Component {
 
     render() {
         const left = { textAlign: 'left' };
-
+        console.log('TOTAL',this.state.totalSize);
         return (
             <HalinCard owner={this}
                 header='Overview'
                 knowledgebase='ClusterMember'
                 id='MemberOverviewCard'>
+                
                 {this.databaseList()}
 
                 <Grid>
@@ -102,6 +137,14 @@ class MemberOverviewCard extends Component {
                                     <List.Icon name='address book' />
                                     <List.Content>{this.props.member.addresses.join(', ')}</List.Content>
                                 </List.Item>
+
+                                {
+                                    this.state.total ? 
+                                    <List.Item>
+                                        <List.Icon name='disk'/>
+                                        <List.Content>{util.humanDataSize(this.state.totalSize)} store data on disk</List.Content>
+                                    </List.Item> : ''
+                                }
                             </List>
                         </Grid.Column>
                     </Grid.Row>
