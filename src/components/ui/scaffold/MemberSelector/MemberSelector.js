@@ -44,7 +44,7 @@ export default class MemberSelector extends Component {
         animation: 'push',
         visible: true,
         direction: 'left',
-        member: window.halinContext.members()[0],
+        member: window.halinContext.getSystemDBWriter(),
 
         panes: (member = null, key = uuid.v4()) => ([
             // Because panes get reused across cluster nodes, we have to 
