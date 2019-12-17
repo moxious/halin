@@ -1,5 +1,13 @@
 # Working docker-compose setup for causal cluster
 # See the image tag for which version we're using.
+#
+# WARNING - PRIOR TO USING THIS SET UP LOCAL HOST ALIASES
+# sudo vi /etc/hosts and then add these lines:
+#
+# 127.0.0.1	core1
+# 127.0.0.1	core2
+# 127.0.0.1	core3
+# 127.0.0.1	read1
 version: '3'
 
 networks:
@@ -16,21 +24,25 @@ services:
       - 6477:6477
       - 7687:7687
     volumes:
-      - $HOME/neo4j/neo4j-core401/conf:/conf
-      - $HOME/neo4j/neo4j-core401/data:/data
-      - $HOME/neo4j/neo4j-core401/logs:/logs
-      - $HOME/neo4j/neo4j-core401/plugins:/plugins
+      - $HOME/neo4j/core1/conf:/conf
+      - $HOME/neo4j/core1/data:/data
+      - $HOME/neo4j/core1/logs:/logs
+      - $HOME/neo4j/core1/plugins:/plugins
     environment:
 #      - NEO4J_AUTH=none
       - NEO4J_AUTH=neo4j/admin
       - NEO4J_dbms_mode=CORE
-      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes      
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
       - NEO4J_causal__clustering_initial__discovery__members=core1:5000,core2:5000,core3:5000
       - NEO4J_causal__clustering_minimum__core__cluster__size__at__formation=3
       - NEO4J_dbms_connector_http_listen__address=:7474
       - NEO4J_dbms_connector_https_listen__address=:6477
       - NEO4J_dbms_connector_bolt_listen__address=:7687
-      - NEO4J_dbms_connector_bolt_advertised__address=0.0.0.0:7687
+      - NEO4J_dbms_connector_bolt_advertised__address=core1:7687
       - NEO4J_causal__clustering_discovery__advertised__address=core1:5000
       - NEO4J_causal__clustering_transaction__advertised__address=core1:6000
       - NEO4J_causal__clustering_raft__advertised__address=core1:7000
@@ -52,14 +64,18 @@ services:
       - 6478:6478      
       - 7688:7688      
     volumes:
-      - $HOME/neo4j/neo4j-core402/conf:/conf
-      - $HOME/neo4j/neo4j-core402/data:/data
-      - $HOME/neo4j/neo4j-core402/logs:/logs
-      - $HOME/neo4j/neo4j-core402/plugins:/plugins      
+      - $HOME/neo4j/core2/conf:/conf
+      - $HOME/neo4j/core2/data:/data
+      - $HOME/neo4j/core2/logs:/logs
+      - $HOME/neo4j/core2/plugins:/plugins      
     environment:
       - NEO4J_AUTH=neo4j/admin
       - NEO4J_dbms_mode=CORE
-      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes      
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
       - NEO4J_causal__clustering_minimum__core__cluster__size__at__formation=3
       - NEO4J_causal__clustering_initial__discovery__members=core1:5000,core2:5000,core3:5000
       - NEO4J_causal__clustering_discovery__advertised__address=core2:5000
@@ -68,7 +84,7 @@ services:
       - NEO4J_dbms_connector_http_listen__address=:7475
       - NEO4J_dbms_connector_https_listen__address=:6478
       - NEO4J_dbms_connector_bolt_listen__address=:7688
-      - NEO4J_dbms_connector_bolt_advertised__address=0.0.0.0:7688
+      - NEO4J_dbms_connector_bolt_advertised__address=core2:7688
       - NEO4J_config_strict__validation=true   
       - NEO4J_dbms_memory_heap_initial__size=1024m
       - NEO4J_dbms_memory_heap_max__size=1024m
@@ -87,14 +103,18 @@ services:
       - 6479:6479      
       - 7689:7689
     volumes:
-      - $HOME/neo4j/neo4j-core403/conf:/conf
-      - $HOME/neo4j/neo4j-core403/data:/data
-      - $HOME/neo4j/neo4j-core403/logs:/logs
-      - $HOME/neo4j/neo4j-core403/plugins:/plugins
+      - $HOME/neo4j/core3/conf:/conf
+      - $HOME/neo4j/core3/data:/data
+      - $HOME/neo4j/core3/logs:/logs
+      - $HOME/neo4j/core3/plugins:/plugins
     environment:
       - NEO4J_AUTH=neo4j/admin
       - NEO4J_dbms_mode=CORE
       - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
       - NEO4J_causal__clustering_minimum__core__cluster__size__at__formation=3
       - NEO4J_causal__clustering_initial__discovery__members=core1:5000,core2:5000,core3:5000
       - NEO4J_causal__clustering_discovery__advertised__address=core3:5000
@@ -103,7 +123,7 @@ services:
       - NEO4J_dbms_connector_http_listen__address=:7476
       - NEO4J_dbms_connector_https_listen__address=:6479      
       - NEO4J_dbms_connector_bolt_listen__address=:7689
-      - NEO4J_dbms_connector_bolt_advertised__address=0.0.0.0:7689
+      - NEO4J_dbms_connector_bolt_advertised__address=core3:7689
       - NEO4J_config_strict__validation=true   
       - NEO4J_dbms_memory_heap_initial__size=1024m
       - NEO4J_dbms_memory_heap_max__size=1024m
@@ -113,3 +133,42 @@ services:
       - NEO4J_dbms_logs_query_threshold=0s
       - NEO4J_dbms_default__database=demoDB
      
+  read1:
+    image: neo4j/neo4j-experimental:4.0.0-rc01-enterprise
+    networks:
+      - lan
+    ports:
+      - 7477:7477
+      - 6480:6480
+      - 7690:7690
+    volumes:
+      - $HOME/neo4j/read1/conf:/conf
+      - $HOME/neo4j/read1/data:/data
+      - $HOME/neo4j/read1/logs:/logs
+      - $HOME/neo4j/read1/plugins:/plugins
+    environment:
+      - NEO4J_AUTH=neo4j/admin
+      - NEO4J_dbms_mode=READ_REPLICA
+      - NEO4J_ACCEPT_LICENSE_AGREEMENT=yes
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_import_file_use__neo4j__config=true
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+      - NEO4J_causal__clustering_minimum__core__cluster__size__at__formation=3
+      - NEO4J_causal__clustering_initial__discovery__members=core1:5000,core2:5000,core3:5000
+      - NEO4J_causal__clustering_discovery__advertised__address=read1:5000
+      - NEO4J_causal__clustering_transaction__advertised__address=read1:6000
+      - NEO4J_causal__clustering_raft__advertised__address=read1:7000
+      - NEO4J_dbms_connector_http_listen__address=:7477
+      - NEO4J_dbms_connector_https_listen__address=:6480
+      - NEO4J_dbms_connector_bolt_listen__address=:7690
+      - NEO4J_dbms_connector_bolt_advertised__address=read1:7690
+      - NEO4J_config_strict__validation=true   
+      - NEO4J_dbms_memory_heap_initial__size=1024m
+      - NEO4J_dbms_memory_heap_max__size=1024m
+      - NEO4J_dbms_memory_pagecache_size=1g
+      - NEO4J_dbms_directories_import=import
+      - NEO4J_dbms_logs_query_enabled=INFO
+      - NEO4J_dbms_logs_query_threshold=0s
+      - NEO4J_dbms_default__database=demoDB
+           
