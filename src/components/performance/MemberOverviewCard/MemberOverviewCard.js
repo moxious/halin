@@ -106,7 +106,6 @@ class MemberOverviewCard extends Component {
 
     render() {
         const left = { textAlign: 'left' };
-        console.log('TOTAL',this.state.totalSize);
         return (
             <HalinCard owner={this}
                 header='Overview'
