@@ -5,7 +5,7 @@ export default {
      * Turn a number of bytes into a human readable label, like 4KB.
      */
     humanDataSize: (bytesInput, si) => {
-        let bytes = new Number(bytesInput);
+        let bytes = bytesInput;
         var thresh = si ? 1000 : 1024;
         if (Math.abs(bytes) < thresh) {
             return bytes + ' B';
