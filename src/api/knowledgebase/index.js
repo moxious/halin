@@ -250,7 +250,19 @@ export default {
         links.connectionManagement,
     ]),
     Database: render([
-        'A Neo4j Database contains nodes and edges',
+        `Databases operate as independent entities in a Neo4j DBMS, both in standalone and in a cluster. 
+        Since a cluster consists of multiple independent server instances, the effects of administrative 
+        operations like creating a new database happen asynchronously and independently for each server. 
+        However, the immediate effect of an administrative operation is to safely commit the desired 
+        state in the system database.`,
+        `The desired state committed in the system database gets replicated and is picked up by an internal 
+        component called the reconciler. It runs on every instance and takes the appropriate actions required 
+        locally on that instance for reaching the desired state; creating, starting, stopping and dropping 
+        databases.`,        
+        `Every database runs in an independent Raft group and since there are two databases in a fresh cluster, 
+        system and neo4j, this means that it also has two Raft groups. Every Raft group also has an independent 
+        leader and thus a particular Core server could be the leader for one database and a follower for 
+        another.`,
     ]),
     TransactionsOpen: render([
         'Any query that updates the graph will run in a transaction. An updating query will always either fully succeed, or not succeed at all.',
