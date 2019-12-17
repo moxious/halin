@@ -30,7 +30,7 @@ describe('Fields', function () {
         it('should reformat long byte values', () => {
             const r = fields.dataSizeField({ value: 1073741824 });
             expect(r.props.className).toEqual('_dataSizeField');
-            expect(r.props.children).toEqual('1.1 GB');
+            expect(r.props.children).toEqual('1.0 GB');
         });
     });
 
