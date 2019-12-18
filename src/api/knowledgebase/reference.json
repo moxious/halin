@@ -68,5 +68,7 @@
     "neo4j.causal_clustering.core.replication_fail": "Raft Replication fail count",
     "neo4j.causal_clustering.read_replica.pull_updates": "The total number of pull requests made by this instance",
     "neo4j.causal_clustering.read_replica.pull_update_highest_tx_id_requested": "The highest transaction id requested in a pull update by this instance",
-    "neo4j.causal_clustering.read_replica.pull_update_highest_tx_id_received": "The highest transaction id that has been pulled in the last pull updates by this instance"
+    "neo4j.causal_clustering.read_replica.pull_update_highest_tx_id_received": "The highest transaction id that has been pulled in the last pull updates by this instance",
+    "neo4j.vm.thread.count": "Estimated number of active threads in the current thread group.",    
+    "neo4j.vm.thread.total": "The total number of live threads including daemon and non-daemon threads."
 }
