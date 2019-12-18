@@ -21,10 +21,8 @@ const negativeButtonProps = row => ({
 
 const positiveButtonProps = row => _.merge(_.cloneDeep(negativeButtonProps(row)), { negative: null, positive: true });
 
-class PrivilegesTable extends Component {
-    key = uuid.v4();
-    query = api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.query;
-    displayColumns = [
+const makeDisplayColumns = () => {
+    const columns = [
         {
             Header: 'Actions',
             id: 'delete',
@@ -66,8 +64,15 @@ class PrivilegesTable extends Component {
                 );
             },
         },
-    ].concat(api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.columns);
+    ].concat(_.cloneDeep(api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.columns));
 
+    return columns;
+};
+
+class PrivilegesTable extends Component {
+    key = uuid.v4();
+    query = api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.query;
+    displayColumns = makeDisplayColumns();
     state = {
         childRefresh: 1,
         refresh: 1,
@@ -143,6 +148,10 @@ class PrivilegesTable extends Component {
                                 database={api.driver.SYSTEM_DB}
                                 refresh={this.state.childRefresh}
                                 defaultPageSize={10}
+                                selectFilter={[
+                                    'access', 'action', 'resource', 
+                                    'segment', 'role', 'graph'
+                                ]}
                                 displayColumns={this.displayColumns}
                                 hideMemberLabel={true}
                             />
