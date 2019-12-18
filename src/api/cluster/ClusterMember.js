@@ -457,8 +457,8 @@ export default class ClusterMember {
                 // { major, minor, patch }
                 _.set(this.dbms, 'version', this.getVersion());
 
-                const e = new Date().getTime() - s;
-                sentry.fine(this.getLabel(), 'initialization', e, 'ms elapsed');
+                // const e = new Date().getTime() - s;
+                // sentry.fine(this.getLabel(), 'initialization', e, 'ms elapsed');
                 return whatever;
             });
     }
