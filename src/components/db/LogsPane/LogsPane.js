@@ -189,7 +189,7 @@ class LogViewer extends Component {
         let n = parseInt(this.state.lastN, 10);
         if (Number.isNaN(n)) { n = 20; }
 
-        const params = { n, limit: MAX_ROWS };
+        const params = { n, limit: neo4j.int(MAX_ROWS) };
         const promise = this.props.node.run(query, params)
             .then(results => {
                 // Records are in reverse order to only get the last ones.  Re-reverse them.
