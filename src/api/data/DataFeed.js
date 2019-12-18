@@ -304,7 +304,7 @@ export default class DataFeed extends Metric {
             .then(results => {
                 const elapsedMs = new Date().getTime() - startTime;
 
-                if (elapsedMs > this.rate && !firstRun) {
+                if (elapsedMs > (2 * this.rate) && !firstRun) {
                     // It's a bad idea to run long-running queries with a short window.
                     // It puts too much load on the system and does a bad job updating the
                     // graphic.
