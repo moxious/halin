@@ -102,8 +102,12 @@ class MetricsPane extends Component {
 
         this.setState({ loading: true });
 
-        console.log({metric, last: this.state.observations });
-        return this.props.node.run(queryLibrary.GET_METRIC.query, { metric, last: api.driver.int(this.state.observations) })
+        const params = {
+            metric,
+            last: api.driver.int(this.state.observations),
+        };
+
+        return this.props.node.run(queryLibrary.GET_METRIC.query, params)
             .then(data => data.records.map(r => ({
                 t: this.convertMetricTimestampToLocalDate(r.get('timestamp').toNumber()),
                 metric: r.get('metric'),
