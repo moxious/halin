@@ -160,7 +160,16 @@ export default class Database {
 
         members.forEach(member => {
             const roles = member.getDatabaseRoles();
-            const roleHere = roles[this.name] || 'DATABASE OFFLINE';
+
+            // #operability for dbms.mode=SINGLE, members don't know DB statuses.
+            // In cluster, you can dbms.cluster.overview() and they tell you their
+            // role, but in SINGLE they don't really have roles...
+            let roleHere;
+            if (member.isSingle()) {
+                roleHere = roles[this.name] || ClusterMember.ROLE_SINGLE;
+            } else {
+                roleHere = roles[this.name] || 'DATABASE OFFLINE';
+            }
 
             if (!(roleHere in results)) {
                 results[roleHere] = [member];
