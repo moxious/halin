@@ -92,7 +92,52 @@ class CypherDataTable extends Component {
         }
     }
 
+    /**
+     * User can pass a prop selectFilter=['foo','bar'] and we auto-build select filters for
+     * those columns.
+     */
+    buildSelectFilters() {
+        if (!this.props.selectFilter) { 
+            return null;
+        }
+
+        this.props.selectFilter.forEach(accessor => {
+            const col = this.state.displayColumns.filter(col => col.accessor === accessor)[0];
+            if (!col) {
+                sentry.warn(`Cannot create select filter for missing column ${accessor}`);
+                return;
+            }
+            
+            const possibleValues = _.uniq(this.state.items.map(item => item[accessor]));
+            possibleValues.sort();
+
+            const filterSpec = {
+                filterMethod: (filter, row) => {
+                    if (filter.value === 'all') {
+                        return true;
+                    }
+                    return row[filter.id] === filter.value;
+                },
+                Filter: ({ filter, onChange }) => 
+                    <select onChange={event => onChange(event.target.value)}
+                        style={{ width: '100%' }}
+                        value={filter ? filter.value : 'all'}
+                    >
+                        <option value='all'>All</option>
+                        {
+                            possibleValues.map((val, i) =>
+                                <option value={val} key={i}>{val}</option>)
+                        }
+                    </select>
+            };
+        
+            _.merge(col, filterSpec);
+        })
+    }
+
     onUpdate = () => {
+        this.buildSelectFilters();
+
         if (this.props.onUpdate) {
             return this.props.onUpdate(this.state.items, this);
         }
