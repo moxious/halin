@@ -435,7 +435,7 @@ export default class ClusterMember {
             }),
         ];
 
-        const s = new Date().getTime();
+        // const s = new Date().getTime();
 
         // When halin is first starting, doing all of these things in parallel can a bit
         // spam the server with new connections, so we limit concurrency which is friendlier
