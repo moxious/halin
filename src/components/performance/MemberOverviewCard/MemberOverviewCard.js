@@ -138,7 +138,7 @@ class MemberOverviewCard extends Component {
                                 </List.Item>
 
                                 {
-                                    this.state.total ? 
+                                    this.state.totalSize && !_.isNil(this.state.storeSizes) ? 
                                     <List.Item>
                                         <List.Icon name='disk'/>
                                         <List.Content>{util.humanDataSize(this.state.totalSize)} store data on disk</List.Content>
