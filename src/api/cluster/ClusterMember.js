@@ -476,7 +476,23 @@ export default class ClusterMember {
         return featureProbes.runAllProbes(this)
             .then(dbms => {
                 this.dbms = dbms;
-            });
+            })
+            .then(() => {
+                if (this.isCommunity()) {
+                    // #operability As a special exception, community will fail 
+                    // the test to determine if a node supports native auth -- but it
+                    // does.  It fails because community doesn't have the concept of
+                    // auth providers.
+                    this.dbms.nativeAuth = true;
+                }
+    
+                if (this.dbms.multidatabase) {
+                    this.dbms.systemGraph = true;
+                }
+    
+                // { major, minor, patch }
+                _.set(this.dbms, 'version', this.getVersion());
+            });    
     }
 
     /**
