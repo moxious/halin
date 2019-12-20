@@ -49,7 +49,7 @@ services:
       - NEO4J_config_strict__validation=true   
       - NEO4J_dbms_memory_heap_initial__size=1024m
       - NEO4J_dbms_memory_heap_max__size=1024m
-      - NEO4J_dbms_memory_pagecache_size=1g
+      - NEO4J_dbms_memory_pagecache_size=256m
       - NEO4J_dbms_directories_import=import
       - NEO4J_dbms_logs_query_enabled=INFO
       - NEO4J_dbms_logs_query_threshold=0s
@@ -88,7 +88,7 @@ services:
       - NEO4J_config_strict__validation=true   
       - NEO4J_dbms_memory_heap_initial__size=1024m
       - NEO4J_dbms_memory_heap_max__size=1024m
-      - NEO4J_dbms_memory_pagecache_size=1g
+      - NEO4J_dbms_memory_pagecache_size=256m
       - NEO4J_dbms_directories_import=import
       - NEO4J_dbms_logs_query_enabled=INFO
       - NEO4J_dbms_logs_query_threshold=0s
@@ -127,7 +127,7 @@ services:
       - NEO4J_config_strict__validation=true   
       - NEO4J_dbms_memory_heap_initial__size=1024m
       - NEO4J_dbms_memory_heap_max__size=1024m
-      - NEO4J_dbms_memory_pagecache_size=1g
+      - NEO4J_dbms_memory_pagecache_size=256m
       - NEO4J_dbms_directories_import=import
       - NEO4J_dbms_logs_query_enabled=INFO
       - NEO4J_dbms_logs_query_threshold=0s
@@ -166,7 +166,7 @@ services:
       - NEO4J_config_strict__validation=true   
       - NEO4J_dbms_memory_heap_initial__size=1024m
       - NEO4J_dbms_memory_heap_max__size=1024m
-      - NEO4J_dbms_memory_pagecache_size=1g
+      - NEO4J_dbms_memory_pagecache_size=256m
       - NEO4J_dbms_directories_import=import
       - NEO4J_dbms_logs_query_enabled=INFO
       - NEO4J_dbms_logs_query_threshold=0s
