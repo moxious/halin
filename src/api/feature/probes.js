@@ -2,6 +2,8 @@ import sentry from '../sentry/index';
 import neo4jErrors from '../driver/errors';
 import queryLibrary from '../data/queries/query-library';
 import neo4j from '../../api/driver';
+import _ from 'lodash';
+import Promise from 'bluebird';
 
 /**
  * A feature probe is a bit of code that runs against a cluster node to determine whether or not
@@ -215,7 +217,70 @@ const getAvailableMetrics = member => {
     return prom;
 };
 
+/**
+ * Run all feature probes in the catalog for a cluster member and return an object that contains keys/values
+ * about supported features.
+ * @param {ClusterMember} member 
+ * @returns {Promise} that resolves to a single object
+ */
+const runAllProbes = member => {
+    let dbms = {};
+
+    const allProbes = [
+        () => getNameVersionsEdition(member)
+            .then(result => { dbms = _.merge(_.cloneDeep(dbms), result); }),
+        () => supportsNativeAuth(member)
+            .then(result => {
+                dbms.nativeAuth = result.nativeAuth;
+                dbms.systemGraph = result.systemGraph;
+            }),
+        () => authEnabled(member)
+            .then(result => { dbms.authEnabled = result; }),
+        () => csvMetricsEnabled(member)
+            .then(result => { dbms.csvMetricsEnabled = result; }),
+        () => hasAPOC(member)
+            .then(result => { dbms.apoc = result; }),
+        () => hasLogStreaming(member)
+            .then(result => { dbms.logStreaming = result; }),
+        () => getAvailableMetrics(member)
+            .then(metrics => { member.metrics = metrics; }),
+        () => hasDBStats(member)
+            .then(result => { dbms.hasDBStats = result }),
+        () => hasMultiDatabase(member)
+            .then(result => { dbms.multidatabase = result }),
+        () => member.getMaxHeap().then(maxHeap => {
+            dbms.maxHeap = maxHeap;
+        }),
+        () => member.getMaxPhysicalMemory().then(maxPhysMemory => {
+            dbms.physicalMemory = maxPhysMemory;
+        }),
+    ];
+
+    // When halin is first starting, doing all of these things in parallel can a bit
+    // spam the server with new connections, so we limit concurrency which is friendlier
+    // and also results in faster startup times.
+    return Promise.map(allProbes, f => f(), { concurrency: 2 })
+        .then(() => {
+            if (member.isCommunity()) {
+                // #operability As a special exception, community will fail 
+                // the test to determine if a node supports native auth -- but it
+                // does.  It fails because community doesn't have the concept of
+                // auth providers.
+                dbms.nativeAuth = true;
+            }
+
+            if (dbms.multidatabase) {
+                dbms.systemGraph = true;
+            }
+
+            // { major, minor, patch }
+            _.set(dbms, 'version', member.getVersion());
+        })
+        .then(() => dbms);
+};
+
 export default {
+    runAllProbes,
     getNameVersionsEdition, 
     hasLogStreaming,
     hasMultiDatabase, 

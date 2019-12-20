@@ -404,62 +404,21 @@ export default class ClusterMember {
 
         // Probes get individual pieces of information then assign them into our structure,
         // so we can drive feature request functions for outside callers.
-        // These are functions so that the async call doesn't start until we call it.
-        const allProbes = [
-            () => featureProbes.getNameVersionsEdition(this)
-                .then(result => { this.dbms = _.merge(_.cloneDeep(this.dbms), result); }),
-            () => featureProbes.supportsNativeAuth(this)
-                .then(result => {
-                    this.dbms.nativeAuth = result.nativeAuth;
-                    this.dbms.systemGraph = result.systemGraph;
-                }),
-            () => featureProbes.authEnabled(this)
-                .then(result => { this.dbms.authEnabled = result; }),
-            () => featureProbes.csvMetricsEnabled(this)
-                .then(result => { this.dbms.csvMetricsEnabled = result; }),
-            () => featureProbes.hasAPOC(this)
-                .then(result => { this.dbms.apoc = result; }),
-            () => featureProbes.hasLogStreaming(this)
-                .then(result => { this.dbms.logStreaming = result; }),
-            () => featureProbes.getAvailableMetrics(this)
-                .then(metrics => { this.metrics = metrics; }),
-            () => featureProbes.hasDBStats(this)
-                .then(result => { this.dbms.hasDBStats = result }),
-            () => featureProbes.hasMultiDatabase(this)
-                .then(result => { this.dbms.multidatabase = result }),
-            () => this.getMaxHeap().then(maxHeap => {
-                this.dbms.maxHeap = maxHeap;
-            }),
-            () => this.getMaxPhysicalMemory().then(maxPhysMemory => {
-                this.dbms.physicalMemory = maxPhysMemory;
-            }),
-        ];
-
-        // const s = new Date().getTime();
-
-        // When halin is first starting, doing all of these things in parallel can a bit
-        // spam the server with new connections, so we limit concurrency which is friendlier
-        // and also results in faster startup times.
-        return Promise.map(allProbes, f => f(), { concurrency: 2 })
-            .then(whatever => {
-                if (this.isCommunity()) {
-                    // #operability As a special exception, community will fail 
-                    // the test to determine if a node supports native auth -- but it
-                    // does.  It fails because community doesn't have the concept of
-                    // auth providers.
-                    this.dbms.nativeAuth = true;
-                }
-
-                if (this.dbms.multidatabase) {
-                    this.dbms.systemGraph = true;
-                }
-
-                // { major, minor, patch }
-                _.set(this.dbms, 'version', this.getVersion());
-
-                // const e = new Date().getTime() - s;
-                // sentry.fine(this.getLabel(), 'initialization', e, 'ms elapsed');
-                return whatever;
+        // this.dbms ends up looking like this:
+        // {
+        //     nativeGraph: true,
+        //     systemGraph: true,
+        //     version: { major: 4, minor: 0, patch: 0 },
+        //     maxHeap: 'whatever',
+        //     physicalMemory: 'whatever',
+        //     hasDBStats: true,
+        //     metrics: [],
+        //     csvMetricsEnabled: true,
+        //     ...
+        // }
+        return featureProbes.runAllProbes(this)
+            .then(dbms => {
+                this.dbms = dbms;
             });
     }
 
