@@ -1,11 +1,21 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import { List } from 'semantic-ui-react';
+import { List, Icon, Label } from 'semantic-ui-react';
 import _ from 'lodash';
 
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 import MemberLabel from '../../ui/scaffold/MemberLabel/MemberLabel';
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
+
+const FabricDesignator = props =>
+    <List.Item>
+    <Label>
+        <Icon name='cubes'/>
+        Fabric Database 
+        <Label.Detail><Explainer knowledgebase='Fabric'/></Label.Detail>
+    </Label>
+    </List.Item>;
 
 class DatabaseOverview extends Component {
     status(s) {
@@ -45,12 +55,15 @@ class DatabaseOverview extends Component {
 
     render() {
         const leader = this.props.database.getLeader(window.halinContext);
+        const fabric = leader.usesFabric();
+        const fabricHere = _.get(fabric, 'database') === this.props.database.getLabel();
 
         return (
             <HalinCard id="DatabaseOverview" header='Overview' knowledgebase='Database'>
                 {this.membersByRole()}
 
                 <List>
+                    { fabricHere ? <FabricDesignator/> : '' }
                     {
                         _.sortBy(this.props.database.getMemberStatuses(), ['address']).map((s, i) =>
                             <List.Item key={i}>
