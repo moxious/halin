@@ -24,6 +24,9 @@ export default class DetectedSettings extends PureComponent {
             roles = ['(no roles)'];
         }
 
+        const fabric = ctx.getSystemDBWriter().usesFabric();
+        console.log('FABRIC', fabric);
+
         const items = [
             this.item(ctx.getBaseURI(), 'home'),
             this.item(ctx.getCurrentUser().username, 'user circle'),
@@ -39,6 +42,7 @@ export default class DetectedSettings extends PureComponent {
             this.lineItem(ctx.supportsMetrics(), 'Metrics'),
             this.lineItem(ctx.isCluster(), 'Clustered'),
             this.lineItem(ctx.isNeo4jAura(), 'Neo4j Aura'),
+            this.lineItem(fabric, 'Neo4j Fabric'),
         ];
 
         const listify = someStuff =>
