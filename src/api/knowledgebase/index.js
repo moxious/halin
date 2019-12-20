@@ -62,6 +62,7 @@ const links = {
     changingCSVMetricIntervals: new KBLink('Configuring CSV Metrics and sampling intervals', 'https://neo4j.com/docs/operations-manual/current/monitoring/metrics/expose/#metrics-csv'),
     countStore: new KBLink('Fast counts using the count store', 'https://neo4j.com/developer/kb/fast-counts-using-the-count-store/'),
     apocDocs: new KBLink('APOC Documentation', 'https://neo4j.com/docs/labs/apoc/current/'),
+    fabric: new KBLink('Fabric', 'https://neo4j.com/docs/operations-manual/4.0/fabric/introduction/'),
 };
 
 export default {
@@ -263,6 +264,15 @@ export default {
         system and neo4j, this means that it also has two Raft groups. Every Raft group also has an independent 
         leader and thus a particular Core server could be the leader for one database and a follower for 
         another.`,
+    ]),
+    Fabric: render([
+        `A Fabric setup includes a Fabric database, that acts as the entry point to a federated or sharded graph 
+        infrastructure. This database is also referred in Fabric as the virtual database. Drivers and client 
+        applications access and use the Fabric database like any other Neo4j database, with the exception that 
+        it cannot store any data and queries against it return no data. The Fabric database can be configured 
+        only on a standalone Neo4j DBMS, i.e. on a Neo4j DBMS where the configuration setting dbms.mode must 
+        be set to SINGLE.`,
+        links.fabric,
     ]),
     TransactionsOpen: render([
         'Any query that updates the graph will run in a transaction. An updating query will always either fully succeed, or not succeed at all.',
