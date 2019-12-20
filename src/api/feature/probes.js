@@ -215,7 +215,9 @@ const usesFabric = member => {
                     const prefix = `fabric.graph.${graphId}`;
 
                     // Get keys starting with the prefix pertaining to this fabric graph.
-                    const keys = Object.keys(map).filter(key => key.indexOf(prefix) === 0);
+                    // Throw out the ones pertaining to driver settings, too detailed.
+                    const keys = Object.keys(map)
+                        .filter(key => key.indexOf(prefix) === 0 && key.indexOf('driver') === -1);
                     if (keys.length === 0) {
                         break;
                     }
