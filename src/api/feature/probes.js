@@ -314,27 +314,12 @@ const runAllProbes = member => {
     // spam the server with new connections, so we limit concurrency which is friendlier
     // and also results in faster startup times.
     return Promise.map(allProbes, f => f(), { concurrency: 2 })
-        .then(() => {
-            if (member.isCommunity()) {
-                // #operability As a special exception, community will fail 
-                // the test to determine if a node supports native auth -- but it
-                // does.  It fails because community doesn't have the concept of
-                // auth providers.
-                dbms.nativeAuth = true;
-            }
-
-            if (dbms.multidatabase) {
-                dbms.systemGraph = true;
-            }
-
-            // { major, minor, patch }
-            _.set(dbms, 'version', member.getVersion());
-        })
         .then(() => dbms);
 };
 
 export default {
     runAllProbes,
+    usesFabric,
     getNameVersionsEdition, 
     hasLogStreaming,
     hasMultiDatabase, 

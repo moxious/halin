@@ -60,6 +60,43 @@ describe('Feature Probes', function () {
                 }));
     });
 
+    describe('Fabric Probe', () => {
+        const faker = config => ({
+            getConfiguration: () => Promise.resolve(config),
+        });
+
+        it('knows when fabric config is missing', () => {
+            const faked = faker({
+                'fabric.database.name': 'foo',
+            });
+
+            return probes.usesFabric(faked)
+                .then(fabric => {
+                    // Because it's missing a fabric.graph.0.uri
+                    expect(fabric).toBeFalsy();
+                });
+        });
+
+        it('knows how to return a good fabric config', () => {
+            const faked = faker({
+                'fabric.database.name': 'foo',
+                'fabric.graph.0.uri': 'neo4j://a',
+                'fabric.graph.0.name': 'graphA',
+                'fabric.graph.1.uri': 'neo4j://b',
+                'fabric.graph.1.name': 'graphB',
+            });
+
+            return probes.usesFabric(faked)
+                .then(fabric => {
+                    expect(fabric).toBeTruthy();
+                    expect(fabric.database).toEqual('foo');
+                    expect(fabric.graphs.length).toEqual(2);
+                    expect(fabric.graphs[0].name).toEqual('graphA');
+                    expect(fabric.graphs[1].name).toEqual('graphB');
+                });
+        });
+    });
+
     describe('Listing Metrics', () => {
         // const metrics = [ { name: 'a', lastUpdated: 'sss' } ];
         it('can get metrics', () =>
