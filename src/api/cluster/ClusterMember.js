@@ -274,6 +274,10 @@ export default class ClusterMember {
         return !this.isEnterprise();
     }
 
+    usesFabric() {
+        return this.dbms.fabric;
+    }
+
     supportsAPOC() {
         return this.dbms.apoc;
     }
@@ -383,18 +387,70 @@ export default class ClusterMember {
             });
     }
 
-    getMaxHeap() {
-        return this.run(queryLibrary.DBMS_GET_MAX_HEAP)
+    /**
+     * @returns {Promise} that resolves to the member's configuration, key=>value.
+     */
+    getConfiguration() {
+        // TODO -- config is loaded once and only once and then cached, because
+        // it barely changes in Neo4j.  There are EXCEPTIONS in terms of a very
+        // small number of dynamic config options (#operability).  So consider 
+        // polling later if it's important to pick up changes in those.
+        if (!_.isNil(this.configuration)) {
+            return Promise.resolve(this.configuration);
+        }
+
+        return this.run('CALL dbms.listConfig()', {})
             .then(results => {
-                const rec = results.records[0];
-                return rec.get('value');
+                const configMap = {};
+                results.records.forEach(rec => {
+                    const key = rec.get('name');
+                    const value = rec.get('value');
+
+                    // Configs can have duplicate keys! #operability
+                    // which sucks.  but we need to detect that.
+                    // If a second value is found, push it on to an array.
+                    if (configMap.hasOwnProperty(key)) {
+                        const presentValue = configMap[key];
+                        if (_.isArray(presentValue)) {
+                            presentValue.push(value);
+                        } else {
+                            configMap[key] = [presentValue, value];
+                        }
+                    } else {
+                        if (neo4j.isInt(value)) {
+                            configMap[key] = neo4j.integer.inSafeRange(value) ? value.toNumber() : neo4j.integer.toString(value);
+                        } else {
+                            configMap[key] = value;
+                        }
+                    }
+                });
+                return configMap;
+            })
+            .then(configMap => {
+                this.configuration = configMap;
+                return this.configuration;
             })
             .catch(err => {
                 if (neo4jErrors.permissionDenied(err)) {
-                    return 'unknown';
+                    this.configuration = {};
+                    return;
                 }
                 throw err;
-            })
+            });
+    }
+
+    /**
+     * Get a Neo4j configuration entry for this member
+     * @param {*} confSetting the name of the setting, e.g. dbms.memory.heap.max_size
+     * @returns {String} the value of the setting
+     * @throws {Error} if the member hasn't been initialized yet.
+     */
+    getConfigurationValue(confSetting) {
+        if (_.isNil(this.configuration)) {
+            throw new Error('Make sure to call getConfiguration() first');
+        }
+
+        return _.get(this.configuration, confSetting);
     }
 
     checkComponents() {
@@ -416,17 +472,29 @@ export default class ClusterMember {
         //     csvMetricsEnabled: true,
         //     ...
         // }
+
         return featureProbes.runAllProbes(this)
             .then(dbms => {
                 this.dbms = dbms;
             });
     }
 
+    /**
+     * This function just takes note of a transaction success, as a data point/observation,
+     * so that we can track ongoing responsiveness/performance.
+     * @param {Number} time number of ms elapsed
+     */
     _txSuccess(time) {
         // It's a ring not an array, so it cannot grow without bound.
         this.observations.push({ x: new Date(), y: time });
     }
 
+    /**
+     * This function does nothing other than take internal note that an error occurred,
+     * so that we can accumulate information about what errors we've seen and provide
+     * feedback to users.
+     * @param {Error} err 
+     */
     _txError(err) {
         const str = `${err}`;
         if (_.has(this.errors, str)) {

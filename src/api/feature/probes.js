@@ -193,6 +193,55 @@ const supportsNativeAuth = member => {
 };
 
 /**
+ * Probe for whether or not fabric is supported.
+ * @param {ClusterMember} member 
+ * @returns {Object} which is either null if fabric isn't supported, or { database, graphs: [] }
+ */
+const usesFabric = member => {
+    return member.getConfiguration()
+        .then(map => {
+            // In order for us to consider this as having fabric, it has to be named and have at least
+            // one graph URI configured, otherwise it couldn't possibly work.
+            const fabricDB = _.get(map, 'fabric.database.name');
+            const firstURI = _.get(map, 'fabric.graph.0.uri');
+
+            if (!fabricDB || !firstURI) {
+                return false;
+            } else {
+                let graphId = 0;
+                const graphs = [];
+
+                while(true) {
+                    const prefix = `fabric.graph.${graphId}`;
+
+                    // Get keys starting with the prefix pertaining to this fabric graph.
+                    const keys = Object.keys(map).filter(key => key.indexOf(prefix) === 0);
+                    if (keys.length === 0) {
+                        break;
+                    }
+
+                    // Based on how fabric config works, these will end up looking like:
+                    // { uri: 'bolt://whatever', database: 'foo', name: 'fabricFoo' }
+                    const graph = {};
+                    keys.forEach(k => {
+                        const graphSpecificKey = k.replace(`${prefix}.`, '');
+                        const value = _.get(map, k);
+                        graph[graphSpecificKey] = value;
+                    });
+
+                    graphs.push(graph);
+                    graphId++;
+                }
+
+                return {
+                    database: fabricDB,
+                    graphs,
+                };
+            }
+        })
+};
+
+/**
  * @returns Array of { name, lastUpdated } metrics supported by the server.
  */
 const getAvailableMetrics = member => {
@@ -234,6 +283,9 @@ const runAllProbes = member => {
                 dbms.nativeAuth = result.nativeAuth;
                 dbms.systemGraph = result.systemGraph;
             }),
+        () => usesFabric(member).then(fabric => {
+            dbms.fabric = fabric;
+        }),    
         () => authEnabled(member)
             .then(result => { dbms.authEnabled = result; }),
         () => csvMetricsEnabled(member)
@@ -248,8 +300,8 @@ const runAllProbes = member => {
             .then(result => { dbms.hasDBStats = result }),
         () => hasMultiDatabase(member)
             .then(result => { dbms.multidatabase = result }),
-        () => member.getMaxHeap().then(maxHeap => {
-            dbms.maxHeap = maxHeap;
+        () => member.getConfiguration().then(() => {
+            dbms.maxHeap = member.getConfigurationValue('dbms.memory.heap.max_size');
         }),
         () => member.getMaxPhysicalMemory().then(maxPhysMemory => {
             dbms.physicalMemory = maxPhysMemory;
