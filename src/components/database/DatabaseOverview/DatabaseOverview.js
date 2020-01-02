@@ -53,9 +53,25 @@ class DatabaseOverview extends Component {
         )
     }
 
+    unavailable() {
+        return (
+            <HalinCard id="DatabaseOverview" header='Overview' knowledgebase='Database'>
+                <strong>Database details are unavailable</strong>
+            </HalinCard>
+        );
+    }
+
     render() {
-        const leader = this.props.database.getLeader(window.halinContext);
-        const fabric = leader.usesFabric();
+        if (!this.props.database) {
+            return this.unavailable();
+        }
+
+        // While database status is updating, it's possible (race condition) for us to have multiple leaders.
+        // The false argument says that if we find multiple leaders, it's not fatal.  In the UI this will get
+        // picked up quite quickly.  If it persists, it's a big problem with the cluster and that should never
+        // occur.
+        const leader = this.props.database.getLeader(window.halinContext, false);
+        const fabric = leader ? leader.usesFabric() : false;
         const fabricHere = _.get(fabric, 'database') === this.props.database.getLabel();
 
         return (
