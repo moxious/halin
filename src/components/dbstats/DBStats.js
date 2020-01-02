@@ -4,6 +4,9 @@ import ql from '../../api/data/queries/query-library';
 /**
  * This class encapsulates functionality around the db.stats.* procedures.
  * See: https://neo4j.com/docs/operations-manual/current/reference/procedures/
+ * 
+ * TODO -- adapt for multidatabase.  Because sessions don't get a database
+ * parameter here, implicitly we're gathering stats about the default database.
  */
 export default class DBStats {
     constructor(clusterMember) {
