@@ -250,6 +250,12 @@ export default class Database {
         return null;
     }
 
+    /**
+     * Get a single status message for this database.
+     * WARNING -- THERE CAN BE MULTIPLE for example when the database is
+     * reconciling.  So be careful when using this.
+     * @returns the first status
+     */
     getStatus() {
         const statuses = this.getStatuses();
 
