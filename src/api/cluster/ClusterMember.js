@@ -258,7 +258,7 @@ export default class ClusterMember {
     canWrite(db = null) {
         if (this.isSingle()) { return true; }
 
-        if (db === null) { return this.isLeader(); }
+        if (_.isNil(db)) { return this.isLeader(); }
         return this.database[db] === 'LEADER';
     }
 
