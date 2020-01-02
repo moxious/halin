@@ -183,11 +183,16 @@ export default class Database {
 
     /**
      * Return the ClusterMember who is the leader of this database.
+     * 
+     * The leader of a database may be null, if the database is stopped,
+     * stuck in some non-online status, or while the cluster is undergoing
+     * a leader election.  So remember to handle the null case.
+     * 
      * @param {HalinContext} a halin context object
      * @returns {ClusterMember} the leader, or nil if there is none.
      * @throws {Error} when there is no leader, or there are multiples (inconsistent cluster)
      */
-    getLeader(halin) {
+    getLeader(halin, multipleLeadersFatal=true) {
         if (halin.members().length === 1) {
             // In standalone mode...it's pretty obvious.
             return halin.members()[0];
@@ -201,12 +206,20 @@ export default class Database {
                     r === ClusterMember.ROLE_SINGLE;
             });
 
-        if (leaders.length === 0) {            
-            sentry.warn(`Database ${this.name} has no leader; election may be underway`);
+        // Remember that databases which are stopped or not online don't have
+        // leaders, and that's OK.
+        if (leaders.length === 0) {
+            if (this.isOnline()) {
+                sentry.warn(`Database ${this.name} has no leader; election may be underway`);
+            }
             return null;
         } else if(leaders.length > 1) {
             const leadersStr = JSON.stringify(leaders, null, 2);
-            throw new Error(`Database ${this.name} has more than one leader (${leadersStr}); inconsistent cluster`);
+            const err = `Database ${this.name} has more than one leader (${leadersStr}); this may be transient and OK, but if it persists, investigate!`;
+            if (multipleLeadersFatal) {
+                throw new Error(err);
+            }
+            sentry.warn(err);
         }
 
         const leaderAddress = leaders[0].address;
