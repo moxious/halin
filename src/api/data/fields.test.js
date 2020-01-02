@@ -7,7 +7,6 @@ describe('Fields', function () {
 
         it('should produce a JSON text result in a div', () => {
             const val = fields.jsonField({ value: json });
-            // console.log(val.props);
             expect(val.props.className).toEqual('_jsonField');
             expect(val.props.children).toEqual(jsonStr);
         });

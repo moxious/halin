@@ -150,9 +150,9 @@ export default class ClusterTransactionStatus extends Component {
             ],
         ].concat(bars);
 
-        console.log('MIN ', this.getMin(), ' MAX ', this.getMax());
+        sentry.fine('MIN ', this.getMin(), ' MAX ', this.getMax());
         const raceChart = this.getRaceChart();
-        console.log('Chart', raceChart);
+        sentry.fine('Chart', raceChart);
 
         // const listify = stuff => stuff.length > 0 ? 
         //     <List>

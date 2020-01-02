@@ -125,7 +125,6 @@ export default class MetricsChart extends PureComponent {
 
         if (rawObservations.length > 0) {
             const first = rawObservations[0];
-            console.log(first);
  
             // Of all of the keys, filter down to only those which are numeric metrics.
             this.numericKeys = Object.keys(first.map).map(key => ({ key, val: _.get(first.map, key) }))
