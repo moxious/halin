@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Sidebar, Segment, Menu, Tab, Icon, Divider } from 'semantic-ui-react';
-import sentry from '../../../../api/sentry';
+// import sentry from '../../../../api/sentry';
 import DatabaseMenuItem from '../DatabaseMenuItem/DatabaseMenuItem';
 import CreateDatabase from '../../../database/CreateDatabase/CreateDatabase';
 import DatabasePane from '../../../database/DatabasePane/DatabasePane';
@@ -55,7 +55,7 @@ export default class DatabaseSelector extends Component {
             
             // Whether or not the selection changed, change state and force refresh.
             if (!this.state.create) {
-                sentry.fine('DatabaseSelector: force selection', selected);
+                // sentry.fine('DatabaseSelector: force selection', selected);
                 this.setState({ selected, id: uuid.v4(), create: false });
             } else {
                 // This is silly, to force state refresh.  We got a new list of

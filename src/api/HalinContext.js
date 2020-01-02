@@ -139,12 +139,8 @@ export default class HalinContext {
         }
 
         const allOptions = _.merge({ encrypted }, this.driverOptions);
-        if (this.debug) {
-            sentry.fine('Driver connection', { addr, username, allOptions });
-        }
         const driver = neo4j.driver(addr,
             neo4j.auth.basic(username, password), allOptions);
-        sentry.fine('Driver', addr);
         this.drivers[addr] = driver;
         return driver;
     }
