@@ -107,6 +107,9 @@ export default class PrivilegeOperation {
      * This function lets you take an existing privilege, and easily "undo" it, by applying
      * a different operation to it.
      * 
+     * Sorry, but this is difficult code because of the syntax peculiarities of how permissions 
+     * commands work in 4.0
+     * 
      * @param {String} operation: one of GRANT, REVOKE, DENY
      * @param {Object} row 
      */
@@ -161,7 +164,13 @@ export default class PrivilegeOperation {
 
         const verb = actionToVerb(row.action);
         const what = resourceToWhat(row.resource);
-        const privilege = what ? `${verb} ${what}` : verb;
+
+        // #operability because WRITE {proplist} isn't supported in 4.0, WRITE has a special
+        // form.  You GRANT WRITE and DENY WRITE, but never DENY WRITE {*} which is a syntax error
+        // despite it meaning the same thing.  This means there are certain privileges and actions
+        // that don't permit an "entity" ({*}) and you have to watch out for this special case when
+        // generating queries.
+        const privilege = (what && this.allowsEntity(verb)) ? `${verb} ${what}` : verb;
 
         // If you did GRANT MATCH (*) ON foo NODES * TO role
         // That "NODES *" would turn into segment=NODE(*) so we're reversing that mapping
