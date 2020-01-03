@@ -1,0 +1,4 @@
+div.HalinCard#MemberOverviewCard > div.HalinCardContent {
+    overflow-y: scroll;
+    overflow-x: hidden;
+}

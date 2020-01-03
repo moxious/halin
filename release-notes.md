@@ -1,5 +1,18 @@
 # Halin Release Notes
 
+## 0.12.0 (Neo4j 4.0, Multi-database, and Fine-Grained Security)
+
+- Status for both all cluster members and all databases.  Users
+can independently see the mapping between the two
+- Halin API exposes a better cluster-wide API for fine-grained cluster
+control, including ClusterMemberSet, DatabaseSet, and feature probes.
+- Full support for GRANT/REVOKE/DENY of fine-grained privileges under Neo4j 4.0
+- Support for tracking LEADER/FOLLOWER status in multi-database arrangements of 4.0
+- Halin knows how to detect presence of Fabric enabled databases
+- Removed Neo4j Desktop API dependencies, permitting upgrades to key components
+(semantic-ui-react).  As a result, users must always log in even when using as a
+graph app.
+
 ## 0.12.0-beta
 
 - Initial support for Neo4j 4.0 as of MR03; multiple databases now supported!

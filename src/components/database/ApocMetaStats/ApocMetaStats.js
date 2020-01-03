@@ -17,6 +17,11 @@ import './ApocMetaStats.css';
 const gatherStats = (node, database) => {
     if (!node || !database) { return null; }
 
+    if (database.isReconciling()) {
+        // Database has multiple statuses, and it's not safe to do this operation at this moment.
+        return Promise.resolve({ reconciling: true });
+    }
+
     if (database.getLabel() === api.driver.SYSTEM_DB) {
         return Promise.resolve({
             message: 'This database does not contain inspectable data',
@@ -78,6 +83,10 @@ class ApocMetaStats extends Component {
     }
 
     render() {
+        if (this.state.reconciling) {
+            return `Database is reconciling; please wait until it is fully online for stats to appear.`;
+        }
+
         if (this.state.error) { return `${this.state.error}`; }
         if (this.state.message) { return <p>{this.state.message}</p>; }
 

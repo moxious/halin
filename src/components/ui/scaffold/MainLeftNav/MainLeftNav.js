@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import './MainLeftNav.css';
-import { Sidebar, Segment, Menu, Icon, Image, Popup, Confirm } from 'semantic-ui-react';
+import { Sidebar, Segment, Menu, Icon, Image, Confirm } from 'semantic-ui-react';
 import ClusterOverviewPane from '../../../overview/ClusterOverviewPane/ClusterOverviewPane';
 import PermissionsPane from '../../../configuration/PermissionsPane/PermissionsPane';
 import SettingsPane from '../../../settings/SettingsPane/SettingsPane';
@@ -18,12 +18,13 @@ const segmentStyle = {
     paddingRight: 0,
 };
 
-const hoverPopup = (text, trigger, key) =>
-    <Popup inverted key={key}
-        on='hover'
-        position='right center'
-        trigger={trigger}
-        content={text} />;
+const hoverPopup = (popupText, childElement, key) => 
+    <div key={key}>{childElement}</div>;
+    // <Popup inverted key={key}
+    //     on='hover'
+    //     position='center right'
+    //     trigger={childElement}
+    //     content={popupText} />;
 
 export default class MainLeftNav extends Component {
     state = {
@@ -110,7 +111,7 @@ export default class MainLeftNav extends Component {
             },
             {
                 section: 'members',
-                text: 'Cluster Members',
+                text: 'Members',
                 visible: () => true,
                 icon: <Icon size={size} name='tv' />,
             },
@@ -122,13 +123,13 @@ export default class MainLeftNav extends Component {
             },
             {
                 section: 'users',
-                text: 'Permissions Management',
+                text: 'Permissions',
                 visible: () => window.halinContext.userIsAdmin(),
                 icon: <Icon size={size} name='group' />,
             },
             {
                 section: 'diagnostics',
-                text: 'Cluster Diagnostic Tools',
+                text: 'Diagnostics',
                 visible: () => true,
                 icon: <Icon size={size} name='wrench' />,
             },
@@ -160,7 +161,7 @@ export default class MainLeftNav extends Component {
                         // Filter to only those that are visible, allowing us to check
                         // if the config permits that section for that user.
                         selections.filter(s => s.visible()).map((selection, index) =>
-                            hoverPopup(selection.text,
+                            hoverPopup(selection.text, <div>
                                 <Menu.Item
                                     active={this.state.section === selection.section}
                                     index={index}
@@ -168,7 +169,7 @@ export default class MainLeftNav extends Component {
                                     style={selection.style || {}}
                                     onClick={() => this.section(selection.section)}>
                                     {selection.icon}
-                                </Menu.Item>, index))
+                                </Menu.Item></div>, index))
                     }
 
                     {

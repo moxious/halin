@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Sidebar, Segment, Menu, Tab, Divider } from 'semantic-ui-react';
 import uuid from 'uuid';
 
-import PerformancePane from '../../../performance/PerformancePane/PerformancePane';
+import ClusterMemberOverview from '../../../performance/ClusterMemberOverview/ClusterMemberOverview';
 import Neo4jConfiguration from '../../../configuration/Neo4jConfiguration/Neo4jConfiguration';
 import OSPane from '../../../performance/OSPane/OSPane';
 import PluginPane from '../../../db/PluginPane/PluginPane';
@@ -16,16 +16,12 @@ import './MemberSelector.css';
 
 // Defines how cluster members are sorted and ordered.
 // Rules:
-// - Display the leader first.
 // - Display core members next
 // - Display read replicas last.
 // - Within a section, core or read replica, order by label.
 // In case mode=SINGLE, we don't really have to care about ordering
 // because there will only be one.
 const memberOrdering = (a, b) => {
-    if (a.isLeader()) { return -1; }
-    if (b.isLeader()) { return 1; }
-
     const aMode = a.isCore() ? 'core' : 'replica';
     const bMode = b.isCore() ? 'core' : 'replica';
 
@@ -48,7 +44,7 @@ export default class MemberSelector extends Component {
         animation: 'push',
         visible: true,
         direction: 'left',
-        member: window.halinContext.members()[0],
+        member: window.halinContext.getSystemDBWriter(),
 
         panes: (member = null, key = uuid.v4()) => ([
             // Because panes get reused across cluster nodes, we have to 
@@ -57,10 +53,10 @@ export default class MemberSelector extends Component {
             // objects.  
             // https://stackoverflow.com/questions/29074690/react-why-components-constructor-is-called-only-once
             {
-                menuItem: 'Performance',
+                menuItem: 'Overview',
                 visible: () => true,
                 render: () => this.paneWrapper(
-                    <PerformancePane key={key} node={member} />),
+                    <ClusterMemberOverview key={key} member={member} />),
             },
             {
                 menuItem: 'Queries',

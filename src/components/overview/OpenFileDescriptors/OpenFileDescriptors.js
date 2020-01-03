@@ -57,7 +57,7 @@ class OpenFileDescriptors extends Component {
             <HalinCard header='File Descriptors' knowledgebase='FileDescriptors' owner={this}>
                 <Dropdown style={{paddingBottom: 10}}
                     placeholder='Show:'
-                    fluid defaultValue='usageRatio'
+                    fluid defaultValue='fdUsed'
                     onChange={this.onChange}
                     selection
                     options={this.state.options}

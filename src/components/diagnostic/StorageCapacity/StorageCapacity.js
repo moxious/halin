@@ -25,7 +25,7 @@ class StorageCapacity extends Component {
                     allowColumnSelect={false}
                     displayColumns={this.state.displayColumns}
                     showPagination={false}
-                    defaultPageSize={10}
+                    defaultPageSize={3}
                     sortable={true}
                     filterable={false}
                     rate={this.state.rate}/>

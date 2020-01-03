@@ -257,7 +257,8 @@ class Neo4jUsers extends Component {
     }
 
     manageRolesButton() {
-        if (!window.halinContext.isEnterprise()) {
+        // #operability: Aura standard does not support role management
+        if (!window.halinContext.supportsRoles()) {
             // Does not apply.
             return '';
         }
@@ -286,7 +287,7 @@ class Neo4jUsers extends Component {
                         </Grid.Column>
                     </Grid.Row>
 
-                    {window.halinContext.isEnterprise() ? <AssignRoleModal key={this.key}
+                    {window.halinContext.supportsRoles() ? <AssignRoleModal key={this.key}
                         node={this.props.node}
                         open={this.state.assignOpen}
                         onCancel={this.closeAssign}
@@ -315,7 +316,7 @@ class Neo4jUsers extends Component {
                                 defaultPageSize={10}
                                 database={halin.driver.SYSTEM_DB}
                                 displayColumns={this.displayColumns}
-                                hideNodeLabel={true}
+                                hideMemberLabel={true}
                             />
                         </Grid.Column>
                     </Grid.Row>

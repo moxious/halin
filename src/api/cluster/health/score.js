@@ -27,6 +27,7 @@ const feedFreshness = (ctx, member) => {
         fresh,
         notFresh,
         performance: member.performance(),
+        created: new Date(),
     };
 };
 

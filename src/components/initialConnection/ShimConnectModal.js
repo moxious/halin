@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import { Button, Form, Modal, Message, Checkbox } from "semantic-ui-react";
 import _ from 'lodash';
-import sentry from '../../api/sentry/index';
+// import sentry from '../../api/sentry/index';
 import Splash from './Splash';
 
 let privateLocalCreds = {};
@@ -82,10 +82,6 @@ class ConnectForm extends Component {
     };
 
     onSubmit = () => this.props.onSubmit(this.state);
-
-    componentWillMount() {
-        sentry.fine('ShimConnectModal: running outside of Neo4j Desktop');
-    }
 
     render() {
         const { open, onClose } = this.props;

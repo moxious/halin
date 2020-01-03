@@ -24,11 +24,17 @@ export default class DetectedSettings extends PureComponent {
             roles = ['(no roles)'];
         }
 
+        const fabric = ctx.getSystemDBWriter().usesFabric();
+        console.log('FABRIC', fabric);
+
+        const version = ctx.getSystemDBWriter().getVersion();
+
         const items = [
+            this.lineItem(true, `Neo4j v${version.major}.${version.minor}.${version.patch}`),
+            ctx.isCommunity() ? this.lineItem(true, 'Community Edition') : this.lineItem(true, 'Enterprise Edition'),
             this.item(ctx.getBaseURI(), 'home'),
             this.item(ctx.getCurrentUser().username, 'user circle'),
             this.item(roles.join(', '), 'lock'),
-            ctx.isCommunity() ? this.lineItem(true, 'Community') : this.lineItem(true, 'Enterprise'),
             this.lineItem(ctx.supportsAuth(), 'Authorization'),
             this.lineItem(ctx.supportsNativeAuth(), 'Native Auth'),
             this.lineItem(ctx.supportsMultiDatabase(), 'Multi-Database'),
@@ -38,7 +44,8 @@ export default class DetectedSettings extends PureComponent {
             this.lineItem(ctx.supportsDBStats(), 'DB Stats'),
             this.lineItem(ctx.supportsMetrics(), 'Metrics'),
             this.lineItem(ctx.isCluster(), 'Clustered'),
-            this.lineItem(ctx.isNeo4jCloud(), 'Neo4j Cloud'),
+            this.lineItem(ctx.isNeo4jAura(), 'Neo4j Aura'),
+            this.lineItem(fabric, 'Neo4j Fabric'),
         ];
 
         const listify = someStuff =>

@@ -1,16 +1,78 @@
 import _ from 'lodash';
+// import sentry from '../../api/sentry';
+
+const dbOps = {
+    ACCCESS: 'ACCESS',
+    START: 'START',
+    STOP: 'STOP',
+    CREATE_INDEX: 'CREATE INDEX',
+    DROP_INDEX: 'DROP INDEX',
+    INDEX_MANAGEMENT: 'INDEX MANAGEMENT',
+    CREATE_CONSTRAINT: 'CREATE CONSTRAINT',
+    DROP_CONSTRAINT: 'DROP CONSTRAINT',
+    CONSTRAINT_MANAGEMENT: 'CONSTRAINT MANAGEMENT',
+    CREATE_LABEL: 'CREATE NEW NODE LABEL',
+    CREATE_RELATIONSHIP: 'CREATE NEW RELATIONSHIP TYPE',
+    CREATE_PROPERTY: 'CREATE NEW PROPERTY NAME',
+    NAME_MANAGEMENT: 'NAME MANAGEMENT',
+    ALL: 'ALL DATABASE PRIVILEGES',
+};
 
 /**
  * A Privilege operation represents a change to a privilege in the graph.
  * See Neo4j 4.0 docs on GRANT/DENY/REVOKE, this structure mirrors that.
  */
 export default class PrivilegeOperation {
+    static OPERATIONS = {
+        GRANT: 'GRANT',
+        REVOKE: 'REVOKE',
+        DENY: 'DENY',
+    };
+
+    static DATABASE_OPERATIONS = dbOps;
+
+    static PRIVILEGES = {
+        TRAVERSE: 'TRAVERSE',
+        READ_ALL: 'READ {*}',
+        MATCH_ALL: 'MATCH {*}',
+        WRITE: 'WRITE',
+    };
+
+    static ENTITIES = {
+        ALL_NODES: 'NODES *',
+        ALL_RELS: 'RELATIONSHIPS *',
+        ALL_ELEMENTS: 'ELEMENTS *',
+    };
+
+    static VALID_OPERATIONS = ['GRANT', 'REVOKE', 'DENY'];        
+    static VALID_PRIVILEGES = ['TRAVERSE', 'READ {*}', 'MATCH {*}', 'WRITE']
+        .concat(Object.values(PrivilegeOperation.DATABASE_OPERATIONS));
+    static VALID_ENTITIES = ['NODES *', 'RELATIONSHIPS *', 'ELEMENTS *'];
+
     constructor(props) {
         this.operation = props.operation;
         this.privilege = props.privilege;
         this.database = props.database;
         this.entity = props.entity;
         this.role = props.role;
+    }
+
+    static isDatabaseOperation(priv) {
+        return Object.values(PrivilegeOperation.DATABASE_OPERATIONS).indexOf(priv) > -1;
+    }
+
+    /**
+     * In the construction of certain queries, the entity portion isn't
+     * used.  This lets you determine whether the entity portion applies
+     * based on the privilege in question.
+     * @param {String} priv 
+     */
+    static allowsEntity(priv) {
+        if (priv === 'WRITE' || PrivilegeOperation.isDatabaseOperation(priv)) {
+            return false;
+        }
+
+        return true;
     }
 
     properties() {
@@ -45,18 +107,38 @@ export default class PrivilegeOperation {
      * This function lets you take an existing privilege, and easily "undo" it, by applying
      * a different operation to it.
      * 
+     * Sorry, but this is difficult code because of the syntax peculiarities of how permissions 
+     * commands work in 4.0
+     * 
      * @param {String} operation: one of GRANT, REVOKE, DENY
      * @param {Object} row 
      */
     static fromSystemPrivilege(operation, row) {
         const actionToVerb = a => {
+            // #operability the output of show privileges doesn't match actual
+            // permissions names when granting, which is confusing.
             const mapping = {
                 read: 'READ',
                 write: 'WRITE',
                 find: 'TRAVERSE',
+                create_propertykey: dbOps.CREATE_PROPERTY,
+                create_reltype: dbOps.CREATE_RELATIONSHIP,
+                create_label: dbOps.CREATE_LABEL,
+
+                drop_constraint: dbOps.DROP_CONSTRAINT,
+                constraint_management: dbOps.CONSTRAINT_MANAGEMENT,
+                create_constraint: dbOps.CREATE_CONSTRAINT,
+
+                create_index: dbOps.CREATE_INDEX,
+                drop_index: dbOps.DROP_INDEX,
+
+                name_management: dbOps.NAME_MANAGEMENT,
+                start_database: dbOps.START,
+                stop_database: dbOps.STOP,
+                access: dbOps.ACCCESS,
             };
 
-            return mapping[a] || a.toUpperCase();
+            return mapping[a.toLowerCase()] || a.toUpperCase();
         };
 
         const resourceToWhat = r => {
@@ -64,7 +146,7 @@ export default class PrivilegeOperation {
             // When you say TRAVERSE the "resource" will appear as "graph".
             const mapping = {
                 graph: '',
-                all_properties: '(*)',
+                all_properties: '{*}',
             };
 
             const v = mapping[r];
@@ -77,12 +159,18 @@ export default class PrivilegeOperation {
                 return `(${match.groups.list})`;
             }
 
-            return v;
+            return v ? v : '';
         };
 
         const verb = actionToVerb(row.action);
         const what = resourceToWhat(row.resource);
-        const privilege = `${verb} ${what}`;
+
+        // #operability because WRITE {proplist} isn't supported in 4.0, WRITE has a special
+        // form.  You GRANT WRITE and DENY WRITE, but never DENY WRITE {*} which is a syntax error
+        // despite it meaning the same thing.  This means there are certain privileges and actions
+        // that don't permit an "entity" ({*}) and you have to watch out for this special case when
+        // generating queries.
+        const privilege = (what && this.allowsEntity(verb)) ? `${verb} ${what}` : verb;
 
         // If you did GRANT MATCH (*) ON foo NODES * TO role
         // That "NODES *" would turn into segment=NODE(*) so we're reversing that mapping
@@ -90,13 +178,17 @@ export default class PrivilegeOperation {
         // can be used to build a related privilege command.
         const entityFromSegment = s => {
             // Case:  turn "NODE(Foo) => NODES Foo"
+            // #operability: grant syntax is NODES{*} but return in the table is NODES(*)
+            // which is super annoying to have to translate back and forth, and users
+            // may not know the difference.
             const re = new RegExp('(?<element>(NODE|RELATIONSHIP))\\((?<list>.*?)\\)');
             const match = s.match(re);
             if (match && match.groups && match.groups.list) {
                 return `${match.groups.element}S ${match.groups.list}`;
             }
 
-            return s;
+            // Sometimes entity doesn't apply.
+            return 'DATABASE';
         };
 
         const props = {
@@ -113,16 +205,34 @@ export default class PrivilegeOperation {
     }
 
     buildQuery() {
-        console.log('buildQuery', this);
+        // sentry.fine('buildQuery', this);
         const op = this.operation;
         const priv = this.privilege;
         const db = this.database;
-        const entity = this.entity;
+
+        // When the entity is 'DATABASE' effectively the entity doesn't apply.
+        // For example when GRANT START ON DATABASE FOO TO ROLE
+        const entity = this.entity === 'DATABASE' ? '' : this.entity;
         const role = this.role;
 
-        const graphToken = (db === '*') ? 'GRAPHS' : 'GRAPH';
+        let graphToken = (db === '*') ? 'GRAPHS' : 'GRAPH';
+
+        // #operability when referring to database privileges the syntax is different.
+        if (PrivilegeOperation.isDatabaseOperation(priv)) {
+            graphToken = 'DATABASE';
+        }
 
         const preposition = (op === 'REVOKE') ? 'FROM' : 'TO';
+
+        /**
+         * WRITE does not support ELEMENTS
+         * https://neo4j.com/docs/cypher-manual/4.0-preview/administration/security/subgraph/#administration-security-subgraph-write
+         */
+        if (priv.indexOf('WRITE') > -1) {
+            return `${op} ${priv} ON ${graphToken} ${db} ${preposition} ${role}`;
+        } else if(Object.values(PrivilegeOperation.DATABASE_OPERATIONS).indexOf(priv) > -1) {
+            return `${op} ${priv} ON DATABASE ${db} ${preposition} ${role}`;
+        }
 
         return `${op} ${priv} ON ${graphToken} ${db} ${entity} ${preposition} ${role}`;
     }

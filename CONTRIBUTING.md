@@ -29,6 +29,20 @@ array of ClusterMember instances.  Halin treats single-node databases as a clust
 member.  The HalinContext also has a ClusterManager object it can create, which handles cluster-
 wide operations, such as mapping queries across a cluster (user management).
 
+#### ClusterMemberSet
+
+A HalinContext has a set of cluster members that gets maintained in an ongoing
+way.  As cluster members enter and exit, this is picked up in near-real time.
+Cluster members in turn can be interrogated for which databases they are the
+leader of, what capabilities they have, and so on.
+
+#### DatabaseSet
+
+A HalinContext also has a set of databases associated with it. Prior to Neo4j
+4.0, this was generally only one default database named "neo4j", but with the
+advent of Neo4j 4.0, there can be any number of databases managed by a cluster.
+Databases in turn can be interrogated for who their leader is, and so on.
+
 #### Feature Probes
 
 Both the HalinContext object and the ClusterMembers that it has have the concept of feature
@@ -54,6 +68,11 @@ all of that and also track performance and errors.  Additionally, Halin uses "se
 on top of the standard Neo4j driver.  This was introduced because session creation/destruction
 requires extra roundtrips in the bolt protocol, and session reuse is desirable for improving
 latency to/from Neo4j.
+
+By using the HalinContext object, you can always easily get the leader of
+a particular database, which can be used to run mutating queries on any 
+database. So in this sense, Halin provides an overlay API which is similar to
+driver routing, but more targetable than bolt+routing.
 
 #### Error Reporting
 

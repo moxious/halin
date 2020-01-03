@@ -14,6 +14,7 @@ const fakeAMember = (role='FOLLOWER') => {
         id: i,
         addresses: [httpAddress, boltAddress],
         role,
+        groups: [],
         database: 'ABC',
     };
     const fakeRecord = fakes.record(entry);
@@ -26,6 +27,7 @@ describe('ClusterManager', function () {
     let mgr;
 
     beforeEach(() => {
+        HalinContext.connectionDetails = fakes.basics;
         ctx = new HalinContext();
         neo4j.driver = sinon.fake.returns(fakes.Driver());
         return ctx.initialize()
@@ -59,5 +61,18 @@ describe('ClusterManager', function () {
         expect(myThing.message).toEqual(message);
         expect(myThing.date).toBeTruthy();
         expect(myThing.id).toBeTruthy();
-    });   
+    });
+
+    it('can add a listener', () => {
+        const listener = foobar => console.log(foobar);
+        mgr.addListener(listener);
+        expect(mgr.listeners.indexOf(listener) > -1).toBeTruthy();
+    });
+
+    it('can remove a listener', () => {
+        const listener = foobar => console.log(foobar);
+        mgr.addListener(listener);
+        mgr.removeListener(listener);
+        expect(mgr.listeners.indexOf(listener) === -1).toBeTruthy();
+    });
 });

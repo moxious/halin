@@ -6,7 +6,7 @@ import _ from 'lodash';
 import datautil from '../../../api/data/util';
 import queryLibrary from '../../../api/data/queries/query-library';
 
-import NodeLabel from '../../ui/scaffold/NodeLabel/NodeLabel';
+import MemberLabel from '../../ui/scaffold/MemberLabel/MemberLabel';
 
 const simpleLabel = (key, value) => 
     <Label>
@@ -67,7 +67,7 @@ export default class DataFeedStats extends Component {
                                 index={idx} style={style}
                                 active={this.state.activeIndex === idx}
                             >
-                                <NodeLabel node={stats.node} />
+                                <MemberLabel member={stats.node} />
                                 <Label>{stats.label}</Label>
                                 <Label>
                                     Best

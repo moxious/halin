@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Sidebar, Segment, Menu, Tab, Divider } from 'semantic-ui-react';
-
+import { Sidebar, Segment, Menu, Tab, Icon, Divider } from 'semantic-ui-react';
+// import sentry from '../../../../api/sentry';
 import DatabaseMenuItem from '../DatabaseMenuItem/DatabaseMenuItem';
-import AddDatabaseMenuItem from '../DatabaseMenuItem/AddDatabaseMenuItem';
+import CreateDatabase from '../../../database/CreateDatabase/CreateDatabase';
 import DatabasePane from '../../../database/DatabasePane/DatabasePane';
 import uuid from 'uuid';
 
@@ -14,6 +14,7 @@ export default class DatabaseSelector extends Component {
         visible: true,
         direction: 'left',
         selected: null,
+        create: false,
 
         panes: () => {
             const menuItem = this.state.selected.getLabel();
@@ -30,12 +31,19 @@ export default class DatabaseSelector extends Component {
                 },
             ];
         },
+
+        createPanes: () => [{
+            menuItem: 'Create Database',
+            visible: () => true,
+            render: () => this.paneWrapper(
+                <CreateDatabase 
+                    member={window.halinContext.getWriteMember()} />),
+        }],
     };
 
     UNSAFE_componentWillMount() {
         this.listenerFn = (e) => {
-            const dbs = window.halinContext.getClusterManager().databases();
-
+            const dbs = window.halinContext.databases();
             // The selected database could no longer exist, or it could now exist with a different
             // status.  For all of these reasons we must update the selection so the view knows.
             // Never take the old selected, or you'll end up with wrong colored icon or
@@ -44,15 +52,24 @@ export default class DatabaseSelector extends Component {
             if (!selected) {
                 selected = dbs[0];
             }
-
+            
             // Whether or not the selection changed, change state and force refresh.
-            this.setState({ selected, id: uuid.v4() });
+            if (!this.state.create) {
+                // sentry.fine('DatabaseSelector: force selection', selected);
+                this.setState({ selected, id: uuid.v4(), create: false });
+            } else {
+                // This is silly, to force state refresh.  We got a new list of
+                // databases, but the selection didn't change and we're still in
+                // create mode.
+                this.setState({ id: uuid.v4(), create: true });
+            }
         };
 
         window.halinContext.getClusterManager().addListener(this.listenerFn);
 
         this.setState({
-            selected: window.halinContext.getClusterManager().databases()[0],
+            selected: window.halinContext.databases()[0],
+            create: false,
         });
     }
 
@@ -65,7 +82,7 @@ export default class DatabaseSelector extends Component {
             <div className={`PaneWrapper ${cls}`}>{obj}</div>
         </Tab.Pane>;
 
-    select = (selected) => this.setState({ selected });
+    select = (selected) => this.setState({ selected, create: false });
 
     renderChildContent() {
         return (
@@ -77,7 +94,11 @@ export default class DatabaseSelector extends Component {
             }}
                 menu={{ secondary: true, pointing: true }}
                 // Limit to panes which are visible under the given config.
-                panes={this.state.panes(this.state.member).filter(p => p.visible())}
+                panes={
+                    this.state.create ? 
+                    this.state.createPanes() : 
+                    this.state.panes(this.state.member).filter(p => p.visible())
+                }
             />
         );
     }
@@ -111,14 +132,21 @@ export default class DatabaseSelector extends Component {
                     width='thin'
                 >
                     {
-                        window.halinContext.getClusterManager().databases().map((db, key) =>
+                        window.halinContext.databases().map((db, key) =>
                             <DatabaseMenuItem
                                 database={db} key={key}
                                 active={this.state.selected && this.state.selected.getLabel() === db.getLabel()}
                                 onSelect={this.select} />)
                     }
 
-                    <AddDatabaseMenuItem />
+                    { window.halinContext.getVersion().major >= 4 ? 
+                    <Menu.Item as='a'
+                        active={false}
+                        onClick={() => this.setState({ create: true })}>
+                        <Icon name='add' color='green' />
+                        Create New Database
+                    </Menu.Item> : '' }
+
                     <Divider horizontal inverted />
                 </Sidebar>
                 <Sidebar.Pusher id="MemberPane" dimmed={false} className={

@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import ReactTable from 'react-table';
 import _ from 'lodash';
 import moment from 'moment';
-import hoc from '../../higherOrderComponents';
+
+import Explainer from '../../ui/scaffold/Explainer/Explainer';
+import CSVDownload from '../../data/download/CSVDownload';
 
 class ClusterEventLog extends Component {
     state = {
@@ -10,6 +12,7 @@ class ClusterEventLog extends Component {
             { 
                 Header: 'Date', 
                 Cell: e => moment(e.date).format(),
+                accessor: 'date',
             },
             {
                 Header: 'Type',
@@ -31,21 +34,28 @@ class ClusterEventLog extends Component {
         const events = _.sortBy(
             _.clone(window.halinContext.getClusterManager().getEventLog()),
             'date').reverse();
-        // console.log('CEV items', events);
+
         return (
             <div className='ClusterEventLog'>
-                <h3>Cluster Event Log</h3>
+                <h3>Event Log <Explainer knowledgebase='EventLog' /></h3>
 
-                <ReactTable className='-striped -highlight'
+                <CSVDownload 
+                    title="Results"
+                    data={events}
+                    displayColumns={this.state.displayColumns}
+                    filename={`Halin-event-log-${moment.utc().format()}.csv`} />
+
+                <ReactTable style={{marginTop:15}} className='-striped -highlight'
                     data={events}
                     sortable={true}
                     filterable={true}
                     columns={this.state.displayColumns}
-                    defaultPageSize={8}
+                    showPagination={events.length > 10}
+                    defaultPageSize={Math.min(events.length, 10)}
                 />
             </div>
         );
     }
 }
 
-export default hoc.clusterOnlyComponent(ClusterEventLog);
+export default ClusterEventLog;

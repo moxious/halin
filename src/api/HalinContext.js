@@ -1,16 +1,13 @@
 import _ from 'lodash';
 import Promise from 'bluebird';
-import uuid from 'uuid';
-
-import nd from './neo4jDesktop/index';
-import ClusterManager from './cluster/ClusterManager';
-import queryLibrary from './data/queries/query-library';
 import sentry from './sentry/index';
-import ClusterMember from './cluster/ClusterMember';
-import DataFeed from './data/DataFeed';
 import neo4j from './driver';
 import neo4jErrors from './driver/errors';
-import errors from './driver/errors';
+
+import ClusterManager from './cluster/ClusterManager';
+import ClusterMemberSet from './cluster/ClusterMemberSet';
+import DatabaseSet from './DatabaseSet';
+import DataFeed from './data/DataFeed';
 
 /**
  * HalinContext is a controller object that keeps track of state and permits diagnostic
@@ -18,36 +15,86 @@ import errors from './driver/errors';
  * 
  * It creates its own drivers and does not use the Neo4j Desktop API provided drivers.
  * The main app will attach it to the window object as a global.
+ * 
+ * The main 3 functions this object provides are:
+ * - A ClusterMemberSet corresponding to who is in the cluster
+ * - A ClusterManager that allows bulk operations cluster wide
+ * - A set of driver management functions so that you can talk to any particular node
+ * you need.
+ * 
+ * This last one is important, because HalinContext acts as the broker of the mapping between
+ * a set of databases and a set of cluster members.  As of Neo4j 4.0, there is a many-to-many
+ * mapping between these items.  In order to route the right query the right way, while being
+ * connected to each node individually, this mapping has to be maintained.
  */
 export default class HalinContext {
+    static connectionDetails = null;
+
     constructor() {
-        this.project = null;
-        this.graph = null;
         this.drivers = {};
         this.dataFeeds = {};
         this.pollRate = 1000;
-        this.clusterMembers = null;
+        this.memberSet = new ClusterMemberSet();
+        this.dbSet = new DatabaseSet();
         this.driverOptions = {
             connectionTimeout: 15000,
-            trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
+            trust: 'TRUST_SYSTEM_CA_SIGNED_CERTIFICATES',
         };
         this.debug = false;
         this.mgr = new ClusterManager(this);
         this.mgr.addListener(e => this.onClusterEvent(e));
     }
 
+    /**
+     * @returns {Array[ClusterMember]}
+     */
     members() {
-        return this.clusterMembers;
+        return this.memberSet.members();
     }
 
+    /**
+     * @returns {Array[Database]}
+     */
+    databases() { 
+        return this.dbSet.databases();
+    }
+
+    getMemberSet() { return this.memberSet; }
+    getDatabaseSet() { return this.dbSet; }
+
     getWriteMember() {
-        const writer = this.clusterMembers.filter(cm => cm.canWrite())[0];
+        const writer = this.memberSet.members().filter(cm => cm.canWrite())[0];
 
         if (!writer) {
             throw new Error(`
                 Cluster has no write members! This could mean that it is broken,
                 or is currently undergoing a leader election.
             `);
+        }
+
+        return writer;
+    }
+
+    /**
+     * Get the leader of systemdb.  You'd want to
+     * know this if you're running a mutating query on systemdb (privileges and such).
+     * Pre Neo4j 4.0, this concept didn't exist, and systemdb didn't exist.  If you're
+     * connected to a pre Neo4j 4.0 database, then there is only *1* leader, and you'll
+     * get that member.  If you're connected to a standalone database, you'll get the
+     * only member.
+     * @returns {ClusterMember} that is the leader for systemdb.
+     * @throws {Error} when there is no writer of systemdb
+     */
+    getSystemDBWriter() {
+        const writer = this.memberSet.members().filter(cm => cm.canWrite(neo4j.SYSTEM_DB))[0];
+
+        if (this.getVersion().major < 4) {
+            return this.getWriteMember();
+        }
+
+        if (!writer) {
+            const str = JSON.stringify(this.memberSet.members().map(m => m.asJSON()), null, 2);
+            throw new Error(`No systemdb writer in all of ${str}`);
         }
 
         return writer;
@@ -85,19 +132,15 @@ export default class HalinContext {
      */
     driverFor(addr, username = _.get(this.base, 'username'), password = _.get(this.base, 'password')) {
         const tlsLevel = _.get(this.base, 'tlsLevel');
-        const encrypted = (tlsLevel === 'REQUIRED' ? true : false);
+        const encrypted = (_.get(this.base, 'encrypted') || tlsLevel === 'REQUIRED' ? true : false);
 
         if (this.drivers[addr]) {
             return this.drivers[addr];
         }
 
         const allOptions = _.merge({ encrypted }, this.driverOptions);
-        if (this.debug) {
-            sentry.fine('Driver connection', { addr, username, allOptions });
-        }
         const driver = neo4j.driver(addr,
             neo4j.auth.basic(username, password), allOptions);
-
         this.drivers[addr] = driver;
         return driver;
     }
@@ -105,8 +148,7 @@ export default class HalinContext {
     shutdown() {
         sentry.info('Shutting down halin context');
         _.values(this.dataFeeds).map(df => df.stop());
-        Promise.all(this.clusterMembers.map(node => node.shutdown()))
-            .catch(err => sentry.reportError(err, 'Failure to shut down cluster members', err));
+        this.memberSet.shutdown();
         _.values(this.drivers).map(driver => driver.close());
         this.getClusterManager().addEvent({
             type: 'halin',
@@ -120,7 +162,7 @@ export default class HalinContext {
      */
     isCluster() {
         // Must have more than one node
-        return this.clusterMembers && this.clusterMembers.length > 1;
+        return this.memberSet.members().length > 1;
     }
 
     /**
@@ -138,9 +180,13 @@ export default class HalinContext {
     /**
      * @returns true if the HalinContext is attached to a Neo4j Cloud instance, false otherwise.
      */
-    isNeo4jCloud() {
+    isNeo4jAura() {
         const uri = this.getBaseURI();
         return (uri || '').toLowerCase().indexOf('databases.neo4j.io') > -1;
+    }
+
+    supportsRoles() {
+        return this.isEnterprise() && !this.isNeo4jAura();
     }
 
     userIsAdmin() {
@@ -158,7 +204,7 @@ export default class HalinContext {
     }
 
     supportsMetrics() {
-        return this.getWriteMember().metrics && this.clusterMembers[0].metrics.length > 0;
+        return this.getWriteMember().metrics && this.memberSet.members()[0].metrics.length > 0;
     }
 
     supportsDBStats() {
@@ -193,105 +239,6 @@ export default class HalinContext {
 
     getVersion() {
         return this.getWriteMember().getVersion();
-    }
-
-    /**
-     * Starts a slow data feed for the node's cluster role.  In this way, if the leader
-     * changes, we can detect it.
-     */
-    watchForClusterRoleChange(clusterMember) {
-        const roleFeed = this.getDataFeed(_.merge({
-            node: clusterMember,
-        }, queryLibrary.CLUSTER_ROLE));
-
-        const addr = clusterMember.getBoltAddress();
-        const onRoleData = (newData /* , dataFeed */) => {
-            const newRole = newData.data[0].role;
-
-            // Something in cluster topology just changed...
-            if (newRole !== clusterMember.role) {
-                const oldRole = clusterMember.role;
-                clusterMember.role = newRole;
-
-                const event = {
-                    message: `Role change from ${oldRole} to ${newRole}`,
-                    type: 'rolechange',
-                    address: clusterMember.getBoltAddress(),
-                    payload: {
-                        old: oldRole,
-                        new: newRole,
-                    },
-                };
-
-                this.getClusterManager().addEvent(event);
-            }
-        };
-
-        const onError = (err /*, dataFeed */) => 
-            sentry.reportError(err, `HalinContext: failed to get cluster role for ${addr}`);
-
-        roleFeed.addListener(onRoleData);
-        roleFeed.onError = onError;
-        return roleFeed;
-    }
-
-    /**
-     * Check to see if the active database is a cluster.  In this context cluster means that it's Neo4j Enterprise
-     * and the dbms.cluster.* procedures are present (e.g. not mode=SINGLE).
-     * @param {Object} activeDb 
-     */
-    checkForCluster(activeDb, progressCallback) {
-        const session = this.base.driver.session();
-        // sentry.debug('activeDb', activeDb);
-
-        const report = str => progressCallback ? progressCallback(str) : null;
-
-        report('Checking cluster status');
-        return session.run(queryLibrary.CLUSTER_OVERVIEW.query)
-            .then(results => {
-                this.clusterMembers = results.records.map(rec => new ClusterMember(rec));
-
-                // Note that in the case of community or mode=SINGLE, because the cluster overview fails,
-                // this will never take place.  Watching for cluster role changes doesn't apply in those cases.
-                return this.clusterMembers.map(clusterMember => {
-                    const driver = this.driverFor(clusterMember.getBoltAddress());
-                    clusterMember.setDriver(driver);
-                    report(`Member ${clusterMember.getLabel()} initialized`);
-                    return this.watchForClusterRoleChange(clusterMember);
-                });
-            })
-            .catch(err => {
-                if (errors.noProcedure(err)) {
-                    // Halin will look at single node databases
-                    // running in desktop as clusters of size 1.
-                    // #operability I wish Neo4j treated mode=SINGLE as a cluster of 1 and exposed dbms.cluster.*
-                    const rec = {
-                        id: uuid.v4(),
-                        addresses: nd.getAddressesForGraph(activeDb.graph),
-                        role: 'SINGLE',
-                        database: 'default',
-                    };
-
-                    // Psuedo object behaves like a cypher result record.
-                    // Somewhere, a strong typing enthusiast is screaming. ;)
-                    const get = key => rec[key];
-                    rec.get = get;
-
-                    const singleton = new ClusterMember(rec);
-                    const driver = this.driverFor(singleton.getBoltAddress());
-                    singleton.setDriver(driver);
-                    this.clusterMembers = [singleton];
-                } else {
-                    sentry.reportError(err);
-                    throw err;
-                }
-            })
-            .then(() => report('Verifying connectivity with members...'))
-            .then(() => 
-                Promise.all(this.clusterMembers.map(cn => this.ping(cn))))
-            .then(() => report('Checking components/features for each cluster member...'))
-            .then(() => Promise.all(this.clusterMembers.map(cn => cn.checkComponents())))
-            .finally(() => session.close());
     }
 
     getCurrentUser() {
@@ -346,44 +293,22 @@ export default class HalinContext {
             .finally(() => session.close());
     }
 
-    static getProjectFromEnvironment() {
-        return {
-            name: process.env.GRAPH_NAME || 'environment',
-            graphs: [
-                HalinContext.getGraphFromEnvironment(),
-            ],
-        };
-    }
-
-    static getGraphFromEnvironment() {
+    static getConnectionDetailsFromEnvironment() {
         const encryption = process.env.ENCRYPTION_REQUIRED ? 'REQUIRED' : 'OPTIONAL';
         const host = process.env.NEO4J_HOST || 'localhost';
         const port = process.env.NEO4J_PORT || 7687;
         const username = process.env.NEO4J_USERNAME || 'neo4j';
         const password = process.env.NEO4J_PASSWORD || 'admin';
-
         return {
-            name: process.env.GRAPH_NAME || 'environment',
-            status: process.env.GRAPH_STATUS || 'ACTIVE',
-            databaseStatus: process.env.DATABASE_STATUS || 'RUNNING',
-            databaseType: process.env.DATABASE_TYPE || 'neo4j',
-            id: process.env.DATABASE_UUID || uuid.v4(),
-            connection: {
-                configuration: {
-                    path: '.',
-                    protocols: {
-                        bolt: {
-                            host,
-                            port,
-                            username,
-                            password,
-                            enabled: true,
-                            tlsLevel: encryption,
-                        },
-                    },
-                },
-            },
+            host, port, username, password, enabled: true, tlsLevel: encryption,
         };
+    }
+
+    /**
+     * Base details are the original connection parameters given at the very start.
+     */
+    getBaseDetails() {
+        return this.base;
     }
 
     getBaseURI() {
@@ -394,14 +319,12 @@ export default class HalinContext {
      * Returns a promise that resolves to the HalinContext object completed,
      * or rejects.
      * 
-     * There are three major code paths here:
-     * (1) Running in Neo4j desktop, use that API to figure what graph to 
-     * connect to.
-     * (2) Running in browser (not desktop) -- in which case we needed to
+     * There are two major code paths here:
+     * (1) Running in browser -- in which case we needed to
      * fake the neo4j desktop API facade prior to this step
-     * (3) Running in terminal (and window object isn't even defined)
+     * (2) Running in terminal (and window object isn't even defined)
      */
-    initialize(progressCallback = null) {
+    initialize(progressCallback = () => null) {
         let inBrowser = true;
 
         const report = str => {
@@ -423,31 +346,20 @@ export default class HalinContext {
             let getGraphSpecificsPromise = null;
 
             if (!inBrowser) {
-                // No need to fake a neo4jdesktop API.  Construct
-                // needed context directly from env vars.
-                getGraphSpecificsPromise = Promise.resolve({
-                    project: HalinContext.getProjectFromEnvironment(),
-                    graph: HalinContext.getGraphFromEnvironment(),
-                });
+                // Get connection details from the environment variables directly.
+                getGraphSpecificsPromise = Promise.resolve(
+                    HalinContext.getConnectionDetailsFromEnvironment());
             } else {
-                getGraphSpecificsPromise = nd.getFirstActive();
+                getGraphSpecificsPromise = Promise.resolve(_.cloneDeep(HalinContext.connectionDetails));
             }
 
             report('Getting database connection');
-            return getGraphSpecificsPromise.then(active => {
-                    if (_.isNil(active)) {
-                        // In the web version, this will never happen because the
-                        // shim will fake an active DB.  In Neo4j Desktop this 
-                        // **will** happen if the user launches Halin without an 
-                        // activated database.
+            return getGraphSpecificsPromise.then(details => {
+                    if (_.isNil(details)) {
                         throw new Error('In order to launch Halin, you must have an active database connection');
                     }
 
-                    // sentry.fine('FIRST ACTIVE', active);
-                    this.project = active.project;
-                    this.graph = active.graph;
-
-                    this.base = _.cloneDeep(active.graph.connection.configuration.protocols.bolt);
+                    this.base = _.cloneDeep(details);
 
                     if (!this.base.password) {
                         // See https://github.com/moxious/halin/issues/100
@@ -465,11 +377,11 @@ export default class HalinContext {
                     // sentry.fine('HalinContext created', this);
                     return Promise.all([
                         this.checkUser(this.base.driver, progressCallback),
-                        this.checkForCluster(active, progressCallback),
+                        this.memberSet.initialize(this, this.base.driver, progressCallback),
                     ]);
                 })
                 // Checking databases must be after checking for a cluster, since we need to know who leader is
-                .then(() => this.getClusterManager().getDatabases())
+                .then(() => this.dbSet.initialize(this))
                 .then(() => {
                     this.getClusterManager().addEvent({
                         type: 'halin',
@@ -487,47 +399,5 @@ export default class HalinContext {
             }
             return Promise.reject(new Error('General Halin Context error', e));
         }
-    }
-
-    /**
-     * Ping a cluster node with a trivial query, just to keep connections
-     * alive and verify it's still listening.  This forces driver creation
-     * for a node if it hasn't already happened.
-     * @param {ClusterMember} the node to ping
-     * @returns {Promise} that resolves to an object with an elapsedMs field
-     * or an err field populated.
-     */
-    ping(clusterMember) {
-        const addr = clusterMember.getBoltAddress();
-
-        // Gets or creates a ping data feed for this cluster node.
-        // Data feed keeps running so that we can deliver the data to the user,
-        // but also have a feed of data to know if the cord is getting unplugged
-        // as the app runs.
-        const pingFeed = this.getDataFeed(_.merge({
-            node: clusterMember,
-        }, queryLibrary.PING));
-
-        // Caller needs a promise.  The feed is already running, so 
-        // We return a promise that resolves the next time the data feed
-        // comes back with a result.
-        return new Promise((resolve, reject) => {
-            const onPingData = (newData /* , dataFeed */) => {
-                return resolve({
-                    clusterMember: clusterMember,
-                    elapsedMs: _.get(newData, 'data[0]_sampleTime'),
-                    newData,
-                    err: null,
-                });
-            };
-
-            const onError = (err, dataFeed) => {
-                sentry.error('HalinContext: failed to ping', addr, err);
-                reject(err, dataFeed);
-            };
-
-            pingFeed.addListener(onPingData);
-            pingFeed.onError = onError;
-        });
     }
 }

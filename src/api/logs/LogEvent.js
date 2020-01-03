@@ -53,7 +53,6 @@ const parseLines = lines => {
             const cd = logData.match(classDesignatorRE);
             if (cd) {
                 classDesignator = cd[1].replace('[', '').replace(']', '');
-                // console.log('got class designator', cd);
                 logData = logData.replace(classDesignatorRE, '');
             }
 

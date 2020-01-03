@@ -1,7 +1,7 @@
 {
   "name": "halin",
   "description": "Halin helps you monitor and improve your Neo4j graph",
-  "version": "0.12.0-beta",
+  "version": "0.12.0",
   "neo4jDesktop": {
     "apiVersion": "^1.2.0"
   },
@@ -23,11 +23,10 @@
     "autobind-decorator": "2.2.1",
     "bluebird": "^3.7.1",
     "generic-pool": "^3.6.1",
-    "graph-app-kit": "^1.0.4",
     "lodash": "^4.17.15",
     "mathjs": "^5.4.0",
     "moment": "^2.24.0",
-    "neo4j-driver": "^4.0.0-beta01",
+    "neo4j-driver": "^4.0.1",
     "pondjs": "^0.9.0",
     "prop-types": "^15.6.0",
     "react": "^16.12.0",
@@ -40,8 +39,10 @@
     "react-sortable-tree": "^2.2.0",
     "react-table": "^6.8.6",
     "react-timeseries-charts": "^0.16.1",
-    "react-toastify": "^5.1.0",
+    "react-toastify": "^5.4.1",
     "ringjs": "^0.0.1",
+    "semantic-ui-css": "^2.4.1",
+    "semantic-ui-react": "^0.88.2",
     "source-map-explorer": "^1.6.0",
     "uri-parser": "^1.0.1",
     "uuid": "^3.3.2",

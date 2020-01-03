@@ -10,7 +10,6 @@ import ClusterManager from './cluster/ClusterManager';
 
 import DataFeed from './data/DataFeed';
 import queryLibrary from './data/queries/query-library';
-import neo4jDesktop from './neo4jDesktop';
 import sentry from './sentry';
 import palette from './palette';
 import datautil from './data/util';
@@ -28,8 +27,6 @@ export default {
     queryLibrary,
     sentry,
     status,
-
-    neo4jDesktop,
 
     palette,
     datautil,

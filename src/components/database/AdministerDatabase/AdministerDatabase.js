@@ -14,7 +14,13 @@ class AdministerDatabase extends Component {
     canAdminister() {
         // For safety we won't allow stop/start/drop of the default DB
         // or the system DB where it would fail anyway.
-        return !this.props.database.isDefault && this.props.database.getLabel() !== neo4j.SYSTEM_DB;
+        // We also can't start/stop/drop databases that are reconciling, that is, in the process
+        // of starting or stopping.  You must wait for that operation to complete first.
+        return (
+            !this.props.database.isDefault() && 
+            this.props.database.getLabel() !== neo4j.SYSTEM_DB &&
+            !this.props.database.isReconciling()
+        );
     }
 
     stopButton() {
@@ -86,6 +92,32 @@ class AdministerDatabase extends Component {
             `Failed to drop database ${this.props.database.name}`);
     }
 
+    administrationWarnings() {
+        if (this.canAdminister()) {
+            return '';
+        }
+
+        let heading, message;
+
+        if (this.props.database.isReconciling()) {
+            heading = 'Database Reconciling';
+            message = `The database is transitioning between states.
+                You cannot administer the database while this operation is
+                underway.`;
+        } else {
+            heading = 'Reserved Database';
+            message = `Halin does not permit stopping, starting, or deleting 
+            the default database, or system`;
+        }
+
+        return (
+          <Message info>
+                <Message.Header>{heading}</Message.Header>
+                <p>{message}</p>
+          </Message>
+        );
+    }
+
     render() {
         const cancel = () => this.setState({ dropConfirmOpen: false });
         const confirm = () => {
@@ -102,17 +134,7 @@ class AdministerDatabase extends Component {
                     {this.dropButton()}
                 </div>
 
-                {!this.canAdminister() ?
-
-                    <div style={{ paddingTop: '15px' }}>
-                        <h4>Reserved Database</h4>
-                        <p>Stopping, starting, and deleting databases is not
-                            permitted for the default database, or the system
-                            database.
-                    </p>
-                    </div>
-
-                    : ''}
+                { this.administrationWarnings() }
 
                 <Confirm
                     open={this.state.dropConfirmOpen}

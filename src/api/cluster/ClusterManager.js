@@ -116,7 +116,7 @@ export default class ClusterManager {
      */
     clusterWideQuery(query, params) {
         const membersToRunAgainst = this.ctx.supportsSystemGraph() ?
-            [this.ctx.getWriteMember()] :
+            [this.ctx.getSystemDBWriter()] :
             this.ctx.members();
 
         const promises = membersToRunAgainst.map(node => {
@@ -354,14 +354,8 @@ export default class ClusterManager {
             .then(packageClusterOpResults);
     }
 
-    databases() { return this._dbs; }
-
-    getDefaultDatabase() {
-        return this.databases().filter(db => db.isDefault)[0];
-    }
-
     getRoles() {
-        return this.ctx.getWriteMember().run('call dbms.security.listRoles()', {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run('call dbms.security.listRoles()', {}, neo4j.SYSTEM_DB)
             .then(results => neo4j.unpackResults(results, {
                 required: ['role', 'users'],
             }));
@@ -375,11 +369,11 @@ export default class ClusterManager {
     alterPrivilege(op) {
         const error = op.validate();
         if (error) { throw new Error(error); }
-        if (!this.ctx.getWriteMember().supportsSystemGraph()) {
+        if (!this.ctx.getSystemDBWriter().supportsSystemGraph()) {
             throw new Error('You cannot modify fine-grained privileges on a DB that does not support system graph');
         }
 
-        return this.ctx.getWriteMember().run(op.buildQuery(), {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(op.buildQuery(), {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.fine('Privilege results', results);
                 this.addEvent({
@@ -387,9 +381,9 @@ export default class ClusterManager {
                     message: op.buildQuery(),
                     payload: [],
                 })
-                
+
                 // No results.
-                return clusterOpSuccess(this.ctx.getWriteMember(), []);
+                return clusterOpSuccess(this.ctx.getSystemDBWriter(), []);
             });
     }
 
@@ -399,15 +393,17 @@ export default class ClusterManager {
      * @returns Array{Database}
      */
     getDatabases() {
-        return this.ctx.getWriteMember().run(ql.DBMS_4_SHOW_DATABASES, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(ql.DBMS_4_SHOW_DATABASES, {}, neo4j.SYSTEM_DB)
             .then(results => neo4j.unpackResults(results, {
-                required: ['name', 'status', 'default'],
+                required: [
+                    'name', 'address', 'role',
+                    'requestedStatus', 'currentStatus',
+                    'default', 'error',
+                ],
             }))
-            .then(results => results.map(r => new Database(r.name, r.status, r.default)))
-            .then(dbs => {
-                console.log('got dbs',dbs);
-                this._dbs = dbs;
-                return dbs;
+            .then(results => {
+                this._dbs = Database.fromArrayOfResults(results);
+                return this._dbs;
             })
             .catch(err => {
                 const str = `${err}`;
@@ -427,10 +423,10 @@ export default class ClusterManager {
                     sentry.warn('ClusterManager#getDatabases() returned unexpected error', err);
                 }
 
-                sentry.info('Faking databases pre 4.0');
+                sentry.info('Pre Neo4j 4.0, all clusters have a single database "neo4j"');
                 // Just like we fake single-node Neo4j instances as a cluster of one member,
                 // we fake non-multidb clusters as a multi-db of one database.  :)
-                this._dbs = [new Database('neo4j', 'online', true)];
+                this._dbs = [Database.pre4DummyDatabase(this.ctx)];
                 return this._dbs;
             });
     }
@@ -438,12 +434,12 @@ export default class ClusterManager {
     stopDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getWriteMember().run(`STOP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(`STOP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('stop results', results);
                 return results;
             })
-            .then(() => this.getDatabases())
+            .then(() => this.ctx.getDatabaseSet().refresh(this.ctx))
             .then(() => this.addEvent({
                 type: 'database',
                 message: `Stopped database ${db.name}`,
@@ -454,12 +450,12 @@ export default class ClusterManager {
     startDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getWriteMember().run(`START DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(`START DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('start results', results);
                 return results;
             })
-            .then(() => this.getDatabases())
+            .then(() => this.ctx.getDatabaseSet().refresh(this.ctx))
             .then(() => this.addEvent({
                 type: 'database',
                 message: `Started database ${db.name}`,
@@ -470,28 +466,65 @@ export default class ClusterManager {
     dropDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getWriteMember().run(`DROP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(`DROP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('drop results', results);
                 return results;
             })
-            .then(() => this.getDatabases())
+            .then(() => this.ctx.getDatabaseSet().refresh(this.ctx))
             .then(() => this.addEvent({
                 type: 'database',
                 message: `Dropped database ${db.name}`,
             }));
     }
 
+    /**
+     * Create a new Database (multidb Neo4j >= 4.0 only)
+     * #operability - the system CREATE DATABASE returns immediately, but it may be 1-2 minutes
+     * before the database is replicated, available, and has a leader election in place.  This means
+     * after CREATE DATABASE (which returns nothing) there's no way to tell if anything is happening
+     * unless you poll show databases.
+     * @param {String} name of the database you want to create
+     */
     createDatabase(name) {
-        return this.ctx.getWriteMember().run(`CREATE DATABASE ${name}`, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(`CREATE DATABASE ${name}`, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('Created database; results ', results);
                 return results;
             })
-            .then(() => this.getDatabases())
+            .then(() => this.ctx.getDatabaseSet().refresh(this.ctx))
             .then(() => this.addEvent({
-                    type: 'database',
-                    message: `Created database ${name}`,
-                }));
+                type: 'database',
+                message: `Created database ${name}`,
+            }));
+    }
+
+    /**
+     * Gets the total amount of data on disk used by the various databases.  Applies to Neo4j >= 4.0.
+     * @returns {Object} that is a map of databaseName => total disk size in bytes.
+     * @throws {Error} if using this on a database that is pre-Neo4j 4.0
+     */
+    getDatabaseStoreSizes() {
+        if (this.ctx.getVersion().major < 4) {
+            throw new Error('This operation only applies to Neo4j >= 4.0');
+        }
+
+        const databaseNames = this.ctx.databases().map(db => db.getLabel());
+
+        const storeSizes = {};
+
+        // Run the store size fetch on each database, collecting results into a single map.
+        const fetchAllSizes = Promise.all(Promise.map(databaseNames, name => {
+            return this.ctx.getSystemDBWriter().run(ql.JMX_4_TOTAL_STORE_SIZE, { db: name })
+                .then(results => neo4j.unpackResults(results, {
+                    required: ['sizeInBytes'],
+                }))
+                .then(results => {
+                    const val = _.get(results[0], 'sizeInBytes') || 0;
+                    storeSizes[name] = val;
+                });
+        }, { concurrency: 3 }));
+
+        return fetchAllSizes.then(() => storeSizes);
     }
 }

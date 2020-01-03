@@ -7,7 +7,7 @@ import {
     Stream,
 } from 'pondjs';
 import uuid from 'uuid';
-
+import neo4j from '../../api/driver';
 import palette from '../../api/palette';
 import datautil from '../../api/data/util';
 import timewindow from '../../api/timeseries/timewindow';
@@ -301,7 +301,10 @@ class ClusterTimeseries extends Component {
             return 'transparent';
         }
 
-        if (window.halinContext.members()[idx].role === 'LEADER') {
+        const member = window.halinContext.members()[idx];
+        if (member.isLeader() && !member.supportsMultiDatabase()) {
+            return LEADER_COLOR;
+        } else if(member.supportsMultiDatabase() && member.canWrite(neo4j.SYSTEM_DB)) {
             return LEADER_COLOR;
         }
 

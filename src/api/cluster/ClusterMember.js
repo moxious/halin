@@ -9,6 +9,8 @@ import neo4jErrors from '../driver/errors';
 import queryLibrary from '../data/queries/query-library';
 import sentry from '../sentry';
 import HalinQuery from '../data/queries/HalinQuery';
+import score from '../cluster/health/score';
+import Database from '../Database';
 
 const MAX_OBSERVATIONS = 100;
 
@@ -20,18 +22,133 @@ const MAX_OBSERVATIONS = 100;
  *  - Gather performance data about how responsive it is
  */
 export default class ClusterMember {
+    static ROLE_LEADER = 'LEADER';
+    static ROLE_FOLLOWER = 'FOLLOWER';
+    static ROLE_REPLICA = 'READ_REPLICA';
+
+    // #operability: between 3.5 and 4.0 they renamed the role...these are effectively the same
+    // thing
+    static ROLE_SINGLE = 'SINGLE';
+    static ROLE_STANDALONE = 'STANDALONE';
+
     /**
      * Input is a record that comes back from dbms.cluster.overview()
      */
     constructor(record) {
+        if (record.has('databases')) {
+            // >= Neo4j 4.0
+            // TODO: Raft roles can separate in 4.0. If you're the leader for one
+            // DB you're not necessarily the leader for all of them.
+            // Under 4.0 asking whether a node is "the leader" is a bit of a 
+            // meaningless question, but this is maintained for backwards compat.
+            const dbs = record.get('databases');
+            Object.keys(dbs).forEach(dbName => {
+                const role = dbs[dbName];
+                this.role = role;
+            });
+
+            // Maps database name to member role
+            this.database = dbs;
+        } else {
+            this.role = (record.get('role') || '').trim();
+            // TODO -- pre-Neo4j 4.0, do we ever need this value?
+            // I can't think of a use for it.
+            // const key = record.get('database');
+            const value = this.role;
+
+            // We're going to rename to neo4j because that's the default
+            // database name for older Neo4j's, but still keep what it told
+            // us.
+            const obj = { [Database.SINGLEDB_NAME]: value };
+
+            // Maps database name to member role
+            this.database = obj;
+        }
+
+        this.standalone = record.has('standalone') ? record.get('standalone') : false;
         this.id = record.get('id');
-        this.addresses = record.get('addresses');        
-        this.role = (record.get('role') || '').trim();
-        this.database = record.get('database');
+        this.addresses = record.get('addresses');
+        this.groups = record.get('groups');
         this.dbms = {};
         this.driver = null;
         this.observations = new Ring(MAX_OBSERVATIONS);
         this.errors = {};
+    }
+
+    /**
+     * When Neo4j is in standalone mode (non CC) Halin fakes this as a cluster of 1 member.
+     * This provides some basic details (id, addresses, role, database) and creates a member
+     * from that.
+     * @param {Object} details 
+     */
+    static makeStandalone(halin, details) {
+        // Psuedo object behaves like a cypher result record.
+        // Somewhere, a strong typing enthusiast is screaming. ;)
+        const get = key => details[key];
+        const has = key => !_.isNil(details[key]);
+        details.get = get;
+        details.has = has;
+        details.standalone = true;
+
+        const member = new ClusterMember(details);
+        const driver = halin.driverFor(member.getBoltAddress());
+        member.setDriver(driver);
+        return member;
+    }
+
+    getId() { return this.id; }
+
+    /**
+     * Merges changes with an existing member of the same ID
+     * @param {ClusterMember} changes 
+     * @returns true if something changed, false otherwise.
+     * @throws {Error} if the IDs don't match
+     */
+    merge(changes) {
+        if (!changes.getId() === this.getId()) {
+            throw new Error('Cannot merge changes with a different member ID');
+        }
+
+        // The things that change are addresses, groups, and critically, databases which tells us who is leader
+        // of what.
+        let changed = false;
+
+        if (!_.isEqual(this.addresses, changes.addresses)) {
+            this.addresses = _.cloneDeep(changes.addresses);
+            sentry.fine(`${this.getBoltAddress()} addresses changed: `, this.addresses, changes.addresses);
+            changed = true;
+        }
+
+        if (!_.isEqual(this.groups, changes.groups)) {
+            this.groups = _.cloneDeep(changes.groups);
+            sentry.fine(`${this.getBoltAddress()} groups changed`, this.groups, changes.groups);
+            changed = true;
+        }
+
+        if (!_.isEqual(this.database, changes.database)) {
+            this.database = _.cloneDeep(changes.database);
+            sentry.fine(`${this.getBoltAddress()} database changed`, this.database, changes.database);
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    /**
+     * Returns the roles this member plays for a given set of databases.  Object is
+     * a mapping of database name (string) to database role (leader, follower, etc)
+     * @returns {Object} database name/role mappings
+     */
+    getDatabaseRoles() {
+        return _.cloneDeep(this.database);
+    }
+
+    /**
+     * Returns an object with health score information about the current status of this
+     * member.  This is done by examining response rates from various datafeeds.
+     */
+    getHealthScore(halin) {
+        return score.feedFreshness(halin, this);
     }
 
     /**
@@ -50,12 +167,12 @@ export default class ClusterMember {
     performance() {
         const obs = this.observations.toArray().map(i => i.y);
         return {
-            stdev: math.std(...obs),
-            mean: math.mean(...obs),
-            median: math.median(...obs),
-            mode: math.mode(...obs),
-            min: math.min(...obs),
-            max: math.max(...obs),
+            stdev: obs.length > 0 ? math.std(...obs) : 0,
+            mean: obs.length > 0 ? math.mean(...obs) : 0,
+            median: obs.length > 0 ? math.median(...obs) : 0,
+            mode: obs.length > 0 ? math.mode(...obs) : 0,
+            min: obs.length > 0 ? math.min(...obs) : 0,
+            max: obs.length > 0 ? math.max(...obs) : 0,
             errors: this.errors,
             observations: this.observations.toArray(),
         };
@@ -69,6 +186,7 @@ export default class ClusterMember {
             writer: this.canWrite(),
             database: this.database,
             id: this.id,
+            groups: this.groups,
             label: this.getLabel(),
             dbms: this.dbms,
             performance: this.performance(),
@@ -119,15 +237,29 @@ export default class ClusterMember {
             .map(parsed => parsed.protocol);
     }
 
-    isLeader() { return this.role === 'LEADER'; }
-    isFollower() { return this.role === 'FOLLOWER'; }
-    isSingle() { return this.role === 'SINGLE'; }
-    isReadReplica() { return this.role === 'READ_REPLICA'; }
-    isCore() { 
-        return this.isLeader() || this.isSingle();
+    isLeader() { return this.role === ClusterMember.ROLE_LEADER; }
+    isFollower() { return this.role === ClusterMember.ROLE_FOLLOWER; }
+    isSingle() { return this.role === ClusterMember.ROLE_SINGLE || this.role === ClusterMember.ROLE_STANDALONE; }
+    isReadReplica() { return this.role === ClusterMember.ROLE_REPLICA; }
+
+    isCore() {
+        return this.isLeader() || this.isFollower() || this.isSingle();
     }
-    canWrite() { 
-        return this.isLeader() || this.isSingle();
+
+    /**
+     * Determine whether or not this member can write to this database.
+     * If the database is standalone, the answer is always yes no matter the input.
+     * If the database is clustered, then this will return if it's the leader (pre Neo4j 4.0)
+     * and for Neo4j >= 4.0 (multidatabase) will return true only if that machine is leader
+     * for that database.
+     * 
+     * @param {String} db database name
+     */
+    canWrite(db = null) {
+        if (this.isSingle()) { return true; }
+
+        if (_.isNil(db)) { return this.isLeader(); }
+        return this.database[db] === 'LEADER';
     }
 
     /**
@@ -140,6 +272,10 @@ export default class ClusterMember {
 
     isCommunity() {
         return !this.isEnterprise();
+    }
+
+    usesFabric() {
+        return this.dbms.fabric;
     }
 
     supportsAPOC() {
@@ -215,13 +351,13 @@ export default class ClusterMember {
         }
 
         return featureProbes.getAvailableMetrics(this)
-            .then(metrics => { 
+            .then(metrics => {
                 this.metrics = metrics;
                 return metrics;
             });
     }
 
-    getVersion() {        
+    getVersion() {
         if (_.isNil(_.get(this.dbms, 'versions'))) {
             return { major: 'unknown', minor: 'unknown', patch: 'unknown' };
         } else if (this.dbms.versions.length > 1) {
@@ -251,18 +387,70 @@ export default class ClusterMember {
             });
     }
 
-    getMaxHeap() {
-        return this.run(queryLibrary.DBMS_GET_MAX_HEAP)
+    /**
+     * @returns {Promise} that resolves to the member's configuration, key=>value.
+     */
+    getConfiguration() {
+        // TODO -- config is loaded once and only once and then cached, because
+        // it barely changes in Neo4j.  There are EXCEPTIONS in terms of a very
+        // small number of dynamic config options (#operability).  So consider 
+        // polling later if it's important to pick up changes in those.
+        if (!_.isNil(this.configuration)) {
+            return Promise.resolve(this.configuration);
+        }
+
+        return this.run('CALL dbms.listConfig()', {})
             .then(results => {
-                const rec = results.records[0];
-                return rec.get('value');
+                const configMap = {};
+                results.records.forEach(rec => {
+                    const key = rec.get('name');
+                    const value = rec.get('value');
+
+                    // Configs can have duplicate keys! #operability
+                    // which sucks.  but we need to detect that.
+                    // If a second value is found, push it on to an array.
+                    if (configMap.hasOwnProperty(key)) {
+                        const presentValue = configMap[key];
+                        if (_.isArray(presentValue)) {
+                            presentValue.push(value);
+                        } else {
+                            configMap[key] = [presentValue, value];
+                        }
+                    } else {
+                        if (neo4j.isInt(value)) {
+                            configMap[key] = neo4j.integer.inSafeRange(value) ? value.toNumber() : neo4j.integer.toString(value);
+                        } else {
+                            configMap[key] = value;
+                        }
+                    }
+                });
+                return configMap;
+            })
+            .then(configMap => {
+                this.configuration = configMap;
+                return this.configuration;
             })
             .catch(err => {
                 if (neo4jErrors.permissionDenied(err)) {
-                    return 'unknown';
+                    this.configuration = {};
+                    return;
                 }
                 throw err;
-            })
+            });
+    }
+
+    /**
+     * Get a Neo4j configuration entry for this member
+     * @param {*} confSetting the name of the setting, e.g. dbms.memory.heap.max_size
+     * @returns {String} the value of the setting
+     * @throws {Error} if the member hasn't been initialized yet.
+     */
+    getConfigurationValue(confSetting) {
+        if (_.isNil(this.configuration)) {
+            throw new Error('Make sure to call getConfiguration() first');
+        }
+
+        return _.get(this.configuration, confSetting);
     }
 
     checkComponents() {
@@ -272,44 +460,24 @@ export default class ClusterMember {
 
         // Probes get individual pieces of information then assign them into our structure,
         // so we can drive feature request functions for outside callers.
-        // These are functions so that the async call doesn't start until we call it.
-        const allProbes = [
-            () => featureProbes.getNameVersionsEdition(this)
-                .then(result => { this.dbms = _.merge(_.cloneDeep(this.dbms), result); }),
-            () => featureProbes.supportsNativeAuth(this)
-                .then(result => { 
-                    this.dbms.nativeAuth = result.nativeAuth; 
-                    this.dbms.systemGraph = result.systemGraph;
-                }),
-            () => featureProbes.authEnabled(this)
-                .then(result => { this.dbms.authEnabled = result; }),
-            () => featureProbes.csvMetricsEnabled(this)
-                .then(result => { this.dbms.csvMetricsEnabled = result; }),
-            () => featureProbes.hasAPOC(this)
-                .then(result => { this.dbms.apoc = result; }),
-            () => featureProbes.hasLogStreaming(this)
-                .then(result => { this.dbms.logStreaming = result; }),
-            () => featureProbes.getAvailableMetrics(this)
-                .then(metrics => { this.metrics = metrics; }),
-            () => featureProbes.hasDBStats(this)
-                .then(result => { this.dbms.hasDBStats = result }),
-            () => featureProbes.hasMultiDatabase(this)
-                .then(result => { this.dbms.multidatabase = result }),
-            () => this.getMaxHeap().then(maxHeap => {
-                this.dbms.maxHeap = maxHeap;
-            }),
-            () => this.getMaxPhysicalMemory().then(maxPhysMemory => {
-                this.dbms.physicalMemory = maxPhysMemory;
-            }),
-        ];
+        // this.dbms ends up looking like this:
+        // {
+        //     nativeGraph: true,
+        //     systemGraph: true,
+        //     version: { major: 4, minor: 0, patch: 0 },
+        //     maxHeap: 'whatever',
+        //     physicalMemory: 'whatever',
+        //     hasDBStats: true,
+        //     metrics: [],
+        //     csvMetricsEnabled: true,
+        //     ...
+        // }
 
-        const s = new Date().getTime();
-
-        // When halin is first starting, doing all of these things in parallel can a bit
-        // spam the server with new connections, so we limit concurrency which is friendlier
-        // and also results in faster startup times.
-        return Promise.map(allProbes, f => f(), { concurrency: 2 })
-            .then(whatever => {
+        return featureProbes.runAllProbes(this)
+            .then(dbms => {
+                this.dbms = dbms;
+            })
+            .then(() => {
                 if (this.isCommunity()) {
                     // #operability As a special exception, community will fail 
                     // the test to determine if a node supports native auth -- but it
@@ -317,25 +485,32 @@ export default class ClusterMember {
                     // auth providers.
                     this.dbms.nativeAuth = true;
                 }
-
+    
                 if (this.dbms.multidatabase) {
                     this.dbms.systemGraph = true;
                 }
-
+    
                 // { major, minor, patch }
                 _.set(this.dbms, 'version', this.getVersion());
-
-                const e = new Date().getTime() - s;
-                sentry.fine(this.getLabel(), 'initialization', e, 'ms elapsed');
-                return whatever;
-            });
+            });    
     }
 
+    /**
+     * This function just takes note of a transaction success, as a data point/observation,
+     * so that we can track ongoing responsiveness/performance.
+     * @param {Number} time number of ms elapsed
+     */
     _txSuccess(time) {
         // It's a ring not an array, so it cannot grow without bound.
         this.observations.push({ x: new Date(), y: time });
     }
 
+    /**
+     * This function does nothing other than take internal note that an error occurred,
+     * so that we can accumulate information about what errors we've seen and provide
+     * feedback to users.
+     * @param {Error} err 
+     */
     _txError(err) {
         const str = `${err}`;
         if (_.has(this.errors, str)) {
@@ -356,7 +531,7 @@ export default class ClusterMember {
      * @param database the name of the database to run the query against
      * @returns {Promise} which resolves to a neo4j driver result set
      */
-    run(query, params = {}, database=null) {
+    run(query, params = {}, database = null) {
         if (!this.driver) { throw new Error('ClusterMember has no driver!'); }
         if (!query) { throw new Error('Missing query'); }
 
@@ -365,7 +540,7 @@ export default class ClusterMember {
         const start = new Date().getTime();
 
         let poolSession;
-        
+
         /*
          * Sessions work differently depending on Neo4j 3 vs. 4.
          * In 4, sessions can be bound to a particular database.  In 3
@@ -382,7 +557,7 @@ export default class ClusterMember {
             if (!database || this.getVersion().major < 4) {
                 poolSession = true;
                 return this.pool.acquire();
-            } 
+            }
 
             poolSession = false;
             return Promise.resolve(this.driver.session({ database }));
@@ -402,7 +577,7 @@ export default class ClusterMember {
                 if (query instanceof HalinQuery) {
                     return session.run(query.getQuery(), params);
                 }
-                
+
                 return session.run(query, params, transactionConfig);
             })
             .then(results => {

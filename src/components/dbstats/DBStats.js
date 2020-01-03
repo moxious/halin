@@ -1,13 +1,27 @@
 import neo4j from '../../api/driver';
 import ql from '../../api/data/queries/query-library';
+import _ from 'lodash';
 
 /**
  * This class encapsulates functionality around the db.stats.* procedures.
  * See: https://neo4j.com/docs/operations-manual/current/reference/procedures/
+ * 
+ * TODO -- adapt for multidatabase.  Because sessions don't get a database
+ * parameter here, implicitly we're gathering stats about the default database.
  */
 export default class DBStats {
-    constructor(clusterMember) {
+    /**
+     * @param {ClusterMember} clusterMember which member to collect stats from
+     * @param {String} database database name
+     */
+    constructor(clusterMember, database) {
         this.clusterMember = clusterMember;
+        this.database = database;
+
+        if (_.isNil(database)) {
+            throw new Error('DBStats must be initialized with a database');
+        }
+
         this.started = false;
     }
 
@@ -16,7 +30,7 @@ export default class DBStats {
             return Promise.resolve(true);
         }
 
-        return this.clusterMember.run(ql.DB_QUERY_STATS_COLLECT)
+        return this.clusterMember.run(ql.DB_QUERY_STATS_COLLECT, {}, this.database)
             .then(() => {
                 this.started = true;
                 return true;
@@ -32,7 +46,7 @@ export default class DBStats {
     }
 
     stats() {
-        return this.clusterMember.run(ql.DB_QUERY_STATS)
+        return this.clusterMember.run(ql.DB_QUERY_STATS, {}, this.database)
             .then(results => results.records.map(r => ({
                 query: r.get('query'),
                 qep: r.get('qep'),
@@ -53,7 +67,7 @@ export default class DBStats {
             return Promise.resolve(false);
         }
 
-        return this.clusterMember.run(ql.DB_QUERY_STATS_STOP)
+        return this.clusterMember.run(ql.DB_QUERY_STATS_STOP, {}, this.database)
             .then(() => {
                 this.started = false;
                 return true;

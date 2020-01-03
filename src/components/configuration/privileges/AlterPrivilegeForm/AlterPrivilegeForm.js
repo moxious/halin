@@ -17,14 +17,14 @@ class AlterPrivilegeForm extends Component {
         message: null,
         error: null,
         formError: null,
-        operation: 'GRANT',
-        privilege: 'TRAVERSE',
-        entity: 'NODES *',
+        operation: PrivilegeOperation.OPERATIONS.GRANT,
+        privilege: PrivilegeOperation.PRIVILEGES.TRAVERSE,
+        entity: PrivilegeOperation.ENTITIES.ALL_NODES,
         role: 'admin',
         op: null,
-        operations: ['GRANT', 'REVOKE', 'DENY'].map(optionify),
-        privileges: ['TRAVERSE', 'READ (*)', 'MATCH (*)', 'WRITE (*)'].map(optionify),
-        entities: ['NODES *', 'RELATIONSHIPS *', 'ELEMENTS *'].map(optionify),
+        operations: PrivilegeOperation.VALID_OPERATIONS.map(optionify),
+        privileges: PrivilegeOperation.VALID_PRIVILEGES.map(optionify),
+        entities: PrivilegeOperation.VALID_ENTITIES.map(optionify),
     };
 
     constructor(props, context) {
@@ -45,7 +45,7 @@ class AlterPrivilegeForm extends Component {
                 console.log('MY PROPS', this.props);
                 const roles = roleData.map(entry => optionify(entry.role));
 
-                const databases = mgr.databases().map(db => optionify(db.getLabel()))
+                const databases = window.halinContext.databases().map(db => optionify(db.getLabel()))
                     .concat([optionify('*')]);
 
                 const database = this.props.database || databases[0].value;
@@ -161,7 +161,7 @@ class AlterPrivilegeForm extends Component {
                     fluid
                     options={this.state.entities}
                     style={this.inputStyle}
-                    disabled={this.state.pending}
+                    disabled={this.state.pending || !PrivilegeOperation.allowsEntity(this.state.privilege)}
                     defaultValue={this.state.entity}
                     onChange={(e, d) => this.handleChange('entity', e, d)}
                     label='Entity'

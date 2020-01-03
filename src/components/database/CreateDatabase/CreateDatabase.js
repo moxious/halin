@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Modal, Form, Message } from 'semantic-ui-react';
+import { Form, Message } from 'semantic-ui-react';
 import _ from 'lodash';
 import sentry from '../../../api/sentry';
 import status from '../../../api/status/index';
+import Spinner from '../../ui/scaffold/Spinner/Spinner';
 
 const defaultState = {
-    open: false,
     name: '',
     pending: false,
     message: null,
@@ -21,60 +21,36 @@ class CreateDatabase extends Component {
     }
 
     formValid = () => {
-        return this.state.name && 
+        const nameValid = this.state.name && this.state.name.match(/^[A-Za-z0-9]+$/);
+
+        return nameValid &&
             // Don't allow duplicate names
-            window.halinContext.getClusterManager().databases().filter(db => db.name === this.state.name).length === 0;
+            window.halinContext.databases().filter(db => db.name === this.state.name).length === 0;
     }
 
-    ok = () => {
-        console.log('TODO -- logic to create database named ', this.state.name);
+    handleSubmit = () => {
+        console.log('Creating database', this.state.name);
         this.setState({ pending: true });
+        
+        let message, error;
+
         return window.halinContext.getClusterManager().createDatabase(this.state.name)
             .then(() => {
-                this.setState({ 
-                    open: false, 
-                    message: status.message('Success', `Created database ${this.state.name}`),
-                    error: null,
-                });
-
-                if (this.props.onCreate) {
-                    return this.props.onCreate(this.state.name);
-                }
+                sentry.info(`Success creating ${this.state.name}`);
+                message = status.message('Success', `Created database ${this.state.name}`);
+                error = null;
             })
             .catch(err => {
                 sentry.error('Failed to create database', err);
-                this.setState({ 
-                    message: null, 
-                    error: status.message('Error',
-                        `Failed to create database ${this.state.name}: ${err}`),
-                });
-
-                if (this.props.onCancel) {
-                    return this.props.onCancel();
-                }
+                error = status.message('Error',
+                    `Failed to create database ${this.state.name}: ${err}`);
+                message = null;
             })
             .finally(() => {
-                this.setState({ pending: false });
+                sentry.fine(`Resetting create form`);
+                this.setState({ pending: false, error, message, name: '' });
                 status.toastify(this);
-            })
-            .then(() => this.resetState());
-    }
-    
-    cancel = () => {
-        this.resetState();
-        if (this.props.onCancel) {
-            return this.props.onCancel();
-        }
-    };
-
-    UNSAFE_componentWillReceiveProps(props) {
-        this.setState({ open: props.open });
-    }
-
-    handleChange(field, event) {
-        const mod = {};
-        mod[field] = event.target.value;
-        this.setState(mod);
+            });
     }
 
     formHasErrors = () => {
@@ -86,45 +62,58 @@ class CreateDatabase extends Component {
         return !this.formValid();
     };
 
+    handleChange = (e, { name, value }) => {
+        this.setState({ [name]: value });
+    };
+
     render() {
         return (
-            <Modal className='CreateDatabaseModal' open={this.state.open}>
-                <Modal.Header>Create Database</Modal.Header>
-                <Modal.Content>
-                    <Form error={this.formHasErrors()} size='small' style={{ textAlign: 'left' }}>
-                        <Form.Input 
-                            fluid 
-                            disabled={this.state.pending}
-                            onChange={e => this.handleChange('name', e)}
+            <div className='CreateDatabaseModal'>
+                <Form
+                    error={this.formHasErrors()}
+                    style={{ textAlign: 'left' }}>
+
+                    <Form.Group>
+                        <Form.Input
+                            name='name'
+                            value={this.state.name}
+                            onChange={this.handleChange}
                             label='Database Name' />
+                    </Form.Group>
 
-                        <Message
-                            error
-                            header={ this.state.error ? 'Error' : 'Invalid database name' }
-                            content={
-                                <div>
-                                    Database names may consist only of simple letters and numbers,
-                                    and may not match any other existing database name.
-                                </div>
-                            }/>
-                    </Form>
-                </Modal.Content>
+                    <Form.Button 
+                        disabled={!this.state.name || this.formHasErrors()}
+                        onClick={this.handleSubmit}
+                        type='submit' 
+                        content='Create' />
 
-                <Modal.Actions>
-                    <Button basic color='red' onClick={this.cancel}>
-                        Cancel
-                    </Button>
-                    <Button basic color='green' disabled={!this.formValid()} onClick={this.ok}>
-                        OK
-                    </Button>
-                </Modal.Actions>
-            </Modal>
+                    <Message
+                        error
+                        header={this.state.error ? 'Error' : 'Invalid database name'}
+                        content={
+                            <div>
+                                Database names may consist only of simple letters and numbers,
+                                and may not match any other existing database name.
+                            </div>
+                        } />
+                </Form>
+
+                <Message>
+                    <Message.Header>Notice</Message.Header>
+
+                    <p>This feature schedules creation of a database.  After you create,
+                        it may take a bit of time for the database to appear in Halin.
+                    </p>
+                </Message>
+
+                {this.state.pending ? <Spinner /> : ''}
+            </div>
         );
     }
 }
 
 CreateDatabase.props = {
-    member: PropTypes.object,
+    member: PropTypes.object.isRequired,
 };
 
 export default CreateDatabase;

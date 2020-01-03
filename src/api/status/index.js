@@ -43,7 +43,7 @@ export default {
 
     toastify: (component, overrideOptions) => {
         if (!_.get(component, 'state.error') && !_.get(component, 'state.message')) {
-            sentry.warn('Toastify called on a component with nothing to say');
+            sentry.warn('Toastify called on a component with nothing to say', component.state);
             return null;
         }
 

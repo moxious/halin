@@ -6,7 +6,8 @@ PASSWORD=admin
 CWD=`pwd`
 #NEO4J=neo4j:3.5.5
 #NEO4J=neo4j:4.0.0-alpha09
-NEO4J=neo4j:4.0.0-alpha09mr02-enterprise
+#NEO4J=neo4j:4.0.0-alpha09mr02-enterprise
+NEO4J=neo4j:4.0.0-enterprise
 
 docker run -d --name neo4j-empty --rm \
 	-p 127.0.0.1:7474:7474 \

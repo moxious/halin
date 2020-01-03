@@ -6,10 +6,12 @@ export default new HalinQuery({
         pass: ctx.isCluster(),
         description: 'Requires clustered configuration',
     }),
+    bare: true,
+    // Return signature < 4.0: id, addresses, role, groups, database
+    // Return signature >= 4.0: id, addresses, databases, groups
+    // No YIELD is present here because this query has to work in different cases.
     query: `
         CALL dbms.cluster.overview()
-        YIELD id, addresses, role, groups, database
-        RETURN id, addresses, role, groups, database    
     `,
     columns: [
         { Header: 'Role', accessor: 'role' },

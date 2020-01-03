@@ -62,6 +62,7 @@ const links = {
     changingCSVMetricIntervals: new KBLink('Configuring CSV Metrics and sampling intervals', 'https://neo4j.com/docs/operations-manual/current/monitoring/metrics/expose/#metrics-csv'),
     countStore: new KBLink('Fast counts using the count store', 'https://neo4j.com/developer/kb/fast-counts-using-the-count-store/'),
     apocDocs: new KBLink('APOC Documentation', 'https://neo4j.com/docs/labs/apoc/current/'),
+    fabric: new KBLink('Fabric', 'https://neo4j.com/docs/operations-manual/4.0/fabric/introduction/'),
 };
 
 export default {
@@ -165,12 +166,23 @@ export default {
         or all of your files reside on the same disk.`,
         links.configuringDataOnDisk,
     ]),
+    ClusterMember: render([
+        'A member is a single machine or container that participates in a Neo4j cluster.',
+        'In the case of stand-alone or single instance Neo4j, Halin treats this as a cluster with 1 member.',
+    ]),
     ClusterMemory: render([
         'The heap space is used for query execution, transaction state, management of the graph etc. The size needed for the heap is very dependent on the nature of the usage of Neo4j. For example, long-running queries, or very complicated queries, are likely to require a larger heap than simpler queries.',
         'Generally speaking, in order to aid performance, we want to configure a large enough heap to sustain concurrent operations.',
         'In case of performance issues we may have to tune our queries, and monitor their memory usage, in order to determine whether the heap needs to be increased.',
         'The heap memory size is determined by the parameters dbms.memory.heap.initial_size and dbms.memory.heap.max_size. It is recommended to set these two parameters to the same value. This will help avoid unwanted full garbage collection pauses.',
         links.memoryConfiguration,
+    ]),
+    EventLog: render([
+        `Halin keeps a record of all significant events it saw since it connected to
+        your Neo4j instance.  This includes leader re-elections, creation of databases,
+        users, roles, and so on.`,
+        `The event log only pertains to the period of time you're running Halin, because
+        halin does not save data locally.`,
     ]),
     GarbageCollection: render([
         'Slow garbage collection is an indication of performance problems.',
@@ -238,8 +250,33 @@ export default {
         links.txManagement,
         links.connectionManagement,
     ]),
+    Database: render([
+        `Databases operate as independent entities in a Neo4j DBMS, both in standalone and in a cluster. 
+        Since a cluster consists of multiple independent server instances, the effects of administrative 
+        operations like creating a new database happen asynchronously and independently for each server. 
+        However, the immediate effect of an administrative operation is to safely commit the desired 
+        state in the system database.`,
+        `The desired state committed in the system database gets replicated and is picked up by an internal 
+        component called the reconciler. It runs on every instance and takes the appropriate actions required 
+        locally on that instance for reaching the desired state; creating, starting, stopping and dropping 
+        databases.`,        
+        `Every database runs in an independent Raft group and since there are two databases in a fresh cluster, 
+        system and neo4j, this means that it also has two Raft groups. Every Raft group also has an independent 
+        leader and thus a particular Core server could be the leader for one database and a follower for 
+        another.`,
+    ]),
+    Fabric: render([
+        `A Fabric setup includes a Fabric database, that acts as the entry point to a federated or sharded graph 
+        infrastructure. This database is also referred in Fabric as the virtual database. Drivers and client 
+        applications access and use the Fabric database like any other Neo4j database, with the exception that 
+        it cannot store any data and queries against it return no data. The Fabric database can be configured 
+        only on a standalone Neo4j DBMS, i.e. on a Neo4j DBMS where the configuration setting dbms.mode must 
+        be set to SINGLE.`,
+        links.fabric,
+    ]),
     TransactionsOpen: render([
         'Any query that updates the graph will run in a transaction. An updating query will always either fully succeed, or not succeed at all.',
+        'This component shows only the transactions on the default configured database.',
         links.txManagement,
     ]),
     UsedMemory: render([

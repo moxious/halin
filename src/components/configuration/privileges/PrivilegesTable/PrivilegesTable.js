@@ -1,61 +1,78 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
-import { Grid, Button, Modal } from 'semantic-ui-react';
+import { Grid, Button } from 'semantic-ui-react';
 import uuid from 'uuid';
 import moment from 'moment';
-// import _ from 'lodash';
+import _ from 'lodash';
 
 import api from '../../../../api';
 import CSVDownload from '../../../data/download/CSVDownload';
 import Explainer from '../../../ui/scaffold/Explainer/Explainer';
-import AlterPrivilegeForm from '../AlterPrivilegeForm/AlterPrivilegeForm';
-// import PrivilegeOperation from '../../../../api/cluster/PrivilegeOperation';
+import PrivilegeOperation from '../../../../api/cluster/PrivilegeOperation';
+import PrivilegeButton from './PrivilegeButton';
 
-class PrivilegesTable extends Component {
-    key = uuid.v4();
-    query = api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.query;
-    displayColumns = [
-        /*
+const negativeButtonProps = row => ({
+    compact: true,
+    negative: true,
+    size: 'tiny',
+    // Do not permit revoking/denying privileges to admin.
+    disabled: row.role === 'admin',
+});
+
+const positiveButtonProps = row => _.merge(_.cloneDeep(negativeButtonProps(row)), { negative: null, positive: true });
+
+const makeDisplayColumns = () => {
+    const columns = [
         {
             Header: 'Actions',
             id: 'delete',
             minWidth: 70,
             maxWidth: 100,
-            Cell: ({ row }) => {
-                const buttonProps = { 
-                    compact: true, 
-                    negative: true, 
-                    size: 'tiny',
-                    // Do not permit revoking/denying privileges to admin.
-                    disabled: row.role === 'admin',
-                };
 
+            // Every row gets "Reverseability" buttons.  If the row shows a grant of
+            // permission XYZ, then there will be a revoke/deny button right next to it
+            // If the permission shows a deny, then there will be a grant next to it,
+            // so that privileges can be easily reversed.
+            Cell: ({ row }) => {
                 const deny = PrivilegeOperation.fromSystemPrivilege('DENY', row);
                 const revoke = PrivilegeOperation.fromSystemPrivilege('REVOKE', row);
+                const grant = PrivilegeOperation.fromSystemPrivilege('GRANT', row);
+
+                if (row.access === 'GRANTED') {
+                    return (
+                        <span>
+                            <PrivilegeButton
+                                label='Deny'
+                                privilege={_.merge({ locked: true }, deny.properties())}
+                                icon='lock'
+                                button={negativeButtonProps(row)} />
+                            <PrivilegeButton
+                                label='Revoke'
+                                privilege={_.merge({ locked: true }, revoke.properties())}
+                                icon='remove circle'
+                                button={negativeButtonProps(row)} />
+                        </span>
+                    );
+                }
 
                 return (
-                    <span>
-                        {
-                            this.privsButton(
-                                'Deny', 
-                                _.merge({ locked: true }, deny.properties()),
-                                'lock', 
-                                buttonProps)
-                        }
-                        {
-                            this.privsButton(
-                                'Revoke', 
-                                _.merge({ locked: true }, revoke.properties()),
-                                'remove circle', 
-                                buttonProps)
-                        }
-                    </span>
+                    <PrivilegeButton
+                        label='Grant'
+                        privilege={_.merge({ locked: true }, grant.properties())}
+                        icon='unlock'
+                        button={positiveButtonProps(row)} />
                 );
             },
         },
-        */
-    ].concat(api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.columns);
+    ].concat(_.cloneDeep(api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.columns));
 
+    return columns;
+};
+
+class PrivilegesTable extends Component {
+    key = uuid.v4();
+    query = api.queryLibrary.DBMS_4_SHOW_PRIVILEGES.query;
+    displayColumns = makeDisplayColumns();
     state = {
         childRefresh: 1,
         refresh: 1,
@@ -103,33 +120,6 @@ class PrivilegesTable extends Component {
         );
     }
 
-    // changePrivs(operation) {
-    //     this.setState({
-    //         pending: false,
-    //         message: null,
-    //         error: api.status.message('Not yet supported', `${operation} is coming soon!`),
-    //     }, () => api.status.toastify(this));
-    // }
-
-    privsButton = (label, privProps, icon, props = {}) => {
-        const compact = props.size === 'tiny' || props.compact;
-
-        const button = compact ?
-            <Button {...props} icon={icon} />
-            : <Button {...props}><i className={'icon ' + icon}></i>{label}</Button>
-
-        return (
-            <Modal closeIcon trigger={button}>
-                <Modal.Header>{label}</Modal.Header>
-                <Modal.Content>
-                    <AlterPrivilegeForm {...privProps} />
-                </Modal.Content>
-            </Modal>
-        );
-    };
-
-    grantButton() { return this.privsButton('Grant', { operation: 'GRANT' }, 'unlock', { primary: true }); }
-
     render() {
         return (
             <div className="Neo4jPrivileges">
@@ -139,7 +129,11 @@ class PrivilegesTable extends Component {
                     <Grid.Row columns={1}>
                         <Grid.Column>
                             <Button.Group size='small'>
-                                {/* {this.grantButton()} */}
+                                <PrivilegeButton 
+                                    label='Grant'
+                                    privilege={{operation:'GRANT'}}
+                                    icon='unlock'
+                                    button={{primary: true}} />
                                 {this.downloadCSVButton()}
                             </Button.Group>
                         </Grid.Column>
@@ -154,8 +148,12 @@ class PrivilegesTable extends Component {
                                 database={api.driver.SYSTEM_DB}
                                 refresh={this.state.childRefresh}
                                 defaultPageSize={10}
+                                selectFilter={[
+                                    'access', 'action', 'resource', 
+                                    'segment', 'role', 'graph'
+                                ]}
                                 displayColumns={this.displayColumns}
-                                hideNodeLabel={true}
+                                hideMemberLabel={true}
                             />
                         </Grid.Column>
                     </Grid.Row>

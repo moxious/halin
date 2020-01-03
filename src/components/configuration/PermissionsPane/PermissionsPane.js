@@ -58,7 +58,8 @@ class PermissionsPane extends Component {
         const enterprise = window.halinContext.isEnterprise();
         const is4 = window.halinContext.getVersion().major >= 4;
 
-        if (enterprise) { panes.push(rolesPane); }
+        // #operability Aura standard doesn't support roles
+        if (window.halinContext.supportsRoles()) { panes.push(rolesPane); }
         if (enterprise && is4) { panes.push(privilegesPane); }
 
         return (

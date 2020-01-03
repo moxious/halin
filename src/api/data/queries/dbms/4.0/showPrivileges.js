@@ -5,7 +5,7 @@ export default new HalinQuery({
     query: `SHOW PRIVILEGES`,
     bare: true, // Do not disclaim
     columns: [
-        { Header: 'Grant', accessor: 'grant' },
+        { Header: 'Access', accessor: 'access' },
         { Header: 'Action', accessor: 'action' },
         { Header: 'Resource', accessor: 'resource' },
         { Header: 'Graph', accessor: 'graph' },
@@ -15,7 +15,7 @@ export default new HalinQuery({
     // Because it's from listConfig, value comes as a string **not** a boolean.
     exampleResult: [ 
         {
-            grant: 'GRANTED',
+            access: 'GRANTED',
             action: 'read',
             resource: 'all_properties',
             graph: '*',

@@ -3,34 +3,34 @@ import HalinQuery from '../../HalinQuery';
 export default new HalinQuery({
     description: 'Fetches transaction statistics of how much work the database is processing',
     query: `
-    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.neo4j.transaction.active')
+    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.' + $db + '.transaction.active')
     YIELD attributes WITH attributes.Value.value as open
 
-    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.neo4j.transaction.active_read')
+    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.' + $db + '.transaction.active_read')
     YIELD attributes WITH attributes.Value.value as active_read,
         open
 
-    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.neo4j.transaction.active_write')
+    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.' + $db + '.transaction.active_write')
     YIELD attributes WITH attributes.Value.value as active_write,
         active_read, open
 
-    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.neo4j.transaction.committed')
+    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.' + $db + '.transaction.committed')
     YIELD attributes WITH attributes.Count.value as committed,
         active_write, active_read, open
 
-    CALL dbms.queryJmx("neo4j.metrics:name=neo4j.neo4j.transaction.active")
+    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.' + $db + '.transaction.active')
     YIELD attributes WITH attributes.Value.value as active,
         committed, active_write, active_read, open
 
-    CALL dbms.queryJmx("neo4j.metrics:name=neo4j.neo4j.transaction.peak_concurrent")
+    CALL dbms.queryJmx("neo4j.metrics:name=neo4j." + $db + ".transaction.peak_concurrent")
     YIELD attributes WITH attributes.Count.value as concurrent,
         active, committed, active_write, active_read, open
 
-    CALL dbms.queryJmx("neo4j.metrics:name=neo4j.neo4j.transaction.rollbacks")
+    CALL dbms.queryJmx("neo4j.metrics:name=neo4j." + $db + ".transaction.rollbacks")
     YIELD attributes WITH attributes.Count.value as rolledBack,
         concurrent, active, committed, active_write, active_read, open
 
-    CALL dbms.queryJmx("neo4j.metrics:name=neo4j.neo4j.transaction.started")
+    CALL dbms.queryJmx("neo4j.metrics:name=neo4j." + $db + ".transaction.started")
     YIELD attributes WITH attributes.Count.value as opened,
         rolledBack, concurrent, active, committed, active_write, active_read, open
         
@@ -42,6 +42,9 @@ export default new HalinQuery({
         concurrent,
         committed
     `,
+    parameters: {
+        db: 'Name of the database',
+    },
     columns: [
         { Header: 'Rolled Back', accessor: 'rolledBack' },
         { Header: 'Open', accessor: 'open' },

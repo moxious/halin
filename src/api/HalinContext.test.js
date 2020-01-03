@@ -7,25 +7,17 @@ import fakes from '../testutils/fakes';
 
 describe('Halin Context', function () {
     describe('Static Members', function () {
-        it('can get a project from the environment', () => {
-            const proj = HalinContext.getProjectFromEnvironment();
-            ['name', 'graphs'].forEach(p => expect(proj).toHaveProperty(p));
+        it('can get connection details from the environment', () => {
+            const details = HalinContext.getConnectionDetailsFromEnvironment();
+            ['tlsLevel', 'username', 'password', 'host', 'port'].forEach(p => expect(details).toHaveProperty(p));
         });
-    
-        it('can get a graph object from the environment', () => {
-            const obj = HalinContext.getGraphFromEnvironment();
-            [ 'name', 'status', 'databaseStatus', 'databaseType', 'id',
-                'connection', 'connection.configuration', 
-                'connection.configuration.protocols.bolt' ].forEach(p => {
-                    expect(obj).toHaveProperty(p);
-                });
-        });    
     });
 
     let ctx;
     const driver = fakes.Driver();
 
     beforeEach(() => {
+        HalinContext.connectionDetails = fakes.basics;
         ctx = new HalinContext();
         neo4j.driver = sinon.fake.returns(driver);
     });
@@ -41,7 +33,7 @@ describe('Halin Context', function () {
         expect(ctx.mgr).toBeTruthy();
     });
 
-    it('has a members accessor', () => expect(ctx.members()).toEqual(ctx.clusterMembers));
+    it('has a members accessor', () => expect(ctx.members()).toEqual(ctx.memberSet.clusterMembers));
     it('exposes a poll rate', () => expect(ctx.getPollRate()).toEqual(ctx.pollRate));
     it('exposes a cluster manager', () => expect(ctx.getClusterManager()).toBeInstanceOf(ClusterManager));
     it('can get a driver for an address', () => {
@@ -53,11 +45,8 @@ describe('Halin Context', function () {
     });
 
     it('can initialize', () => {
-        // Reads from Neo4jDesktop fake API shim which is created by fakes.
         return ctx.initialize()
             .then(() => {
-                expect(ctx.project).toBeTruthy();
-                expect(ctx.graph).toBeTruthy();
                 expect(ctx.base.host).toEqual(fakes.basics.host);
                 expect(ctx.base.username).toEqual(fakes.basics.username);
                 expect(ctx.base.password).toEqual(fakes.basics.password);

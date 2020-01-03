@@ -6,9 +6,7 @@ import uuid from 'uuid';
 import _ from 'lodash';
 
 import sentry from '../api/sentry/index';
-
 import queryFakes from './queryfakes';
-import neo4jDesktop from '../api/neo4jDesktop/';
 
 sentry.disable();
 
@@ -56,6 +54,10 @@ const ClusterMember = (data = []) => {
         dbms: {},
         getLabel: sinon.fake.returns(host),
         run: fakeRun(data),
+        canWrite: () => true,
+        isLeader: () => true,
+        isReadReplica: () => false,
+        supportsMultiDatabase: () => true,
         getBoltAddress: sinon.fake.returns(`bolt://${host}:7777`),
         getCypherSurface: sinon.fake.returns(Promise.resolve([
             { type: 'function', name: 'foobar', signature: 'foobar()', description: 'blah', roles: [] },
@@ -132,9 +134,12 @@ const HalinContext = (returnData = []) => {
         getClusterManager: sinon.fake.returns(mgr),
         isEnterprise: () => sinon.fake.returns(true),
         isCommunity: () => sinon.fake.returns(false),
+        supportsRoles: () => sinon.fake.returns(true),
         getCurrentUser: sinon.fake.returns({
             username: 'neo4j', roles: ['admin'],
         }),
+        driverFor: () => Driver(),
+        connectionDetails: basics,
     };
 };
 
@@ -151,11 +156,6 @@ const Driver = (data = []) => {
         id: uuid.v4(),
         session: sinon.fake.returns(Session(data)),
     };
-};
-
-window.neo4jDesktopApi = {
-    getContext: () =>
-        Promise.resolve(neo4jDesktop.buildFakeContext(basics)),
 };
 
 export default {
