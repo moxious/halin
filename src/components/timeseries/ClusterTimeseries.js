@@ -301,7 +301,10 @@ class ClusterTimeseries extends Component {
             return 'transparent';
         }
 
-        if (window.halinContext.members()[idx].canWrite(neo4j.SYSTEM_DB)) {
+        const member = window.halinContext.members()[idx];
+        if (member.isLeader() && !member.supportsMultiDatabase()) {
+            return LEADER_COLOR;
+        } else if(member.supportsMultiDatabase() && member.canWrite(neo4j.SYSTEM_DB)) {
             return LEADER_COLOR;
         }
 
