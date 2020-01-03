@@ -196,6 +196,8 @@ export default class Database {
         if (halin.members().length === 1) {
             // In standalone mode...it's pretty obvious.
             return halin.members()[0];
+        } else if (!halin.supportsMultiDatabase()) {
+            return halin.getWriteMember();
         }
 
         const leaders = this.getMemberStatuses()
