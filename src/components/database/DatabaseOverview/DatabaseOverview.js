@@ -61,6 +61,43 @@ class DatabaseOverview extends Component {
         );
     }
 
+    /**
+     * TODO this is a cleaner display, but has visual fitting issues.
+    memberStatusTable() {
+        const rows = _.sortBy(this.props.database.getMemberStatuses(), ['address']).map(s => ({
+            address: s.address,
+            role: ('' + s.role).toUpperCase(),
+            status: this.status(s),
+            error: this.errorInformation(s),
+        }));
+
+        return (
+            <Table size='small'>
+                <Table.Header>
+                    <Table.Row>
+                        <Table.HeaderCell>Address</Table.HeaderCell>
+                        <Table.HeaderCell>Role</Table.HeaderCell>
+                        <Table.HeaderCell>Status</Table.HeaderCell>
+                        <Table.HeaderCell>Error</Table.HeaderCell>
+                    </Table.Row>
+                </Table.Header>
+                <Table.Body>
+                    {
+                        rows.map((row, i) =>
+                            <Table.Row key={i}>
+                                <Table.Cell>{row.address}</Table.Cell>
+                                <Table.Cell>{row.role}</Table.Cell>
+                                <Table.Cell>{row.status}</Table.Cell>
+                                <Table.Cell>{row.error}</Table.Cell>
+                            </Table.Row>
+                        )
+                    }
+                </Table.Body>
+            </Table>
+        );
+    }
+    */
+
     render() {
         if (!this.props.database) {
             return this.unavailable();
@@ -78,6 +115,8 @@ class DatabaseOverview extends Component {
             <HalinCard id="DatabaseOverview" header='Overview' knowledgebase='Database'>
                 {this.membersByRole()}
 
+                {/* {this.memberStatusTable()} */}
+
                 <List>
                     { fabricHere ? <FabricDesignator/> : '' }
                     {
@@ -93,7 +132,7 @@ class DatabaseOverview extends Component {
 
                 <p>Last updated: {moment(this.props.database.created).format()}</p>
                 { leader ? 
-                    <p>Leader ID: {leader.id}</p> : 
+                    '' : // <p>Leader ID: {leader.id}</p> : 
                     <p><strong>No leader detected</strong>; 
                         &nbsp;database may be starting, stopping, or 
                     &nbsp;undergoing leader election</p> }
