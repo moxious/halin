@@ -12,6 +12,7 @@ import Explainer from '../../ui/scaffold/Explainer/Explainer';
 import QueryExecutionPlan from '../QueryExecutionPlan/QueryExecutionPlan';
 import QueryStatTable from '../queries/QueryStatTable';
 import CSVDownload from '../../data/download/CSVDownload';
+import DBChooser from '../DBChooser/DBChooser';
 
 import './SampleQueries.css';
 
@@ -38,6 +39,7 @@ class SampleQueries extends Component {
         includeHalinQueries: true,
         data: null,
         interval: 10000,
+        database: null,
         percent: 0,
         updateInterval: null,
         status: STOPPED,
@@ -108,6 +110,9 @@ class SampleQueries extends Component {
 
     componentDidMount() {
         this.mounted = true;
+        this.setState({
+            database: window.halinContext.getDatabaseSet().getDefaultDatabase().getLabel()
+        });
     }
 
     componentWillUnmount() {
@@ -118,9 +123,7 @@ class SampleQueries extends Component {
     }
 
     start() {
-        if (!this.collector) {
-            this.collector = new DBStats(this.props.node);
-        }
+        this.collector = new DBStats(this.props.node, this.state.database);
 
         this.setState({
             timer: null,
@@ -146,6 +149,11 @@ class SampleQueries extends Component {
                     }, 100),
                 });
             })
+            .catch(err => {
+                if (this.mounted) {
+                    this.setState({ data: null, status: ERROR, error: err });
+                }
+            });
     }
 
     isRunning() {
@@ -214,6 +222,12 @@ class SampleQueries extends Component {
         includeHalinQueries: !this.state.includeHalinQueries,
     });
 
+    selectDB = (meh, data) => {
+        this.setState({
+            database: data.value,
+        });
+    };
+
     render() {
         return (
             <div className='SampleQueries'>
@@ -224,21 +238,28 @@ class SampleQueries extends Component {
                 <Form>
                     <Form.Group inline>
                         <Form.Field>
+                            <DBChooser
+                                defaultValue={window.halinContext.getDatabaseSet().getDefaultDatabase().getLabel()}
+                                label='Sample database:'
+                                onChange={this.selectDB} />
+                        </Form.Field>
+
+                        <Form.Field>
                             <Form.Input
-                                label='Sample for: (milliseconds)'
+                                label='for: (milliseconds)'
                                 name='lastN'
                                 onChange={this.handleChange}
                                 style={{ width: '100px' }}
                                 value={this.state.interval} />
                         </Form.Field>
-
                         <Form.Field>
                             <Checkbox
                                 onChange={this.toggleIncludeHalinQueries}
                                 label='Show Halin Queries'
                                 checked={this.state.includeHalinQueries} />
                         </Form.Field>
-
+                    </Form.Group>
+                    <Form.Group inline>
                         <Form.Field>
                             <Button primary
                                 onClick={() => this.start()}
