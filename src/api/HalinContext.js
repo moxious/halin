@@ -132,7 +132,7 @@ export default class HalinContext {
      */
     driverFor(addr, username = _.get(this.base, 'username'), password = _.get(this.base, 'password')) {
         const tlsLevel = _.get(this.base, 'tlsLevel');
-        const encrypted = (this.base.encrypted || tlsLevel === 'REQUIRED' ? true : false);
+        const encrypted = (_.get(this.base, 'encrypted') || tlsLevel === 'REQUIRED' ? true : false);
 
         if (this.drivers[addr]) {
             return this.drivers[addr];

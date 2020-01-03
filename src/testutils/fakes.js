@@ -55,6 +55,7 @@ const ClusterMember = (data = []) => {
         getLabel: sinon.fake.returns(host),
         run: fakeRun(data),
         canWrite: () => true,
+        isLeader: () => true,
         isReadReplica: () => false,
         supportsMultiDatabase: () => true,
         getBoltAddress: sinon.fake.returns(`bolt://${host}:7777`),
@@ -133,6 +134,7 @@ const HalinContext = (returnData = []) => {
         getClusterManager: sinon.fake.returns(mgr),
         isEnterprise: () => sinon.fake.returns(true),
         isCommunity: () => sinon.fake.returns(false),
+        supportsRoles: () => sinon.fake.returns(true),
         getCurrentUser: sinon.fake.returns({
             username: 'neo4j', roles: ['admin'],
         }),
