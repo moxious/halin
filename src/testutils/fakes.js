@@ -56,6 +56,7 @@ const ClusterMember = (data = []) => {
         run: fakeRun(data),
         canWrite: () => true,
         isReadReplica: () => false,
+        supportsMultiDatabase: () => true,
         getBoltAddress: sinon.fake.returns(`bolt://${host}:7777`),
         getCypherSurface: sinon.fake.returns(Promise.resolve([
             { type: 'function', name: 'foobar', signature: 'foobar()', description: 'blah', roles: [] },
