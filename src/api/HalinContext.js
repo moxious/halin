@@ -38,7 +38,7 @@ export default class HalinContext {
         this.dbSet = new DatabaseSet();
         this.driverOptions = {
             connectionTimeout: 15000,
-            trust: 'TRUST_CUSTOM_CA_SIGNED_CERTIFICATES',
+            trust: 'TRUST_SYSTEM_CA_SIGNED_CERTIFICATES',
         };
         this.debug = false;
         this.mgr = new ClusterManager(this);
@@ -132,13 +132,14 @@ export default class HalinContext {
      */
     driverFor(addr, username = _.get(this.base, 'username'), password = _.get(this.base, 'password')) {
         const tlsLevel = _.get(this.base, 'tlsLevel');
-        const encrypted = (tlsLevel === 'REQUIRED' ? true : false);
+        const encrypted = (this.base.encrypted || tlsLevel === 'REQUIRED' ? true : false);
 
         if (this.drivers[addr]) {
             return this.drivers[addr];
         }
 
         const allOptions = _.merge({ encrypted }, this.driverOptions);
+        console.log('DRIVER OPTIONS', allOptions);
         const driver = neo4j.driver(addr,
             neo4j.auth.basic(username, password), allOptions);
         this.drivers[addr] = driver;
@@ -183,6 +184,10 @@ export default class HalinContext {
     isNeo4jAura() {
         const uri = this.getBaseURI();
         return (uri || '').toLowerCase().indexOf('databases.neo4j.io') > -1;
+    }
+
+    supportsRoles() {
+        return this.isEnterprise() && !this.isNeo4jAura();
     }
 
     userIsAdmin() {
