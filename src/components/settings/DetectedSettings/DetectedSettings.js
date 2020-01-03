@@ -27,11 +27,14 @@ export default class DetectedSettings extends PureComponent {
         const fabric = ctx.getSystemDBWriter().usesFabric();
         console.log('FABRIC', fabric);
 
+        const version = ctx.getSystemDBWriter().getVersion();
+
         const items = [
+            this.lineItem(true, `Neo4j v${version.major}.${version.minor}.${version.patch}`),
+            ctx.isCommunity() ? this.lineItem(true, 'Community Edition') : this.lineItem(true, 'Enterprise Edition'),
             this.item(ctx.getBaseURI(), 'home'),
             this.item(ctx.getCurrentUser().username, 'user circle'),
             this.item(roles.join(', '), 'lock'),
-            ctx.isCommunity() ? this.lineItem(true, 'Community') : this.lineItem(true, 'Enterprise'),
             this.lineItem(ctx.supportsAuth(), 'Authorization'),
             this.lineItem(ctx.supportsNativeAuth(), 'Native Auth'),
             this.lineItem(ctx.supportsMultiDatabase(), 'Multi-Database'),
