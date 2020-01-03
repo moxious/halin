@@ -139,7 +139,6 @@ export default class HalinContext {
         }
 
         const allOptions = _.merge({ encrypted }, this.driverOptions);
-        console.log('DRIVER OPTIONS', allOptions);
         const driver = neo4j.driver(addr,
             neo4j.auth.basic(username, password), allOptions);
         this.drivers[addr] = driver;
