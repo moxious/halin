@@ -57,7 +57,7 @@ describe('Privilege Operations', function() {
 
         // 4.0 doesn't support write privileges on specific elements:
         // https://neo4j.com/docs/cypher-manual/4.0-preview/administration/security/subgraph/#administration-security-subgraph-write
-        expect(q).toEqual('GRANT WRITE ON GRAPH foo TO blorko');
+        expect(q).toEqual('GRANT WRITE ON GRAPH `foo` TO blorko');
     });
 
     it('can generate GRANTs from existing privileges (database permissions)', () => {
