@@ -1,5 +1,10 @@
 # Halin Release Notes
 
+## 0.12.1 Patch Release
+
+- Fixes #121 identify halin with global user-agent string in bolt driver
+- Fixes #122 confusion between open and available OS file descriptors
+
 ## 0.12.0 (Neo4j 4.0, Multi-database, and Fine-Grained Security)
 
 - Status for both all cluster members and all databases.  Users
