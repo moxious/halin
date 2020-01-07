@@ -21,7 +21,8 @@ class CreateDatabase extends Component {
     }
 
     formValid = () => {
-        const nameValid = this.state.name && this.state.name.match(/^[A-Za-z0-9]+$/);
+        // Must start with an ASCII character, then contain only ascii, numbers, dots, dashes.
+        const nameValid = this.state.name && this.state.name.match(/^[A-Za-z][A-Za-z0-9.-]*$/);
 
         return nameValid &&
             // Don't allow duplicate names
@@ -93,7 +94,8 @@ class CreateDatabase extends Component {
                         content={
                             <div>
                                 Database names may consist only of simple letters and numbers,
-                                and may not match any other existing database name.
+                                dots, and dashes, and must start with an ASCII letter.
+                                They may not match any other existing database name.
                             </div>
                         } />
                 </Form>

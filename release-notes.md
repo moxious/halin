@@ -5,6 +5,7 @@
 - Fixes #121 identify halin with global user-agent string in bolt driver
 - Fixes #122 confusion between open and available OS file descriptors
 - Fixes #97 omit 'parameters' from query/task view for performance reasons
+- Fixes #125 database names may contain dots and dashes
 - React scripts updates, which addresses numerous github security notices
 - Change base docker image to upgrade node, yarn, and react-scripts
 

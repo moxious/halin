@@ -434,7 +434,7 @@ export default class ClusterManager {
     stopDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getSystemDBWriter().run(`STOP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(`STOP DATABASE \`${db.name}\``, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('stop results', results);
                 return results;
@@ -450,7 +450,7 @@ export default class ClusterManager {
     startDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getSystemDBWriter().run(`START DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(`START DATABASE \`${db.name}\``, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('start results', results);
                 return results;
@@ -466,7 +466,7 @@ export default class ClusterManager {
     dropDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
-        return this.ctx.getSystemDBWriter().run(`DROP DATABASE ${db.name}`, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(`DROP DATABASE \`${db.name}\``, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('drop results', results);
                 return results;
@@ -487,7 +487,7 @@ export default class ClusterManager {
      * @param {String} name of the database you want to create
      */
     createDatabase(name) {
-        return this.ctx.getSystemDBWriter().run(`CREATE DATABASE ${name}`, {}, neo4j.SYSTEM_DB)
+        return this.ctx.getSystemDBWriter().run(`CREATE DATABASE \`${name}\``, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('Created database; results ', results);
                 return results;

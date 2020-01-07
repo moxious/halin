@@ -41,7 +41,7 @@ describe('Privilege Operations', function() {
 
     it('can build a query', () => {
         const q = op.buildQuery();
-        expect(q).toEqual('GRANT TRAVERSE ON GRAPH foo ELEMENTS * TO blorko');
+        expect(q).toEqual('GRANT TRAVERSE ON GRAPH `foo` ELEMENTS * TO blorko');
     });
 
     it('WRITE privileges do not include ELEMENTS part of query', () => {
@@ -70,7 +70,7 @@ describe('Privilege Operations', function() {
             resource: '',
         });
 
-        expect(op.buildQuery()).toEqual('GRANT CREATE INDEX ON DATABASE foo TO blorko');        
+        expect(op.buildQuery()).toEqual('GRANT CREATE INDEX ON DATABASE `foo` TO blorko');        
     });
 
     it('allowsEntity for non-database privileges', () => {
@@ -98,7 +98,7 @@ describe('Privilege Operations', function() {
                 segment: 'database',
                 role: 'test',
             },
-            expected: 'DENY ACCESS ON DATABASE neo4j TO test',
+            expected: 'DENY ACCESS ON DATABASE `neo4j` TO test',
         },
         {
             reversalAction: 'DENY',
@@ -110,7 +110,7 @@ describe('Privilege Operations', function() {
                 segment: 'NODE(*)',
                 role: 'test',
             },
-            expected: 'DENY TRAVERSE ON GRAPH neo4j NODES * TO test',
+            expected: 'DENY TRAVERSE ON GRAPH `neo4j` NODES * TO test',
         },
         {
             reversalAction: 'REVOKE',
@@ -122,7 +122,7 @@ describe('Privilege Operations', function() {
                 segment: 'database',
                 role: 'test',
             },
-            expected: 'REVOKE CREATE NEW PROPERTY NAME ON DATABASE neo4j FROM test',
+            expected: 'REVOKE CREATE NEW PROPERTY NAME ON DATABASE `neo4j` FROM test',
         },
         {
             reversalAction: 'REVOKE',
@@ -134,7 +134,7 @@ describe('Privilege Operations', function() {
                 segment: 'RELATIONSHIP(*)',
                 role: 'test',
             },
-            expected: 'REVOKE READ {*} ON GRAPH neo4j RELATIONSHIPS * FROM test',
+            expected: 'REVOKE READ {*} ON GRAPH `neo4j` RELATIONSHIPS * FROM test',
         },
         {
             reversalAction: 'GRANT',
@@ -146,7 +146,7 @@ describe('Privilege Operations', function() {
                 segment: 'NODE(Address)',
                 role: 'microuser',
             },
-            expected: 'GRANT READ {*} ON GRAPH neo4j NODES Address TO microuser',
+            expected: 'GRANT READ {*} ON GRAPH `neo4j` NODES Address TO microuser',
         },
         {
             reversalAction: 'GRANT',
@@ -158,7 +158,7 @@ describe('Privilege Operations', function() {
                 segment: 'RELATIONSHIP(PHONE)',
                 role: 'microuser',
             },
-            expected: 'GRANT TRAVERSE ON GRAPH neo4j RELATIONSHIPS PHONE TO microuser',
+            expected: 'GRANT TRAVERSE ON GRAPH `neo4j` RELATIONSHIPS PHONE TO microuser',
         }
     ];
 
