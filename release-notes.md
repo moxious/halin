@@ -5,6 +5,7 @@
 - Fixes #121 identify halin with global user-agent string in bolt driver
 - Fixes #122 confusion between open and available OS file descriptors
 - Fixes #97 omit 'parameters' from query/task view for performance reasons
+- React scripts updates, which addresses numerous github security notices
 
 ## 0.12.0 (Neo4j 4.0, Multi-database, and Fine-Grained Security)
 
