@@ -6,6 +6,7 @@
 - Fixes #122 confusion between open and available OS file descriptors
 - Fixes #97 omit 'parameters' from query/task view for performance reasons
 - React scripts updates, which addresses numerous github security notices
+- Change base docker image to upgrade node, yarn, and react-scripts
 
 ## 0.12.0 (Neo4j 4.0, Multi-database, and Fine-Grained Security)
 
