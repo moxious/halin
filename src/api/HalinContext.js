@@ -147,7 +147,6 @@ export default class HalinContext {
         const driver = neo4j.driver(addr,
             neo4j.auth.basic(username, password), allOptions);
         driver._userAgent = USER_AGENT; // https://github.com/moxious/halin/issues/121
-        console.log('driver', driver);
         this.drivers[addr] = driver;
         return driver;
     }
