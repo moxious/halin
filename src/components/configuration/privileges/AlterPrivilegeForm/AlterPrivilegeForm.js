@@ -42,8 +42,7 @@ class AlterPrivilegeForm extends Component {
         this.setState({ pending: true });
         return mgr.getRoles()
             .then(roleData => {
-                console.log('MY PROPS', this.props);
-                const roles = roleData.map(entry => optionify(entry.role));
+                const roles = roleData.map(entry => optionify(entry.role));                
 
                 const databases = window.halinContext.databases().map(db => optionify(db.getLabel()))
                     .concat([optionify('*')]);
