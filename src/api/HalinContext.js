@@ -8,6 +8,11 @@ import ClusterManager from './cluster/ClusterManager';
 import ClusterMemberSet from './cluster/ClusterMemberSet';
 import DatabaseSet from './DatabaseSet';
 import DataFeed from './data/DataFeed';
+import pkg from '../package.json';
+import build from '../build.json';
+import moment from 'moment';
+
+const USER_AGENT = `halin/${pkg.version} build ${build.build} on ${moment.utc(build.date).format('YYYY-MM-DD')}`;
 
 /**
  * HalinContext is a controller object that keeps track of state and permits diagnostic
@@ -141,6 +146,7 @@ export default class HalinContext {
         const allOptions = _.merge({ encrypted }, this.driverOptions);
         const driver = neo4j.driver(addr,
             neo4j.auth.basic(username, password), allOptions);
+        driver._userAgent = USER_AGENT; // https://github.com/moxious/halin/issues/121
         this.drivers[addr] = driver;
         return driver;
     }

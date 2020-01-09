@@ -1,5 +1,7 @@
 # base image
-FROM kkarczmarczyk/node-yarn:latest
+FROM node:13.5.0-stretch
+
+RUN apt-get update && apt-get install -y yarn
 
 # set working directory
 RUN mkdir /app

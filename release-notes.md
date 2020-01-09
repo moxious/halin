@@ -1,5 +1,14 @@
 # Halin Release Notes
 
+## 0.12.1 Patch Release
+
+- Fixes #121 identify halin with global user-agent string in bolt driver
+- Fixes #122 confusion between open and available OS file descriptors
+- Fixes #97 omit 'parameters' from query/task view for performance reasons
+- Fixes #125 database names may contain dots and dashes
+- React scripts updates, which addresses numerous github security notices
+- Change base docker image to upgrade node, yarn, and react-scripts
+
 ## 0.12.0 (Neo4j 4.0, Multi-database, and Fine-Grained Security)
 
 - Status for both all cluster members and all databases.  Users

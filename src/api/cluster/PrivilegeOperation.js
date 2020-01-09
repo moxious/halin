@@ -229,11 +229,11 @@ export default class PrivilegeOperation {
          * https://neo4j.com/docs/cypher-manual/4.0-preview/administration/security/subgraph/#administration-security-subgraph-write
          */
         if (priv.indexOf('WRITE') > -1) {
-            return `${op} ${priv} ON ${graphToken} ${db} ${preposition} ${role}`;
+            return `${op} ${priv} ON ${graphToken} \`${db}\` ${preposition} ${role}`;
         } else if(Object.values(PrivilegeOperation.DATABASE_OPERATIONS).indexOf(priv) > -1) {
-            return `${op} ${priv} ON DATABASE ${db} ${preposition} ${role}`;
+            return `${op} ${priv} ON DATABASE \`${db}\` ${preposition} ${role}`;
         }
 
-        return `${op} ${priv} ON ${graphToken} ${db} ${entity} ${preposition} ${role}`;
+        return `${op} ${priv} ON ${graphToken} \`${db}\` ${entity} ${preposition} ${role}`;
     }
 };

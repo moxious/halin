@@ -9,10 +9,10 @@ import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 class OpenFileDescriptors extends Component {
     state = {
         key: uuid.v4(),
-        displayProperty: 'fdUsed',
+        displayProperty: 'fdAvailable',
         options: [
-            { text: 'Used', value: 'fdUsed' },
-            { text: 'Available', value: 'fdOpen' },
+            { text: 'Used', value: 'fdOpen' },
+            { text: 'Available', value: 'fdAvailable' },
             { text: 'Max', value: 'fdMax' },
         ],
     };
@@ -25,8 +25,8 @@ class OpenFileDescriptors extends Component {
     // so we have to augment the data structure because the timeseries doesn't do math
     // for us.
     augmentData = (/* node */) => (data) => {
-        const fdUsed = data.fdMax - data.fdOpen;
-        return { fdUsed };
+        const fdAvailable = data.fdMax - data.fdOpen;
+        return { fdAvailable };
     };
 
     dataFeedMaker = node => {
@@ -36,7 +36,7 @@ class OpenFileDescriptors extends Component {
 
         const feed = halin.getDataFeed(_.merge({ node }, queryLibrary.OS_OPEN_FDS));
         feed.addAliases({ 
-            fdUsed: ClusterTimeseries.keyFor(addr, 'fdUsed'),
+            fdAvailable: ClusterTimeseries.keyFor(addr, 'fdAvailable'),
             fdOpen: ClusterTimeseries.keyFor(addr, 'fdOpen'),
             fdMax: ClusterTimeseries.keyFor(addr, 'fdMax'),
         });
@@ -57,7 +57,7 @@ class OpenFileDescriptors extends Component {
             <HalinCard header='File Descriptors' knowledgebase='FileDescriptors' owner={this}>
                 <Dropdown style={{paddingBottom: 10}}
                     placeholder='Show:'
-                    fluid defaultValue='fdUsed'
+                    fluid defaultValue='fdAvailable'
                     onChange={this.onChange}
                     selection
                     options={this.state.options}

@@ -46,9 +46,9 @@ export default new HalinQuery({
             idleTimeMillis: idleTimeMillis
         }) as transactions
         
-        /* Grab queries */
+        /* Grab queries -- omit parameters because of https://github.com/moxious/halin/issues/97 */
         CALL dbms.listQueries()
-        YIELD queryId, username, metaData, query, parameters, planner, runtime, indexes,
+        YIELD queryId, username, metaData, query, /* parameters, */ planner, runtime, indexes,
         startTime, protocol, clientAddress, requestUri, status, resourceInformation, 
         activeLockCount, elapsedTimeMillis, cpuTimeMillis, waitTimeMillis, idleTimeMillis,
         allocatedBytes, pageHits, pageFaults
@@ -57,7 +57,7 @@ export default new HalinQuery({
         WITH transactions, collect({
             id: queryId,
             query: query,
-            parameters: parameters,
+            /* parameters: parameters, */
             planner: planner,
             runtime: runtime,
             indexes: indexes,
@@ -129,7 +129,7 @@ export default new HalinQuery({
                 "pageHits": 0,
                 "id": "query-33",
                 "planner": "idp",
-                "parameters": {},
+                // "parameters": {},
                 "pageFaults": 0,
                 "status": "running"
               },              
