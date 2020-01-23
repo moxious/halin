@@ -16,14 +16,14 @@ const OSPane = (props) => {
                     <Grid.Column>
                         <OSStats 
                             key={key} 
-                            node={props.node} 
+                            node={props.member} 
                         />
                     </Grid.Column>
                 </Grid.Row>
 
                 <Grid.Row columns={1}>
                     <Grid.Column>
-                        <StorageCapacity key={key} node={props.node} />
+                        <StorageCapacity key={key} node={props.member} />
                     </Grid.Column>
                 </Grid.Row>                
             </Grid>  
@@ -32,7 +32,7 @@ const OSPane = (props) => {
 }
 
 OSPane.props = {
-    node: PropTypes.object.isRequired, // shape?
-}
+    member: PropTypes.object.isRequired, // shape?
+};
 
 export default OSPane;

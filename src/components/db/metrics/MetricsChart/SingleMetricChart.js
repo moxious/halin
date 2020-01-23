@@ -121,8 +121,6 @@ export default class SingleMetricChart extends Component {
     }
 
     render() {
-        console.log('MIN',this.getChartMin(),'MAX',this.getChartMax());
-
         return (
             <HalinCard className='MetricsChart' header={this.state.header} key={uuid.v4()}>
                 <ChartContainer className='MetricsChart'

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import moment from 'moment';
+import PropTypes from 'prop-types';
 import hoc from '../../../higherOrderComponents';
 import _ from 'lodash';
 import Spinner from '../../../ui/scaffold/Spinner/Spinner';
@@ -31,7 +32,7 @@ class MetricsPane extends Component {
     };
 
     componentDidMount() {
-        return this.props.node.getAvailableMetrics()
+        return this.props.member.getAvailableMetrics()
             .then(metrics => {
                 // Convert to the format that the dropdown menu wants.
                 const metricOptions = _.sortBy(_.uniqBy(metrics.map(m => ({
@@ -108,7 +109,7 @@ class MetricsPane extends Component {
             last: api.driver.int(this.state.observations),
         };
 
-        return this.props.node.run(queryLibrary.GET_METRIC.query, params)
+        return this.props.member.run(queryLibrary.GET_METRIC.query, params)
             .then(data => data.records.map(r => ({
                 t: this.convertMetricTimestampToLocalDate(r.get('timestamp').toNumber()),
                 metric: r.get('metric'),
@@ -273,6 +274,11 @@ const supportRequirements = () => {
         </Message>            
     );
 }
+
+
+MetricsPane.props = {
+    member: PropTypes.object.isRequired, // shape?
+};
 
 export default hoc.compatibilityCheckableComponent(
     MetricsPane,
