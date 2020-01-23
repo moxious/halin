@@ -28,15 +28,8 @@ const fine = (...args) => enabled ? console.log('FINE', ...args) : null;
 const debug = (...args) => enabled ? console.log('DEBUG', ...args) : null;
 
 // Filter out certain messages which might be so common that they'd create problems.
-const shouldSentryCapture = err => {
-    const str = `${err}`;
-
-    // if (str.indexOf('WebSocket connection failure') > -1) {
-    //     return false;
-    // }
-
-    return true;
-}
+// TBD pending further implementation
+const shouldSentryCapture = err => true;
 
 const context = ctx => {
     const eventMetadata = {
