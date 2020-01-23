@@ -10,5 +10,7 @@ export default {
     contains: (err, str) => asStr(err).toLowerCase().indexOf(str.toLowerCase()) > -1,
     insecureWSFromHTTPS: (err) => asStr(err).toLowerCase().indexOf('insecure websocket connection may not be initiated from a page loaded over HTTPS') > -1,
     repeatedAuthFailure: (err) => asStr(err).toLowerCase().indexOf('incorrect authentication details too many times in a row') > -1,
+    fileNotFound: (err) => asStr(err).indexOf('java.io.FileNotFoundException') > -1,
+    apocFileImportNotEnabled: (err) => asStr(err).indexOf('apoc.import.file.enabled') > -1,
 };
 
