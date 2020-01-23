@@ -1,5 +1,12 @@
 # Halin Release Notes
 
+## 0.12.2 Patch Release
+
+- Fixes #127: Neo4j 3.5 standalone members appear properly, not as LEADER
+- Fixes #126: Metric chart improvements for readability & precision
+- Fixes #128: excessive error reporting
+- Upgrades to sentry dependencies
+
 ## 0.12.1 Patch Release
 
 - Fixes #121 identify halin with global user-agent string in bolt driver
