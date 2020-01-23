@@ -1,12 +1,9 @@
 import React, { Component } from 'react';
-import { styler, Charts, ChartContainer, ChartRow, YAxis, LineChart } from 'react-timeseries-charts';
+import { styler, Charts, ChartContainer, ChartRow, YAxis, LineChart, EventMarker } from 'react-timeseries-charts';
 import _ from 'lodash';
 import uuid from 'uuid';
-import {
-    TimeSeries,
-    TimeRange,
-    TimeEvent,
-} from 'pondjs';
+import moment from 'moment';
+import { TimeSeries, TimeEvent } from 'pondjs';
 
 import HalinCard from '../../../ui/scaffold/HalinCard/HalinCard';
 
@@ -40,7 +37,18 @@ const LABELS = {
     p999: '99.9 Percentile',
 };
 
+const NullMarker = props => {
+    return <g />;
+};
+
 export default class SingleMetricChart extends Component {
+    state = {
+        tracker: null,
+        trackerValue: "-- °C",
+        trackerEvent: null,
+        markerMode: "flag",
+    }
+
     getChartMin() {
         return Math.min(...this.props.data.map(d => Number(_.get(d.map, this.props.mapKey))))
     }
@@ -49,53 +57,96 @@ export default class SingleMetricChart extends Component {
         return Math.max(...this.props.data.map(d => Number(_.get(d.map, this.props.mapKey))));
     }
 
-    render() {
-        const mapKey = this.props.mapKey;
-        const displayColumns = [ { accessor: mapKey } ];
+    renderMarker = () => {
+        if (!this.state.tracker) {
+            return <NullMarker />;
+        }
 
-        const style = styler(displayColumns.map((col, idx) => ({
-            key: col.accessor,
-            color: '#000000',
-            width: 3,
-        })));
-        
-        const rawObservations = this.props.data;
-        const dataSeries = new TimeSeries({
-            name: 'Data Series',
-            events: rawObservations.map(v => new TimeEvent(v.t, { [mapKey]: Number(_.get(v.map, mapKey)) })),
-        });
-
-        const header = LABELS[this.props.mapKey] || this.props.mapKey;
-        // console.log('DATA SERIES FOR ', header, mapKey, rawObservations.map(v => Number(_.get(v.map, mapKey))));
+        const infoStyle = {
+            fill: 'white',
+            stroke: 'black',
+        };
 
         return (
-            <HalinCard className='MetricsChart' header={header} key={uuid.v4()}>
+            <EventMarker id='EventMarker'
+                type="flag"
+                axis="y"
+                event={this.state.trackerEvent}
+                column={this.props.mapKey}
+                info={this.props.mapKey + ': ' + this.state.trackerValue}
+                infoTimeFormat={() => moment(this.state.tracker).format('HH:mm:ss')}
+                infoWidth={120}
+                infoStyle={infoStyle}
+                markerRadius={5}
+                markerStyle={{ fill: "#2db3d1" }}
+            />
+        );
+    };
+
+    handleTrackerChanged = t => {
+        if (t) {
+            const e = this.state.dataSeries.atTime(t);
+            const eventTime = new Date(
+                e.begin().getTime() + (e.end().getTime() - e.begin().getTime()) / 2
+            );
+            const eventValue = e.get(this.props.mapKey);
+            const v = `${eventValue}`;
+            console.log('Time', eventTime, 'value', eventValue);
+            this.setState({ tracker: eventTime, trackerValue: v, trackerEvent: e });
+        } else {
+            this.setState({ tracker: null, trackerValue: null, trackerEvent: null });
+        }
+    };
+
+    componentWillMount() {
+        const mapKey = this.props.mapKey;
+        const displayColumns = [{ accessor: mapKey }];
+        return this.setState({
+            displayColumns,
+            style: styler(displayColumns.map((col) => ({
+                key: col.accessor,
+                color: '#000000',
+                width: 3,
+            }))),
+            dataSeries: new TimeSeries({
+                name: 'Data Series',
+                events: this.props.data.map(v => new TimeEvent(v.t, { [mapKey]: Number(_.get(v.map, mapKey)) })),
+            }),
+            header: LABELS[mapKey] || mapKey,
+        });
+    }
+
+    render() {
+        return (
+            <HalinCard className='MetricsChart' header={this.state.header} key={uuid.v4()}>
                 <ChartContainer className='MetricsChart'
-                    showGrid={true}                    
+                    showGrid={false}
                     showGridPosition='under'
                     width={this.props.width || 380}
                     enablePanZoom={false}
                     timeAxisAngledLabels={true}
                     timeAxisHeight={65}
+                    onTrackerChanged={this.handleTrackerChanged}
                     timeRange={this.props.timeRange}>
                     <ChartRow height="150">
                         <YAxis id="y"
                             min={this.getChartMin()}
                             max={this.getChartMax()}
                             width="70"
-                            showGrid={true}
+                            showGrid={false}
                             type="linear" />
                         <Charts>
                             {
-                                displayColumns.map((col, idx) =>
+                                this.state.displayColumns.map((col, idx) =>
                                     <LineChart key={`ct-${idx}`}
                                         axis="y"
-                                        style={style}
+                                        style={this.state.style}
                                         columns={[col.accessor]}
-                                        series={dataSeries}
+                                        series={this.state.dataSeries}
                                     />
                                 )
                             }
+                            {this.renderMarker()}
                         </Charts>
                     </ChartRow>
                 </ChartContainer>
