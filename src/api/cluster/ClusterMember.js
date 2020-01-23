@@ -73,6 +73,7 @@ export default class ClusterMember {
         this.driver = null;
         this.observations = new Ring(MAX_OBSERVATIONS);
         this.errors = {};
+        this.pluggedIn = true;  // Whether or not the member is noticeably online and responsive.
     }
 
     /**
@@ -501,6 +502,7 @@ export default class ClusterMember {
      * @param {Number} time number of ms elapsed
      */
     _txSuccess(time) {
+        this.pluggedIn = true;
         // It's a ring not an array, so it cannot grow without bound.
         this.observations.push({ x: new Date(), y: time });
     }
@@ -512,6 +514,12 @@ export default class ClusterMember {
      * @param {Error} err 
      */
     _txError(err) {
+        if(neo4jErrors.failedToEstablishConnection(err) || 
+            neo4jErrors.repeatedAuthFailure(err) || 
+            neo4jErrors.connectionRefused(err)) {
+            this.pluggedIn = false;
+        }
+
         const str = `${err}`;
         if (_.has(this.errors, str)) {
             this.errors[str] = this.errors[str] + 1;

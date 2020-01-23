@@ -115,7 +115,7 @@ export default class ClusterMemberSet {
             };
 
             const onError = (err, dataFeed) => {
-                sentry.error('ClusterMemberSet: failed to ping', addr, err);
+                sentry.fine('ClusterMemberSet: failed to ping', addr, err);
                 reject(err, dataFeed);
             };
 
