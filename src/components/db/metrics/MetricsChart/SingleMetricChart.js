@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { styler, Charts, ChartContainer, ChartRow, YAxis, LineChart, EventMarker } from 'react-timeseries-charts';
+import { styler, Charts, ChartContainer, ChartRow, YAxis, ScatterChart, EventMarker } from 'react-timeseries-charts';
 import _ from 'lodash';
 import uuid from 'uuid';
 import moment from 'moment';
@@ -146,8 +146,9 @@ export default class SingleMetricChart extends Component {
                         <Charts>
                             {
                                 this.state.displayColumns.map((col, idx) =>
-                                    <LineChart key={`ct-${idx}`}
+                                    <ScatterChart key={`ct-${idx}`}
                                         axis="y"
+                                        breakLine={true}
                                         style={this.state.style}
                                         columns={[col.accessor]}
                                         series={this.state.dataSeries}
