@@ -43,6 +43,7 @@ export default class Halin extends Component {
         })
         .then(ctx => {
           this.setState({ halin: ctx });
+          sentry.context(ctx);
         });
 
       this.setState({ initPromise });

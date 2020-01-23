@@ -15,10 +15,10 @@ const init = () => {
 
     return Sentry.init({
         dsn,
-        maxBreadcrumbs: 50,
+        maxBreadcrumbs: 10,
         debug: false,
         release: appPkg.version,
-      });    
+      });
 };
 
 const info = (...args) => enabled ? console.log('INFO', ...args) : null;
@@ -31,11 +31,24 @@ const debug = (...args) => enabled ? console.log('DEBUG', ...args) : null;
 const shouldSentryCapture = err => {
     const str = `${err}`;
 
-    if (str.indexOf('WebSocket connection failure') > -1) {
-        return false;
-    }
+    // if (str.indexOf('WebSocket connection failure') > -1) {
+    //     return false;
+    // }
 
     return true;
+}
+
+const context = ctx => {
+    const eventMetadata = {
+        neo4j: ctx.getVersion(),
+        clustered: ctx.isCluster(),
+        base: ctx.getBaseURI(),
+    };
+
+    // https://docs.sentry.io/platforms/javascript/#extra-context
+    Object.keys(eventMetadata).forEach(key => {
+        Sentry.setExtra(key, eventMetadata[key]);
+    });
 }
 
 const reportError = (err, message=null) => {
@@ -57,7 +70,7 @@ const disable = () => {
 };
 
 export default {
-    init, reportError,
+    init, reportError, context,
     info, warn, error, fine, debug,
     disable,
 };
