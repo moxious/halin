@@ -37,6 +37,9 @@ const LABELS = {
     p999: '99.9 Percentile',
 };
 
+const humanPrintNumber = val =>
+    val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
 const NullMarker = props => {
     return <g />;
 };
@@ -47,14 +50,15 @@ export default class SingleMetricChart extends Component {
         trackerValue: "-- °C",
         trackerEvent: null,
         markerMode: "flag",
+        bumpFactor: 0.00,
     }
 
     getChartMin() {
-        return Math.min(...this.props.data.map(d => Number(_.get(d.map, this.props.mapKey))))
+        return Math.min(...this.props.data.map(d => Number(_.get(d.map, this.props.mapKey)))) * (1 - this.state.bumpFactor);
     }
 
     getChartMax() {
-        return Math.max(...this.props.data.map(d => Number(_.get(d.map, this.props.mapKey))));
+        return Math.max(...this.props.data.map(d => Number(_.get(d.map, this.props.mapKey)))) * (1 + this.state.bumpFactor);
     }
 
     renderMarker = () => {
@@ -73,7 +77,7 @@ export default class SingleMetricChart extends Component {
                 axis="y"
                 event={this.state.trackerEvent}
                 column={this.props.mapKey}
-                info={this.props.mapKey + ': ' + this.state.trackerValue}
+                info={this.props.mapKey + ': ' + humanPrintNumber(this.state.trackerValue) }
                 infoTimeFormat={() => moment(this.state.tracker).format('HH:mm:ss')}
                 infoWidth={120}
                 infoStyle={infoStyle}
@@ -117,6 +121,8 @@ export default class SingleMetricChart extends Component {
     }
 
     render() {
+        console.log('MIN',this.getChartMin(),'MAX',this.getChartMax());
+
         return (
             <HalinCard className='MetricsChart' header={this.state.header} key={uuid.v4()}>
                 <ChartContainer className='MetricsChart'
@@ -133,6 +139,8 @@ export default class SingleMetricChart extends Component {
                             min={this.getChartMin()}
                             max={this.getChartMax()}
                             width="70"
+                            ticks={5}
+                            format={humanPrintNumber}
                             showGrid={false}
                             type="linear" />
                         <Charts>
