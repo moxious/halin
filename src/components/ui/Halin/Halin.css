@@ -61,8 +61,6 @@ div.ContentPaneComponent {
 }
 
 .Halin-logo {
-  /* animation:.Halin-logo-spin infinite 20s linear; */
-  /* height: 80px; */
   display: block;
   margin-left: auto;
   margin-right: auto;
@@ -87,9 +85,4 @@ div.ContentPaneComponent {
 div.ui.grid {
   /* padding-left: 15px;
   padding-right: 15px; */
-}
-
-@keyframes.Halin-logo-spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
 }

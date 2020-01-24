@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 
 import queryLibrary from '../../../api/data/queries/query-library';
-
+import PropTypes from 'prop-types';
 import hoc from '../../higherOrderComponents';
 import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
@@ -51,7 +51,7 @@ class Neo4jConfiguration extends Component {
                 <h3>Neo4j Configuration <Explainer knowledgebase='Neo4jConfiguration' /></h3>
 
                 <CypherDataTable
-                    node={this.props.node}
+                    node={this.props.member}
                     query={this.state.query}
                     allowDownloadCSV={true}
                     displayColumns={this.state.displayColumns}
@@ -61,5 +61,9 @@ class Neo4jConfiguration extends Component {
         );
     }
 }
+
+Neo4jConfiguration.props = {
+    member: PropTypes.object.isRequired,
+};
 
 export default hoc.adminOnlyComponent(Neo4jConfiguration, 'Neo4j Configuration', false);

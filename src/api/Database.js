@@ -89,7 +89,7 @@ export default class Database {
             name: Database.SINGLEDB_NAME,
             currentStatus: Database.STATUS_ONLINE,
             requestedStatus: Database.STATUS_ONLINE,
-            role: 'LEADER',
+            role: ClusterMember.ROLE_STANDALONE,
             default: true,
             error: '',
             address: halin ? halin.getBaseURI() : '0.0.0.0',

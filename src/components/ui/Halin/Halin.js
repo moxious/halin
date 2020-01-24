@@ -43,6 +43,7 @@ export default class Halin extends Component {
         })
         .then(ctx => {
           this.setState({ halin: ctx });
+          sentry.context(ctx);
         });
 
       this.setState({ initPromise });
@@ -95,7 +96,7 @@ export default class Halin extends Component {
     return (
       <div className="Halin" key="app">
         <HalinToast />
-        {this.props.connected ? <MainLeftNav /> : ''}
+        <MainLeftNav />
       </div>
     );
   }

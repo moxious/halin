@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import uuid from 'uuid';
 import moment from 'moment';
+import PropTypes from 'prop-types';
 import hoc from '../../../higherOrderComponents';
 import _ from 'lodash';
 import Spinner from '../../../ui/scaffold/Spinner/Spinner';
 import api from '../../../../api';
+import neo4jErrors from '../../../../api/driver/errors';
 import kb from '../../../../api/knowledgebase';
 import { Message, Form, Icon } from 'semantic-ui-react';
 import unflatten from '../unflatten';
@@ -30,7 +32,7 @@ class MetricsPane extends Component {
     };
 
     componentDidMount() {
-        return this.props.node.getAvailableMetrics()
+        return this.props.member.getAvailableMetrics()
             .then(metrics => {
                 // Convert to the format that the dropdown menu wants.
                 const metricOptions = _.sortBy(_.uniqBy(metrics.map(m => ({
@@ -107,7 +109,7 @@ class MetricsPane extends Component {
             last: api.driver.int(this.state.observations),
         };
 
-        return this.props.node.run(queryLibrary.GET_METRIC.query, params)
+        return this.props.member.run(queryLibrary.GET_METRIC.query, params)
             .then(data => data.records.map(r => ({
                 t: this.convertMetricTimestampToLocalDate(r.get('timestamp').toNumber()),
                 metric: r.get('metric'),
@@ -168,13 +170,13 @@ class MetricsPane extends Component {
     }
 
     describeDateRange() {
-        const dt2Text = i => moment.utc(i).format(this.state.dateFormat);
+        const dt2Text = i => moment(i).format(this.state.dateFormat);
 
         return (
             <h4><Icon name='calendar outline'/>
                 {dt2Text(this.getChartStart())}
                 <Icon name='arrow right'/>
-                {dt2Text(this.getChartEnd())} (UTC)
+                {dt2Text(this.getChartEnd())}
             </h4>
         );
     }
@@ -190,10 +192,10 @@ class MetricsPane extends Component {
             const header = 'Error Fetching Metrics';
             let negative = true;
 
-            if (err.indexOf('apoc.import.file.enabled') > -1) {
+            if (neo4jErrors.apocFileImportNotEnabled(err)) {
                 err = 'In your neo4j.conf, you must set apoc.import.file.enabled=true in order to use this feature';
                 negative = false;
-            } else if(err.indexOf('java.io.FileNotFoundException') > -1) {
+            } else if(neo4jErrors.fileNotFound(err)) {
                 // In versions of APOC prior to the required versions:
                 // (3.5.0.4 for Neo4j 3.5, or 3.4.0.7 for Neo4j 3.4)
                 // This error will come up because of a bug in an earlier patch version of APOC
@@ -272,6 +274,11 @@ const supportRequirements = () => {
         </Message>            
     );
 }
+
+
+MetricsPane.props = {
+    member: PropTypes.object.isRequired, // shape?
+};
 
 export default hoc.compatibilityCheckableComponent(
     MetricsPane,

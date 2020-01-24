@@ -1,4 +1,5 @@
 import Database from './Database';
+import ClusterMember from './cluster/ClusterMember';
 import HalinContext from './HalinContext';
 import fakes from './../testutils/fakes';
 import neo4j from './driver/index';
@@ -83,6 +84,11 @@ describe('Database', function() {
         expect(d).toBeTruthy();
         expect(d.name).toEqual(Database.SINGLEDB_NAME);
         expect(d.isOnline()).toBeTruthy();
+        const memberStatuses = d.getMemberStatuses();
+        expect(memberStatuses.length).toBe(1);
+        const stat = memberStatuses[0];
+        expect(stat.name).toBe(Database.SINGLEDB_NAME);
+        expect(stat.role).toBe(ClusterMember.ROLE_STANDALONE);
         expect(d.isDefault()).toBeTruthy();
     });
 

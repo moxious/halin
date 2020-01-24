@@ -366,7 +366,16 @@ export default class DataFeed extends Metric {
                 return this.listeners.map(listener => listener(this.state, this));
             })
             .catch(err => {
-                sentry.reportError(err, 'Failed to execute timeseries query');
+                // About this catch block, it's possible for halin to be stuck in a loop,
+                // continuously getting the same error as we poll.  This is common if the DB
+                // got unplugged, crashed, or if it has some internal config error.  So we'll
+                // report certian errors the first time we see them, and not spam every time 
+                // as we poll.
+                if (`${this.state.error}` !== `${err}`) {
+                    sentry.reportError(err, 'Failed to execute timeseries query (first time)');
+                } else {
+                    sentry.fine(`Duplicate polled error in timeseries ${err}`);
+                }
                 
                 this.state.lastDataArrived = this.feedStartTime;
                 this.state.error = err;

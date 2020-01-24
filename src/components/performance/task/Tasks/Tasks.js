@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import _ from 'lodash';
 import moment from 'moment';
+import PropTypes from 'prop-types';
 
 import queryLibrary from '../../../../api/data/queries/query-library';
 import fields from '../../../../api/data/fields';
@@ -59,7 +60,7 @@ class Tasks extends Component {
                         <TaskDetailModal task={e.row} />
                         { this.allowKillTransactions() ? 
                             <KillTransaction 
-                                member={this.props.node} 
+                                member={this.props.member} 
                                 transaction={e.row.transaction} /> : '' }
                     </span>);
                 },
@@ -203,7 +204,7 @@ class Tasks extends Component {
                 <h3>Tasks <Explainer knowledgebase='Tasks' /></h3>
                 <CypherDataTable
                     allowDownloadCSV={true}
-                    node={this.props.node}
+                    node={this.props.member}
                     query={this.state.query}
                     allowColumnSelect={false}
                     sortable={true}
@@ -217,5 +218,9 @@ class Tasks extends Component {
         );
     }
 }
+
+Tasks.props = {
+    member: PropTypes.object.isRequired,
+};
 
 export default hoc.enterpriseOnlyComponent(Tasks, 'Tasks');

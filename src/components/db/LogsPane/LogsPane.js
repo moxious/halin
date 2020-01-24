@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { Tab, Button, Icon, Form, Radio, Message, Checkbox } from 'semantic-ui-react';
 import ReactTable from 'react-table';
 import moment from 'moment';
+import PropTypes from 'prop-types';
 
 import sentry from '../../../api/sentry';
 import kb from '../../../api/knowledgebase';
@@ -121,7 +122,7 @@ class LogViewer extends Component {
     }
 
     download() {
-        const promise = this.props.node.run(`
+        const promise = this.props.member.run(`
             CALL apoc.log.stream("${this.props.file}") YIELD lineNo, line
             RETURN line
             ORDER BY lineNo ASC
@@ -190,7 +191,7 @@ class LogViewer extends Component {
         if (Number.isNaN(n)) { n = 20; }
 
         const params = { n, limit: neo4j.int(MAX_ROWS) };
-        const promise = this.props.node.run(query, params)
+        const promise = this.props.member.run(query, params)
             .then(results => {
                 // Records are in reverse order to only get the last ones.  Re-reverse them.
                 const data = neo4j.unpackResults(results, {
@@ -357,7 +358,7 @@ class LogsPane extends Component {
     viewerFor(file) {
         return (
             <LogViewer key={file}
-                node={this.props.node}
+                node={this.props.member}
                 file={file} />
         );
     }
@@ -431,6 +432,10 @@ const notSupported = () => {
             </Message.Content>
         </Message>
     );
+};
+
+LogsPane.props = {
+    member: PropTypes.object.isRequired, // shape?
 };
 
 /**

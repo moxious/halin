@@ -62,45 +62,45 @@ export default class MemberSelector extends Component {
                 menuItem: 'Queries',
                 visible: () => member.isEnterprise(),
                 render: () => this.paneWrapper(
-                    <Tasks key={key} node={member} />
+                    <Tasks key={key} member={member} />
                 ),
             },
             {
                 menuItem: 'Configuration',
                 visible: () => true,
                 render: () => this.paneWrapper(
-                    <Neo4jConfiguration key={key} node={member} />),
+                    <Neo4jConfiguration key={key} member={member} />),
             },
             {
                 menuItem: 'OS',
                 visible: () => true,
                 render: () => this.paneWrapper(
-                    <OSPane key={key} node={member} />),
+                    <OSPane key={key} member={member} />),
             },
             {
                 menuItem: 'Plugins',
                 visible: () => true,
                 render: () => this.paneWrapper(
-                    <PluginPane key={key} node={member} />),
+                    <PluginPane key={key} member={member} />),
             },
             {
                 menuItem: 'Query Performance',
                 visible: () => window.halinContext.userIsAdmin(),
                 render: () => this.paneWrapper(
-                    <SampleQueryPane key={key} node={member} />),
+                    <SampleQueryPane key={key} member={member} />),
             },
             {
               menuItem: 'Metrics',
               visible: () => true,
               render: () => this.paneWrapper(
-                <MetricsPane key={key} node={member}/>
+                <MetricsPane key={key} member={member}/>
               ),
             },
             {
                 menuItem: 'Logs',
                 visible: () => true,
                 render: () => this.paneWrapper(
-                    <LogsPane key={key} node={member} />),
+                    <LogsPane key={key} member={member} />),
             }
         ]),
     };

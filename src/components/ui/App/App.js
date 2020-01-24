@@ -12,7 +12,7 @@ const App = () => {
 
   return ( 
     <ConnectionDetailsProvider username='neo4j' password='admin' host='localhost' port='7687' name='shim'>
-      <Halin key="app" connected={true} />
+      <Halin/>
     </ConnectionDetailsProvider>
   );
 };

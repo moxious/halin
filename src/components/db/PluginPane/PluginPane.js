@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import CypherSurface from '../CypherSurface/CypherSurface';
 import uuid from 'uuid';
+import PropTypes from 'prop-types';
 
-export default class PluginPane extends Component {
+class PluginPane extends Component {
     state = {
         key: uuid.v4(),
     };
@@ -12,9 +13,15 @@ export default class PluginPane extends Component {
             <div className='PluginPane'>
                 <CypherSurface
                     key={this.state.key} 
-                    node={this.props.node}
+                    node={this.props.member}
                 />
             </div>
         )
     }
 }
+
+PluginPane.props = {
+    member: PropTypes.object.isRequired, // shape?
+};
+
+export default PluginPane;
