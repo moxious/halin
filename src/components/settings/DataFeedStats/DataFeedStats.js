@@ -1,39 +1,19 @@
 import React, { Component } from 'react';
-import { Accordion, Label } from 'semantic-ui-react';
-import { LineChart } from 'react-d3-components';
+import ReactTable from 'react-table';
 import _ from 'lodash';
-
+import moment from 'moment';
 import datautil from '../../../api/data/util';
-import queryLibrary from '../../../api/data/queries/query-library';
-
-import MemberLabel from '../../ui/scaffold/MemberLabel/MemberLabel';
-
-const simpleLabel = (key, value) => 
-    <Label>
-        {key}
-        <Label.Detail>{value}</Label.Detail>
-    </Label>;
-
-const getDescription = label => {
-    const q = queryLibrary[label];
-    const defaultDescription = 'No description of this query is available';
-
-    if(q) {
-        return q.getDescription() || defaultDescription;
-    }
-
-    return defaultDescription;
-};
+import CSVDownload from '../../data/download/CSVDownload';
 
 export default class DataFeedStats extends Component {
-    state = { activeIndex: null };
+    state = { activeIndex: 0 };
 
     handleClick = (e, titleProps) => {
-      const { index } = titleProps
-      const { activeIndex } = this.state
-      const newIndex = activeIndex === index ? -1 : index
-  
-      this.setState({ activeIndex: newIndex })
+        const { index } = titleProps
+        const { activeIndex } = this.state
+        const newIndex = activeIndex === index ? -1 : index
+
+        this.setState({ activeIndex: newIndex })
     };
 
     dataFeedStats() {
@@ -55,65 +35,64 @@ export default class DataFeedStats extends Component {
         };
     }
 
-    render() {
-        const style = { textAlign: 'left' };
-        return (
-            <Accordion fluid styled exclusive={false}>
-                {
-                    this.dataFeedStats().map((stats, idx) =>
-                        <div key={idx}>
-                            <Accordion.Title
-                                onClick={this.handleClick}
-                                index={idx} style={style}
-                                active={this.state.activeIndex === idx}
-                            >
-                                <MemberLabel member={stats.node} />
-                                <Label>{stats.label}</Label>
-                                <Label>
-                                    Best
-                                            <Label.Detail>
-                                        {datautil.roundToPlaces(stats.min, 2)}ms
-                                            </Label.Detail>
-                                </Label>
-                                <Label>
-                                    Avg. Response Time
-                                            <Label.Detail>
-                                        {datautil.roundToPlaces(stats.mean, 2)}ms
-                                            </Label.Detail>
-                                </Label>
-                                <Label>
-                                    Worst
-                                            <Label.Detail>
-                                        {datautil.roundToPlaces(stats.max, 2)}ms
-                                            </Label.Detail>
-                                </Label>
-                            </Accordion.Title>
-                            <Accordion.Content
-                                active={this.state.activeIndex === idx}
-                                index={idx}>
-
-                                <p>{ getDescription(stats.label) }</p>
-
-                                { simpleLabel('Listeners', stats.listeners) }
-                                { simpleLabel('Augmentation Functions', stats.augFns) }
-                                { simpleLabel('Aliases', stats.aliases) }
-                                { simpleLabel('Packets', stats.packets) }
-
-                                <h5>Response Timings</h5>
-
-                                <LineChart
-                                    data={this.lineChartData(stats.timings)}
-                                    width={600}
-                                    height={200}
-                                    margin={{top: 10, bottom: 50, left: 50, right: 10}}/>
-
-                                <h5>Query</h5>
-                                <pre style={style}>{stats.query}</pre>
-                            </Accordion.Content>
-                        </div>)
-                }
-            </Accordion>
-        )
+    componentDidMount() {
+        this.mounted = true;
+        this.interval = setInterval(() => this.setState({ activeIndex: this.state.activeIndex + 1 }), 1000);
     }
 
+    componentWillUnmount() {
+        this.mounted = false;
+        clearInterval(this.interval);
+    }
+
+    render() {
+        console.log('statsrender');
+        const displayColumns = [
+            { Header: 'Member', accessor: 'member' },
+            { Header: 'Query', accessor: 'query' },
+            { Header: 'Best (ms)', accessor: 'best' },
+            { Header: 'Avg (ms)', accessor: 'avg' },
+            { Header: 'Worst (ms)', accessor: 'worst' },
+            { Header: 'Listeners', accessor: 'listeners' },
+            { Header: 'Fns', accessor: 'augFns' },
+            { Header: 'Aliases', accessor: 'aliases' },
+            { Header: 'Packets', accessor: 'packets' },
+        ];
+
+        const data = this.dataFeedStats().map((stats, idx) => ({
+            member: stats.node.getLabel(),
+            query: stats.label,
+            best: datautil.roundToPlaces(stats.min, 2),
+            avg: datautil.roundToPlaces(stats.mean, 2),
+            worst: datautil.roundToPlaces(stats.max, 2),
+            listeners: stats.listeners,
+            augFns: stats.augFns,
+            aliases: stats.aliases,
+            packets: stats.packets,
+        }));
+
+        return (
+            <div>
+                <CSVDownload
+                    title='Download'
+                    filename={`Halin-datafeed-stats-${moment.utc().format()}.csv`}
+                    data={data}
+                    displayColumns={displayColumns}
+                />
+
+                <ReactTable className='-striped -highlight'
+                    data={data}
+                    defaultFilterMethod={(filter, row /* , column */) => {
+                        const id = filter.pivotId || filter.id
+                        return row[id] !== undefined ? String(row[id]).indexOf(filter.value) > -1 : true
+                    }}
+                    columns={displayColumns}
+                    sortable={true}
+                    filterable={true}
+                    defaultPageSize={10}
+                    showPagination={true}
+                />
+            </div>
+        );
+    }
 }
