@@ -6,6 +6,7 @@
 - Fixes #126: Metric chart improvements for readability & precision
 - Fixes #128: excessive error reporting
 - Upgrades to sentry dependencies
+- Simplify the data feed statistics page into a table
 
 ## 0.12.1 Patch Release
 
