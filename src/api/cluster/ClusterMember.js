@@ -476,6 +476,7 @@ export default class ClusterMember {
 
         return featureProbes.runAllProbes(this)
             .then(dbms => {
+                this.pluggedIn = true;
                 this.dbms = dbms;
             })
             .then(() => {
@@ -495,6 +496,8 @@ export default class ClusterMember {
                 _.set(this.dbms, 'version', this.getVersion());
             });    
     }
+
+    isOnline() { return this.pluggedIn; }
 
     /**
      * This function just takes note of a transaction success, as a data point/observation,
