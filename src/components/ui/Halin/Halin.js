@@ -96,7 +96,7 @@ export default class Halin extends Component {
     return (
       <div className="Halin" key="app">
         <HalinToast />
-        {this.props.connected ? <MainLeftNav /> : ''}
+        <MainLeftNav />
       </div>
     );
   }
