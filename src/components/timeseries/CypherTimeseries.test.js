@@ -11,17 +11,17 @@ describe('Cypher Timeseries', function() {
         { Header: 'Value', accessor: 'value' },
     ];
     const returnData = [ {value: 1} ];
-    let node;
+    let member;
     
     beforeEach(() => {
         window.halinContext = fakes.HalinContext(returnData);
-        node = fakes.ClusterMember(returnData);
+        member = fakes.ClusterMember(returnData);
     });
 
     it('renders without crashing', () => {
         ReactDOM.render(
             <CypherTimeseries key={key}
-                node={node}
+                member={member}
                 query={query}
                 displayColumns={displayColumns}/>, 
             document.createElement('div'));

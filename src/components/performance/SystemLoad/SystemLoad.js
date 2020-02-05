@@ -21,7 +21,7 @@ class SystemLoad extends Component {
                 <CypherTimeseries key={this.state.key}
                     heading="Load"
                     explainer={explainer}
-                    node={this.props.member}
+                    member={this.props.member}
                     query={this.state.query}
                     rate={this.state.rate}
                     displayColumns={this.state.displayColumns}

@@ -6,7 +6,7 @@ import {
     TimeRange,
     Stream,
 } from 'pondjs';
-// import { datautil, timewindow, sentry, palette } from '../../api';
+import PropTypes from 'prop-types';
 import api from '../../api';
 
 import uuid from 'uuid';
@@ -78,7 +78,7 @@ class CypherTimeseries extends Component {
         this.mounted = true;
 
         this.feed = window.halinContext.getDataFeed({
-            node: this.props.node,
+            node: this.props.member,
             query: this.props.query,
             rate: this.props.rate, 
             windowWidth: this.props.timeWindowWidth,
@@ -299,7 +299,7 @@ class CypherTimeseries extends Component {
                         <Label.Detail>{datautil.roundToPlaces(this.getChartMin(), 2)}</Label.Detail>
                     </Label>
 
-                    <MemberLabel member={this.props.node}/>
+                    <MemberLabel member={this.props.member}/>
                 </Grid.Row>
                 { this.renderLegendOnlyColumns() }
             </Grid>;
@@ -421,5 +421,11 @@ class CypherTimeseries extends Component {
         ) : <Spinner active={true}/>;
     }
 }
+
+CypherTimeseries.props = {
+    member: PropTypes.object.isRequired,
+    query: PropTypes.string.isRequired,
+    displayColumns: PropTypes.array.isRequired,
+};
 
 export default CypherTimeseries;
