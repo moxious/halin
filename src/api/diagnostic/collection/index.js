@@ -268,11 +268,28 @@ const halinDiagnostics = halinContext => {
     return Promise.resolve(halin);
 };
 
-const clusterManagerDiagnostics = halinContext => {
-    const getDatabasesPromise = Promise.resolve(halinContext.databases().map(db => db.asJSON()))
-        .then(arrayOfDBJSON => ({ databases: arrayOfDBJSON }));
+const databaseDiagnostics = halinContext => {
+    // For each database, run a count on that database alone, then merge it into
+    // the databases's regular descriptive stats.
+    const promises = halinContext.databases().map(db => {
+        const leader = db.getLeader(halinContext, false);
 
-    return getDatabasesPromise;
+        return db.getLabel() === neo4j.SYSTEM_DB ? 
+            Promise.resolve({ nodeCount: -1 }) : // Don't run count on systemdb
+            leader.run('MATCH (n) RETURN count(n) as n', {}, db.getLabel())
+                .then(results => neo4j.unpackResults(results, {
+                    required: ['n'],
+                }))
+                .then(results => ({ nodeCount: results[0].n }))
+                .catch(err => {
+                    // Don't let this error stop us.
+                    sentry.warn(`Failed to run node count on ${leader.getBoltAddress()} for ${db.getLabel()}`, err);
+                    return { nodeCount: -1 };
+                })
+                .then(nodeCount => _.merge(nodeCount, db.asJSON()));
+    });
+    
+    return Promise.all(promises).then(results => ({ databases: results }));
 };
 
 /**
@@ -316,12 +333,12 @@ const runDiagnostics = (halinContext, tag=uuid.v4()) => {
     });
 
     const halinDiags = halinDiagnostics(halinContext);
-    const clusterManagerDiags = clusterManagerDiagnostics(halinContext);
+    const dbDiags = databaseDiagnostics(halinContext);
     const neo4jDesktopDiags = neo4jDesktopDiagnostics(halinContext);
 
     // Each object resolves to a diagnostic object with 1 key, and sub properties.
     // All diagnostics are just a merge of those objects.
-    return Promise.all([root, halinDiags, clusterManagerDiags, allNodeDiags, neo4jDesktopDiags])
+    return Promise.all([root, halinDiags, dbDiags, allNodeDiags, neo4jDesktopDiags])
         .then(arrayOfObjects => _.merge(...arrayOfObjects))
 };
 
