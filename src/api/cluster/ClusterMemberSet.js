@@ -91,11 +91,13 @@ export default class ClusterMemberSet {
     }
 
     updateStats(halin, addr, data) {
-        console.log(data);
         const stats = _.merge({ lastUpdated: new Date() }, _.clone(data));
 
         const prevHeap = _.get(this.stats[addr], 'heapCommitted');
         const nowHeap = _.get(data, 'heapCommitted');
+
+        stats.pctUsed = (data.heapUsed || 0) / (data.heapCommitted || -1);
+        stats.pctFree = 1 - stats.pctUsed;
 
         if (prevHeap && nowHeap !== prevHeap) {
             halin.getClusterManager().addEvent({
@@ -103,8 +105,22 @@ export default class ClusterMemberSet {
                 message: `Heap allocation changed on ${addr} from ${prevHeap} to ${nowHeap} bytes`,
                 payload: {
                     old: _.clone(this.stats[addr]),
-                    new: _.clone(data),
+                    new: _.clone(stats),
                 },
+            });
+        }
+
+        if (stats.pctFree <= 0.05) {
+            halin.getClusterManager().addEvent({
+                type: 'memory',
+                message: `Heap is >= 95% utilization on ${addr} - you may be about to OOM`,
+                payload: _.clone(stats),
+            });
+        } else if (stats.pctFree <= 0.02) {
+            halin.getClusterManager().addEvent({
+                type: 'memory',
+                message: `Heap is >= 98% utilization on ${addr} - you are likely to OOM`,
+                payload: _.clone(stats),
             });
         }
 
