@@ -18,9 +18,17 @@ export default class ClusterMemberSet {
         this.clusterMembers = [];
         this.clustered = false;
         this.timeout = null;
+        this.memFeeds = {};
+        
+        // Stores utilization statistics about each member
+        this.stats = {};
     }
 
     members() { return this.clusterMembers; }
+
+    getStats() {
+        return this.stats;
+    }
 
     shutdown() {
         if (this.timeout) { clearTimeout(this.timeout); }
@@ -80,6 +88,56 @@ export default class ClusterMemberSet {
 
         this.timeout = setTimeout(() => this.refresh(halin), REFRESH_INTERVAL);
         return this.timeout;
+    }
+
+    updateStats(halin, addr, data) {
+        console.log(data);
+        const stats = _.merge({ lastUpdated: new Date() }, _.clone(data));
+
+        const prevHeap = _.get(this.stats[addr], 'heapCommitted');
+        const nowHeap = _.get(data, 'heapCommitted');
+
+        if (prevHeap && nowHeap !== prevHeap) {
+            halin.getClusterManager().addEvent({
+                type: 'memory',
+                message: `Heap allocation changed on ${addr} from ${prevHeap} to ${nowHeap} bytes`,
+                payload: {
+                    old: _.clone(this.stats[addr]),
+                    new: _.clone(data),
+                },
+            });
+        }
+
+        this.stats[addr] = stats;
+        return stats;
+    }
+
+    getMemoryFeed(halin, clusterMember) {
+        const addr = clusterMember.getBoltAddress();
+
+        if (this.memFeeds[addr]) {
+            return Promise.resolve(this.memFeeds[addr]);            
+        }
+
+        const memFeed = halin.getDataFeed(_.merge({
+            node: clusterMember,
+        }, queryLibrary.JMX_MEMORY_STATS));
+
+        return new Promise((resolve, reject) => {
+            const onMemData = (newData /* , dataFeed */) => {
+                const data = _.get(newData, 'data[0]');
+                return this.updateStats(halin, addr, data);
+            };
+
+            const onError = (err, dataFeed) => {
+                sentry.fine('ClusterMemberSet: failed to get mem data', addr, err);
+                reject(err, dataFeed);
+            };
+
+            memFeed.addListener(onMemData);
+            memFeed.onError = onError;
+            return resolve(memFeed);
+        });
     }
 
     /**
@@ -182,7 +240,11 @@ export default class ClusterMemberSet {
             // SETUP ACTIONS FOR ANY NEW MEMBER
             const driver = halin.driverFor(member.getBoltAddress());
             member.setDriver(driver);
-            const setup = this.ping(halin, member)
+            
+            const setup = Promise.all([
+                this.ping(halin, member),
+                this.getMemoryFeed(halin, member),
+            ])
                 .then(() => member.checkComponents());
 
             promises.push(setup);
