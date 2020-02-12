@@ -203,10 +203,14 @@ const gatherConfig = (halin, node) => () => {
  * @return Promise{Object} of diagnostic information about that node.
  */
 const memberDiagnostics = (halin, clusterMember) => {
+    // Keyed by address => utilization object.
+    const utilizationStats = halin.getMemberSet().getStats();
+
     const basics = {
         basics: clusterMember.asJSON(),
+        utilization: utilizationStats[clusterMember.getBoltAddress()],
     };
-
+   
     /* GATHER STEPS.
      * Each of these is a promise that is guaranteed not to fail because it's wrapped.
      * Each is wrapped in a closure (they all return functions) to help us control concurrency.
