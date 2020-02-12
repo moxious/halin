@@ -1,14 +1,11 @@
 import Advice from '../Advice';
-import _ from 'lodash';
 import util from '../../../data/util';
 
 const nodeStorage = pkg => {
     const findings = [];
 
     // For what this is about, see: https://github.com/moxious/halin/issues/132
-    const THRESHOLD = (34 * /*1000000000*/ 100) * 0.9; // 90% of 34 billion
-
-    console.log('PKG',pkg);
+    const THRESHOLD = (34 * 1000000000) * 0.9; // 90% of 34 billion
 
     pkg.nodes.forEach(node => {
         const addr = node.basics.address;
