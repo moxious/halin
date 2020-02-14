@@ -9,6 +9,7 @@ import HalinContext from '../../../api/HalinContext';
 import Spinner from '../scaffold/Spinner/Spinner';
 import HalinToast from '../scaffold/HalinToast/HalinToast';
 import Troubleshooting from '../../initialConnection/Troubleshooting';
+import HalinAlerter from './HalinAlerter';
 
 import './Halin.css';
 
@@ -96,6 +97,7 @@ export default class Halin extends Component {
     return (
       <div className="Halin" key="app">
         <HalinToast />
+        <HalinAlerter context={this.state.halin}/>
         <MainLeftNav />
       </div>
     );
