@@ -4,6 +4,7 @@ import ClusterMember from './ClusterMember';
 import errors from '../driver/errors';
 import sentry from '../sentry';
 import uuid from 'uuid';
+import util from '../data/util';
 
 const REFRESH_INTERVAL = 5000;
 
@@ -100,9 +101,14 @@ export default class ClusterMemberSet {
         stats.pctFree = 1 - stats.pctUsed;
 
         if (prevHeap && nowHeap !== prevHeap) {
+            const a = util.humanDataSize(prevHeap);
+            const b = util.humanDataSize(nowHeap);
+
             halin.getClusterManager().addEvent({
                 type: 'memory',
-                message: `Heap allocation changed on ${addr} from ${prevHeap} to ${nowHeap} bytes`,
+                alert: true,
+                address: addr,
+                message: `Heap allocation changed on ${addr} from ${a} to ${b}`,
                 payload: {
                     old: _.clone(this.stats[addr]),
                     new: _.clone(stats),
@@ -113,13 +119,19 @@ export default class ClusterMemberSet {
         if (stats.pctFree <= 0.05) {
             halin.getClusterManager().addEvent({
                 type: 'memory',
-                message: `Heap is >= 95% utilization on ${addr} - you may be about to OOM`,
+                alert: true,
+                error: true,
+                address: addr,
+                message: `Heap is >= 95% utilization on ${addr}`,
                 payload: _.clone(stats),
             });
         } else if (stats.pctFree <= 0.02) {
             halin.getClusterManager().addEvent({
                 type: 'memory',
-                message: `Heap is >= 98% utilization on ${addr} - you are likely to OOM`,
+                alert: true,
+                error: true,
+                address: addr,
+                message: `Heap is >= 98% utilization on ${addr}`,
                 payload: _.clone(stats),
             });
         }
