@@ -234,13 +234,13 @@ export default class ClusterManager {
 
     /** Specific to a particular node */
     addNodeRole(node, username, role) {
-        sentry.info('ADD ROLE', { username, role });
+        sentry.info('ADD ROLE', { username, role, addr: node.getBoltAddress() });
         return node.run('call dbms.security.addRoleToUser($role, $username)', { username, role }, neo4j.SYSTEM_DB);
     }
 
     /** Specific to a particular node */
     removeNodeRole(node, username, role) {
-        sentry.info('REMOVE ROLE', { username, role });
+        sentry.info('REMOVE ROLE', { username, role, addr: node.getBoltAddress() });
         return node.run('call dbms.security.removeRoleFromUser($role, $username)', { username, role }, neo4j.SYSTEM_DB);
     }
 
@@ -340,7 +340,11 @@ export default class ClusterManager {
                 });
         };
 
-        const allPromises = this.ctx.members().map(node => {
+        const membersToRunAgainst = this.ctx.supportsSystemGraph() ? 
+            [this.ctx.getSystemDBWriter()] : 
+            this.ctx.members();
+
+        const allPromises = membersToRunAgainst.map(node => {
             return gatherRoles(node)
                 .then(rolesHere => determineDifferences(rolesHere, node))
                 .then(roleChanges => applyChanges(roleChanges, node))
