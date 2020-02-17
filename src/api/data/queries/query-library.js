@@ -36,6 +36,7 @@ import DBMS_GET_MAX_HEAP from './dbms/getMaxHeap';
 import DBMS_FUNCTIONS from './dbms/functions';
 import DBMS_PROCEDURES from './dbms/procedures';
 import DBMS_LIST_CONFIG from './dbms/listConfig';
+import DBMS_LIST_INDEXES from './dbms/listIndexes';
 import DBMS_SECURITY_USER_ROLES from './dbms/security/userRoles';
 import DBMS_LIST_TRANSACTIONS from './dbms/listTransactions';
 import DBMS_LIST_CONNECTIONS from './dbms/listConnections';
@@ -104,6 +105,7 @@ const allQueries = {
     DBMS_FUNCTIONS,
     DBMS_PROCEDURES,
     DBMS_LIST_CONFIG,
+    DBMS_LIST_INDEXES,
     DBMS_SECURITY_USER_ROLES,
     DBMS_LIST_TRANSACTIONS,
     DBMS_LIST_CONNECTIONS,
