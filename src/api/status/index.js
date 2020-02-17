@@ -1,7 +1,7 @@
 import React from 'react';
 import { Message } from 'semantic-ui-react';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+// import 'react-toastify/dist/ReactToastify.css';
 import sentry from '../sentry/index';
 import _ from 'lodash';
 
@@ -9,7 +9,7 @@ const message = (header, body) => ({ header, body });
 
 const toastContent = messageObject => 
     <div className='HalinToast'>
-        <h4>{messageObject.header}</h4>
+        { messageObject.header ? <h4>{messageObject.header}</h4> : '' }
         <div>{messageObject.body}</div>
     </div>;
 
@@ -41,6 +41,13 @@ export default {
 
     toastContent,
 
+    /**
+     * Allows you to toastify a component.  THIS REQUIRES that the component have state containing
+     * fields "error" and/or "message".  If an error is present you'll get an error message, otherwise
+     * and informative message.
+     * @param component a React component with state including either message or error
+     * @param overrideOptions any options to toast which will override defaults
+     */
     toastify: (component, overrideOptions) => {
         if (!_.get(component, 'state.error') && !_.get(component, 'state.message')) {
             sentry.warn('Toastify called on a component with nothing to say', component.state);
@@ -56,11 +63,11 @@ export default {
         });
 
         const errorOptions = {
-            autoClose: false,
+            autoClose: 60000,
         };
 
         const successOptions = {
-            autoClose: true,
+            autoClose: 5000,
         };
 
         const toastBody = (component.state.error ? 
