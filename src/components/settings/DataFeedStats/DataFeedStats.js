@@ -46,7 +46,6 @@ export default class DataFeedStats extends Component {
     }
 
     render() {
-        console.log('statsrender');
         const displayColumns = [
             { Header: 'Member', accessor: 'member' },
             { Header: 'Query', accessor: 'query' },
