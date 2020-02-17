@@ -12,8 +12,8 @@ const cacheOptions = {
 };
 
 export default class HalinAlerter extends Component {
+    seen = new LRU(cacheOptions);
     state = {
-        seen: new LRU(cacheOptions),
         message: null,
         error: null,
         pending: false,
@@ -24,11 +24,11 @@ export default class HalinAlerter extends Component {
 
             // LRU cache prevents us from spamming user with the same message when
             // it comes up repeatedly.  Timeout allows it to arise again later.
-            if (this.state.seen.get(event.message)) {
+            if (this.seen.get(event.message)) {
                 console.log('Skipping spam message');
                 return null;
             } else {
-                this.state.seen.put(event.message, true);
+                this.seen.set(event.message, true);
             }
 
             const msg = status.message(event.message);
