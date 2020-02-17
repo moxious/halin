@@ -72,7 +72,9 @@ export default class DataFeedStats extends Component {
         }));
 
         return (
-            <div>
+            <div id='DataFeedStatistics'>
+                <h3>Data Feed Statistics</h3>
+
                 <CSVDownload
                     title='Download'
                     filename={`Halin-datafeed-stats-${moment.utc().format()}.csv`}
@@ -80,7 +82,8 @@ export default class DataFeedStats extends Component {
                     displayColumns={displayColumns}
                 />
 
-                <ReactTable className='-striped -highlight'
+                <ReactTable style={{marginTop:15}}
+                    className='-striped -highlight'
                     data={data}
                     defaultFilterMethod={(filter, row /* , column */) => {
                         const id = filter.pivotId || filter.id
