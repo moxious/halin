@@ -392,7 +392,6 @@ export default class HalinContext {
                     this.getClusterManager().addEvent({
                         type: 'halin',
                         message: 'Halin monitoring started',
-                        address: 'all members',
                     });
                     report('Initialization complete');
                     return this;
