@@ -9,7 +9,6 @@ import Spinner from '../../ui/scaffold/Spinner/Spinner';
 const defaultState = {
     name: '',
     pending: false,
-    message: null,
     error: null,
 };
 
@@ -33,24 +32,20 @@ class CreateDatabase extends Component {
         console.log('Creating database', this.state.name);
         this.setState({ pending: true });
         
-        let message, error;
+        let error = null;
 
         return window.halinContext.getClusterManager().createDatabase(this.state.name)
-            .then(() => {
-                sentry.info(`Success creating ${this.state.name}`);
-                message = status.message('Success', `Created database ${this.state.name}`);
-                error = null;
-            })
             .catch(err => {
                 sentry.error('Failed to create database', err);
                 error = status.message('Error',
                     `Failed to create database ${this.state.name}: ${err}`);
-                message = null;
             })
             .finally(() => {
-                sentry.fine(`Resetting create form`);
-                this.setState({ pending: false, error, message, name: '' });
-                status.toastify(this);
+                this.setState({ pending: false, error, name: '' });
+
+                if (error) {
+                    status.toastify(this);
+                }
             });
     }
 

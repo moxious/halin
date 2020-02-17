@@ -58,7 +58,6 @@ class Neo4jUsers extends Component {
     state = {
         childRefresh: 1,
         refresh: 1,
-        message: null,
         error: null,
     };
 
@@ -107,7 +106,6 @@ class Neo4jUsers extends Component {
         this.setState({
             refresh: val,
             childRefresh: val,
-            message: null,
             error: null,
         });
     }
@@ -134,24 +132,21 @@ class Neo4jUsers extends Component {
                 if (clusterOpRes.success) {
                     this.setState({
                         pending: false,
-                        message: status.fromClusterOp(action, clusterOpRes),
                         error: null,
                     });
                 } else {
                     this.setState({
                         pending: false,
-                        message: null,
                         error: status.fromClusterOp(action, clusterOpRes),
                     });
                 }
             })
             .catch(err => this.setState({
                 pending: false,
-                message: null,
                 error: status.message('Error',
                     `Could not delete user ${row.username}: ${err}`),
             }))
-            .finally(() => status.toastify(this));
+            .finally(() => this.state.error ? status.toastify(this) : null);
     }
 
     openAssign = (row) => {
@@ -171,26 +166,23 @@ class Neo4jUsers extends Component {
         if (clusterOpResult instanceof Error) {
             newState = {
                 assignOpen: false,
-                message: null,
                 error: status.message(`Error on ${action}`,
                     `${clusterOpResult}`),
             };
         } else if (clusterOpResult.success) {
             newState = {
                 assignOpen: false,
-                message: status.fromClusterOp(action, clusterOpResult),
                 error: false,
             };
         } else {
             newState = {
                 assignOpen: false,
-                message: null,
                 error: status.fromClusterOp(action, clusterOpResult),
             };
         }
 
         // Fire the toast message after update is complete.
-        this.setState(newState, () => status.toastify(this));
+        this.setState(newState, () => this.state.error ? status.toastify(this) : null);
     }
 
     closeAssign = () => {

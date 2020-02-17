@@ -111,8 +111,10 @@ class AssignRoleModal extends Component {
     };
 
     componentDidMount() {
-        this.loadUsers();
-        this.loadRoles();
+        return Promise.all([
+            this.loadUsers(),
+            this.loadRoles(),
+        ]);
     }
 
     UNSAFE_componentWillReceiveProps(props) {
@@ -120,8 +122,10 @@ class AssignRoleModal extends Component {
             if (props.open) {
                 // Load fresh data each time the dialog opens so that users
                 // don't get stale stuff
-                this.loadUsers();
-                this.loadRoles();
+                return Promise.all([
+                    this.loadUsers(),
+                    this.loadRoles(),
+                ]);
             }
 
             this.setState({ open: props.open });
