@@ -33,7 +33,7 @@ export default class HalinAlerter extends Component {
 
             const msg = status.message(event.message);
             const component = {};
-
+            
             if (event.error) {
                 component.state = { error: msg };
             } else {
