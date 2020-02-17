@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { ScatterPlot } from 'react-d3-components';
-import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
 
 export default class ClusterResponseGraph extends Component {
