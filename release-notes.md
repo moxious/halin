@@ -1,5 +1,14 @@
 # Halin Release Notes
 
+## 0.13.0 Limited Alerting
+
+- Added alerts for certain memory conditions, such as heap re-allocation and imminent out-of-memory errors (OOMs)
+- Fixes #132: Halin will warn you when you are approaching the need for high_limit storage.
+- Members with non-standard ports will now have their port displayed in
+their label.  This helps separate members running on the same host.
+- Main nav menu is labeled for help with navigation
+- Thanks to Hugo for several points of feedback on this release.
+
 ## 0.12.2 Patch Release
 
 - Fixes #127: Neo4j 3.5 standalone members appear properly, not as LEADER
