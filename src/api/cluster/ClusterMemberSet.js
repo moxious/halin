@@ -116,13 +116,13 @@ export default class ClusterMemberSet {
             });
         }
 
-        if (stats.pctFree <= 0.05) {
+        if (stats.pctFree <= 0.1) {
             halin.getClusterManager().addEvent({
                 type: 'memory',
                 alert: true,
                 error: true,
                 address: addr,
-                message: `Heap is >= 95% utilization on ${addr}`,
+                message: `Heap is >= 90% utilization on ${addr}`,
                 payload: _.clone(stats),
             });
         } else if (stats.pctFree <= 0.02) {
