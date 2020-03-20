@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import status from '../../../api/status/index';
+import api from '../../../api';
 import LRU from 'lru-cache';
 
 /**
@@ -25,7 +26,7 @@ export default class HalinAlerter extends Component {
             // LRU cache prevents us from spamming user with the same message when
             // it comes up repeatedly.  Timeout allows it to arise again later.
             if (this.seen.get(event.message)) {
-                console.log('Skipping spam message');
+                api.sentry.fine('Alerter: Skipping spam message');
                 return null;
             } else {
                 this.seen.set(event.message, true);
@@ -43,15 +44,6 @@ export default class HalinAlerter extends Component {
             return status.toastify(component);
         },
     };
-
-    // componentWillMount() {
-    //     const interval = setInterval(() => this.update(), 1000);
-    //     this.setState({ interval });
-    // }
-
-    // componentWillUnmount() {
-    //     return this.state.interval ? clearInterval(this.state.interval) : null;
-    // }
 
     componentWillMount() {
         this.props.context.getClusterManager().addListener(this.state.listener);
