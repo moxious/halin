@@ -358,7 +358,7 @@ class LogsPane extends Component {
     viewerFor(file) {
         return (
             <LogViewer key={file}
-                node={this.props.member}
+                member={this.props.member}
                 file={file} />
         );
     }

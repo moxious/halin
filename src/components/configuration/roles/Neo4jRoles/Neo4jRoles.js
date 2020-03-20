@@ -104,24 +104,21 @@ class Neo4jRoles extends Component {
                 if (clusterOpRes.success) {
                     this.setState({
                         pending: false,
-                        message: status.fromClusterOp(action, clusterOpRes),
                         error: null,
                     });
                 } else {
                     this.setState({
                         pending: false,
-                        message: null,
                         error: status.fromClusterOp(action, clusterOpRes),
                     });
                 }
             })
             .catch(err => this.setState({
                 pending: false,
-                message: null,
                 error: status.message('Error',
                     `Could not delete role ${row.role}: ${err}`),
             }))
-            .finally(() => status.toastify(this));
+            .finally(() => this.state.error ? status.toastify(this) : null);
     }
 
     open = (row) => {

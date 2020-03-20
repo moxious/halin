@@ -10,7 +10,6 @@ class NewUserForm extends Component {
         password: '',
         requireChange: false,
         pending: false,
-        message: null,
         error: null,
     };
 
@@ -20,7 +19,7 @@ class NewUserForm extends Component {
     }
 
     createUser() {
-        this.setState({ pending: true });
+        this.setState({ pending: true, error: false });
 
         const mgr = window.halinContext.getClusterManager();
 
@@ -37,24 +36,21 @@ class NewUserForm extends Component {
                 if (clusterOpRes.success) {
                     this.setState({
                         pending: false,
-                        message: status.fromClusterOp(action, clusterOpRes),
                         error: null,
                     });
                 } else {
                     this.setState({
                         pending: false,
-                        message: null,
                         error: status.fromClusterOp(action, clusterOpRes),
                     });
                 }
             })
             .catch(err => this.setState({
                 pending: false,
-                message: null,
                 error: status.message('Error',
                     `Could not create ${user.username}: ${err}`),
             }))
-            .finally(() => status.toastify(this));
+            .finally(() => this.state.error ? status.toastify(this) : null);
     }
 
     valid() {

@@ -168,7 +168,7 @@ export default class MainLeftNav extends Component {
                                     as='a'
                                     style={selection.style || {}}
                                     onClick={() => this.section(selection.section)}>
-                                    {selection.icon}
+                                    {selection.icon}{selection.text}
                                 </Menu.Item></div>, index))
                     }
 
@@ -178,7 +178,7 @@ export default class MainLeftNav extends Component {
                                 onClick={() => {
                                     this.setState({ logoutConfirmOpen: true });
                                 }}>
-                                <Icon name='log out' />
+                                <Icon name='log out' />Log Out
                             </Menu.Item>, 99)
                     }
 

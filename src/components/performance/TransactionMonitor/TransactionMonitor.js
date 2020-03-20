@@ -27,7 +27,7 @@ class TransactionMonitor extends Component {
             <HalinCard owner={this}>
                 <CypherTimeseries key={this.state.key}
                     heading="Transaction Monitor"
-                    node={this.props.member}
+                    member={this.props.member}
                     query={this.state.query} 
                     explainer={explainer}
                     rate={this.state.rate}

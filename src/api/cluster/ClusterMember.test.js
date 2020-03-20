@@ -8,6 +8,7 @@ import _ from 'lodash';
 
 describe('ClusterMember', function () {
     const host = 'foo-host';
+    const label = 'foo-host:7777'; // Non-standard port gets label
     const boltAddress = `bolt://${host}:7777`;
     const httpAddress = `http://${host}:8888`;
     const entry = {
@@ -78,7 +79,7 @@ describe('ClusterMember', function () {
     });
 
     it('knows its bolt address', () => expect(c.getBoltAddress()).toEqual(boltAddress));
-    it('knows how to label by host', () => expect(c.getLabel()).toEqual(host));
+    it('knows how to label by host', () => expect(c.getLabel()).toEqual(label));
     it('knows how to extract protocols', () => {
         const prots = c.protocols();
         expect(prots).toContain('http');

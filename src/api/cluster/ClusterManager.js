@@ -85,6 +85,7 @@ export default class ClusterManager {
         _.set(data, 'date', moment.utc().toISOString());
         _.set(data, 'payload', event.payload || null);
         _.set(data, 'id', uuid.v4());
+        _.set(data, 'address', data.event || 'all members');
         this.eventLog.push(data);
 
         // Notify listeners.
@@ -166,6 +167,7 @@ export default class ClusterManager {
             .then(result => {
                 this.addEvent({
                     type: 'adduser',
+                    alert: true,
                     message: `Added user "${username}"`,
                     payload: username,
                 });
@@ -188,6 +190,7 @@ export default class ClusterManager {
                     type: 'deleteuser',
                     message: `Deleted user "${username}"`,
                     payload: username,
+                    alert: true,
                 });
                 return result;
             })
@@ -205,6 +208,7 @@ export default class ClusterManager {
                     type: 'addrole',
                     message: `Created role "${role}"`,
                     payload: role,
+                    alert: true,
                 });
                 return result;
             });
@@ -222,6 +226,7 @@ export default class ClusterManager {
                     type: 'deleterole',
                     message: `Deleted role "${role}"`,
                     payload: role,
+                    alert: true,
                 });
                 return result;
             });
@@ -229,13 +234,13 @@ export default class ClusterManager {
 
     /** Specific to a particular node */
     addNodeRole(node, username, role) {
-        sentry.info('ADD ROLE', { username, role });
+        sentry.info('ADD ROLE', { username, role, addr: node.getBoltAddress() });
         return node.run('call dbms.security.addRoleToUser($role, $username)', { username, role }, neo4j.SYSTEM_DB);
     }
 
     /** Specific to a particular node */
     removeNodeRole(node, username, role) {
-        sentry.info('REMOVE ROLE', { username, role });
+        sentry.info('REMOVE ROLE', { username, role, addr: node.getBoltAddress() });
         return node.run('call dbms.security.removeRoleFromUser($role, $username)', { username, role }, neo4j.SYSTEM_DB);
     }
 
@@ -335,7 +340,11 @@ export default class ClusterManager {
                 });
         };
 
-        const allPromises = this.ctx.members().map(node => {
+        const membersToRunAgainst = this.ctx.supportsSystemGraph() ? 
+            [this.ctx.getSystemDBWriter()] : 
+            this.ctx.members();
+
+        const allPromises = membersToRunAgainst.map(node => {
             return gatherRoles(node)
                 .then(rolesHere => determineDifferences(rolesHere, node))
                 .then(roleChanges => applyChanges(roleChanges, node))
@@ -343,6 +352,7 @@ export default class ClusterManager {
                     this.addEvent({
                         type: 'roleassoc',
                         message: `Associated "${username}" to roles ${roles.map(r => `"${r}"`).join(', ')}`,
+                        alert: true,
                         payload: { username, roles },
                     });
                 })
@@ -442,6 +452,7 @@ export default class ClusterManager {
             .then(() => this.ctx.getDatabaseSet().refresh(this.ctx))
             .then(() => this.addEvent({
                 type: 'database',
+                alert: true,
                 message: `Stopped database ${db.name}`,
                 payload: db,
             }));
@@ -458,6 +469,7 @@ export default class ClusterManager {
             .then(() => this.ctx.getDatabaseSet().refresh(this.ctx))
             .then(() => this.addEvent({
                 type: 'database',
+                alert: true,
                 message: `Started database ${db.name}`,
                 payload: db,
             }));
@@ -474,6 +486,7 @@ export default class ClusterManager {
             .then(() => this.ctx.getDatabaseSet().refresh(this.ctx))
             .then(() => this.addEvent({
                 type: 'database',
+                alert: true,
                 message: `Dropped database ${db.name}`,
             }));
     }
@@ -495,6 +508,7 @@ export default class ClusterManager {
             .then(() => this.ctx.getDatabaseSet().refresh(this.ctx))
             .then(() => this.addEvent({
                 type: 'database',
+                alert: true,
                 message: `Created database ${name}`,
             }));
     }

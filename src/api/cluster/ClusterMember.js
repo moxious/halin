@@ -216,20 +216,33 @@ export default class ClusterMember {
         return this.boltAddress;
     }
 
+    getPort() {
+        const parsed = Parser.parse(this.getBoltAddress());
+        return parsed.port || 7687;
+    }
+
     getAddress() {
         const parsed = Parser.parse(this.getBoltAddress());
         return parsed.host;
     }
 
     getLabel() {
-        const addr = this.getAddress() || 'NO_ADDRESS';
+        const parts = Parser.parse(this.getBoltAddress());
+
+        const addr = parts.host || 'NO_ADDRESS';
+        parts.port = parts.port || '7687';
+
+        // Add the port on only if it's non-standard.  This also helps
+        // disambiguate when localhost is used 3x.
+        const port = parts.port === '7687' ? '' : ':' + parts.port;
+
         if (addr.match(/^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$/)) {
             // IP address
-            return addr;
+            return addr + port;
         }
 
         // Return the first portion of the hostname.
-        return addr.split('.')[0];
+        return addr.split('.')[0] + port;
     }
 
     protocols() {

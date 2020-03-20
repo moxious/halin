@@ -9,7 +9,6 @@ class NewRoleForm extends Component {
     state = {
         role: null,
         pending: false,
-        message: null,
         error: null,
     };
 
@@ -32,24 +31,21 @@ class NewRoleForm extends Component {
                 if (clusterOpRes.success) {
                     this.setState({
                         pending: false,
-                        message: status.fromClusterOp(action, clusterOpRes),
                         error: null,
                     });
                 } else {
                     this.setState({
                         pending: false,
-                        message: null,
                         error: status.fromClusterOp(action, clusterOpRes),
                     });
                 }
             })
             .catch(err => this.setState({
                 pending: false,
-                message: null,
                 error: status.message('Error',
                     `Could not create role ${this.state.role}: ${err}`),
             }))
-            .finally(() => status.toastify(this));
+            .finally(() => this.state.error ? status.toastify(this) : null);
     }
 
     formValid() {

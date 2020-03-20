@@ -11,12 +11,13 @@ export default class Advice {
      * @param evidence (optional) data showing the issue
      * @param advice (optional) corrective action if applicable.
      */
-    constructor({ level, addr=Advice.CLUSTER, finding, evidence=null, advice='none' }) {
+    constructor({ level, addr=Advice.CLUSTER, database='all', finding, evidence=null, advice='none' }) {
         this.addr = addr;
         this.level = level;
         this.finding = finding;
         this.evidence = evidence;
         this.advice = advice;
+        this.database = database;
 
         if (!level || !addr || !finding) {
             throw new Error('Advice requires at a minimum a level, addr, and finding');

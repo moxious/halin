@@ -14,9 +14,7 @@ export default class AppFooter extends PureComponent {
         api.sentry.fine('build', build);
         const buildDate = moment.utc(build.date).format("YYYY-MM-DD");
         return (
-            <HalinCard header='About Halin' className='AppFooter'>
-                <h4>Halin v{appPkg.version}</h4>
-
+            <HalinCard header={`About Halin v${appPkg.version}`} className='AppFooter'>
                 <p><Image style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto' }} src='favicon-32x32.png'/></p>
 
                 <List>                    

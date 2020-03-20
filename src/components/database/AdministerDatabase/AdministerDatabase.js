@@ -8,6 +8,7 @@ import neo4j from '../../../api/driver';
 class AdministerDatabase extends Component {
     state = {
         pending: false,
+        error: null,
         dropConfirmOpen: false,
     };
 
@@ -49,24 +50,19 @@ class AdministerDatabase extends Component {
     }
 
     doOperation(operationPromise, successMessage, failMessage) {
-        this.setState({ pending: true });
+        this.setState({ pending: true, error: null });
 
         return operationPromise
-            .then(() => {
-                this.setState({
-                    message: status.message('Success', successMessage),
-                    error: null,
-                });
-            })
             .catch(err => {
                 this.setState({
-                    message: null,
                     error: status.message('Error', failMessage + `: ${err}`),
                 });
             })
             .finally(() => {
                 this.setState({ pending: false });
-                status.toastify(this);
+                if (this.state.error) {
+                    status.toastify(this);
+                }                
             });
     }
 

@@ -4,6 +4,7 @@ import ClusterMember from './ClusterMember';
 import errors from '../driver/errors';
 import sentry from '../sentry';
 import uuid from 'uuid';
+import util from '../data/util';
 
 const REFRESH_INTERVAL = 5000;
 
@@ -18,9 +19,17 @@ export default class ClusterMemberSet {
         this.clusterMembers = [];
         this.clustered = false;
         this.timeout = null;
+        this.memFeeds = {};
+        
+        // Stores utilization statistics about each member
+        this.stats = {};
     }
 
     members() { return this.clusterMembers; }
+
+    getStats() {
+        return this.stats;
+    }
 
     shutdown() {
         if (this.timeout) { clearTimeout(this.timeout); }
@@ -80,6 +89,83 @@ export default class ClusterMemberSet {
 
         this.timeout = setTimeout(() => this.refresh(halin), REFRESH_INTERVAL);
         return this.timeout;
+    }
+
+    updateStats(halin, addr, data) {
+        const stats = _.merge({ lastUpdated: new Date() }, _.clone(data));
+
+        const prevHeap = _.get(this.stats[addr], 'heapCommitted');
+        const nowHeap = _.get(data, 'heapCommitted');
+
+        stats.pctUsed = (data.heapUsed || 0) / (data.heapCommitted || -1);
+        stats.pctFree = 1 - stats.pctUsed;
+
+        if (prevHeap && nowHeap !== prevHeap) {
+            const a = util.humanDataSize(prevHeap);
+            const b = util.humanDataSize(nowHeap);
+
+            halin.getClusterManager().addEvent({
+                type: 'memory',
+                alert: true,
+                address: addr,
+                message: `Heap allocation changed on ${addr} from ${a} to ${b}`,
+                payload: {
+                    old: _.clone(this.stats[addr]),
+                    new: _.clone(stats),
+                },
+            });
+        }
+
+        if (stats.pctFree <= 0.1) {
+            halin.getClusterManager().addEvent({
+                type: 'memory',
+                alert: true,
+                error: true,
+                address: addr,
+                message: `Heap is >= 90% utilization on ${addr}`,
+                payload: _.clone(stats),
+            });
+        } else if (stats.pctFree <= 0.02) {
+            halin.getClusterManager().addEvent({
+                type: 'memory',
+                alert: true,
+                error: true,
+                address: addr,
+                message: `Heap is >= 98% utilization on ${addr}`,
+                payload: _.clone(stats),
+            });
+        }
+
+        this.stats[addr] = stats;
+        return stats;
+    }
+
+    getMemoryFeed(halin, clusterMember) {
+        const addr = clusterMember.getBoltAddress();
+
+        if (this.memFeeds[addr]) {
+            return Promise.resolve(this.memFeeds[addr]);            
+        }
+
+        const memFeed = halin.getDataFeed(_.merge({
+            node: clusterMember,
+        }, queryLibrary.JMX_MEMORY_STATS));
+
+        return new Promise((resolve, reject) => {
+            const onMemData = (newData /* , dataFeed */) => {
+                const data = _.get(newData, 'data[0]');
+                return this.updateStats(halin, addr, data);
+            };
+
+            const onError = (err, dataFeed) => {
+                sentry.fine('ClusterMemberSet: failed to get mem data', addr, err);
+                reject(err, dataFeed);
+            };
+
+            memFeed.addListener(onMemData);
+            memFeed.onError = onError;
+            return resolve(memFeed);
+        });
     }
 
     /**
@@ -182,7 +268,11 @@ export default class ClusterMemberSet {
             // SETUP ACTIONS FOR ANY NEW MEMBER
             const driver = halin.driverFor(member.getBoltAddress());
             member.setDriver(driver);
-            const setup = this.ping(halin, member)
+            
+            const setup = Promise.all([
+                this.ping(halin, member),
+                this.getMemoryFeed(halin, member),
+            ])
                 .then(() => member.checkComponents());
 
             promises.push(setup);
