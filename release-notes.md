@@ -1,5 +1,12 @@
 # Halin Release Notes
 
+## 0.13.1 Bugfix Release & COPY ROLE
+
+- A bug in the generation of privilege commands was fixed, which could give the wrong results
+when the selected graph was `*`
+- A "copy role" option was added for Neo4j 4.0 installs; the "copy" icon button in Actions on
+the role administration page
+
 ## 0.13.0 Limited Alerting
 
 - Added alerts for certain memory conditions, such as heap re-allocation and imminent out-of-memory errors (OOMs)
