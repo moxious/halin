@@ -159,7 +159,19 @@ describe('Privilege Operations', function() {
                 role: 'microuser',
             },
             expected: 'GRANT TRAVERSE ON GRAPH `neo4j` RELATIONSHIPS PHONE TO microuser',
-        }
+        },
+        {
+            reversalAction: 'GRANT',
+            op: {
+                access: 'DENIED',
+                action: 'read',
+                resource: 'all_properties',
+                graph: '*',
+                segment: 'NODE(SSN)',
+                role: 'public',
+            },
+            expected: 'GRANT READ {*} ON GRAPHS * NODES SSN TO public',
+        },
     ];
 
     scenarios.forEach(scenario => {

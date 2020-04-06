@@ -208,7 +208,11 @@ export default class PrivilegeOperation {
         // sentry.fine('buildQuery', this);
         const op = this.operation;
         const priv = this.privilege;
-        const db = this.database;
+
+        // Escape with back-ticks ONLY if the database isn't *.
+        // #operability otherwise we defeat the * expansion and are talking about
+        // a database named * which cannot exist due to naming rules.
+        const db = this.database === '*' ? this.database : `\`${this.database}\``;
 
         // When the entity is 'DATABASE' effectively the entity doesn't apply.
         // For example when GRANT START ON DATABASE FOO TO ROLE
@@ -229,11 +233,11 @@ export default class PrivilegeOperation {
          * https://neo4j.com/docs/cypher-manual/4.0-preview/administration/security/subgraph/#administration-security-subgraph-write
          */
         if (priv.indexOf('WRITE') > -1) {
-            return `${op} ${priv} ON ${graphToken} \`${db}\` ${preposition} ${role}`;
+            return `${op} ${priv} ON ${graphToken} ${db} ${preposition} ${role}`;
         } else if(Object.values(PrivilegeOperation.DATABASE_OPERATIONS).indexOf(priv) > -1) {
-            return `${op} ${priv} ON DATABASE \`${db}\` ${preposition} ${role}`;
+            return `${op} ${priv} ON DATABASE ${db} ${preposition} ${role}`;
         }
 
-        return `${op} ${priv} ON ${graphToken} \`${db}\` ${entity} ${preposition} ${role}`;
+        return `${op} ${priv} ON ${graphToken} ${db} ${entity} ${preposition} ${role}`;
     }
 };
