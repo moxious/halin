@@ -196,6 +196,19 @@ export default class ClusterManager {
             })
     }
 
+    copyRole(existingRole, toBeCreatedRole) {
+        return this.clusterWideQuery(`CREATE ROLE \`${toBeCreatedRole}\` AS COPY OF \`${existingRole}\``)
+            .then(result => {
+                this.addEvent({
+                    type: 'addrole',
+                    message: `Created role ${toBeCreatedRole} as copy of ${existingRole}`,
+                    payload: { existingRole, toBeCreatedRole },
+                    alert: true,
+                });
+                return result;
+            });
+    }
+
     addRole(role) {
         if (!role) { throw new Error('Must provide role'); }
 
