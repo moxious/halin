@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
-import { Grid, Button, Confirm, Modal, Icon, Input } from 'semantic-ui-react';
+import { Grid, Button, Confirm, Modal, Icon } from 'semantic-ui-react';
 import moment from 'moment';
 
 import status from '../../../../api/status/index';
