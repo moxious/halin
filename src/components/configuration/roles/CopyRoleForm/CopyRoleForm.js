@@ -76,10 +76,19 @@ class CopyRoleForm extends Component {
         return this.state.role.match(/^[A-Za-z0-9]+$/);
     }
 
+    preview() {
+        return `CREATE ROLE \`${this.state.role || '(enter role below)'}\` AS COPY OF \`${this.props.role}\``;
+    }
+
     render() {
         return (
             <div className='CopyRoleForm'>
                 <Form error={!this.valid()} size="small" style={{ textAlign: 'left' }}>
+                    <Form.Group>
+                        <h3>Preview</h3>
+                        <h4>{this.preview()}</h4>
+                    </Form.Group>
+
                     <Form.Group widths='equal'>
                         <Form.Input
                             fluid                            
@@ -90,6 +99,7 @@ class CopyRoleForm extends Component {
                             placeholder='myCustomRole'
                         />
                     </Form.Group>
+
                     <Message
                         error
                         header='Invalid role name'
