@@ -56,7 +56,7 @@ export default class CypherPieChart extends Component {
                     })), 
                     ['value']);
 
-                this.setState({
+                return this.setState({
                     data,
                     error: null,
                     total,
@@ -64,7 +64,8 @@ export default class CypherPieChart extends Component {
                 });
             })
             .catch(err => {
-                api.sentry.reportError('Error getting pie chart data', err);
+                const str = `${err}`;
+                api.sentry.reportError(`Error getting pie chart data (${str})`, err);
                 this.setState({
                     error: err,
                     total: 1,
