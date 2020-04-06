@@ -14,6 +14,18 @@ import Explainer from '../../../ui/scaffold/Explainer/Explainer';
 import NewRoleForm from '../NewRoleForm/NewRoleForm';
 import CopyRoleForm from '../CopyRoleForm/CopyRoleForm';
 
+const copyRoleButton = (input) => 
+    <Modal closeIcon
+        trigger={
+            <Button compact icon='copy' type='submit' />
+        }>
+        <Modal.Header>Copy Role: {input.role}</Modal.Header>
+
+        <Modal.Content>
+            <CopyRoleForm role={input.role} />
+        </Modal.Content>
+    </Modal>            
+
 class Neo4jRoles extends Component {
     query = 'call dbms.security.listRoles()';
     static undeleteableRoles = [
@@ -37,7 +49,8 @@ class Neo4jRoles extends Component {
                         disabled={!Neo4jRoles.canDelete(row.role)}
                         onClick={e => this.open(row)}
                         type='submit' icon="cancel"/>
-                    { this.copyRoleButton(row) }
+                    {/* Only Neo4j 4.0 can do the COPY ROLE operation */}
+                    { window.halinContext.getVersion().major >= 4 ? copyRoleButton(row) : ''}
                 </div>
             ),
         },
@@ -74,21 +87,6 @@ class Neo4jRoles extends Component {
             message: null,
             error: null,
         });
-    }
-
-    copyRoleButton(input) {
-        return (
-            <Modal closeIcon
-                trigger={
-                    <Button compact icon='copy' type='submit' />
-                }>
-                <Modal.Header>Copy Role: {input.role}</Modal.Header>
-
-                <Modal.Content>
-                    <CopyRoleForm role={input.role} />
-                </Modal.Content>
-            </Modal>            
-        );
     }
 
     addRoleButton() {
