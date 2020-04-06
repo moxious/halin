@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import CypherDataTable from '../../../data/CypherDataTable/CypherDataTable';
-import { Grid, Button, Confirm, Modal, Icon } from 'semantic-ui-react';
+import { Grid, Button, Confirm, Modal, Icon, Input } from 'semantic-ui-react';
 import moment from 'moment';
 
 import status from '../../../../api/status/index';
@@ -12,6 +12,7 @@ import './Neo4jRoles.css';
 import hoc from '../../../higherOrderComponents';
 import Explainer from '../../../ui/scaffold/Explainer/Explainer';
 import NewRoleForm from '../NewRoleForm/NewRoleForm';
+import CopyRoleForm from '../CopyRoleForm/CopyRoleForm';
 
 class Neo4jRoles extends Component {
     query = 'call dbms.security.listRoles()';
@@ -30,11 +31,14 @@ class Neo4jRoles extends Component {
             minWidth: 70,
             maxWidth: 100,
             Cell: ({ row }) => (
-                <Button compact negative
-                    // Don't let people delete neo4j or admins for now.
-                    disabled={!Neo4jRoles.canDelete(row.role)}
-                    onClick={e => this.open(row)/*this.deleteUser(e, row)*/}
-                    type='submit' icon="cancel"/>
+                <div>
+                    <Button compact negative
+                        // Don't let people delete neo4j or admins for now.
+                        disabled={!Neo4jRoles.canDelete(row.role)}
+                        onClick={e => this.open(row)}
+                        type='submit' icon="cancel"/>
+                    { this.copyRoleButton(row) }
+                </div>
             ),
         },
         { Header: 'Role', accessor: 'role' },
@@ -70,6 +74,21 @@ class Neo4jRoles extends Component {
             message: null,
             error: null,
         });
+    }
+
+    copyRoleButton(input) {
+        return (
+            <Modal closeIcon
+                trigger={
+                    <Button compact icon='copy' type='submit' />
+                }>
+                <Modal.Header>Copy Role: {input.role}</Modal.Header>
+
+                <Modal.Content>
+                    <CopyRoleForm role={input.role} />
+                </Modal.Content>
+            </Modal>            
+        );
     }
 
     addRoleButton() {
@@ -127,6 +146,10 @@ class Neo4jRoles extends Component {
             activeRole: row,
         });
     };
+
+    copy = (row) => {
+        console.log('COPY ROLE',row);
+    }
 
     confirm = () => {
         const roleToDelete = this.state.activeRole;
