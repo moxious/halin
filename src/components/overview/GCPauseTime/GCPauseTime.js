@@ -27,6 +27,7 @@ class GCPauseTime extends Component {
                     yAxis={{ label: 'Milliseconds' }}
                     displayProperty='duration'
                     chartType='scatter'
+                    debug={true}
                 />
             </HalinCard>
         )

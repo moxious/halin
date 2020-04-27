@@ -89,16 +89,29 @@ class ClusterTimeseries extends Component {
     }
 
     /**
+     * @param {*} query the text of a cypher query
+     * @returns {HalinQuery} from the query library whose query matches
+     */
+    findMatchingHalinQuery(query=this.props.query) {
+        let queryObj = null;
+
+        Object.keys(queryLibrary).forEach(entry => {
+            if (!queryLibrary[entry].query || queryObj) { return; }
+
+            if (queryLibrary[entry].query === query) {
+                queryObj = queryLibrary[entry];
+            }
+        });
+
+        return queryObj;
+    }
+
+    /**
      * Check and see if query is a standard query.  If so, retrieve its columns.
      */
     findColumns(query=this.props.query) {
-        let columns = null;
-        Object.keys(queryLibrary).forEach(entry => {
-            if (!entry.query) { return; }
-            if (entry.query === query) {
-                columns = entry.columns;
-            }
-        });
+        const queryObj = this.findMatchingHalinQuery(query);
+        const columns = queryObj ? queryObj.columns : null;
 
         // If columns cannot be found, just use the display property.
         return columns ? columns : [
@@ -157,14 +170,20 @@ class ClusterTimeseries extends Component {
             // If the user specified a feed making function, use that one.
             // Otherwise construct the reasonable default.
             if (this.props.feedMaker) {
+                if (this.props.debug) { console.log('FEEDMAKER'); }
                 feed = this.props.feedMaker(node);
             } else {
+                const queryObj = this.findMatchingHalinQuery(this.props.query);
+                if (this.props.debug) { 
+                    console.log('Matching query', queryObj);
+                }
                 feed = halin.getDataFeed({
                     node,
                     query: this.props.query,
                     rate: this.props.rate,
                     windowWidth: this.props.timeWindowWidth,
                     displayColumns: this.findColumns(),
+                    filter: queryObj ? queryObj.filter : null,
                 });
 
                 feed.addAliases({ [this.state.displayProperty]: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
@@ -255,10 +274,10 @@ class ClusterTimeseries extends Component {
         // Each address has unique data state.
         const stateAddendum = {};
         stateAddendum[addr] = newState;
-        if (this.props.debug) {
-            sentry.debug('ClusterTimeseries state update', 
-                stateAddendum, 'min=', computedMin, 'max=',computedMax);
-        }
+        // if (this.props.debug) {
+        //     sentry.debug('ClusterTimeseries state update', 
+        //         stateAddendum, 'min=', computedMin, 'max=',computedMax);
+        // }
 
         this.setState(stateAddendum);
         if (this.onUpdate) {
@@ -373,7 +392,7 @@ class ClusterTimeseries extends Component {
         const style = styler(this.nodes.map((addr, idx) => ({
             key: ClusterTimeseries.keyFor(addr, this.state.displayProperty),
             color: this.chooseColor(idx),
-            width: 3,
+            width: this.props.chartType === 'scatter' ? 8 : 3,
         })));
 
         this.dataSeries = {};

@@ -50,6 +50,11 @@ export default class DataFeed extends Metric {
                 this.aliases);
         }
 
+        /* A filter function can be passed on whether or not to report the new data point.  If
+         * none is specified, nothing gets filtered.
+         */
+        this.filter = props.filter;
+
         // An augmentation function can be passed to allow computing values that
         // aren't in the query, on the basis of some external function.
         this.augmentFns = props.augmentData ? [props.augmentData] : [];
@@ -346,6 +351,18 @@ export default class DataFeed extends Metric {
                     sentry.fine('event', data);
                 }
                 this.timeout = setTimeout(() => this.sampleData(), this.rate);
+
+                /* A filter function can inspect a new data packet and decide whether it's new or not.
+                 * If the filter function works and returns something falsy, the data isn't new.
+                 */
+                if (this.filter) {
+                    const isNovel = this.filter(data, _.get(this.state, 'data[0]'));
+                    if (!isNovel) {
+                        // console.log('Filtering out old data point OLD', _.get(this.state, 'data[0]'), 'NEW', data);
+                        // Shortcut out without updating our state or notifying listeners.
+                        return null;
+                    }
+                }
 
                 const t = new Date();
                 const event = new TimeEvent(t, data);
