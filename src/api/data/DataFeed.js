@@ -40,6 +40,7 @@ export default class DataFeed extends Metric {
         this.query = props.query;
         this.params = props.params || {};
         this.rate = props.rate || 1000;
+        this.index = 0;
         this.displayColumns = props.displayColumns || props.columns;
         
         // A list of aliases can be passed, allowing renaming of columns.
@@ -69,6 +70,7 @@ export default class DataFeed extends Metric {
             events: new Ring(Math.floor((this.windowWidth / this.rate) * 1.25)),
             time: new Date(),
             lastDataArrived: new Date(),
+            index: this.index++,
         };
 
         this.listeners = props.onData ? [props.onData] : [];
@@ -79,7 +81,7 @@ export default class DataFeed extends Metric {
         }
 
         const qtag = this.query.replace(/\s*[\r\n]+\s*/g, ' ');
-        this.name = `${this.node.getBoltAddress()}-${qtag}-${JSON.stringify(this.displayColumns)}}`;
+        this.name = `${this.node.getBoltAddress()}-${qtag}-${JSON.stringify(this.params)}-${JSON.stringify(this.displayColumns)}}`;
     }
 
     findLabel(query) {
@@ -324,7 +326,7 @@ export default class DataFeed extends Metric {
                 }
 
                 // Record elapsed time for every sample
-                let data = { _sampleTime: elapsedMs };
+                let data = { _sampleTime: elapsedMs, index: this.index++ };
 
                 // Plug query data values into data map, converting ints as necessary.
                 this.displayColumns.forEach(col => {
