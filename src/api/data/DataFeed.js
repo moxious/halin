@@ -337,7 +337,7 @@ export default class DataFeed extends Metric {
                 // Progressively merge data from the augmentation functions, if
                 // present.
                 this.augmentFns.forEach(fn => {
-                    data = _.merge(data, fn(data));
+                    data = _.merge(data, fn(data, this));
                 });
 
                 // Apply aliases if specified.
