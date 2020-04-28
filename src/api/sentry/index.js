@@ -5,6 +5,7 @@
 /* eslint-disable no-console */
 import * as Sentry from '@sentry/browser';
 import appPkg from '../../package.json';
+import _ from 'lodash';
 
 let initialized = false;
 let enabled = true;
@@ -29,7 +30,14 @@ const debug = (...args) => enabled ? console.log('DEBUG', ...args) : null;
 
 // Filter out certain messages which might be so common that they'd create problems.
 // TBD pending further implementation
-const shouldSentryCapture = err => true;
+const shouldSentryCapture = err => {
+    const href = _.get(window, 'location.href');
+    if (href && href.indexOf('localhost') > -1) {
+        return false;
+    }
+    
+    return true;
+}
 
 const context = ctx => {
     const eventMetadata = {
