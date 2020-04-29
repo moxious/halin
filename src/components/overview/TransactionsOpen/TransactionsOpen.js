@@ -55,13 +55,16 @@ class TransactionsOpen extends Component {
         const allColumns = _.cloneDeep(queryLibrary.JMX_TRANSACTIONS.columns)
             .concat(_.cloneDeep(queryLibrary.JMX_TRANSACTIONS.legendOnlyColumns));
 
+        console.log('Making TX data feed for ', this.props.database.getLabel());
+
         const feed = halin.getDataFeed({
             node: member,
+            database: this.props.database.getLabel(),
             query: this.state.query,
             rate: this.state.rate,
             displayColumns: allColumns,
             params: {
-                db: halin.getDatabaseSet().getDefaultDatabase().name,
+                db: this.props.database.getLabel(),
             },
         });
 
@@ -99,6 +102,8 @@ class TransactionsOpen extends Component {
                 <ClusterTimeseries key={this.state.key}
                     query={this.state.query}
                     feedMaker={this.dataFeedMaker}
+                    database={this.props.database}
+                    debug={true}
                     // onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />
