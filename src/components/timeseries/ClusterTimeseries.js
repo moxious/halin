@@ -196,7 +196,7 @@ class ClusterTimeseries extends Component {
                 this.onData(node, newData, dataFeed);
 
             // And attach that to the feed.
-            this.feeds[addr].addListener(this.onDataCallbacks[addr]);
+            this.feeds[addr].on('data', this.onDataCallbacks[addr]);
 
             const curState = this.feeds[addr].currentState();
             this.onDataCallbacks[addr](curState, this.feeds[addr]);

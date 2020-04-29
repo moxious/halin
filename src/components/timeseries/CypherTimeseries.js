@@ -92,7 +92,7 @@ class CypherTimeseries extends Component {
         const onDataListener = (newData, dataFeed) => 
             this.onData(newData, dataFeed);
 
-        this.feed.addListener(onDataListener);
+        this.feed.on('data', onDataListener);
 
         const disabled = {};
 

@@ -54,7 +54,7 @@ export default class ClusterTransactionStatus extends Component {
             this.onDataCallbacks[addr] = (newData, dataFeed) =>
                 this.onData(member, newData, dataFeed);
 
-            feed.addListener(this.onDataCallbacks[addr]);
+            feed.on('data', this.onDataCallbacks[addr]);
             feeds[addr] = feed;
             lastTxIds[addr] = 0;
         });

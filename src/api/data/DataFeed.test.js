@@ -42,15 +42,6 @@ describe('DataFeed', function () {
             expect(feed.aliases.indexOf(alias)).toBeGreaterThan(-1);
         });
 
-        it('can add and remove a listener', () => {
-            const fn = () => 1;
-
-            feed.addListener(fn);
-            expect(feed.listeners.indexOf(fn)).toBeGreaterThan(-1);
-            feed.removeListener(fn);
-            expect(feed.listeners.indexOf(fn)).toEqual(-1);
-        });
-
         it('prior to run start, it is not running', () => expect(feed.isRunning()).toBeFalsy());
     });
 

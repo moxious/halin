@@ -73,8 +73,6 @@ export default class DataFeed extends Metric {
             index: this.index++,
         };
 
-        this.listeners = props.onData ? [props.onData] : [];
-
         if (!this.node || !this.query || !this.displayColumns) {
             sentry.error(props);
             throw new Error('Missing one of required props displayColumns/columns, node, query');
@@ -124,23 +122,6 @@ export default class DataFeed extends Metric {
             this.aliases.push(aliases);
         }
         return this.aliases;
-    }
-
-    addListener(listener) {
-        if (this.listeners.indexOf(listener) === -1) {
-            this.listeners.push(listener);
-        }
-
-        return this.listeners;
-    }
-
-    removeListener(listener) {
-        const idx = this.listeners.indexOf(listener);
-        if (idx > -1) {
-            this.listeners.splice(idx, 1);
-        }
-
-        return this.listeners;
     }
 
     /**
@@ -214,7 +195,6 @@ export default class DataFeed extends Metric {
             mode: math.mode(...timings),
             min: math.min(...timings),
             max: math.max(...timings),
-            listeners: this.listeners.length,
             augFns: this.augmentFns.length,
             aliases: this.aliases.length,
             timings,
@@ -258,6 +238,10 @@ export default class DataFeed extends Metric {
             .map(obs => maxObs(obs));
 
         return Math.max(...allMaxes);
+    }
+
+    hasError() {
+        return !_.isNil(this.state.error);
     }
 
     isFresh() {
@@ -382,7 +366,7 @@ export default class DataFeed extends Metric {
                 this.state.error = undefined;
 
                 // Let our user know we have something new.
-                return this.listeners.map(listener => listener(this.state, this));
+                return this._notifyListeners('data', [this.state, this]);
             })
             .catch(err => {
                 // About this catch block, it's possible for halin to be stuck in a loop,
@@ -399,9 +383,7 @@ export default class DataFeed extends Metric {
                 this.state.lastDataArrived = this.feedStartTime;
                 this.state.error = err;
 
-                if (this.onError) {
-                    this.onError(err, this);
-                }
+                this._notifyListeners('error', [err, this]);
 
                 // Back off and schedule next call to be 2x the normal window.
                 this.timeout = setTimeout(() => this.sampleData(), this.rate * 2);
