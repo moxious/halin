@@ -4,23 +4,16 @@ import { Card } from 'semantic-ui-react';
 import ClusterMemory from '../ClusterMemory/ClusterMemory';
 import GCPauseTime from '../GCPauseTime/GCPauseTime';
 import PageCacheTracking from '../PageCacheTracking/PageCacheTracking';
-import TransactionsOpen from '../TransactionsOpen/TransactionsOpen';
 import UsedMemory from '../UsedMemory/UsedMemory';
-import OpenFileDescriptors from '../OpenFileDescriptors/OpenFileDescriptors';
 
 import hoc from '../../higherOrderComponents';
 
-const ClusterOverviewPane = (props) => {
-    return (
-        <Card.Group itemsPerRow={3} className="PerformancePane">
-            <ClusterMemory />
-            <UsedMemory />
-            <GCPauseTime />
-            <PageCacheTracking />
-            <TransactionsOpen />
-            <OpenFileDescriptors />
-        </Card.Group>
-    );
-}
+const ClusterOverviewPane = (props) =>
+    <Card.Group itemsPerRow={2} className="ClusterOverviewPane">
+        <ClusterMemory />
+        <UsedMemory />
+        <GCPauseTime />
+        <PageCacheTracking />
+    </Card.Group>;
 
 export default hoc.contentPaneComponent(ClusterOverviewPane);
