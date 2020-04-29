@@ -7,6 +7,7 @@ import Ring from 'ringjs';
 import neo4j from '../driver/index';
 import ql from '../data/queries/query-library';
 import Database from '../Database';
+import Metric from '../Metric';
 
 /**
  * This is a controller for clusters.
@@ -51,29 +52,25 @@ const packageClusterOpResults = results => {
 
 const MAX_EVENTS = 200;
 
-export default class ClusterManager {
+/**
+ * This object acts as a metric of its own, keeping cluster-wide events in an event log,
+ * and also permitting cluster-wide queries to be executed in a way that is cross-Neo4j
+ * version compatible.
+ */
+export default class ClusterManager extends Metric {
     constructor(halinCtx) {
+        super();
         this.ctx = halinCtx;
         this.eventLog = new Ring(MAX_EVENTS);
-        this.listeners = [];
     }
 
-    addListener(listener) {
-        if (this.listeners.indexOf(listener) === -1) {
-            this.listeners.push(listener);
-        }
+    /** @override Metric#currentState */
+    currentState() {
+        return this.eventLog.toArray();
+    }    
 
-        return this.listeners;
-    }
-
-    removeListener(listener) {
-        const idx = this.listeners.indexOf(listener);
-        if (idx > -1) {
-            this.listeners.splice(idx, 1);
-        }
-
-        return this.listeners;
-    }
+    /** @override Metric#isFresh */
+    isFresh() { return true; }
 
     addEvent(event) {
         if (!event.message || !event.type) {
@@ -89,12 +86,12 @@ export default class ClusterManager {
         this.eventLog.push(data);
 
         // Notify listeners.
-        this.listeners.forEach(f => f(event));
+        this._notifyListeners('data', [event, this]);
         return event;
     }
 
     getEventLog() {
-        return this.eventLog.toArray();
+        return this.currentState();
     }
 
     /**

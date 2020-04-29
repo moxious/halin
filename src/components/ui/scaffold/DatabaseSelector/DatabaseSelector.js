@@ -65,7 +65,7 @@ export default class DatabaseSelector extends Component {
             }
         };
 
-        window.halinContext.getClusterManager().addListener(this.listenerFn);
+        window.halinContext.getClusterManager().on('data', this.listenerFn);
 
         this.setState({
             selected: window.halinContext.databases()[0],
