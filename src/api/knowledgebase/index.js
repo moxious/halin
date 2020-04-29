@@ -276,7 +276,9 @@ export default {
     ]),
     TransactionsOpen: render([
         'Any query that updates the graph will run in a transaction. An updating query will always either fully succeed, or not succeed at all.',
-        'This component shows only the transactions on the default configured database.',
+        `Open transactions are those that are currently in-flight in the database`,
+        `Committed transactions have succeeded and finished.`,
+        `Rolled back transactions are those that failed, and were not applied.`,
         links.txManagement,
     ]),
     UsedMemory: render([
