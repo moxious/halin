@@ -3,6 +3,7 @@ node_modules
 scripts/flow/*/.flowconfig
 *~
 *.pyc
+*.cyp
 .grunt
 _SpecRunner.html
 __benchmarks__
