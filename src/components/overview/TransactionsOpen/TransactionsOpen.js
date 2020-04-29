@@ -17,11 +17,11 @@ class TransactionsOpen extends Component {
         displayProperty: 'open',
         options: [
             /* #operability: this JMX metric is a mixture of cumulative and instant data :( */
-            { text: 'Open', value: 'open' }, /* INSTANTANEOUS */
+            { text: 'Success:  Committed TXs', value: 'committedInstant' }, /* Augmentation function */
+            { text: 'Running: Open', value: 'open' }, /* INSTANTANEOUS */
             // { text: 'Committed', value: 'committed' }, /* CUMULATIVE */
             // { text: 'Rolled Back', value: 'rolledBack' }, /* CUMULATIVE */
-            { text: 'Committed', value: 'committedInstant' }, /* Augmentation function */
-            { text: 'Rolled Back', value: 'rolledBackInstant' }, /* Augmentation function */
+            { text: 'Failed: Rolled Back TXs', value: 'rolledBackInstant' }, /* Augmentation function */
             { text: 'Peak Concurrent', value: 'concurrent' },
         ],
     };
@@ -93,7 +93,7 @@ class TransactionsOpen extends Component {
             <HalinCard header='Transactions' knowledgebase='TransactionsOpen' owner={this}>
                 <Dropdown style={{paddingBottom: 10}}
                     placeholder='Show:'
-                    fluid defaultValue='open'
+                    fluid defaultValue='committedInstant'
                     onChange={this.onChange}
                     selection
                     options={this.state.options}
@@ -103,7 +103,6 @@ class TransactionsOpen extends Component {
                     query={this.state.query}
                     feedMaker={this.dataFeedMaker}
                     database={this.props.database}
-                    debug={true}
                     // onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />
