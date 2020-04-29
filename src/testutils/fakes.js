@@ -72,7 +72,7 @@ const FailingClusterMember = err => ({
 
 const DataFeed = (returnData = []) => {
     const events = new Ring(5);
-    const listeners = [];
+    const listeners = {'data':[], 'error':[]};
     let state = {
         data: returnData[0],
         time: new Date(),
@@ -83,7 +83,7 @@ const DataFeed = (returnData = []) => {
     const df = {
         events,
         feedStartTime: new Date(),
-        addListener: f => listeners.indexOf(f) === -1 ? listeners.push(f) : null,
+        on: (event, f) => listeners[event].indexOf(f) === -1 ? listeners[event].push(f) : null,
         addAugmentationFunction: f => f,
         currentState: sinon.fake.returns(state),
         min: sinon.fake.returns(13),
@@ -100,7 +100,7 @@ const DataFeed = (returnData = []) => {
                 events,
             };
             // Alert listeners
-            listeners.map(listener => listener(state, df));
+            listeners['data'].map(listener => listener(state, df));
         },
         addAliases: x => [x],
     };
