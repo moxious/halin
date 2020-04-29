@@ -19,8 +19,17 @@ describe('Metric', function() {
     });
 
     it('can register a listener', () => {
-        m.on('data', canaryFunction);
+        const result = m.on('data', canaryFunction);
         expect(m._subscribers['data'].indexOf(canaryFunction) > -1);
+        expect(result).toBe(canaryFunction);
+    });
+
+    it('does not register duplicate functions, which would cause duplicate callbacks', () => {
+        m.on('data', canaryFunction);
+        m.on('data', canaryFunction);
+        m.on('data', canaryFunction);
+
+        expect(m._subscribers['data'].length).toBe(1);
     });
 
     it('can de-register a listener', () => {

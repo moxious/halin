@@ -17,7 +17,10 @@ export default class Metric {
             this._subscribers[event] = [];
         }
 
-        this._subscribers[event].push(f);
+        if (this._subscribers[event].indexOf(f) === -1) {
+            this._subscribers[event].push(f);
+        }
+
         return f;
     }
 
