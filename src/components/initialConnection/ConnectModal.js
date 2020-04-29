@@ -1,5 +1,5 @@
-import React, { Component } from "react";
-import { Button, Form, Modal, Message, Checkbox } from "semantic-ui-react";
+import React, { Component } from 'react';
+import { Button, Form, Modal, Message, Checkbox } from 'semantic-ui-react';
 import _ from 'lodash';
 // import sentry from '../../api/sentry/index';
 import Splash from './Splash';
@@ -171,14 +171,14 @@ class ConnectForm extends Component {
     }
 }
 
-class ShimConnectModal extends Component {
+class ConnectModal extends Component {
     state = {
         showModal: true,
         initial: true
     };
-    closeModal = () => {
-        this.setState({ showModal: false });
-    };
+
+    closeModal = () => this.setState({ showModal: false });
+
     render() {
         return (
             <ConnectForm
@@ -190,4 +190,4 @@ class ShimConnectModal extends Component {
     }
 }
 
-export default ShimConnectModal;
+export default ConnectModal;
