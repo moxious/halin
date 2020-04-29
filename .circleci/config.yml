@@ -54,7 +54,7 @@ jobs:
           command: |
             ls -l src/components/
             # Take careful note of runInBand https://jestjs.io/docs/en/troubleshooting.html#tests-are-extremely-slow-on-docker-and-or-continuous-integration-ci-server
-            yarn test --runInBand
+            yarn test --runInBand --coverage --watchAll=false
       - run: 
           # This creates a runnable copy on S3 **per build**
           name: Deploy to S3 (BUILD)

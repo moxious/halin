@@ -53,7 +53,7 @@
     "start": "./node_modules/.bin/react-scripts start",
     "build": "./node_modules/.bin/react-scripts build",
     "gather": "./node_modules/.bin/babel-node --presets @babel/env,@babel/react --plugins @babel/plugin-proposal-class-properties src/scripts/gather.js",
-    "test": "./node_modules/.bin/react-scripts test --env=jsdom --coverage",
+    "test": "./node_modules/.bin/react-scripts test --env=jsdom --coverage --watchAll=false",
     "eject": "./node_modules/.bin/react-scripts eject",
     "postbuild": "rm -rf dist && mv build dist",
     "prepublishOnly": "npm run build",
