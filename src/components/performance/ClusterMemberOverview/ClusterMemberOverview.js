@@ -14,7 +14,7 @@ const ClusterMemberOverview = (props) => {
             <MemberOverviewCard member={props.member} />
             <SystemLoad member={props.member} />
             <MemoryMonitor member={props.member} />
-            <TransactionMonitor member={props.member} />
+            {/* <TransactionMonitor member={props.member} /> */}
             {/* <DiskUtilizationPieChart node={props.node} /> */}
         </Card.Group>
     );
