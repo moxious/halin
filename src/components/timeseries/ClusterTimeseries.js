@@ -120,9 +120,14 @@ class ClusterTimeseries extends Component {
     }
 
     UNSAFE_componentWillReceiveProps(props) {
+        if (props.database !== this.state.database) {
+            // Switching databases probably requires we adjust which feeds we're pulling from.
+            this.startDataFeeds();
+        }
+
         this.setState({ 
             displayProperty: props.displayProperty,
-
+            database: props.database,
             // Reset observed values to reset y axis
             minObservedValue: Infinity,
             maxObservedValue: -Infinity,
@@ -151,14 +156,22 @@ class ClusterTimeseries extends Component {
         return timewindow.displayTimeRange(_.get(_.get(this.state, this.nodes[0]), 'timeRange'));
     }
 
-    componentDidMount() {
-        this.mounted = true;
-
-        this.feeds = {};
-        this.streams = {};
-        this.onDataCallbacks = {};
-
+    startDataFeeds() {
         const halin = window.halinContext;
+        const chooseDatabaseLabel = () => {
+            if (this.props.database) {
+                return this.props.database.getLabel();
+            }
+
+            const defaultDatabase = halin.getDatabaseSet().getDefaultDatabase();
+
+            if (!defaultDatabase) {
+                sentry.warn('No default database detected in ClusterTimeseries');
+                return 'DEFAULT';
+            }
+
+            return defaultDatabase.getLabel();
+        };
 
         halin.members().forEach(node => {
             const addr = node.getBoltAddress();
@@ -179,6 +192,7 @@ class ClusterTimeseries extends Component {
                 }
                 feed = halin.getDataFeed({
                     node,
+                    database: chooseDatabaseLabel(),
                     query: this.props.query,
                     rate: this.props.rate,
                     windowWidth: this.props.timeWindowWidth,
@@ -189,11 +203,19 @@ class ClusterTimeseries extends Component {
                 feed.addAliases({ [this.state.displayProperty]: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
             }
 
+            if (this.feeds[addr]) {
+                // We're doing a property switch, and we're replacing a previous data feed.
+                // This requires that we unregister the previous hooks we had in place, so
+                // that the component doesn't get confused with double updates.
+                console.log('removing old data listener');
+                this.feeds[addr].removeListener('data', this.onDataCallbacks[addr]);
+            }
+
             this.feeds[addr] = feed;
 
             // Define a closure which makes the data callback specific to this node.
             this.onDataCallbacks[addr] = (newData, dataFeed) =>
-                this.onData(node, newData, dataFeed);
+                this.onData(node, chooseDatabaseLabel(), newData, dataFeed);
 
             // And attach that to the feed.
             this.feeds[addr].on('data', this.onDataCallbacks[addr]);
@@ -201,6 +223,16 @@ class ClusterTimeseries extends Component {
             const curState = this.feeds[addr].currentState();
             this.onDataCallbacks[addr](curState, this.feeds[addr]);
         });
+    }
+
+    componentDidMount() {
+        this.mounted = true;
+
+        this.feeds = {};
+        this.streams = {};
+        this.onDataCallbacks = {};
+
+        this.startDataFeeds();
 
         const noneDisabled = {};
         this.nodes.forEach(addr => {
@@ -217,7 +249,7 @@ class ClusterTimeseries extends Component {
         this.mounted = false;
     }
 
-    onData(clusterMember, newData, dataFeed) {
+    onData(clusterMember, database, newData, dataFeed) {
         const addr = clusterMember.getBoltAddress();
 
         if (!this.mounted) { return; }
@@ -230,7 +262,8 @@ class ClusterTimeseries extends Component {
         const computedMin = dataFeed.min(cols, this.props.debug) * 0.85;
         const computedMax = dataFeed.max(cols, this.props.debug) * 1.15;
 
-        if (this.debug) {
+        if (this.props.debug) {
+            // console.log('MEMBER',clusterMember,'DB',database,'DATA',_.get(newData,'data[0]'));
             sentry.debug('computedMin/Max',computedMin,computedMax,'from',this.state.displayProperty);
         }
 
