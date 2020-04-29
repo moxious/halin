@@ -7,6 +7,7 @@ import DiskUtilizationPieChart from '../DiskUtilizationPieChart/DiskUtilizationP
 import AdministerDatabase from '../AdministerDatabase/AdministerDatabase';
 import ApocMetaStats from '../ApocMetaStats/ApocMetaStats';
 import DatabaseOverview from '../DatabaseOverview/DatabaseOverview';
+import TransactionsOpen from '../../overview/TransactionsOpen/TransactionsOpen';
 
 const DatabasePane = (props) => {
     return (
@@ -14,6 +15,7 @@ const DatabasePane = (props) => {
             <DatabaseOverview {...props} />
             <AdministerDatabase {...props} />
             { window.halinContext.supportsAPOC() ? <ApocMetaStats {...props} /> : '' }
+            <TransactionsOpen {...props} />
             { 
                 // Due to JMX changes in 4.0, this component isn't workable >= 4.0.
                 window.halinContext.getVersion().major < 4 ? 
