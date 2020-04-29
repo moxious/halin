@@ -37,6 +37,7 @@ export default class DataFeed extends Metric {
     constructor(props) {
         super();
         this.node = props.node;
+        this.database = props.database || 'DEFAULT';
         this.query = props.query;
         this.params = props.params || {};
         this.rate = props.rate || 1000;
@@ -79,7 +80,7 @@ export default class DataFeed extends Metric {
         }
 
         const qtag = this.query.replace(/\s*[\r\n]+\s*/g, ' ');
-        this.name = `${this.node.getBoltAddress()}-${qtag}-${JSON.stringify(this.params)}-${JSON.stringify(this.displayColumns)}}`;
+        this.name = `${this.node.getBoltAddress()}-${qtag}-${this.database}-${JSON.stringify(this.displayColumns)}}`;
     }
 
     findLabel(query) {
@@ -118,7 +119,14 @@ export default class DataFeed extends Metric {
     }
 
     addAliases(aliases) {
-        if (this.aliases.indexOf(aliases) === -1) {
+        const nameAliasSet = objSet => 
+            _.sortBy(Object.keys(objSet)).join(',');
+
+        const thisName = nameAliasSet(aliases);
+        const existingNames = this.aliases.map(nameAliasSet);
+
+        if (existingNames.indexOf(thisName) === -1) {
+            console.log('novel aliases pushed');
             this.aliases.push(aliases);
         }
         return this.aliases;
@@ -334,7 +342,7 @@ export default class DataFeed extends Metric {
                 });
 
                 if (this.debug) {
-                    sentry.fine('event', data);
+                    sentry.fine('DB=',this.database,'event', data);
                 }
                 this.timeout = setTimeout(() => this.sampleData(), this.rate);
 
