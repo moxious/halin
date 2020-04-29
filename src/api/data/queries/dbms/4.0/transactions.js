@@ -40,7 +40,10 @@ export default new HalinQuery({
         -1 as lastCommittedId, /* 4.0 TODO Not yet supported by neo4j.metrics:name=neo4j.system.transaction.last_committed_tx_id */
         opened,
         concurrent,
-        committed
+        committed,
+        active_write,
+        active_read,
+        active
     `,
     parameters: {
         db: 'Name of the database',
