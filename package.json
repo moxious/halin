@@ -19,7 +19,7 @@
   "homepage": "http://halin.graphapp.io/",
   "private": false,
   "dependencies": {
-    "@sentry/browser": "^5.11.1",
+    "@sentry/browser": "^5.15.5",
     "autobind-decorator": "2.2.1",
     "bluebird": "^3.7.1",
     "generic-pool": "^3.6.1",
