@@ -89,16 +89,29 @@ class ClusterTimeseries extends Component {
     }
 
     /**
+     * @param {*} query the text of a cypher query
+     * @returns {HalinQuery} from the query library whose query matches
+     */
+    findMatchingHalinQuery(query=this.props.query) {
+        let queryObj = null;
+
+        Object.keys(queryLibrary).forEach(entry => {
+            if (!queryLibrary[entry].query || queryObj) { return; }
+
+            if (queryLibrary[entry].query === query) {
+                queryObj = queryLibrary[entry];
+            }
+        });
+
+        return queryObj;
+    }
+
+    /**
      * Check and see if query is a standard query.  If so, retrieve its columns.
      */
     findColumns(query=this.props.query) {
-        let columns = null;
-        Object.keys(queryLibrary).forEach(entry => {
-            if (!entry.query) { return; }
-            if (entry.query === query) {
-                columns = entry.columns;
-            }
-        });
+        const queryObj = this.findMatchingHalinQuery(query);
+        const columns = queryObj ? queryObj.columns : null;
 
         // If columns cannot be found, just use the display property.
         return columns ? columns : [
@@ -107,9 +120,14 @@ class ClusterTimeseries extends Component {
     }
 
     UNSAFE_componentWillReceiveProps(props) {
+        if (props.database !== this.state.database) {
+            // Switching databases probably requires we adjust which feeds we're pulling from.
+            this.startDataFeeds();
+        }
+
         this.setState({ 
             displayProperty: props.displayProperty,
-
+            database: props.database,
             // Reset observed values to reset y axis
             minObservedValue: Infinity,
             maxObservedValue: -Infinity,
@@ -138,14 +156,22 @@ class ClusterTimeseries extends Component {
         return timewindow.displayTimeRange(_.get(_.get(this.state, this.nodes[0]), 'timeRange'));
     }
 
-    componentDidMount() {
-        this.mounted = true;
-
-        this.feeds = {};
-        this.streams = {};
-        this.onDataCallbacks = {};
-
+    startDataFeeds() {
         const halin = window.halinContext;
+        const chooseDatabaseLabel = () => {
+            if (this.props.database) {
+                return this.props.database.getLabel();
+            }
+
+            const defaultDatabase = halin.getDatabaseSet().getDefaultDatabase();
+
+            if (!defaultDatabase) {
+                sentry.warn('No default database detected in ClusterTimeseries');
+                return 'DEFAULT';
+            }
+
+            return defaultDatabase.getLabel();
+        };
 
         halin.members().forEach(node => {
             const addr = node.getBoltAddress();
@@ -157,31 +183,56 @@ class ClusterTimeseries extends Component {
             // If the user specified a feed making function, use that one.
             // Otherwise construct the reasonable default.
             if (this.props.feedMaker) {
+                if (this.props.debug) { console.log('FEEDMAKER'); }
                 feed = this.props.feedMaker(node);
             } else {
+                const queryObj = this.findMatchingHalinQuery(this.props.query);
+                if (this.props.debug) { 
+                    console.log('Matching query', queryObj);
+                }
                 feed = halin.getDataFeed({
                     node,
+                    database: chooseDatabaseLabel(),
                     query: this.props.query,
                     rate: this.props.rate,
                     windowWidth: this.props.timeWindowWidth,
                     displayColumns: this.findColumns(),
+                    filter: queryObj ? queryObj.filter : null,
                 });
 
                 feed.addAliases({ [this.state.displayProperty]: ClusterTimeseries.keyFor(addr, this.state.displayProperty) });
+            }
+
+            if (this.feeds[addr]) {
+                // We're doing a property switch, and we're replacing a previous data feed.
+                // This requires that we unregister the previous hooks we had in place, so
+                // that the component doesn't get confused with double updates.
+                console.log('removing old data listener');
+                this.feeds[addr].removeListener('data', this.onDataCallbacks[addr]);
             }
 
             this.feeds[addr] = feed;
 
             // Define a closure which makes the data callback specific to this node.
             this.onDataCallbacks[addr] = (newData, dataFeed) =>
-                this.onData(node, newData, dataFeed);
+                this.onData(node, chooseDatabaseLabel(), newData, dataFeed);
 
             // And attach that to the feed.
-            this.feeds[addr].addListener(this.onDataCallbacks[addr]);
+            this.feeds[addr].on('data', this.onDataCallbacks[addr]);
 
             const curState = this.feeds[addr].currentState();
             this.onDataCallbacks[addr](curState, this.feeds[addr]);
         });
+    }
+
+    componentDidMount() {
+        this.mounted = true;
+
+        this.feeds = {};
+        this.streams = {};
+        this.onDataCallbacks = {};
+
+        this.startDataFeeds();
 
         const noneDisabled = {};
         this.nodes.forEach(addr => {
@@ -198,7 +249,7 @@ class ClusterTimeseries extends Component {
         this.mounted = false;
     }
 
-    onData(clusterMember, newData, dataFeed) {
+    onData(clusterMember, database, newData, dataFeed) {
         const addr = clusterMember.getBoltAddress();
 
         if (!this.mounted) { return; }
@@ -211,7 +262,8 @@ class ClusterTimeseries extends Component {
         const computedMin = dataFeed.min(cols, this.props.debug) * 0.85;
         const computedMax = dataFeed.max(cols, this.props.debug) * 1.15;
 
-        if (this.debug) {
+        if (this.props.debug) {
+            // console.log('MEMBER',clusterMember,'DB',database,'DATA',_.get(newData,'data[0]'));
             sentry.debug('computedMin/Max',computedMin,computedMax,'from',this.state.displayProperty);
         }
 
@@ -255,10 +307,10 @@ class ClusterTimeseries extends Component {
         // Each address has unique data state.
         const stateAddendum = {};
         stateAddendum[addr] = newState;
-        if (this.props.debug) {
-            sentry.debug('ClusterTimeseries state update', 
-                stateAddendum, 'min=', computedMin, 'max=',computedMax);
-        }
+        // if (this.props.debug) {
+        //     sentry.debug('ClusterTimeseries state update', 
+        //         stateAddendum, 'min=', computedMin, 'max=',computedMax);
+        // }
 
         this.setState(stateAddendum);
         if (this.onUpdate) {
@@ -373,7 +425,7 @@ class ClusterTimeseries extends Component {
         const style = styler(this.nodes.map((addr, idx) => ({
             key: ClusterTimeseries.keyFor(addr, this.state.displayProperty),
             color: this.chooseColor(idx),
-            width: 3,
+            width: this.props.chartType === 'scatter' ? 8 : 3,
         })));
 
         this.dataSeries = {};

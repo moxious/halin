@@ -8,6 +8,11 @@ import hoc from '../../higherOrderComponents';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 
+/**
+ * @deprecated this component is now deprecated by 4.0 changes.
+ * It is not specific to an individual database's transactions, but to a cluster
+ * member, which only made sense in the 3.5 series.
+ */
 class TransactionMonitor extends Component {
     state = {
         key: uuid.v4(),

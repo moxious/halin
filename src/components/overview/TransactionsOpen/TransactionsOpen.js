@@ -16,16 +16,36 @@ class TransactionsOpen extends Component {
         query: queryLibrary.find(window.halinContext, 'transactions').query,
         displayProperty: 'open',
         options: [
-            { text: 'Open', value: 'open' },
-            { text: 'Committed', value: 'committed' },
-            { text: 'Rolled Back', value: 'rolledBack' },
+            /* #operability: this JMX metric is a mixture of cumulative and instant data :( */
+            { text: 'Success:  Committed TXs', value: 'committedInstant' }, /* Augmentation function */
+            { text: 'Running: Open', value: 'open' }, /* INSTANTANEOUS */
+            // { text: 'Committed', value: 'committed' }, /* CUMULATIVE */
+            // { text: 'Rolled Back', value: 'rolledBack' }, /* CUMULATIVE */
+            { text: 'Failed: Rolled Back TXs', value: 'rolledBackInstant' }, /* Augmentation function */
             { text: 'Peak Concurrent', value: 'concurrent' },
         ],
     };
 
-    augmentData = (/* node */) => (/* data */) => {
+    /**
+     * We need to calculate the instant values of committed and rolled back TXs from the 
+     * cumulative numbers that the JMX feed actually gives us.   :/
+     */
+    augmentData = (/* node */) => (newPacket, dataFeed) => {
         // TBD -- we can use this to compute committed/sec if we want.
-        return {};
+        const oldState = _.get(dataFeed.currentState(), 'data[0]') || {};        
+
+        // On the first packet, if there is no old state, then we want the difference to be
+        // zero.  Otherwise this causes a huge spike as the first observation inherits the full
+        // cumulative committed load.
+        const oldCommitted = oldState.committed || newPacket.committed;
+        const oldRolledBack = oldState.rolledBack || newPacket.rolledBack;
+
+        const aug = { 
+            rolledBackInstant: (newPacket.rolledBack || 0) - oldRolledBack,
+            committedInstant: (newPacket.committed || 0) - oldCommitted,
+        };
+        // console.log('AUG', aug, 'FROM OLD', oldState, 'NEW', newPacket);
+        return aug;
     };
 
     dataFeedMaker = member => {
@@ -35,13 +55,16 @@ class TransactionsOpen extends Component {
         const allColumns = _.cloneDeep(queryLibrary.JMX_TRANSACTIONS.columns)
             .concat(_.cloneDeep(queryLibrary.JMX_TRANSACTIONS.legendOnlyColumns));
 
+        console.log('Making TX data feed for ', this.props.database.getLabel());
+
         const feed = halin.getDataFeed({
             node: member,
+            database: this.props.database.getLabel(),
             query: this.state.query,
             rate: this.state.rate,
             displayColumns: allColumns,
             params: {
-                db: halin.getDatabaseSet().getDefaultDatabase().name,
+                db: this.props.database.getLabel(),
             },
         });
 
@@ -50,6 +73,8 @@ class TransactionsOpen extends Component {
             committed: ClusterTimeseries.keyFor(addr, 'committed'),
             rolledBack: ClusterTimeseries.keyFor(addr, 'rolledBack'),
             concurrent: ClusterTimeseries.keyFor(addr, 'concurrent'),
+            rolledBackInstant: ClusterTimeseries.keyFor(addr, 'rolledBackInstant'),
+            committedInstant: ClusterTimeseries.keyFor(addr, 'committedInstant'),
         });
 
         feed.addAugmentationFunction(this.augmentData(member));
@@ -68,15 +93,16 @@ class TransactionsOpen extends Component {
             <HalinCard header='Transactions' knowledgebase='TransactionsOpen' owner={this}>
                 <Dropdown style={{paddingBottom: 10}}
                     placeholder='Show:'
-                    fluid defaultValue='open'
+                    fluid defaultValue='committedInstant'
                     onChange={this.onChange}
                     selection
                     options={this.state.options}
                 />
 
                 <ClusterTimeseries key={this.state.key}
-                    query={this.state.query} 
+                    query={this.state.query}
                     feedMaker={this.dataFeedMaker}
+                    database={this.props.database}
                     // onUpdate={this.onUpdate}
                     displayProperty={this.state.displayProperty}
                 />

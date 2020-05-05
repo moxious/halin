@@ -47,7 +47,7 @@ export default class HalinContext {
         };
         this.debug = false;
         this.mgr = new ClusterManager(this);
-        this.mgr.addListener(e => this.onClusterEvent(e));
+        this.mgr.on('data', e => this.onClusterEvent(e));
     }
 
     /**

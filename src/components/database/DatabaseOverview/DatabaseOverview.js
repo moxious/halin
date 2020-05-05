@@ -130,7 +130,7 @@ class DatabaseOverview extends Component {
                     }
                 </List>
 
-                <p>Last updated: {moment(this.props.database.created).format()}</p>
+                <p>Last updated: {moment(this.props.database.created).fromNow()}</p>
                 { leader ? 
                     '' : // <p>Leader ID: {leader.id}</p> : 
                     <p><strong>No leader detected</strong>; 

@@ -37,7 +37,7 @@ export default class OSStats extends Component {
 
         // Setup listener to do the same thing as new data arrives.
         const onDataListener = (newData /* , dataFeed */) => setMyStateFromDataFeed(newData);
-        this.feed.addListener(onDataListener);
+        this.feed.on('data', onDataListener);
     }
 
     componentWillUnmount() {

@@ -62,17 +62,4 @@ describe('ClusterManager', function () {
         expect(myThing.date).toBeTruthy();
         expect(myThing.id).toBeTruthy();
     });
-
-    it('can add a listener', () => {
-        const listener = foobar => console.log(foobar);
-        mgr.addListener(listener);
-        expect(mgr.listeners.indexOf(listener) > -1).toBeTruthy();
-    });
-
-    it('can remove a listener', () => {
-        const listener = foobar => console.log(foobar);
-        mgr.addListener(listener);
-        mgr.removeListener(listener);
-        expect(mgr.listeners.indexOf(listener) === -1).toBeTruthy();
-    });
 });

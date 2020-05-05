@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ShimConnectModal from './ShimConnectModal';
+import ConnectModal from './ConnectModal';
 import HalinContext from '../../api/HalinContext';
 
 export default class ConnectionDetailsProvider extends Component {
@@ -34,7 +34,7 @@ export default class ConnectionDetailsProvider extends Component {
         }
 
         return (
-            <ShimConnectModal
+            <ConnectModal
                 key='modal'
                 errorMsg=''
                 onSubmit={this.onSubmit}

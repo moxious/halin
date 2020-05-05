@@ -162,8 +162,8 @@ export default class ClusterMemberSet {
                 reject(err, dataFeed);
             };
 
-            memFeed.addListener(onMemData);
-            memFeed.onError = onError;
+            memFeed.on('data', onMemData);
+            memFeed.on('error', onError);
             return resolve(memFeed);
         });
     }
@@ -205,8 +205,8 @@ export default class ClusterMemberSet {
                 reject(err, dataFeed);
             };
 
-            pingFeed.addListener(onPingData);
-            pingFeed.onError = onError;
+            pingFeed.on('data', onPingData);
+            pingFeed.on('error', onError);
         });
     }
 

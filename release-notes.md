@@ -1,5 +1,13 @@
 # Halin Release Notes
 
+## 0.14.0 Transactions & GC
+
+- Revamped garbage collection to be a scatterplot of instantaneous GC
+- Moved Transactions view to the database pane, tailored per-database for 4.0 support.
+- Removed File Descriptor view, as less often requested/problematic.
+- Deprecated some components
+- Refactored the event API for core Metrics
+
 ## 0.13.1 Bugfix Release & COPY ROLE
 
 - A bug in the generation of privilege commands was fixed, which could give the wrong results

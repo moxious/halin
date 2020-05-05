@@ -72,7 +72,7 @@ const FailingClusterMember = err => ({
 
 const DataFeed = (returnData = []) => {
     const events = new Ring(5);
-    const listeners = [];
+    const listeners = {'data':[], 'error':[]};
     let state = {
         data: returnData[0],
         time: new Date(),
@@ -83,7 +83,7 @@ const DataFeed = (returnData = []) => {
     const df = {
         events,
         feedStartTime: new Date(),
-        addListener: f => listeners.indexOf(f) === -1 ? listeners.push(f) : null,
+        on: (event, f) => listeners[event].indexOf(f) === -1 ? listeners[event].push(f) : null,
         addAugmentationFunction: f => f,
         currentState: sinon.fake.returns(state),
         min: sinon.fake.returns(13),
@@ -100,7 +100,7 @@ const DataFeed = (returnData = []) => {
                 events,
             };
             // Alert listeners
-            listeners.map(listener => listener(state, df));
+            listeners['data'].map(listener => listener(state, df));
         },
         addAliases: x => [x],
     };
@@ -121,6 +121,20 @@ const ClusterManager = () => {
     };
 };
 
+const Database = (name, isDefault=false) => {
+    return {
+        isDefault: () => isDefault,
+        getLabel: () => name,
+    };
+}
+
+const DatabaseSet = () => {
+    return {
+        getDefaultDatabase: () => Database('neo4j', true),
+        databases: () => [Database('neo4j', true), Database('system', false)],
+    };
+};
+
 const HalinContext = (returnData = []) => {
     const mgr = ClusterManager();
     const clusterMembers = [
@@ -131,6 +145,7 @@ const HalinContext = (returnData = []) => {
     return {
         getDataFeed: sinon.fake.returns(DataFeed(returnData)),
         members: sinon.fake.returns(clusterMembers),
+        getDatabaseSet: sinon.fake.returns(DatabaseSet()),
         getClusterManager: sinon.fake.returns(mgr),
         isEnterprise: () => sinon.fake.returns(true),
         isCommunity: () => sinon.fake.returns(false),

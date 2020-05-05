@@ -37,9 +37,11 @@ export default class DataFeed extends Metric {
     constructor(props) {
         super();
         this.node = props.node;
+        this.database = props.database || 'DEFAULT';
         this.query = props.query;
         this.params = props.params || {};
         this.rate = props.rate || 1000;
+        this.index = 0;
         this.displayColumns = props.displayColumns || props.columns;
         
         // A list of aliases can be passed, allowing renaming of columns.
@@ -49,6 +51,11 @@ export default class DataFeed extends Metric {
             sentry.warn('Warning: use addAliases() rather than passing in DataFeed constructor',
                 this.aliases);
         }
+
+        /* A filter function can be passed on whether or not to report the new data point.  If
+         * none is specified, nothing gets filtered.
+         */
+        this.filter = props.filter;
 
         // An augmentation function can be passed to allow computing values that
         // aren't in the query, on the basis of some external function.
@@ -64,9 +71,8 @@ export default class DataFeed extends Metric {
             events: new Ring(Math.floor((this.windowWidth / this.rate) * 1.25)),
             time: new Date(),
             lastDataArrived: new Date(),
+            index: this.index++,
         };
-
-        this.listeners = props.onData ? [props.onData] : [];
 
         if (!this.node || !this.query || !this.displayColumns) {
             sentry.error(props);
@@ -74,7 +80,7 @@ export default class DataFeed extends Metric {
         }
 
         const qtag = this.query.replace(/\s*[\r\n]+\s*/g, ' ');
-        this.name = `${this.node.getBoltAddress()}-${qtag}-${JSON.stringify(this.displayColumns)}}`;
+        this.name = `${this.node.getBoltAddress()}-${qtag}-${this.database}-${JSON.stringify(this.displayColumns)}}`;
     }
 
     findLabel(query) {
@@ -113,27 +119,17 @@ export default class DataFeed extends Metric {
     }
 
     addAliases(aliases) {
-        if (this.aliases.indexOf(aliases) === -1) {
+        const nameAliasSet = objSet => 
+            _.sortBy(Object.keys(objSet)).join(',');
+
+        const thisName = nameAliasSet(aliases);
+        const existingNames = this.aliases.map(nameAliasSet);
+
+        if (existingNames.indexOf(thisName) === -1) {
+            console.log('novel aliases pushed');
             this.aliases.push(aliases);
         }
         return this.aliases;
-    }
-
-    addListener(listener) {
-        if (this.listeners.indexOf(listener) === -1) {
-            this.listeners.push(listener);
-        }
-
-        return this.listeners;
-    }
-
-    removeListener(listener) {
-        const idx = this.listeners.indexOf(listener);
-        if (idx > -1) {
-            this.listeners.splice(idx, 1);
-        }
-
-        return this.listeners;
     }
 
     /**
@@ -207,7 +203,6 @@ export default class DataFeed extends Metric {
             mode: math.mode(...timings),
             min: math.min(...timings),
             max: math.max(...timings),
-            listeners: this.listeners.length,
             augFns: this.augmentFns.length,
             aliases: this.aliases.length,
             timings,
@@ -251,6 +246,10 @@ export default class DataFeed extends Metric {
             .map(obs => maxObs(obs));
 
         return Math.max(...allMaxes);
+    }
+
+    hasError() {
+        return !_.isNil(this.state.error);
     }
 
     isFresh() {
@@ -319,7 +318,7 @@ export default class DataFeed extends Metric {
                 }
 
                 // Record elapsed time for every sample
-                let data = { _sampleTime: elapsedMs };
+                let data = { _sampleTime: elapsedMs, index: this.index++ };
 
                 // Plug query data values into data map, converting ints as necessary.
                 this.displayColumns.forEach(col => {
@@ -330,7 +329,7 @@ export default class DataFeed extends Metric {
                 // Progressively merge data from the augmentation functions, if
                 // present.
                 this.augmentFns.forEach(fn => {
-                    data = _.merge(data, fn(data));
+                    data = _.merge(data, fn(data, this));
                 });
 
                 // Apply aliases if specified.
@@ -343,9 +342,21 @@ export default class DataFeed extends Metric {
                 });
 
                 if (this.debug) {
-                    sentry.fine('event', data);
+                    sentry.fine('DB=',this.database,'event', data);
                 }
                 this.timeout = setTimeout(() => this.sampleData(), this.rate);
+
+                /* A filter function can inspect a new data packet and decide whether it's new or not.
+                 * If the filter function works and returns something falsy, the data isn't new.
+                 */
+                if (this.filter) {
+                    const isNovel = this.filter(data, _.get(this.state, 'data[0]'));
+                    if (!isNovel) {
+                        // console.log('Filtering out old data point OLD', _.get(this.state, 'data[0]'), 'NEW', data);
+                        // Shortcut out without updating our state or notifying listeners.
+                        return null;
+                    }
+                }
 
                 const t = new Date();
                 const event = new TimeEvent(t, data);
@@ -363,7 +374,7 @@ export default class DataFeed extends Metric {
                 this.state.error = undefined;
 
                 // Let our user know we have something new.
-                return this.listeners.map(listener => listener(this.state, this));
+                return this._notifyListeners('data', [this.state, this]);
             })
             .catch(err => {
                 // About this catch block, it's possible for halin to be stuck in a loop,
@@ -380,9 +391,7 @@ export default class DataFeed extends Metric {
                 this.state.lastDataArrived = this.feedStartTime;
                 this.state.error = err;
 
-                if (this.onError) {
-                    this.onError(err, this);
-                }
+                this._notifyListeners('error', [err, this]);
 
                 // Back off and schedule next call to be 2x the normal window.
                 this.timeout = setTimeout(() => this.sampleData(), this.rate * 2);

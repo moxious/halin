@@ -6,6 +6,11 @@ import uuid from 'uuid';
 import _ from 'lodash';
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 
+/**
+ * @deprecated - this will probably be the subject of a diagnostic check later,
+ * but this information isn't as useful anymore and will no longer be shown on the
+ * overview page.
+ */
 class OpenFileDescriptors extends Component {
     state = {
         key: uuid.v4(),

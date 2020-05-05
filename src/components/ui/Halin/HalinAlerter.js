@@ -46,11 +46,11 @@ export default class HalinAlerter extends Component {
     };
 
     componentWillMount() {
-        this.props.context.getClusterManager().addListener(this.state.listener);
+        this.props.context.getClusterManager().on('data', this.state.listener);
     }
 
     componentWillUnmount() {
-        this.props.context.getClusterManager().removeListener(this.state.listener);
+        this.props.context.getClusterManager().removeListener('data', this.state.listener);
     }
 
     update() {
