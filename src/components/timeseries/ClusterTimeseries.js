@@ -207,7 +207,7 @@ class ClusterTimeseries extends Component {
                 // We're doing a property switch, and we're replacing a previous data feed.
                 // This requires that we unregister the previous hooks we had in place, so
                 // that the component doesn't get confused with double updates.
-                console.log('removing old data listener');
+                // console.log('removing old data listener');
                 this.feeds[addr].removeListener('data', this.onDataCallbacks[addr]);
             }
 
