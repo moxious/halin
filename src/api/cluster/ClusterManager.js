@@ -488,6 +488,11 @@ export default class ClusterManager extends Metric {
     dropDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
+        const dataFeeds = this.ctx.getFeedsForDatabase(db.name);
+        dataFeeds.forEach(df => {
+            sentry.info(`Stopping data feed on ${db.name}`, this.ctx.removeDataFeed(df));
+        });
+
         return this.ctx.getSystemDBWriter().run(`DROP DATABASE \`${db.name}\``, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('drop results', results);
