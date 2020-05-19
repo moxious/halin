@@ -617,8 +617,13 @@ export default class ClusterMember {
             })
             // Cleanup session.
             .finally(p => {
-                return poolSession ? this.pool.release(s)
-                    .catch(e => sentry.fine('Pool release error', e)) : p;
+                if (poolSession) {
+                    this.pool.release(s).catch(e => sentry.fine('Pool release error', e));
+                } else {
+                    s.close();
+                }
+
+                return p;
             });
     }
 }
