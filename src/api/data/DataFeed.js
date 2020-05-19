@@ -126,7 +126,6 @@ export default class DataFeed extends Metric {
         const existingNames = this.aliases.map(nameAliasSet);
 
         if (existingNames.indexOf(thisName) === -1) {
-            console.log('novel aliases pushed');
             this.aliases.push(aliases);
         }
         return this.aliases;
