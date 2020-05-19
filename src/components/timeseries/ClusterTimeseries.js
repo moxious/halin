@@ -278,6 +278,12 @@ class ClusterTimeseries extends Component {
         );*/
 
         const futurePad = 1000; // ms into the future to show blank space on graph
+
+        if (!dataFeed.feedStartTime) {
+            sentry.fine('ClusterTimeseries:  feed is stopped');
+            return null;
+        }
+
         const fst = dataFeed.feedStartTime.getTime();
 
         let startTime, endTime;
