@@ -1,6 +1,5 @@
 import React, { Component, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
 import api from '../../../api';
 
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
@@ -78,7 +77,7 @@ const ApocMetaStats = (props) => {
            setStats(state);
        }
        getStats();
-    }, [_.get(props, 'database'), _.get(props, 'node')]);
+    }, [props.database, props.node]);
 
     if (state.reconciling) {
         return <div>
