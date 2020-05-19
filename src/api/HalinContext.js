@@ -116,8 +116,38 @@ export default class HalinContext {
         return this.mgr;
     }
 
+    /**
+     * Get a set of DataFeeds that apply to a given database
+     * @param {String} db database name
+     * @return {Array} of DataFeed objects.
+     */
+    getFeedsForDatabase(db) {
+        return _.values(this.dataFeeds).filter(df => df.database === db);
+    }
+
+    /**
+     * Get a set of DataFeeds that apply to a cluster member.
+     * @param {ClusterMember} clusterMember 
+     * @return {Array} of DataFeed objects.
+     */
     getFeedsFor(clusterMember) {
         return _.values(this.dataFeeds).filter(df => df.node === clusterMember);
+    }
+
+    /**
+     * Remove a DataFeed from the halin context.  This shuts the data feed down.
+     * @param {DataFeed} df 
+     * @returns true if the feed was in this halin context, false otherwise.
+     */
+    removeDataFeed(df) {
+        df.stop();
+        
+        if (this.dataFeeds[df.name]) {
+            delete this.dataFeeds[df.name];
+            return true;
+        }
+
+        return false;
     }
 
     getDataFeed(feedOptions) {

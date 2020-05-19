@@ -454,6 +454,12 @@ export default class ClusterManager extends Metric {
     stopDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
 
+        const feeds = this.ctx.getFeedsForDatabase(db.name);
+        feeds.forEach(df => {
+            sentry.fine(`Stopping data feed for ${db.name}`);
+            df.stop();
+        });
+
         return this.ctx.getSystemDBWriter().run(`STOP DATABASE \`${db.name}\``, {}, neo4j.SYSTEM_DB)
             .then(results => {
                 sentry.info('stop results', results);
@@ -482,11 +488,26 @@ export default class ClusterManager extends Metric {
                 alert: true,
                 message: `Started database ${db.name}`,
                 payload: db,
-            }));
+            }))
+            .then(() => {
+                // If any data feeds existed for this DB, restart them.  This can occur
+                // when user has feeds, stops database, and then restarts them.  The feed
+                // is still valid, but is paused while the DB is inactive.
+                const feeds = this.ctx.getFeedsForDatabase(db.name);
+                feeds.forEach(df => {
+                    sentry.fine(`Starting data feed for ${db.name}`);
+                    df.start();
+                });                
+            })
     }
 
     dropDatabase(db) {
         if (!db || !db.name) { throw new Error('Invalid or missing database'); }
+
+        const dataFeeds = this.ctx.getFeedsForDatabase(db.name);
+        dataFeeds.forEach(df => {
+            sentry.info(`Stopping data feed on ${db.name}`, this.ctx.removeDataFeed(df));
+        });
 
         return this.ctx.getSystemDBWriter().run(`DROP DATABASE \`${db.name}\``, {}, neo4j.SYSTEM_DB)
             .then(results => {

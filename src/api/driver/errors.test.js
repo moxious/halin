@@ -33,5 +33,17 @@ describe('Neo4j Driver Error Detection', function () {
             expect(fn(sampleError)).toBe(true);
             expect(fn(bogusError)).toBe(false);
         });
+
+        if (key.indexOf('apoc') < 0) {
+            it(`Knows that error ${key} is a Neo4j Error`, () => {
+                const sampleError = new Error(errTypes[key]);
+                expect(errors.isNeo4jError(sampleError)).toBe(true);
+            });
+        } else {
+            it(`Knows that ${key} is an APOC error`, () => {
+                const sampleError = new Error(errTypes[key]);
+                expect(errors.isAPOCError(sampleError)).toBe(true);
+            });
+        }
     });
 });

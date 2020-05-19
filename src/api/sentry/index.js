@@ -6,6 +6,7 @@
 import * as Sentry from '@sentry/browser';
 import appPkg from '../../package.json';
 import _ from 'lodash';
+import errors from '../driver/errors';
 
 let initialized = false;
 let enabled = true;
@@ -34,6 +35,8 @@ const shouldSentryCapture = err => {
     const href = _.get(window, 'location.href');
     if (href && href.indexOf('localhost') > -1) {
         return false;
+    } else if(errors.isNeo4jError(err)) {
+        return false;
     }
     
     return true;
@@ -60,9 +63,11 @@ const reportError = (err, message=null) => {
         Sentry.captureException(err);
         if (message) {
             console.error(message, err);
-        }    
+        } 
+        return err;
     }
 
+    console.log('Sentry skipped reporting error');
     return err;
 };
 

@@ -1,5 +1,11 @@
 # Halin Release Notes
 
+## 0.14.1 Bugfix Release
+
+- Better error handling for common Neo4j errors
+- DB-specific data feeds get stopped & started along with the underlying database stop/restart.
+- Fixed some data feed errors caused by underlying race conditions in data return
+
 ## 0.14.0 Transactions & GC
 
 - Revamped garbage collection to be a scatterplot of instantaneous GC
