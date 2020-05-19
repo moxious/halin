@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
+import React, { Component, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-
+import _ from 'lodash';
 import api from '../../../api';
 
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
@@ -16,7 +16,6 @@ import './ApocMetaStats.css';
  */
 const gatherStats = (node, database) => {
     if (!node || !database) { return null; }
-
     if (database.isReconciling()) {
         // Database has multiple statuses, and it's not safe to do this operation at this moment.
         return Promise.resolve({ reconciling: true });
@@ -61,60 +60,59 @@ const gatherStats = (node, database) => {
         });
 };
 
-class ApocMetaStats extends Component {
-    state = {
-        relCount: 0,
-        nodeCount: 0,
-        labelCount: 0,
-        propertyKeyCount: 0,
-        labels: {},
-        relTypes: {},
-        message: null,
-    };
+const defaultState = {
+    relCount: 0,
+    nodeCount: 0,
+    labelCount: 0,
+    propertyKeyCount: 0,
+    labels: {},
+    relTypes: {},
+    message: null,
+};
 
-    UNSAFE_componentWillReceiveProps(props) {
-        return gatherStats(props.node, props.database)
-            .then(state => this.setState(state));
+const ApocMetaStats = (props) => {
+    const [state, setStats] = useState(defaultState);
+    useEffect(() => {
+       async function getStats() {
+           const state = await gatherStats(props.node, props.database);
+           setStats(state);
+       }
+       getStats();
+    }, [_.get(props, 'database'), _.get(props, 'node')]);
+
+    if (state.reconciling) {
+        return <div>
+            Database is reconciling; please wait until it is fully online for stats to appear.
+            </div>;
     }
 
-    componentDidMount() {
-        return gatherStats(this.props.node, this.props.database)
-            .then(state => this.setState(state));
-    }
+    if (state.error) { return <div>{state.error}</div>; }
+    if (state.message) { return <div>{state.message}</div>; }
 
-    render() {
-        if (this.state.reconciling) {
-            return `Database is reconciling; please wait until it is fully online for stats to appear.`;
-        }
+    return (
+        <div>
+            <p>{state.nodeCount} nodes, {state.relCount} relationships, and
+            &nbsp;{state.propertyKeyCount} properties.</p>
 
-        if (this.state.error) { return `${this.state.error}`; }
-        if (this.state.message) { return <p>{this.state.message}</p>; }
+            <h4>Labels</h4>
+            <List id='label_list'>
+                {
+                    Object.keys(state.labels).length === 0 ? 'None' :
+                        Object.keys(state.labels).map((label, i) =>
+                            <List.Item key={i}>{label}: {api.driver.handleNeo4jInt(state.labels[label])} nodes</List.Item>)
+                }
+            </List>
 
-        return (
-            <div>
-                <p>{this.state.nodeCount} nodes, {this.state.relCount} relationships, and
-                &nbsp;{this.state.propertyKeyCount} properties.</p>
-
-                <h4>Labels</h4>
-                <List id='label_list'>
-                    {
-                        Object.keys(this.state.labels).length === 0 ? 'None' :
-                            Object.keys(this.state.labels).map((label, i) =>
-                                <List.Item key={i}>{label}: {api.driver.handleNeo4jInt(this.state.labels[label])} nodes</List.Item>)
-                    }
-                </List>
-
-                <h4>Relationships</h4>
-                <List id='rel_list'>
-                    {
-                        Object.keys(this.state.relTypes).length === 0 ? 'None' :
-                            Object.keys(this.state.relTypes).map((rt, i) =>
-                                <List.Item key={i}>{rt}: {api.driver.handleNeo4jInt(this.state.relTypes[rt])}</List.Item>)
-                    }
-                </List>
-            </div>
-        );
-    }
+            <h4>Relationships</h4>
+            <List id='rel_list'>
+                {
+                    Object.keys(state.relTypes).length === 0 ? 'None' :
+                        Object.keys(state.relTypes).map((rt, i) =>
+                            <List.Item key={i}>{rt}: {api.driver.handleNeo4jInt(state.relTypes[rt])}</List.Item>)
+                }
+            </List>
+        </div>
+    );
 }
 
 const Stats = hoc.apocOnlyComponent(ApocMetaStats);
