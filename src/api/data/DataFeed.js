@@ -298,6 +298,37 @@ export default class DataFeed extends Metric {
         const startTime = new Date().getTime();
         this.sampleStart = new Date();
 
+        const scheduleNextPoll = ms => {
+            this.timeout = setTimeout(() => this.sampleData(), ms);
+        };
+
+        const pollFailed = err => {
+            // About this catch block, it's possible for halin to be stuck in a loop,
+            // continuously getting the same error as we poll.  This is common if the DB
+            // got unplugged, crashed, or if it has some internal config error.  So we'll
+            // report certian errors the first time we see them, and not spam every time 
+            // as we poll.
+            if (err) {
+                if (`${this.state.error}` !== `${err}`) {
+                    sentry.reportError(err, 'Failed to execute timeseries query (first time)');
+                } else {
+                    sentry.fine(`Duplicate polled error in timeseries ${err}`);
+                }
+                
+                this.state.lastDataArrived = this.feedStartTime;
+                this.state.error = err;
+
+                this._notifyListeners('error', [err, this]);
+            }
+
+            // Back off and schedule next call to be 2x the normal window.
+            scheduleNextPoll(this.rate * 2);
+        };
+
+        if (!this.node.isOnline()) {
+            return Promise.resolve(pollFailed(null));
+        }
+
         return this.node.run(this.query, this.params)
             .then(results => {
                 const elapsedMs = new Date().getTime() - startTime;
@@ -343,7 +374,8 @@ export default class DataFeed extends Metric {
                 if (this.debug) {
                     sentry.fine('DB=',this.database,'event', data);
                 }
-                this.timeout = setTimeout(() => this.sampleData(), this.rate);
+
+                scheduleNextPoll(this.rate);
 
                 /* A filter function can inspect a new data packet and decide whether it's new or not.
                  * If the filter function works and returns something falsy, the data isn't new.
@@ -375,25 +407,6 @@ export default class DataFeed extends Metric {
                 // Let our user know we have something new.
                 return this._notifyListeners('data', [this.state, this]);
             })
-            .catch(err => {
-                // About this catch block, it's possible for halin to be stuck in a loop,
-                // continuously getting the same error as we poll.  This is common if the DB
-                // got unplugged, crashed, or if it has some internal config error.  So we'll
-                // report certian errors the first time we see them, and not spam every time 
-                // as we poll.
-                if (`${this.state.error}` !== `${err}`) {
-                    sentry.reportError(err, 'Failed to execute timeseries query (first time)');
-                } else {
-                    sentry.fine(`Duplicate polled error in timeseries ${err}`);
-                }
-                
-                this.state.lastDataArrived = this.feedStartTime;
-                this.state.error = err;
-
-                this._notifyListeners('error', [err, this]);
-
-                // Back off and schedule next call to be 2x the normal window.
-                this.timeout = setTimeout(() => this.sampleData(), this.rate * 2);
-            });
+            .catch(pollFailed);
     }
 }
