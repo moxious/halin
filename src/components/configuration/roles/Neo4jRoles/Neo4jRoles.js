@@ -28,14 +28,8 @@ const copyRoleButton = (input) =>
 
 class Neo4jRoles extends Component {
     query = 'call dbms.security.listRoles()';
-    static undeleteableRoles = [
-        'admin', 'reader', 'architect', 'publisher', 'editor', 
-        // Introduced in 4.1
-        'PUBLIC', 
-    ];
-
     static canDelete(role) {
-        return Neo4jRoles.undeleteableRoles.indexOf(role) === -1;
+        return halin.driver.systemRoles.indexOf(role) === -1;
     }
 
     displayColumns = [

@@ -15,8 +15,8 @@ const negativeButtonProps = row => ({
     compact: true,
     negative: true,
     size: 'tiny',
-    // Do not permit revoking/denying privileges to admin.
-    disabled: row.role === 'admin',
+    // Do not permit revoking/denying privileges to built-in system roles.
+    disabled: api.driver.systemRoles.indexOf(row.role) > -1,
 });
 
 const positiveButtonProps = row => _.merge(_.cloneDeep(negativeButtonProps(row)), { negative: null, positive: true });
