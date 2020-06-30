@@ -40,7 +40,7 @@ export default class Halin extends Component {
         .catch(err => {
           sentry.reportError(err, 'Error initializing halin context');
           this.setState({ error: err });
-          return window.halinContext;
+          return null;
         })
         .then(ctx => {
           this.setState({ halin: ctx });

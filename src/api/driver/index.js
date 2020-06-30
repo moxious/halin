@@ -147,5 +147,6 @@ neo4j.isNeo4jInt = isNeo4jInt;
 neo4j.handleNeo4jInt = handleNeo4jInt;
 neo4j.getSessionPool = getSessionPool;
 neo4j.SYSTEM_DB = 'system';
+neo4j.systemRoles = ['admin', 'reader', 'architect', 'publisher', 'editor', 'PUBLIC'];
 
 export default neo4j;

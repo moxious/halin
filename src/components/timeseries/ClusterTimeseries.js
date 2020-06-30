@@ -439,13 +439,16 @@ class ClusterTimeseries extends Component {
         // We have data if none of the data fields in our state are missing.
         const hasData = this.nodes
             .map(addr => _.get(this.state[addr], 'data'))
-            .reduce((accumulator, curVal) => accumulator && curVal, true);
+            .reduce((accumulator, curVal) => accumulator || curVal, true);
 
         if (hasData) {
             this.nodes.forEach(addr => {
+                // Not all events will be defined as members go offline
+                const events = _.get(this.state[addr], 'events');
+
                 this.dataSeries[addr] = new TimeSeries({
                     name: 'Data Series',
-                    events: this.state[addr].events.toArray()
+                    events: events ? events.toArray() : [],
                 });
             });
         }

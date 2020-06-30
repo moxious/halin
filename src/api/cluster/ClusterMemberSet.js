@@ -74,7 +74,13 @@ export default class ClusterMemberSet {
                 }
             })
             .then(() => this.scheduleRefresh(halin))
-            .finally(() => session.close());
+            .finally(() => {
+                session.close();
+
+                if (this.members().length === 0) {
+                    throw new Error('Failed to connect to any valid cluster members');
+                }
+            });
     }
 
     scheduleRefresh(halin) {
@@ -153,11 +159,13 @@ export default class ClusterMemberSet {
 
         return new Promise((resolve, reject) => {
             const onMemData = (newData /* , dataFeed */) => {
+                clusterMember.markOnline();
                 const data = _.get(newData, 'data[0]');
                 return this.updateStats(halin, addr, data);
             };
 
             const onError = (err, dataFeed) => {
+                clusterMember.markOffline();
                 sentry.fine('ClusterMemberSet: failed to get mem data', addr, err);
                 reject(err, dataFeed);
             };
@@ -192,6 +200,7 @@ export default class ClusterMemberSet {
         // comes back with a result.
         return new Promise((resolve, reject) => {
             const onPingData = (newData /* , dataFeed */) => {
+                clusterMember.markOnline();
                 return resolve({
                     clusterMember: clusterMember,
                     elapsedMs: _.get(newData, 'data[0]_sampleTime'),
@@ -202,6 +211,7 @@ export default class ClusterMemberSet {
 
             const onError = (err, dataFeed) => {
                 sentry.fine('ClusterMemberSet: failed to ping', addr, err);
+                clusterMember.markOffline();
                 reject(err, dataFeed);
             };
 
@@ -273,7 +283,8 @@ export default class ClusterMemberSet {
                 this.ping(halin, member),
                 this.getMemoryFeed(halin, member),
             ])
-                .then(() => member.checkComponents());
+                .then(() => member.checkComponents())
+                .catch(err => console.error('Failed to initialize entering member', err));
 
             promises.push(setup);
             
@@ -282,7 +293,7 @@ export default class ClusterMemberSet {
                 type: 'enter',
                 address: member.getBoltAddress(),
                 payload: payload(member),
-            })
+            });
 
             this.clusterMembers.push(member);
         });

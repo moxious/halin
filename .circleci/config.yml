@@ -145,9 +145,9 @@ jobs:
             docker logs neo4j355 > /tmp/artifacts/neo4j350.log
             docker stop neo4j355
       - run:
-          name: Test Against Neo4j 4.0.0 Enterprise
+          name: Test Against Neo4j 4.1.0 Enterprise
           command: |
-            docker run -d --name neo4j400 --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin --env=NEO4J_ACCEPT_LICENSE_AGREEMENT=yes -t neo4j:4.0.0-enterprise
+            docker run -d --name neo4j410 --rm -p 127.0.0.1:7474:7474 -p 127.0.0.1:7687:7687 --env NEO4J_AUTH=neo4j/admin --env=NEO4J_ACCEPT_LICENSE_AGREEMENT=yes -t neo4j:4.0.0-enterprise
             sleep 20
             docker ps
 
@@ -156,13 +156,13 @@ jobs:
             export NEO4J_PASSWORD=admin
 
             # Run gather against the temp docker image started.
-            docker run --network container:neo4j400 \
+            docker run --network container:neo4j410 \
               --env NEO4J_URI=bolt://localhost:7687 \
               --env NEO4J_USERNAME=neo4j \
               --env NEO4J_PASSWORD=admin \
-              mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-4.0.0.txt
-            docker logs neo4j400 > /tmp/artifacts/neo4j400.log
-            docker stop neo4j400
+              mdavidallen/halin:latest npm run gather > /tmp/artifacts/halin-4.1.0.txt
+            docker logs neo4j410 > /tmp/artifacts/neo4j410.log
+            docker stop neo4j410
       - run:
           name: Test Against Neo4j 3.5.0 Community
           command: |

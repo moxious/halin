@@ -487,6 +487,10 @@ export default class ClusterMember {
         //     ...
         // }
 
+        if (!this.isOnline()) {
+            return Promise.reject('Skipping component check on offline cluster member');
+        }
+
         return featureProbes.runAllProbes(this)
             .then(dbms => {
                 this.pluggedIn = true;
@@ -510,6 +514,8 @@ export default class ClusterMember {
             });    
     }
 
+    markOffline() { this.pluggedIn = false; }
+    markOnline() { this.pluggedIn = true; }
     isOnline() { return this.pluggedIn; }
 
     /**

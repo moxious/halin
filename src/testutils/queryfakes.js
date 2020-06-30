@@ -35,6 +35,19 @@ const queries = {
     'CALL dbms.listConfig.*dbms.security.auth_provider.*': [
         { value: ['native'] },
     ],
+    'java.lang:type=Memory': [
+        { 
+            heapInit: 0,
+            heapCommitted: 0,
+            heapUsed: 0,
+            heapMax: 0,
+            nonHeapInit: 0,
+            nonHeapCommitted: 0,
+            nonHeapUsed: 0,
+            nonHeapMax: 0,
+            totalMem: 0,
+        },
+    ],
     'WHERE name=\'dbms.memory.heap.max_size\'': [
         { value: '1G' },
     ],

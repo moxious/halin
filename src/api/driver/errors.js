@@ -16,6 +16,7 @@ const fileNotFound = matches('java.io.FileNotFoundException');
 const connectionRefused = matches('ERR_CONNECTION_REFUSED');
 const apocFileImportNotEnabled = matches('apoc.import.file.enabled');
 const notUpToRequestedVersion = matches('database not up to requested version');
+const ldapExpired = matches('LDAP authorization info expired');
 
 const isNeo4jError = err =>
     failedToEstablishConnection(err) || browserSecurityConstraints(err) ||
@@ -23,7 +24,7 @@ const isNeo4jError = err =>
     unauthorized(err) || bookmarks(err) ||
     noActiveDatabase(err) || insecureWSFromHTTPS(err) ||
     repeatedAuthFailure(err) || fileNotFound(err) ||
-    connectionRefused(err) || notUpToRequestedVersion(err);
+    connectionRefused(err) || notUpToRequestedVersion(err) || ldapExpired(err);
 
 const isAPOCError = err => apocFileImportNotEnabled(err);
     
@@ -45,4 +46,5 @@ export default {
     connectionRefused,
     apocFileImportNotEnabled,
     notUpToRequestedVersion,
+    ldapExpired,
 };

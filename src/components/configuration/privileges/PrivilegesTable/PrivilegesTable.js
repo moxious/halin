@@ -15,8 +15,8 @@ const negativeButtonProps = row => ({
     compact: true,
     negative: true,
     size: 'tiny',
-    // Do not permit revoking/denying privileges to admin.
-    disabled: row.role === 'admin',
+    // Do not permit revoking/denying privileges to built-in system roles.
+    disabled: api.driver.systemRoles.indexOf(row.role) > -1,
 });
 
 const positiveButtonProps = row => _.merge(_.cloneDeep(negativeButtonProps(row)), { negative: null, positive: true });
@@ -33,6 +33,8 @@ const makeDisplayColumns = () => {
             // permission XYZ, then there will be a revoke/deny button right next to it
             // If the permission shows a deny, then there will be a grant next to it,
             // so that privileges can be easily reversed.
+            // #operability: privilege commands don't return anything, so you can 
+            // revoke access database NONEXIST FROM NONEXISTROLE and it will "work".
             Cell: ({ row }) => {
                 const deny = PrivilegeOperation.fromSystemPrivilege('DENY', row);
                 const revoke = PrivilegeOperation.fromSystemPrivilege('REVOKE', row);
