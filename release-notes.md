@@ -1,5 +1,14 @@
 # Halin Release Notes
 
+## 0.14.2 Bugfix Release
+
+- Halin can now connect to and monitor clusters with (partially) broken routing tables, which
+can occur when a member is falling offline, or when one member (i.e. a RR) has an invalid 
+advertised address.
+- Built-in system roles (expanded to include PUBLIC in Neo4j 4.1) cannot be removed, and
+their privileges cannot be revoked.
+- Test infrastructure now tests against Neo4j Enterprise 4.1.0
+
 ## 0.14.1 Bugfix Release
 
 - Better error handling for common Neo4j errors
