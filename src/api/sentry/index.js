@@ -44,9 +44,9 @@ const shouldSentryCapture = err => {
 
 const context = ctx => {
     const eventMetadata = {
-        neo4j: ctx.getVersion(),
-        clustered: ctx.isCluster(),
-        base: ctx.getBaseURI(),
+        neo4j: ctx ? ctx.getVersion() : null,
+        clustered: ctx ? ctx.isCluster() : null,
+        base: ctx ? ctx.getBaseURI() : null,
     };
 
     // https://docs.sentry.io/platforms/javascript/#extra-context
