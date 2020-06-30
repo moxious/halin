@@ -30,6 +30,10 @@ export default class Troubleshooting extends PureComponent {
             suggestions: kb.RepeatedAuthFailure,
         },
         {
+            detector: err => `${err}`.match(/Failed to connect to any valid cluster members/),
+            suggestions: kb.BrokenRoutingTable,
+        },
+        {
             detector: err => `${err}`.match(/./),
             suggestions: kb.UnknownError,
         },
