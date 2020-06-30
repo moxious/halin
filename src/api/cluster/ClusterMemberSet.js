@@ -74,7 +74,13 @@ export default class ClusterMemberSet {
                 }
             })
             .then(() => this.scheduleRefresh(halin))
-            .finally(() => session.close());
+            .finally(() => {
+                session.close();
+
+                if (this.members().length === 0) {
+                    throw new Error('Failed to connect to any valid cluster members');
+                }
+            });
     }
 
     scheduleRefresh(halin) {
