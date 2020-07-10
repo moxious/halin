@@ -243,6 +243,16 @@ const usesFabric = member => {
         })
 };
 
+const getAvailableJMXEntries = member => {
+    const prom = member.run(queryLibrary.JMX_ALL.query, {})
+        .then(results => results.records.map(r => r.get('name')))
+        .catch(err => {
+            sentry.reportError('Failed to list JMX entries', err);
+            return [];
+        });
+    return prom;
+};
+
 /**
  * @returns Array of { name, lastUpdated } metrics supported by the server.
  */
@@ -298,6 +308,11 @@ const runAllProbes = member => {
             .then(result => { dbms.logStreaming = result; }),
         () => getAvailableMetrics(member)
             .then(metrics => { member.metrics = metrics; }),
+        () => getAvailableJMXEntries(member)
+            .then(jmxEntries => { 
+                dbms.jmxEntries = jmxEntries.sort();
+                console.log('JMX entries', dbms); 
+            }),
         () => hasDBStats(member)
             .then(result => { dbms.hasDBStats = result }),
         () => hasMultiDatabase(member)
