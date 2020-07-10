@@ -380,11 +380,19 @@ export default class ClusterMember {
 
         const v = this.dbms.versions[0] || '';
         const parts = v.split('.');
-        return {
+        const ver = {
             major: parts[0] || 'unknown',
             minor: parts[1] || 'unknown',
             patch: parts[2] || 'unknown',
         };
+
+        const extra = ver.patch.split('-');
+        if (extra.length > 1) {
+            ver.patch = extra[0];
+            ver.extra = extra[1];
+        }
+
+        return ver;
     }
 
     getMaxPhysicalMemory() {
