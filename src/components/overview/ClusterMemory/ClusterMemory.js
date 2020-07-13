@@ -3,6 +3,8 @@ import ClusterTimeseries from '../../timeseries/ClusterTimeseries';
 import uuid from 'uuid';
 import queryLibrary from '../../../api/data/queries/query-library';
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
+import util from '../../../api/data/util';
+import _ from 'lodash';
 
 class ClusterMemory extends Component {
     state = {
@@ -12,8 +14,12 @@ class ClusterMemory extends Component {
     };
 
     render() {
+        const stats = window.halinContext.getMemberSet().getStats() || {};
+        const writerStats = stats[window.halinContext.getWriteMember().getBoltAddress()];
+        const heapCommitted = _.get(writerStats, 'heapCommitted');
+
         const header = 'Heap Size (' + 
-            (window.halinContext.getWriteMember().dbms.maxHeap || 'unknown') + ' max)';
+            (heapCommitted ? util.humanDataSize(heapCommitted) : 'unknown') + ' committed)';
 
         return (
             <HalinCard header={header} knowledgebase='ClusterMemory' owner={this}>
