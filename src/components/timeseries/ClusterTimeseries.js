@@ -252,7 +252,6 @@ class ClusterTimeseries extends Component {
     }
 
     onError(err, dataFeed) {
-        console.log('received error on underlying feed', dataFeed);
         const feeds = Object.values(this.feeds);
 
         // The timeseries is only in an error state if *all feeds* have errored.
