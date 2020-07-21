@@ -326,6 +326,11 @@ export default {
         too many times`,
         links.authMaxFailedAttempts,
     ]),
+    HalinNotSupported: render([
+        `This error means that the underlying version of Neo4j does not provide facilities 
+        necessary for Halin to function properly.  Please raise an issue with your Neo4j support,
+        or open an issue at the Halin github repository.`,
+    ]),
     UnknownError: render([
         `Unfortunately, no troubleshooting is available for this particular error. 
         Consider checking the Neo4j community site for more information.`

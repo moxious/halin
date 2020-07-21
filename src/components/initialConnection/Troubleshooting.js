@@ -34,6 +34,10 @@ export default class Troubleshooting extends PureComponent {
             suggestions: kb.BrokenRoutingTable,
         },
         {
+            detector: err => `${err}`.match(/Halin does not support/),
+            suggestions: kb.HalinNotSupported,
+        },
+        {
             detector: err => `${err}`.match(/./),
             suggestions: kb.UnknownError,
         },
