@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { Grid, Label } from 'semantic-ui-react';
+import { Grid, Label, Message } from 'semantic-ui-react';
 import {
     TimeSeries,
     TimeRange,
@@ -32,6 +32,7 @@ class ClusterTimeseries extends Component {
         startTime: new Date(),
         query: null,
         data: null,
+        error: null,
         events: null,
         time: new Date(),
         lastDataArrived: new Date(),
@@ -219,6 +220,7 @@ class ClusterTimeseries extends Component {
 
             // And attach that to the feed.
             this.feeds[addr].on('data', this.onDataCallbacks[addr]);
+            this.feeds[addr].on('error', (err, dataFeed) => this.onError(err, dataFeed));
 
             const curState = this.feeds[addr].currentState();
             this.onDataCallbacks[addr](curState, this.feeds[addr]);
@@ -247,6 +249,20 @@ class ClusterTimeseries extends Component {
 
     componentWillUnmount() {
         this.mounted = false;
+    }
+
+    onError(err, dataFeed) {
+        const feeds = Object.values(this.feeds);
+
+        // The timeseries is only in an error state if *all feeds* have errored.
+        // If only one has, the machine could be restarting or just under load.
+        const error = feeds.map(f => _.get(f.currentState(), 'error'))
+            .reduce((a, b) => a && b, true);
+
+        if (error) {
+            this.setState({ error });
+            console.fine('All feeds are in an error state');
+        }
     }
 
     onData(clusterMember, database, newData, dataFeed) {
@@ -308,6 +324,7 @@ class ClusterTimeseries extends Component {
             maxObservedValue,
             minObservedValue,
             timeRange,
+            error: null,
         };
 
         // Each address has unique data state.
@@ -455,6 +472,11 @@ class ClusterTimeseries extends Component {
 
         if (!this.mounted || !hasData) {
             return <Spinner active={true} />;
+        } else if(this.state.error) {
+            return <Message negative>
+                <Message.Header>Error Retrieving Data</Message.Header>
+                <p>Data feeds are in an error state, and no data can be shown.</p>
+            </Message>;
         }
 
         // For both the yAxis and the container, define some defaults, permitting overrides to be

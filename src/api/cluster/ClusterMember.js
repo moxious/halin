@@ -378,13 +378,20 @@ export default class ClusterMember {
             sentry.warn("This ClusterMember has more than one version installed; only using the first");
         }
 
-        const v = this.dbms.versions[0] || '';
+        const [v, extra] = (this.dbms.versions[0] || '').split('-');
+
         const parts = v.split('.');
-        return {
+        const ver = {
             major: parts[0] || 'unknown',
             minor: parts[1] || 'unknown',
             patch: parts[2] || 'unknown',
         };
+
+        if (extra) {
+            ver.extra = extra;
+        }
+
+        return ver;
     }
 
     getMaxPhysicalMemory() {

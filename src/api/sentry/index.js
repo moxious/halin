@@ -67,7 +67,7 @@ const reportError = (err, message=null) => {
         return err;
     }
 
-    console.log('Sentry skipped reporting error');
+    // console.log('Sentry skipped reporting error');
     return err;
 };
 

@@ -311,9 +311,9 @@ export default class DataFeed extends Metric {
             if (err) {
                 if (`${this.state.error}` !== `${err}`) {
                     sentry.reportError(err, 'Failed to execute timeseries query (first time)');
-                } else {
+                } /*else {
                     sentry.fine(`Duplicate polled error in timeseries ${err}`);
-                }
+                }*/
                 
                 this.state.lastDataArrived = this.feedStartTime;
                 this.state.error = err;
