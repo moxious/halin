@@ -378,7 +378,8 @@ export default class ClusterMember {
             sentry.warn("This ClusterMember has more than one version installed; only using the first");
         }
 
-        const v = this.dbms.versions[0] || '';
+        const [v, extra] = (this.dbms.versions[0] || '').split('-');
+
         const parts = v.split('.');
         const ver = {
             major: parts[0] || 'unknown',
@@ -386,10 +387,8 @@ export default class ClusterMember {
             patch: parts[2] || 'unknown',
         };
 
-        const extra = ver.patch.split('-');
-        if (extra.length > 1) {
-            ver.patch = extra[0];
-            ver.extra = extra[1];
+        if (extra) {
+            ver.extra = extra;
         }
 
         return ver;
