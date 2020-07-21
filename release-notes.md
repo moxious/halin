@@ -1,5 +1,12 @@
 # Halin Release Notes
 
+## 0.14.3 Minor Fixes
+
+- Halin now shows *committed* heap in the overview, not configured heap
+- Improved version parsing for the various kinds of neo4j encountered
+- Cluster timeseries charts can be paused when all underlying data feeds are in an error state
+- Halin does not support Neo4j 4 on Aura
+
 ## 0.14.2 Bugfix Release
 
 - Halin can now connect to and monitor clusters with (partially) broken routing tables, which
