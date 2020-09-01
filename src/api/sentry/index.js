@@ -9,7 +9,7 @@ import _ from 'lodash';
 import errors from '../driver/errors';
 
 let initialized = false;
-let enabled = true;
+let enabled = false;
 
 const init = () => {
     const dsn = 'https://82705ec41177415dbf13621167480fd8@sentry.io/1297023';

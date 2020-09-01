@@ -1,5 +1,10 @@
 # Halin Release Notes
 
+## 0.14.4 Updates
+
+- Minor dependency updates for security purposes
+- Disable Sentry error reporting in most cases.
+
 ## 0.14.3 Minor Fixes
 
 - Halin now shows *committed* heap in the overview, not configured heap
