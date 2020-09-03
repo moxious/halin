@@ -1,7 +1,8 @@
 # Halin Release Notes
 
-## 0.14.4 Updates
+## 0.14.4, 0.14.5 Updates
 
+- Fixed minor Desktop deployment issue
 - Minor dependency updates for security purposes
 - Disable Sentry error reporting in most cases.
 

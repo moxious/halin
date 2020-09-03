@@ -38,7 +38,7 @@ check the `.circleci/config.yml` file, and look for the "Deploy to S3" step.
 ### Running in Docker
 
 ```
-docker run -d -p 127.0.0.1:3000:3000 --rm -t mdavidallen/halin:latest 
+docker run -d -p 127.0.0.1:3000:3000 --rm -t mdavidallen/halin:latest --name halin
 ```
 
 Open a browser to http://localhost:3000/
