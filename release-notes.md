@@ -1,5 +1,9 @@
 # Halin Release Notes
 
+## 0.15.0
+
+- New connection dialog per member, allowing individual killing of connections
+
 ## 0.14.4, 0.14.5 Updates
 
 - Fixed minor Desktop deployment issue
