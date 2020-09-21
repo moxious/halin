@@ -51,7 +51,7 @@ class CypherDataTable extends Component {
 
         this.sortable = _.isNil(props.sortable) ? true : props.sortable;
         this.filterable = _.isNil(props.filterable) ? true : props.filterable;
-        this.pageSizeOptions = _.isNil(props.pageSizeOptions) ? [5, 10, 20, 25, 50, 100] : props.pageSizeOptions;
+        this.pageSizeOptions = _.isNil(props.pageSizeOptions) ? [10, 20, 25, 50, 100] : props.pageSizeOptions;
         this.nodeLabel = props.hideMemberLabel ? false : true;
 
         // Callbacks
