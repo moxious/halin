@@ -394,6 +394,13 @@ export default class ClusterMember {
         return ver;
     }
 
+    killConnections(ids) {
+        return this.run('CALL dbms.killConnections($ids)', { ids })
+            .then(result => neo4j.unpackResults(result, {
+                optional: ['connectionId', 'username', 'message'],
+            }))
+    }
+
     getMaxPhysicalMemory() {
         return this.run(queryLibrary.OS_MEMORY_STATS)
             .then(results => {

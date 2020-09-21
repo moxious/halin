@@ -9,7 +9,7 @@ export default new HalinQuery({
         serverAddress, clientAddress
         RETURN connectionId, connectTime, connector, username, userAgent,
         serverAddress, clientAddress
-        ORDER BY connectTime ASC
+        ORDER BY userAgent, connectTime ASC
     `,
     columns: ['connectionId', 'connectTime', 'connector', 
         'username', 'userAgent', 'serverAddress', 'clientAddress'].map(column),
