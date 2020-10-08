@@ -1,5 +1,9 @@
 # Halin Release Notes
 
+## 0.14.6
+
+- Connection details may be passed by URL string, as in: `http://halin-host.com/?host=mydb&port=7687`
+
 ## 0.14.4, 0.14.5 Updates
 
 - Fixed minor Desktop deployment issue
