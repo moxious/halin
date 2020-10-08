@@ -57,6 +57,7 @@ import DBMS_4_TRANSACTIONS from './dbms/4.0/transactions';
 
 import APOC_LOG_STREAM from './apoc/logStream';
 import APOC_VERSION from './apoc/version';
+import APOC_COUNT_STORE from './apoc/countStore';
 
 /**
  * A collection of queries that other components can refer to.  By using the same
@@ -123,6 +124,7 @@ const allQueries = {
 
     APOC_LOG_STREAM,
     APOC_VERSION,
+    APOC_COUNT_STORE,
 };
 
 /**

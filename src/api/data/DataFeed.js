@@ -359,7 +359,11 @@ export default class DataFeed extends Metric {
                 // Progressively merge data from the augmentation functions, if
                 // present.
                 this.augmentFns.forEach(fn => {
-                    data = _.merge(data, fn(data, this));
+                    try {
+                        data = _.merge(data, fn(data, this));
+                    } catch(e) {
+                        console.error('Aug fn failed', e);
+                    }
                 });
 
                 // Apply aliases if specified.
@@ -401,7 +405,7 @@ export default class DataFeed extends Metric {
                 this.state.lastDataArrived = new Date();
                 this.state.data = [data];
                 this.state.time = t;
-                this.state.event = newEvents;
+                this.state.events = newEvents;
                 this.state.error = undefined;
 
                 // Let our user know we have something new.
