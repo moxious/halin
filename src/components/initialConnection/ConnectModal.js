@@ -1,25 +1,15 @@
 import React, { Component } from 'react';
 import { Button, Form, Modal, Message, Checkbox } from 'semantic-ui-react';
 import _ from 'lodash';
-// import sentry from '../../api/sentry/index';
 import Splash from './Splash';
-
-let privateLocalCreds = {};
-// try {
-//     // In local dev, this file can exist with local creds not checked into git.
-//     privateLocalCreds = require(`../../creds/`).default;
-// } catch (e) {
-//     console.log(e);
-//     sentry.fine('No pre-configured halin credentials were found, but that\'s OK', e);
-// }
 
 class ConnectForm extends Component {
     state = {
-        username: privateLocalCreds.username || process.env.NEO4J_USERNAME || 'neo4j',
-        password: privateLocalCreds.password || process.env.NEO4J_PASSWORD || '',
-        host: privateLocalCreds.host || process.env.NEO4J_URI || 'localhost',
-        port: privateLocalCreds.port || 7687,
-        encrypted: _.isNil(privateLocalCreds.encrypted) ? false : privateLocalCreds.encrypted,
+        username: process.env.NEO4J_USERNAME || 'neo4j',
+        password: process.env.NEO4J_PASSWORD || '',
+        host: process.env.NEO4J_URI || 'localhost',
+        port: 7687,
+        encrypted: false,
         errors: {
             host: null,
             port: null,
@@ -82,6 +72,20 @@ class ConnectForm extends Component {
     };
 
     onSubmit = () => this.props.onSubmit(this.state);
+
+    componentDidMount() {
+        const search = _.get(document, 'location.search');
+        const params = search ? new URLSearchParams(document.location.search) : null;
+
+        if (params) {
+            const host = params.get('host') || this.state.host;
+            const username = params.get('username') || this.state.username;
+            const password = params.get('password') || this.state.password;
+            const port = params.get('port') || this.state.port;
+
+            this.setState({ host, port, username, password });
+        }
+    }
 
     render() {
         const { open, onClose } = this.props;
