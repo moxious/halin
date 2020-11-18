@@ -166,7 +166,7 @@ const neo4j42JMXComponent = (WrappedComponent, heading, halinCard=true) => {
                     const jmxEnabled = config['metrics.jmx.enabled'];
                     return jmxEnabled === "true";
                 });
-        };
+        }
          
         return Promise.resolve(true);
     }
