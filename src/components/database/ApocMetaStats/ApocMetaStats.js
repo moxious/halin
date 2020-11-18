@@ -23,7 +23,8 @@ const calculateDiffs = (latest, previous, timeElapsedInMs) => {
         const diff = now - then;
 
         // console.log(`Label ${label} now: ${now} then: ${then} difference of ${diff} over ${timeElapsedInMs}`);
-        result.labels[label] = { diff, rate: timeElapsedInMs != 0 ? diff/(timeElapsedInMs/1000): 0 };
+        result.labels[label] = { diff, rate: timeElapsedInMs !== 0 ? diff/(timeElapsedInMs/1000): 0 };
+        return true;
     });
 
     relTypes.forEach(relType => {
@@ -31,7 +32,7 @@ const calculateDiffs = (latest, previous, timeElapsedInMs) => {
         const then = neo4j.handleNeo4jInt(previous.stats.relTypes[relType] || 0);
         const diff = now - then;
 
-        result.relTypes[relType] = { diff, rate: timeElapsedInMs != 0 ? diff/(timeElapsedInMs/1000) : 0 };
+        result.relTypes[relType] = { diff, rate: timeElapsedInMs !== 0 ? diff/(timeElapsedInMs/1000) : 0 };
     });
 
     return result;
@@ -97,7 +98,7 @@ class ApocMetaStats extends Component {
 
     labelListEntry = (label, key) => {
         const count = pretty(api.driver.handleNeo4jInt(this.state.data.labels[label]));
-        const diff = _.get(this.state.data, `sinceStart.labels.${label}.diff`) || 0;
+        // const diff = _.get(this.state.data, `sinceStart.labels.${label}.diff`) || 0;
         const rate = _.get(this.state.data, `sinceStart.labels.${label}.rate`) || 0;
 
         let rateHuman = '';

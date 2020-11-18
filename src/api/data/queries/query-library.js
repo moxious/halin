@@ -146,7 +146,7 @@ const find = (ctx, queryName) => {
 
     const version = ctx.getVersion();
     const is4 = version.major >= 4;
-    const is4_2 = version.major == 4 && version.minor == 2;
+    const is4_2 = version.major === 4 && version.minor === 2;
 
     // Version switching to accomodate all of the different incarnations of page cache metrics
     // over time #operability

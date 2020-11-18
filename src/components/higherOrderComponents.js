@@ -158,7 +158,7 @@ const neo4j42JMXComponent = (WrappedComponent, heading, halinCard=true) => {
 
     const compatCheck = ctx => {
         const version = ctx.getVersion();        
-        if(version.major = 4 && version.minor >= 2) { return Promise.resolve(false); }
+        if(version.major === 4 && version.minor >= 2) { return Promise.resolve(false); }
         return Promise.resolve(true);
     }
 

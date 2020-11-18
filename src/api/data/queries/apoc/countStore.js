@@ -1,5 +1,4 @@
 import HalinQuery from '../HalinQuery';
-import neo4j from '../../../driver/index';
 
 const cols = ['labelCount', 'relTypeCount', 'propertyKeyCount',
     'nodeCount', 'relCount', 'labels', 'relTypes', 'relTypesCount', 'stats' ];
