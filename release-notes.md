@@ -2,7 +2,10 @@
 
 ## 0.15.0
 
+- Feature fixes & upgrades to work with newly released Neo4j 4.2
 - New connection dialog per member, allowing individual killing of connections
+- Upgraded dependencies, including Neo4j driver 4.2.1
+- Removed support for Neo4j 3.4.x; newer Neo4j drivers are incompatible with bolt protocol support
 
 ## 0.14.6
 
