@@ -128,4 +128,6 @@ class PageCacheTracking extends Component {
     }
 }
 
-export default hoc.enterpriseOnlyComponent(PageCacheTracking, 'Page Cache');
+export default hoc.neo4j42JMXComponent(
+    hoc.enterpriseOnlyComponent(PageCacheTracking, 'Page Cache')
+);

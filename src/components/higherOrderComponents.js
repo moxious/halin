@@ -149,6 +149,26 @@ const adminOnlyComponent = (WrappedComponent, heading, halinCard=true) => {
     );
 };
 
+/**
+ * In Neo4j 4.2, breaking changes were made to JMX which included disabling JMX metrics by default.
+ * This component catches that case
+ */
+const neo4j42JMXComponent = (WrappedComponent, heading, halinCard=true) => {
+    const failMsg = "As of Neo4j 4.2, you must set metrics.jmx.enabled=true in your configuration in order to use this function";
+
+    const compatCheck = ctx => {
+        const version = ctx.getVersion();        
+        if(version.major = 4 && version.minor >= 2) { return Promise.resolve(false); }
+        return Promise.resolve(true);
+    }
+
+    return compatibilityCheckableComponent(
+        WrappedComponent,
+        compatCheck,
+        () => missingFeatureMessage(heading, failMsg, halinCard)
+    );
+};
+
 const dbStatsOnlyComponent = (WrappedComponent, heading, halinCard=true) => {
     const failMsg = 'Only available in versions of Neo4j which support db.stats (Neo4j 3.5.2 and above)';
     const compatCheck = ctx => Promise.resolve(ctx.supportsDBStats());
@@ -175,6 +195,7 @@ export default {
     contentPaneComponent,
     adminOnlyComponent,
     enterpriseOnlyComponent,
+    neo4j42JMXComponent,
     clusterOnlyComponent,
     apocOnlyComponent,
     csvMetricsComponent,
