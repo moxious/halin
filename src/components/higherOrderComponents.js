@@ -157,8 +157,17 @@ const neo4j42JMXComponent = (WrappedComponent, heading, halinCard=true) => {
     const failMsg = "As of Neo4j 4.2, you must set metrics.jmx.enabled=true in your configuration in order to use this function";
 
     const compatCheck = ctx => {
-        const version = ctx.getVersion();        
-        if(version.major === 4 && version.minor >= 2) { return Promise.resolve(false); }
+        const version = ctx.getVersion();
+
+        if(Number(version.major) === 4 && Number(version.minor) >= 2) {
+            // Check if metrics are enabled
+            return ctx.getSystemDBWriter().getConfiguration()
+                .then(config => {
+                    const jmxEnabled = config['metrics.jmx.enabled'];
+                    return jmxEnabled === "true";
+                });
+        };
+         
         return Promise.resolve(true);
     }
 
