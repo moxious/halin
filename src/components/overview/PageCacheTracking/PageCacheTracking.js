@@ -17,8 +17,13 @@ class PageCacheTracking extends Component {
         options: [
             { format: ',.2f', min: 0, max: 1, key: 'usageRatio', text: 'Usage Ratio', value: 'usageRatio' },
             { format: ',.2f', min: 0, max: 1, key: 'hitRatio', text: 'Hit Ratio', value: 'hitRatio' },
-            { format: null, min: null, max: null, key: 'faultsPerSecond', text: 'Faults/sec', value: 'faultsPerSecond' },
-            { format: null, min: null, max: null, key: 'flushesPerSecond', text: 'Flushes/sec', value: 'flushesPerSecond' },
+
+            /* NOTE:  The following extra options are available in Neo4j up to 4.2, but 4.2 removed the JMX metrics needed to
+             * track these options. While these are *present in earlier versions* they're being disabled to keep version switching
+             * from getting out of hand.
+             */
+            // { format: null, min: null, max: null, key: 'faultsPerSecond', text: 'Faults/sec', value: 'faultsPerSecond' },
+            // { format: null, min: null, max: null, key: 'flushesPerSecond', text: 'Flushes/sec', value: 'flushesPerSecond' },
         ],
     };
 

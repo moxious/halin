@@ -55,6 +55,9 @@ import DBMS_4_SHOW_PRIVILEGES from './dbms/4.0/showPrivileges';
 import DBMS_4_PAGE_CACHE from './dbms/4.0/pageCache';
 import DBMS_4_TRANSACTIONS from './dbms/4.0/transactions';
 
+import DBMS_4_2_PAGE_CACHE from './dbms/4.2/pageCache';
+import DBMS_4_2_TRANSACTIONS from './dbms/4.2/transactions';
+
 import APOC_LOG_STREAM from './apoc/logStream';
 import APOC_VERSION from './apoc/version';
 import APOC_COUNT_STORE from './apoc/countStore';
@@ -122,6 +125,8 @@ const allQueries = {
     DBMS_4_DROP_DATABASE,
     DBMS_4_SHOW_PRIVILEGES,
 
+    DBMS_4_2_PAGE_CACHE,
+
     APOC_LOG_STREAM,
     APOC_VERSION,
     APOC_COUNT_STORE,
@@ -141,12 +146,23 @@ const find = (ctx, queryName) => {
 
     const version = ctx.getVersion();
     const is4 = version.major >= 4;
+    const is4_2 = version.major == 4 && version.minor == 2;
 
+    // Version switching to accomodate all of the different incarnations of page cache metrics
+    // over time #operability
     if (queryName === 'pageCache') {
+        if(is4_2) {
+            return DBMS_4_2_PAGE_CACHE;
+        }
+
         return is4 ? DBMS_4_PAGE_CACHE : JMX_PAGE_CACHE;
     }
 
     if (queryName === 'transactions') {
+        if (is4_2) {
+            return DBMS_4_2_TRANSACTIONS;
+        }
+        
         return is4 ? DBMS_4_TRANSACTIONS : JMX_TRANSACTIONS;
     }
 
