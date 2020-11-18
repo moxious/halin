@@ -59,7 +59,7 @@ class ApocMetaStats extends Component {
 
     onData = (newData, dataFeed) => {
         this.setState({ data: newData.data[0] });
-        console.log(newData.data[0]);
+        // console.log(newData.data[0]);
     }
 
     augmentData = (data) => {
