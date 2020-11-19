@@ -11,6 +11,7 @@ const cdt = fields;
 export default new HalinQuery({
     description: 'Fetches page cache statistics for running Neo4j',
     query: `
+    WITH 4.2 AS variant
     CALL dbms.queryJmx('neo4j.metrics:name=neo4j.page_cache.usage_ratio')
     YIELD attributes
     WITH attributes.Value.value as usageRatio

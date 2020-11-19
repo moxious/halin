@@ -3,6 +3,7 @@ import HalinQuery from '../../HalinQuery';
 export default new HalinQuery({
     description: 'Fetches transaction statistics of how much work the database is processing',
     query: `
+    WITH 4.0 AS variant
     CALL dbms.queryJmx('neo4j.metrics:name=neo4j.' + $db + '.transaction.active')
     YIELD attributes WITH attributes.Value.value as open
 

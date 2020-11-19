@@ -20,6 +20,7 @@ export default new HalinQuery({
      * with full visibility into the details of that thing.
      */
     query: `
+        WITH 3.4 AS variant
         CALL dbms.listTransactions()
         
         YIELD transactionId, username, metaData, startTime, protocol,
