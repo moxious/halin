@@ -8,6 +8,7 @@ export default new HalinQuery({
         description: 'Requires CSV Metrics Support (present in recent APOC releases)',
     }),
     query: `
+        WITH 'generic' AS variant
         CALL dbms.listConfig() 
         YIELD name, value 
         WHERE name='metrics.csv.enabled' 

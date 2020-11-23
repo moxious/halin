@@ -4,6 +4,7 @@ import column from '../column';
 export default new HalinQuery({
     description: 'Lists active connections to the database',
     query: `
+        WITH 'generic' AS variant    
         CALL dbms.listConnections()
         YIELD connectionId, connectTime, connector, username, userAgent,
         serverAddress, clientAddress

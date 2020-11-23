@@ -8,6 +8,7 @@ export default new HalinQuery({
         description: 'Requires CSV Metrics Support (present in recent APOC releases)',
     }),
     query: `
+        WITH 'generic' AS variant
         CALL apoc.metrics.get($metric)
         YIELD timestamp, metric, map
         RETURN timestamp, metric, map

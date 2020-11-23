@@ -4,6 +4,7 @@ export default new HalinQuery({
     description: 'Fetches a list of graph schema constraints',
     dependency: null,
     query: `
+        WITH 'generic' AS variant
         CALL db.constraints()
         YIELD description
         RETURN description

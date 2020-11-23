@@ -3,6 +3,7 @@ import HalinQuery from '../HalinQuery';
 export default new HalinQuery({
     description: 'Fetches transaction statistics of how much work the database is processing',
     query: `
+    WITH 'generic' AS variant
     CALL dbms.queryJmx("org.neo4j:instance=kernel#0,name=Transactions") 
     YIELD attributes WITH attributes as a 
     RETURN 

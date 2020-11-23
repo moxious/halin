@@ -10,6 +10,7 @@ export default new HalinQuery({
         };
     },
     query: `
+        WITH 'generic' AS variant    
         CALL dbms.procedures() 
         YIELD name 
         WHERE name =~ 'db.stats.clear'

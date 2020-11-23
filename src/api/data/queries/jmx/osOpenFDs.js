@@ -4,6 +4,7 @@ import column from '../column';
 export default new HalinQuery({
     description: 'Inspects number of open file descriptors at the OS level',
     query: `
+    WITH 'generic' AS variant
     CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
     YIELD attributes 
     WITH

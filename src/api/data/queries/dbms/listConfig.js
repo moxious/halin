@@ -4,6 +4,7 @@ export default new HalinQuery({
     description: 'Get Neo4j Configuration',
     dependency: null,
     query: `
+        WITH 'generic' AS variant
         CALL dbms.listConfig() 
         YIELD name, description, value 
         RETURN name, description, value

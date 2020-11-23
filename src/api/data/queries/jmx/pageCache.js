@@ -5,6 +5,7 @@ const cdt = fields;
 export default new HalinQuery({
     description: 'Fetches page cache statistics for running Neo4j',
     query: `
+    WITH 'generic' AS variant
     CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Page cache')
     YIELD attributes 
     WITH 

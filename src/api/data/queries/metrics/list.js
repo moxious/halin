@@ -9,6 +9,7 @@ export default new HalinQuery({
         description: 'Requires CSV Metrics Support (present in recent APOC releases)',
     }),
     query: `
+        WITH 'generic' AS variant
         CALL apoc.metrics.list() YIELD name, lastUpdated
         RETURN name, lastUpdated
         ORDER BY lastUpdated ASC;

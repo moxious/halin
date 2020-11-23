@@ -4,6 +4,7 @@ import neo4j from '../../../driver';
 export default new HalinQuery({
     description: 'Fetches operating system memory statistics using JMX',
     query: `
+        WITH 'generic' AS variant
         CALL dbms.queryJmx("java.lang:type=OperatingSystem") 
         YIELD attributes 
         WITH

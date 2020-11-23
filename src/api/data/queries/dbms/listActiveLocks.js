@@ -5,6 +5,7 @@ import column from '../column';
 export default new HalinQuery({
     description: 'Fetches a list of active locks for a given query',
     query: `
+        WITH 'generic' AS variant
         CALL dbms.listActiveLocks($queryId) 
         YIELD mode, queryId, resourceType, resourceId
         RETURN mode, queryId, resourceType, resourceId
