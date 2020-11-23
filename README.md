@@ -49,6 +49,11 @@ If you'd like to build the Halin docker container from source:
 docker build -t halin:latest -f Dockerfile .
 ```
 
+### Running in Kubernetes
+
+Note that the docker container above can be run just as any other docker container; but you must specify `stdin: true` in the container specification;
+if you do not, Halin may restart repeatedly.
+
 ### Running as a GraphApp
 
 4. Inside of Neo4j Desktop, go to application settings, scroll all the way to the bottom, enable development mode
