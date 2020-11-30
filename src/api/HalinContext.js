@@ -429,7 +429,7 @@ export default class HalinContext {
                 // Checking databases must be after checking for a cluster, since we need to know who leader is
                 .then(() => this.dbSet.initialize(this))
                 .then(() => {
-                    if (this.getVersion().major >= 4 && this.isNeo4jAura()) {
+                    if (this.isNeo4jAura()) {
                         throw new Error('Halin does not support Aura at this time');
                     }
                 })
