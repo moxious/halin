@@ -10,6 +10,7 @@ export default new HalinQuery({
         };
     },
     query: `
+        WITH 'generic' AS variant    
         CALL db.stats.stop("QUERIES") 
         YIELD section, success, message 
         RETURN section, success, message;

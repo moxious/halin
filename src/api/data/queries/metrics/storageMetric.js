@@ -11,6 +11,7 @@ export default new HalinQuery({
         description: 'Requires CSV Metrics Support (present in recent APOC releases)',
     }),
     query: `
+        WITH 'generic' AS variant
         CALL apoc.metrics.storage(null)
         YIELD setting, freeSpaceBytes, totalSpaceBytes, usableSpaceBytes, percentFree
         RETURN setting, freeSpaceBytes, totalSpaceBytes, usableSpaceBytes, percentFree

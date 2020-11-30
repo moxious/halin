@@ -4,6 +4,7 @@ export default new HalinQuery({
     description: 'Fetches a list of supported procedures',
     dependency: null,
     query: `
+        WITH 'generic' AS variant    
         CALL dbms.procedures()
         YIELD name, signature, description, mode
         RETURN name, description, signature, mode

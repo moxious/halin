@@ -13,6 +13,7 @@ export default new HalinQuery({
         };
     },
     query: `
+        WITH 'generic' AS variant    
         CALL db.stats.retrieve("QUERIES") 
         YIELD data 
         WITH 

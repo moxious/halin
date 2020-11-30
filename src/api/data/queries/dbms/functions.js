@@ -4,6 +4,7 @@ export default new HalinQuery({
     description: 'Fetches a list of supported functions',
     dependency: null,
     query: `
+        WITH 'generic' AS variant
         CALL dbms.functions()
         YIELD name, signature, description
         RETURN name, description, signature

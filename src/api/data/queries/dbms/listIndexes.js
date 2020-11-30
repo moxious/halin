@@ -3,6 +3,7 @@ import HalinQuery from '../HalinQuery';
 export default new HalinQuery({
     description: 'Lists database indexes',
     query: `
+        WITH 'generic' AS variant    
         CALL db.indexes() 
         YIELD id, name, state, populationPercent, uniqueness, type, 
               entityType, labelsOrTypes, properties, provider

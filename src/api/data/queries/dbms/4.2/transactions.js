@@ -3,48 +3,38 @@ import HalinQuery from '../../HalinQuery';
 export default new HalinQuery({
     description: 'Fetches transaction statistics of how much work the database is processing',
     query: `
-    WITH 4.0 AS variant
-    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.' + $db + '.transaction.active')
-    YIELD attributes WITH attributes.Value.value as open
-
+    WITH 4.2 AS variant
     CALL dbms.queryJmx('neo4j.metrics:name=neo4j.' + $db + '.transaction.active_read')
-    YIELD attributes WITH attributes.Value.value as active_read,
-        open
+    YIELD attributes WITH attributes.Value.value as active_read
 
     CALL dbms.queryJmx('neo4j.metrics:name=neo4j.' + $db + '.transaction.active_write')
     YIELD attributes WITH attributes.Value.value as active_write,
-        active_read, open
+        active_read
 
     CALL dbms.queryJmx('neo4j.metrics:name=neo4j.' + $db + '.transaction.committed')
     YIELD attributes WITH attributes.Count.value as committed,
-        active_write, active_read, open
-
-    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.' + $db + '.transaction.active')
-    YIELD attributes WITH attributes.Value.value as active,
-        committed, active_write, active_read, open
+        active_write, active_read
 
     CALL dbms.queryJmx("neo4j.metrics:name=neo4j." + $db + ".transaction.peak_concurrent")
     YIELD attributes WITH attributes.Count.value as concurrent,
-        active, committed, active_write, active_read, open
+        committed, active_write, active_read
 
     CALL dbms.queryJmx("neo4j.metrics:name=neo4j." + $db + ".transaction.rollbacks")
     YIELD attributes WITH attributes.Count.value as rolledBack,
-        concurrent, active, committed, active_write, active_read, open
-
-    CALL dbms.queryJmx("neo4j.metrics:name=neo4j." + $db + ".transaction.started")
-    YIELD attributes WITH attributes.Count.value as opened,
-        rolledBack, concurrent, active, committed, active_write, active_read, open
-        
+        concurrent, committed, active_write, active_read
+       
     RETURN 
         rolledBack,
-        open,
+        /* NOTE: 4.2 changed the definitions of JMX metrics and open is not available anymore; this is the closets available
+         * proxy */
+        active_read + active_write AS open,
         -1 as lastCommittedId, /* 4.0 TODO Not yet supported by neo4j.metrics:name=neo4j.system.transaction.last_committed_tx_id */
-        opened,
+        -1 as opened, /* 4.2 removed support for this metric */
         concurrent,
         committed,
         active_write,
         active_read,
-        active
+        active_read + active_write AS active
     `,
     parameters: {
         db: 'Name of the database',

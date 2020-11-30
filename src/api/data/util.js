@@ -19,6 +19,29 @@ export default {
         return bytes.toFixed(1) + ' ' + units[u];
     },
 
+    /**
+     * This takes numbers like 9876543 and turns them into things like "9.87 million"
+     */
+    humanNumberSize: num => {
+        let here = num;
+        const thresh = 1000;
+
+        if (Math.abs(here) < thresh) {
+            return here;
+        }
+
+        const units = ['K', 'million', 'billion', 'trillion'];
+
+        var u = -1;
+        do {
+            here /= thresh;
+            ++u;
+        } while(Math.abs(here) >= thresh && u < units.length -1);
+        
+        const res = here.toFixed(2) + ' ' + units[u];
+        return res;
+    },
+
     roundToPlaces: (num, places=2) => 
         Math.round(num * Math.pow(10, places)) / Math.pow(10, places),
 

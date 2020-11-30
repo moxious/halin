@@ -111,4 +111,6 @@ class TransactionsOpen extends Component {
     }
 }
 
-export default hoc.enterpriseOnlyComponent(TransactionsOpen, 'Transactions');
+export default hoc.neo4j42JMXComponent(
+    hoc.enterpriseOnlyComponent(TransactionsOpen, 'Transactions')
+);

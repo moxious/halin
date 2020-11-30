@@ -15,6 +15,8 @@ import './Halin.css';
 
 import MainLeftNav from '../scaffold/MainLeftNav/MainLeftNav';
 
+import _ from 'lodash';
+
 export default class Halin extends Component {
   state = {
     cTag: 1,
@@ -39,6 +41,7 @@ export default class Halin extends Component {
       const initPromise = window.halinContext.initialize(this.initializeProgressCallback)
         .catch(err => {
           sentry.reportError(err, 'Error initializing halin context');
+          _.set(err, 'header', 'Trouble Initializing Halin');
           this.setState({ error: err });
           return null;
         })

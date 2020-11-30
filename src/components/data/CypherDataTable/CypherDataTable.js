@@ -47,11 +47,11 @@ class CypherDataTable extends Component {
             () => this.state.items.length >= 7);
         this.defaultPageSize = (props.defaultPageSize ?
             () => props.defaultPageSize :
-            () => Math.min(this.state.items.length, 10));
+            () => 10);
 
         this.sortable = _.isNil(props.sortable) ? true : props.sortable;
         this.filterable = _.isNil(props.filterable) ? true : props.filterable;
-        this.pageSizeOptions = _.isNil(props.pageSizeOptions) ? [5, 10, 20, 25, 50, 100] : props.pageSizeOptions;
+        this.pageSizeOptions = _.isNil(props.pageSizeOptions) ? [10, 20, 25, 50, 100] : props.pageSizeOptions;
         this.nodeLabel = props.hideMemberLabel ? false : true;
 
         // Callbacks
@@ -132,7 +132,7 @@ class CypherDataTable extends Component {
             };
         
             _.merge(col, filterSpec);
-        })
+        });
     }
 
     onUpdate = () => {
@@ -231,6 +231,7 @@ class CypherDataTable extends Component {
                                 sortable={this.sortable}
                                 filterable={this.filterable}
                                 defaultPageSize={this.defaultPageSize()}
+                                pageSize={Math.min(this.state.items.length, 10)}
                                 pageSizeOptions={this.pageSizeOptions}
                                 showPagination={this.showPagination()}
                                 columns={this.state.displayColumns}

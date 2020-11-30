@@ -4,12 +4,13 @@ import column from '../column';
 export default new HalinQuery({
     description: 'Lists active connections to the database',
     query: `
+        WITH 'generic' AS variant    
         CALL dbms.listConnections()
         YIELD connectionId, connectTime, connector, username, userAgent,
         serverAddress, clientAddress
         RETURN connectionId, connectTime, connector, username, userAgent,
         serverAddress, clientAddress
-        ORDER BY connectTime ASC
+        ORDER BY userAgent, connectTime ASC
     `,
     columns: ['connectionId', 'connectTime', 'connector', 
         'username', 'userAgent', 'serverAddress', 'clientAddress'].map(column),

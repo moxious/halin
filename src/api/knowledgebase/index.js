@@ -250,6 +250,11 @@ export default {
         links.txManagement,
         links.connectionManagement,
     ]),
+    Connections: render([
+        `These are bolt or other network connections to the database, showing which 
+        programs are accessing the database, and from which network addresses`,
+        links.connectionManagement,
+    ]),
     Database: render([
         `Databases operate as independent entities in a Neo4j DBMS, both in standalone and in a cluster. 
         Since a cluster consists of multiple independent server instances, the effects of administrative 
@@ -327,9 +332,7 @@ export default {
         links.authMaxFailedAttempts,
     ]),
     HalinNotSupported: render([
-        `This error means that the underlying version of Neo4j does not provide facilities 
-        necessary for Halin to function properly.  Please raise an issue with your Neo4j support,
-        or open an issue at the Halin github repository.`,
+        `No further information available.`,
     ]),
     UnknownError: render([
         `Unfortunately, no troubleshooting is available for this particular error. 

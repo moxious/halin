@@ -1,117 +1,150 @@
-import React, { Component, useState, useEffect } from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import api from '../../../api';
+import neo4j from '../../../api/driver';
 
 import HalinCard from '../../ui/scaffold/HalinCard/HalinCard';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
+import _ from 'lodash';
 import hoc from '../../higherOrderComponents';
-import { List } from 'semantic-ui-react';
+import { List, Icon } from 'semantic-ui-react';
 import './ApocMetaStats.css';
 
-/**
- * Gathers stats and returns a new state object.
- * @param {ClusterMember} node 
- * @param {Database} database 
- */
-const gatherStats = (node, database) => {
-    if (!node || !database) { return null; }
-    if (database.isReconciling()) {
-        // Database has multiple statuses, and it's not safe to do this operation at this moment.
-        return Promise.resolve({ reconciling: true });
-    }
+const calculateDiffs = (latest, previous, timeElapsedInMs) => {
+    if (!latest || !previous) { return {}; }
+    const labels = Object.keys(latest.stats.labels);
+    const relTypes = Object.keys(latest.stats.relTypes);
 
-    if (database.getLabel() === api.driver.SYSTEM_DB) {
-        return Promise.resolve({
-            message: 'This database does not contain inspectable data',
-            error: null,
-        });
-    } else if(database.getStatus() !== 'online') {
-        return Promise.resolve({
-            message: 'This database is not online.  Please start it to see statistics.',
-            error: null,
-        });
-    }
+    const result = { labels: {}, relTypes: {} };
 
-    return node.run('CALL apoc.meta.stats()', {}, database.getLabel())
-        .then(results => api.driver.unpackResults(results, {
-            required: ['labelCount', 'relTypeCount', 'propertyKeyCount',
-                'nodeCount', 'relCount', 'labels',
-                'relTypes', 'relTypesCount', 'stats'],
-        }))
-        .then(data => data[0] || null)
-        .then(result => {
-            const s = result.stats;
+    labels.map(label => {
+        const now = neo4j.handleNeo4jInt(latest.stats.labels[label] || 0);
+        const then = neo4j.handleNeo4jInt(previous.stats.labels[label] || 0);
+        const diff = now - then;
 
-            return {
-                relCount: api.driver.handleNeo4jInt(s.relCount),
-                nodeCount: api.driver.handleNeo4jInt(s.nodeCount),
-                labelCount: api.driver.handleNeo4jInt(s.labelCount),
-                propertyKeyCount: api.driver.handleNeo4jInt(s.propertyKeyCount),
-                labels: s.labels,
-                relTypes: s.relTypes,
-                message: null,
-                error: null,
-            };
-        })
-        .catch(err => {
-            api.sentry.error('Error getting APOC meta stats', err);
-            return { error: err, message: null };
-        });
+        // console.log(`Label ${label} now: ${now} then: ${then} difference of ${diff} over ${timeElapsedInMs}`);
+        result.labels[label] = { diff, rate: timeElapsedInMs !== 0 ? diff/(timeElapsedInMs/1000): 0 };
+        return true;
+    });
+
+    relTypes.forEach(relType => {
+        const now = neo4j.handleNeo4jInt(latest.stats.relTypes[relType] || 0);
+        const then = neo4j.handleNeo4jInt(previous.stats.relTypes[relType] || 0);
+        const diff = now - then;
+
+        result.relTypes[relType] = { diff, rate: timeElapsedInMs !== 0 ? diff/(timeElapsedInMs/1000) : 0 };
+    });
+
+    return result;
 };
 
-const defaultState = {
-    relCount: 0,
-    nodeCount: 0,
-    labelCount: 0,
-    propertyKeyCount: 0,
-    labels: {},
-    relTypes: {},
-    message: null,
-};
+const pretty = num => api.datautil.humanNumberSize(num);
 
-const ApocMetaStats = (props) => {
-    const [state, setStats] = useState(defaultState);
-    useEffect(() => {
-       async function getStats() {
-           const state = await gatherStats(props.node, props.database);
-           setStats(state);
-       }
-       getStats();
-    }, [props.database, props.node]);
+class ApocMetaStats extends Component {
+    state = {
+        data: {},
+    };
 
-    if (state.reconciling) {
-        return <div>
-            Database is reconciling; please wait until it is fully online for stats to appear.
-            </div>;
+    componentWillMount() {
+        this.df = window.halinContext.getDataFeed({
+            node: this.props.node,
+            database: this.props.database,
+            query: api.queryLibrary.APOC_COUNT_STORE.query,
+            displayColumns: api.queryLibrary.APOC_COUNT_STORE.columns,
+        });
+
+        this.df.on('data', this.onData);
+        this.df.addAugmentationFunction(this.augmentData);
     }
 
-    if (state.error) { return <div>{state.error}</div>; }
-    if (state.message) { return <div>{state.message}</div>; }
+    componentDidMount() { this.mounted = true; }
 
-    return (
-        <div>
-            <p>{state.nodeCount} nodes, {state.relCount} relationships, and
-            &nbsp;{state.propertyKeyCount} properties.</p>
+    onData = (newData, dataFeed) => {
+        if (this.mounted) {
+            this.setState({ data: newData.data[0] });
+        }
+    }
 
-            <h4>Labels</h4>
-            <List id='label_list'>
-                {
-                    Object.keys(state.labels).length === 0 ? 'None' :
-                        Object.keys(state.labels).map((label, i) =>
-                            <List.Item key={i}>{label}: {api.driver.handleNeo4jInt(state.labels[label])} nodes</List.Item>)
-                }
-            </List>
+    augmentData = (data) => {
+        const packets = this.df.getDataPackets();
+        const first = packets[0];
+        const last = packets[packets.length - 1];
+        
+        // console.log("AUG Packets", packets, "Last packet", last, "current data", data);
 
-            <h4>Relationships</h4>
-            <List id='rel_list'>
-                {
-                    Object.keys(state.relTypes).length === 0 ? 'None' :
-                        Object.keys(state.relTypes).map((rt, i) =>
-                            <List.Item key={i}>{rt}: {api.driver.handleNeo4jInt(state.relTypes[rt])}</List.Item>)
-                }
-            </List>
-        </div>
-    );
+        if (!first || !last) {
+            console.log('Waiting on accumulation to calculate diffs');
+            return {};
+        }
+
+        // How much time elapsed since the sample?
+        // We know we've sampled N times (packet.length).  Each sample is df.rate apart in time.
+        // And each sample took a certain number of ms to actually gather (sampleTime)
+        const timeElapsedSinceFirst = (
+            packets.length * this.df.rate + 
+            packets.map(p => p._sampleTime).reduce(((a, b) => a+b), 0) + 
+            data._sampleTime
+        );
+
+        // Same as above, but only one sample of time.
+        const timeElapsedSinceLast = this.df.rate + last._sampleTime + data._sampleTime;
+
+        const sinceStart = calculateDiffs(data, first, timeElapsedSinceFirst);
+        const sinceLast = calculateDiffs(data, last, timeElapsedSinceLast);
+
+        return { sinceStart, sinceLast };
+    };
+
+    componentWillUnmount() {
+        this.mounted = false;
+    }
+
+    labelListEntry = (label, key) => {
+        const count = pretty(api.driver.handleNeo4jInt(this.state.data.labels[label]));
+        // const diff = _.get(this.state.data, `sinceStart.labels.${label}.diff`) || 0;
+        const rate = _.get(this.state.data, `sinceStart.labels.${label}.rate`) || 0;
+
+        let rateHuman = '';
+
+        if (rate > 0) {
+            rateHuman = <strong><Icon name='plus' color='green'/> {pretty(rate)}/sec</strong>;
+        } else if (rate < 0) {
+            rateHuman = <strong><Icon name='minus' color='red'/> {pretty(rate)}/sec</strong>;
+        }
+
+        return (
+            <List.Item key={key}>{label}: {count} nodes {rateHuman}</List.Item>
+        );
+    };
+
+    render() {
+        const state = this.state.data;
+        if(_.isEmpty(state)) { return ''; }
+        
+        return (
+            <div>
+                <p>{pretty(state.nodeCount)} nodes, {pretty(state.relCount)} relationships, and
+                &nbsp;{pretty(state.propertyKeyCount)} properties.</p>
+    
+                <h4>Labels</h4>
+                <List id='label_list'>
+                    {
+                        Object.keys(state.labels).length === 0 ? 'None' :
+                            Object.keys(state.labels).sort().map((label, i) => this.labelListEntry(label, i))
+                    }
+                </List>
+    
+                <h4>Relationships</h4>
+                <List id='rel_list'>
+                    {
+                        Object.keys(state.relTypes).length === 0 ? 'None' :
+                            Object.keys(state.relTypes).sort().map((rt, i) =>
+                                <List.Item key={i}>{rt}: {pretty(api.driver.handleNeo4jInt(state.relTypes[rt]))}</List.Item>)
+                    }
+                </List>
+            </div>
+        );        
+    }
 }
 
 const Stats = hoc.apocOnlyComponent(ApocMetaStats);

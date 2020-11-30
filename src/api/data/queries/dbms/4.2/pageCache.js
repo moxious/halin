@@ -11,7 +11,7 @@ const cdt = fields;
 export default new HalinQuery({
     description: 'Fetches page cache statistics for running Neo4j',
     query: `
-    WITH 4.0 AS variant
+    WITH 4.2 AS variant
     CALL dbms.queryJmx('neo4j.metrics:name=neo4j.page_cache.usage_ratio')
     YIELD attributes
     WITH attributes.Value.value as usageRatio
@@ -24,32 +24,26 @@ export default new HalinQuery({
     YIELD attributes
     WITH attributes.Count.value as faults, hitRatio, usageRatio
 
-    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.page_cache.flushes')
-    YIELD attributes
-    WITH attributes.Count.value as flushes,
-        faults, hitRatio, usageRatio
-
-    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.page_cache.evictions')
-    YIELD attributes
-    WITH attributes.Count.value as evictions,
-        flushes, faults, hitRatio, usageRatio
-
-    CALL dbms.queryJmx('neo4j.metrics:name=neo4j.page_cache.eviction_exceptions')
-    YIELD attributes
-    WITH attributes.Count.value as evictionExceptions,
-        evictions, flushes, faults, hitRatio, usageRatio
+    /* As of Neo4j 4.2, metrics for:
+     * neo4j.metrics:name=neo4j.page_cache.flushes
+     * neo4j.metrics:name=neo4j.page_cache.evictions
+     * neo4j.page_cache.eviction_exceptions
+     * Appear to have been removed
+     * #operability
+     */
 
     RETURN 
         hitRatio, 
         0 as bytesRead, /* Not yet supported */
         0 as fileMappings, /* Not yet supported */
         0 as fileUnmappings, /* Not yet supported */
-        flushes, 
         usageRatio, 
         0 as bytesWritten, /* Not yet supported */
-        faults, 
-        evictions, 
-        evictionExceptions`,
+        faults,
+        -1 as flushes, /* No longer supported in 4.2 */
+        -1 as evictions, /* No longer supported in 4.2 */
+        -1 as evictionExceptions /* No longer supported in 4.2 */
+    `,        
     columns: [
         { Header: 'Usage Ratio', accessor: 'usageRatio', Cell: cdt.pctField },
         { Header: 'Hit Ratio', accessor: 'hitRatio', Cell: cdt.pctField },

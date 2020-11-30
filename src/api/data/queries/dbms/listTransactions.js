@@ -6,6 +6,7 @@ const cdt = fields;
 export default new HalinQuery({
     description: 'Fetches a list of running transactions on the database at this moment',
     query: `
+        WITH 'generic' AS variant    
         CALL dbms.listTransactions()
         YIELD transactionId, username, metaData, startTime, protocol,
         clientAddress, requestUri, currentQueryId, currentQuery, 

@@ -6,7 +6,6 @@ import PropTypes from 'prop-types';
 import hoc from '../../higherOrderComponents';
 import CypherDataTable from '../../data/CypherDataTable/CypherDataTable';
 import Explainer from '../../ui/scaffold/Explainer/Explainer';
-import './Neo4jConfiguration.css';
 
 class Neo4jConfiguration extends Component {
     // URL path to where a config item can be looked up.
@@ -47,7 +46,7 @@ class Neo4jConfiguration extends Component {
 
     render() {
         return (
-            <div className="Neo4jConfiguration" style={{ align: 'center', height: 800 }}>
+            <div className="Neo4jConfiguration">
                 <h3>Neo4j Configuration <Explainer knowledgebase='Neo4jConfiguration' /></h3>
 
                 <CypherDataTable

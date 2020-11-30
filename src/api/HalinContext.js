@@ -221,6 +221,16 @@ export default class HalinContext {
         return (uri || '').toLowerCase().indexOf('databases.neo4j.io') > -1;
     }
 
+    isAuraEnterprise() {
+        // On Aura professional, the neo4j user is only role PUBLIC and does not have role
+        // admin
+        return this.isNeo4jAura() && this.userIsAdmin();
+    }
+
+    isAuraProfessional() {
+        return this.isNeo4jAura() && !this.isAuraEnterprise();
+    }
+
     supportsRoles() {
         return this.isEnterprise() && !this.isNeo4jAura();
     }
@@ -419,8 +429,8 @@ export default class HalinContext {
                 // Checking databases must be after checking for a cluster, since we need to know who leader is
                 .then(() => this.dbSet.initialize(this))
                 .then(() => {
-                    if (this.getVersion().major >= 4 && this.isNeo4jAura()) {
-                        throw new Error('Halin does not support Neo4j 4 on Aura at this time');
+                    if (this.isNeo4jAura()) {
+                        throw new Error('Halin does not support Aura at this time');
                     }
                 })
                 .then(() => {

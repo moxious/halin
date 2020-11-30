@@ -391,7 +391,23 @@ export default class ClusterMember {
             ver.extra = extra;
         }
 
+        // Aura interpretation magic: #operability
+        // Aura reports that it is 4.0-aura, but in terms of fine-grained feature compatibility,
+        // it has many 4.2 capabilities, so we need halin to see 4.2.
+        if (ver.extra === 'aura' && Number(ver.major) === 4) {
+            ver.major = 4;
+            ver.minor = 2;
+            ver.patch = 0;
+        }
+
         return ver;
+    }
+
+    killConnections(ids) {
+        return this.run('CALL dbms.killConnections($ids)', { ids })
+            .then(result => neo4j.unpackResults(result, {
+                optional: ['connectionId', 'username', 'message'],
+            }))
     }
 
     getMaxPhysicalMemory() {

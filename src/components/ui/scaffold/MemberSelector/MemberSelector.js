@@ -10,6 +10,7 @@ import SampleQueryPane from '../../../db/SampleQueryPane/SampleQueryPane';
 import LogsPane from '../../../db/LogsPane/LogsPane';
 import MetricsPane from '../../../db/metrics/MetricsPane/MetricsPane';
 import Tasks from '../../../performance/task/Tasks/Tasks';
+import Connections from '../../../performance/Connections/Connections';
 import ClusterMemberMenuItem from '../ClusterMemberMenuItem/ClusterMemberMenuItem';
 
 import './MemberSelector.css';
@@ -63,6 +64,13 @@ export default class MemberSelector extends Component {
                 visible: () => member.isEnterprise(),
                 render: () => this.paneWrapper(
                     <Tasks key={key} member={member} />
+                ),
+            },
+            {
+                menuItem: 'Connections',
+                visible: () => member.isEnterprise(),
+                render: () => this.paneWrapper(
+                    <Connections key={key} member={member} />
                 ),
             },
             {

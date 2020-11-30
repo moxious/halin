@@ -5,7 +5,8 @@ export default new HalinQuery({
     description: 'Fetches statistics on overall disk utilization by the database',
     // otherStore is a calculated value that catches all other files which may
     // be in the store directory which don't belong to Neo4j.
-    query: `            
+    query: `
+        WITH 'generic' AS variant
         CALL dbms.queryJmx('org.neo4j:instance=kernel#0,name=Store sizes') 
         YIELD attributes 
         WITH

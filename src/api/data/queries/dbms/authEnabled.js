@@ -3,6 +3,7 @@ import HalinQuery from '../HalinQuery';
 export default new HalinQuery({
     description: 'Determines whether or not authorization is enabled on the database',
     query: `
+        WITH 'generic' AS variant
         CALL dbms.listConfig() YIELD name, value
         WHERE name =~ 'dbms.security.auth_enabled'
         RETURN value;
