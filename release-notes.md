@@ -2,10 +2,19 @@
 
 ## 0.15.0
 
-- Feature fixes & upgrades to work with newly released Neo4j 4.2
+New features & changes
+
+- Upgrades to work with the Neo4j 4.2 series
+- Removed support for Neo4j 3.4.x; newer drivers are incompatible with older bolt protocol
+- Neo4j Aura is not supported in any version or tier
 - New connection dialog per member, allowing individual killing of connections
-- Upgraded dependencies, including Neo4j driver 4.2.1
-- Removed support for Neo4j 3.4.x; newer Neo4j drivers are incompatible with bolt protocol support
+
+Bug fixes and maintenance
+
+- Upgraded dependencies, addressing security bulletins, including Neo4j driver 4.2.1
+- Fixed unmounted component state change issues
+- Fixed pagination on very small result sets
+- Fixed #157 running Halin in kubernetes
 
 ## 0.14.6
 
