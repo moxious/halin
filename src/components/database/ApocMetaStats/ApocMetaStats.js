@@ -57,9 +57,12 @@ class ApocMetaStats extends Component {
         this.df.addAugmentationFunction(this.augmentData);
     }
 
+    componentDidMount() { this.mounted = true; }
+
     onData = (newData, dataFeed) => {
-        this.setState({ data: newData.data[0] });
-        // console.log(newData.data[0]);
+        if (this.mounted) {
+            this.setState({ data: newData.data[0] });
+        }
     }
 
     augmentData = (data) => {
