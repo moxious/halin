@@ -24,7 +24,7 @@
     "bluebird": "^3.7.1",
     "generic-pool": "^3.6.1",
     "lodash": "^4.17.20",
-    "mathjs": "^5.4.0",
+    "mathjs": "^7.5.1",
     "moment": "^2.29.1",
     "neo4j-driver": "^4.2.1",
     "pondjs": "^0.9.0",
