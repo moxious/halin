@@ -17,6 +17,9 @@ export default class AppFooter extends PureComponent {
             <HalinCard header={`About Halin v${appPkg.version}`} className='AppFooter'>
                 <p><Image style={{ display: 'block', marginLeft: 'auto', marginRight: 'auto' }} src='favicon-32x32.png'/></p>
 
+                <strong>As of June 2021, Halin version 0.16.0 and Neo4j 4.3.0 halin is now deprecated, and will not
+                support all 4.3.0+ features; you may encounter incompatibilities.</strong>
+
                 <List>                    
                     <List.Item><a target='halindocs' href='https://moxious.github.io/halin/'>Documentation</a></List.Item>
                     <List.Item><a target='halindocs' href='https://github.com/moxious/halin/blob/master/release-notes.md#halin-release-notes'>Release Notes</a></List.Item>
@@ -26,14 +29,6 @@ export default class AppFooter extends PureComponent {
                 <p>
                     Build <a href={`https://circleci.com/gh/moxious/halin/${build.build}`}>{build.build} on {buildDate}</a>
                 </p>    
-
-                <h4>Neo4j Official Documentation</h4>
-
-                <List>
-                    <List.Item><a target='halindocs' href='https://neo4j.com/docs/operations-manual/current/'>Operations Manual</a></List.Item>
-                    <List.Item><a target='halindocs' href='https://neo4j.com/docs/cypher-manual/current/'>Cypher Manual</a></List.Item>
-                    <List.Item><a target='halindocs' href='https://neo4j.com/docs/getting-started/current/'>Getting Started</a></List.Item>
-                </List>                
             </HalinCard>
         );
     }

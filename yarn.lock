@@ -3129,7 +3129,7 @@ bindings@^1.5.0:
   dependencies:
     file-uri-to-path "1.0.0"
 
-bluebird@^3.5.5, bluebird@^3.7.1:
+bluebird@^3.5.5, bluebird@^3.7.2:
   version "3.7.2"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/bluebird/-/bluebird-3.7.2.tgz#9f229c15be272454ffa973ace0dbee79a1b0c36f"
   integrity sha1-nyKcFb4nJFT/qXOs4NvueaGww28=
@@ -7669,10 +7669,10 @@ lodash.uniq@^4.5.0:
   resolved "https://neo.jfrog.io/neo/api/npm/npm/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha1-tEf2ZwoEVbv+7dETku/zMOoJdUg=
 
-lodash@^4.17.20:
-  version "4.17.20"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/lodash/-/lodash-4.17.20.tgz#b44a9b6297bcb698f1c51a3545a2b3b368d59c52"
-  integrity sha1-tEqbYpe8tpjxxRo1RaKzs2jVnFI=
+lodash@^4.17.21:
+  version "4.17.21"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+  integrity sha1-Z5WRxWTDv/quhFTPCz3zcMPWkRw=
 
 loglevel@^1.6.8:
   version "1.7.0"
@@ -8134,15 +8134,28 @@ neo-async@^2.5.0, neo-async@^2.6.0, neo-async@^2.6.1:
   resolved "https://neo.jfrog.io/neo/api/npm/npm/neo-async/-/neo-async-2.6.1.tgz#ac27ada66167fa8849a6addd837f6b189ad2081c"
   integrity sha1-rCetpmFn+ohJpq3dg39rGJrSCBw=
 
-neo4j-driver@^4.2.1:
-  version "4.2.1"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/neo4j-driver/-/neo4j-driver-4.2.1.tgz#b2b7542c4a83f0d1085e86826ee7ff11da71a7dc"
-  integrity sha1-srdULEqD8NEIXoaCbuf/Edpxp9w=
+neo4j-driver-bolt-connection@^4.3.1:
+  version "4.3.1"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/neo4j-driver-bolt-connection/-/neo4j-driver-bolt-connection-4.3.1.tgz#bbaf0d2287d9be61a480397067c57e82e431fac9"
+  integrity sha1-u68NIofZvmGkgDlwZ8V+guQx+sk=
+  dependencies:
+    neo4j-driver-core "^4.3.1"
+    text-encoding-utf-8 "^1.0.2"
+
+neo4j-driver-core@^4.3.1:
+  version "4.3.1"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/neo4j-driver-core/-/neo4j-driver-core-4.3.1.tgz#5d92ae3f9ee48e3af2b4a085503368b15a195a98"
+  integrity sha1-XZKuP57kjjrytKCFUDNosVoZWpg=
+
+neo4j-driver@^4.3.1:
+  version "4.3.1"
+  resolved "https://neo.jfrog.io/neo/api/npm/npm/neo4j-driver/-/neo4j-driver-4.3.1.tgz#897c812abf631b5a520162bb1d71d6a1b320d231"
+  integrity sha1-iXyBKr9jG1pSAWK7HXHWobMg0jE=
   dependencies:
     "@babel/runtime" "^7.5.5"
+    neo4j-driver-bolt-connection "^4.3.1"
+    neo4j-driver-core "^4.3.1"
     rxjs "^6.6.3"
-    text-encoding-utf-8 "^1.0.2"
-    uri-js "^4.4.0"
 
 next-tick@~1.0.0:
   version "1.0.0"
@@ -11925,13 +11938,6 @@ uri-js@^4.2.2:
   version "4.2.2"
   resolved "https://neo.jfrog.io/neo/api/npm/npm/uri-js/-/uri-js-4.2.2.tgz#94c540e1ff772956e2299507c010aea6c8838eb0"
   integrity sha1-lMVA4f93KVbiKZUHwBCupsiDjrA=
-  dependencies:
-    punycode "^2.1.0"
-
-uri-js@^4.4.0:
-  version "4.4.0"
-  resolved "https://neo.jfrog.io/neo/api/npm/npm/uri-js/-/uri-js-4.4.0.tgz#aa714261de793e8a82347a7bcc9ce74e86f28602"
-  integrity sha1-qnFCYd55PoqCNHp7zJznTobyhgI=
   dependencies:
     punycode "^2.1.0"
 

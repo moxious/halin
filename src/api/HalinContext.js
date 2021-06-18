@@ -432,12 +432,24 @@ export default class HalinContext {
                     if (this.isNeo4jAura()) {
                         throw new Error('Halin does not support Aura at this time');
                     }
+
+                    const ver = this.getVersion();
+                    console.log('version', ver);
+                    if (ver.major >= 4 && ver.minor >= 3) {
+                        setTimeout(() => {
+                            this.getClusterManager().addEvent({
+                                type: 'halin',
+                                message: 'Halin is deprecated; check the "About" tab for more information.',
+                                alert: true,
+                            });
+                        }, 3000);
+                    }
                 })
                 .then(() => {
                     this.getClusterManager().addEvent({
                         type: 'halin',
                         message: 'Halin monitoring started',
-                    });
+                    });                    
                     report('Initialization complete');
                     return this;
                 });

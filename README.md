@@ -4,6 +4,12 @@
 
 Halin is a Graph App for monitoring Neo4j. 
 
+As of June 2021, with the release of [Neo4j 4.3.0](https://neo4j.com/release-notes/neo4j-4-3-0/) halin is now deprecated.
+
+The software will continue to be available as a GraphApp and via the URL above; and if you currently depend on it, it will not break or disappear.
+Halin will not support all 4.3.0 features, and you may encounter incompatibilities when using Halin with this version.   Halin will continue to support
+3.5 <= Neo4j <= 4.2 as it always did.
+
 **[Click here to run Halin!](https://halin.graphapp.io/)**
 
 Primary features:
