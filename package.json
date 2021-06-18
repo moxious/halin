@@ -1,7 +1,7 @@
 {
   "name": "halin",
   "description": "Halin helps you monitor and improve your Neo4j graph",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "neo4jDesktop": {
     "apiVersion": "^1.2.0"
   },
@@ -26,7 +26,7 @@
     "lodash": "^4.17.20",
     "mathjs": "^5.4.0",
     "moment": "^2.29.1",
-    "neo4j-driver": "^4.2.1",
+    "neo4j-driver": "^4.3.1",
     "pondjs": "^0.9.0",
     "prop-types": "^15.6.0",
     "react": "^16.12.0",
