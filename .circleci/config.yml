@@ -12,13 +12,13 @@ jobs:
             # I should maybe be using a different docker image in Circle rather than
             # doing all of this junk, but works for me.  :)
             mkdir -p /tmp/artifacts
-            sudo npm install -g yarn python3
+            sudo npm install -g yarn 
             # Do not install s3cmd from apt-get, it's an out of date version.
             wget https://github.com/s3tools/s3cmd/releases/download/v2.0.2/s3cmd-2.0.2.tar.gz
             tar zxvf s3cmd-2.0.2.tar.gz
 
             curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-            sudo python3 get-pip.py
+            sudo python get-pip.py
             sudo pip install setuptools
 
             pip --version            
