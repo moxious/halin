@@ -430,7 +430,7 @@ export default class HalinContext {
                 .then(() => this.dbSet.initialize(this))
                 .then(() => {
                     if (this.isNeo4jAura()) {
-                        throw new Error('Halin does not support Aura at this time');
+                        // throw new Error('Halin does not support Aura at this time');
                     }
 
                     const ver = this.getVersion();
